@@ -3,7 +3,7 @@
 #include "clusters.h"
 #include "slope_threshold.h"
 #include "sorted_l1_norm.h"
-#include <RcppEigen.h>
+#include <Eigen/Core>
 #include <vector>
 
 namespace slope {
@@ -133,8 +133,6 @@ coordinateDescent(double& beta0,
       residual.array() -= beta0_update;
       beta0 += beta0_update;
     }
-
-    Rcpp::checkUserInterrupt();
   }
 }
 }

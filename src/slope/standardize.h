@@ -1,6 +1,6 @@
 #pragma once
 
-#include <RcppEigen.h>
+#include <Eigen/Sparse>
 
 namespace slope {
 

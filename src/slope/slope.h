@@ -11,14 +11,10 @@
 #include "slope_threshold.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
-
-#ifdef BUILD_R_BINDINGS
-#include <RcppEigen.h>
-#else
-#include <Eigen/Core>
+#include <Eigen/Sparse>
+#include <iostream>
 #include <memory>
 #include <vector>
-#endif
 
 namespace slope {
 
@@ -139,8 +135,8 @@ slope(const T& x,
   // Regularization path loop
   for (int path_step = 0; path_step < path_length; ++path_step) {
     if (print_level > 0) {
-      Rcpp::Rcout << "Path step: " << path_step
-                  << ", alpha: " << alpha(path_step) << std::endl;
+      std::cout << "Path step: " << path_step << ", alpha: " << alpha(path_step)
+                << std::endl;
     }
 
     sl1_norm.setAlpha(alpha(path_step));
@@ -158,8 +154,8 @@ slope(const T& x,
       residual = z - eta;
 
       if (print_level > 1) {
-        Rcpp::Rcout << "  IRLS iteration: " << it_outer << std::endl;
-        Rcpp::Rcout << "    primal (main problem): " << primal << std::endl;
+        std::cout << "  IRLS iteration: " << it_outer << std::endl;
+        std::cout << "    primal (main problem): " << primal << std::endl;
       }
 
       if (print_level > 3) {
@@ -176,14 +172,14 @@ slope(const T& x,
         double h = sl1_norm.eval(beta);
 
         if (print_level > 2) {
-          Rcpp::Rcout << "    iteration: " << it << std::endl;
-          Rcpp::Rcout << "      primal (sub problem): " << g + h << std::endl;
+          std::cout << "    iteration: " << it << std::endl;
+          std::cout << "      primal (sub problem): " << g + h << std::endl;
         }
 
         if (it % pgd_freq == 0) {
           VectorXd beta_old = beta;
           if (print_level > 2) {
-            Rcpp::Rcout << "      Running PGD step" << std::endl;
+            std::cout << "      Running PGD step" << std::endl;
           }
 
           proximalGradientDescent(beta0,
@@ -210,8 +206,8 @@ slope(const T& x,
           // TODO: Consider changing this criterion to use the duality gap
           // instead.
           if (print_level > 2) {
-            Rcpp::Rcout << "      max inner update change: " << max_update_inner
-                        << ", tol: " << tol << std::endl;
+            std::cout << "      max inner update change: " << max_update_inner
+                      << ", tol: " << tol << std::endl;
           }
 
           if (max_update_inner <= tol) {
@@ -219,7 +215,7 @@ slope(const T& x,
           }
         } else {
           if (print_level > 2) {
-            Rcpp::Rcout << "      Running CD step" << std::endl;
+            std::cout << "      Running CD step" << std::endl;
           }
 
           coordinateDescent(beta0,
@@ -237,16 +233,14 @@ slope(const T& x,
                             update_clusters,
                             print_level);
         }
-
-        Rcpp::checkUserInterrupt();
       }
 
       double max_update_outer = computeMaxDelta(
         x, x_centers, x_scales, w, beta_old_outer, beta, standardize);
 
       if (print_level > 1) {
-        Rcpp::Rcout << "    max outer update change: " << max_update_outer
-                    << ", tol: " << tol << std::endl;
+        std::cout << "    max outer update change: " << max_update_outer
+                  << ", tol: " << tol << std::endl;
       }
 
       if (max_update_outer <= tol) {

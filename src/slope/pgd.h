@@ -3,7 +3,7 @@
 #include "helpers.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Dense>
-#include <Rcpp.h>
+#include <iostream>
 
 namespace slope {
 template<typename T>
@@ -46,7 +46,7 @@ proximalGradientDescent(double& beta0,
 
   // Proximal gradient descent with line search
   if (print_level > 2) {
-    Rcpp::Rcout << "        Starting line search" << std::endl;
+    std::cout << "        Starting line search" << std::endl;
   }
 
   Eigen::VectorXd beta_old = beta;
@@ -77,8 +77,6 @@ proximalGradientDescent(double& beta0,
     } else {
       learning_rate *= learning_rate_decr;
     }
-
-    Rcpp::checkUserInterrupt();
   }
 }
 
