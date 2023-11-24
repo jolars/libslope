@@ -13,9 +13,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(Eigen3_DIR "${CMAKE_SOURCE_DIR}/external/eigen3/cmake")
-
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+include_directories(${CMAKE_SOURCE_DIR}/external)
 
 add_subdirectory(src)
 
@@ -28,8 +26,9 @@ if(BUILD_TESTING)
 
   add_executable(tests tests/test.cpp)
 
-  target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain
-                                      Eigen3::Eigen)
+  # target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain
+  # Eigen3::Eigen)
+  target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
