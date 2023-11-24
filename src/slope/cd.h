@@ -64,7 +64,7 @@ coordinateDescent(double& beta0,
            std::pow(x_centers(k), 2) * w.sum()) /
           (std::pow(x_scales(k), 2) * n);
       } else {
-        gradient_j = -s_k * x.col(k).cwiseProduct(w).dot(residual) / n;
+        gradient_j = -s_k * (x.col(k).cwiseProduct(w).dot(residual)) / n;
         hessian_j = x.col(k).cwiseAbs2().dot(w) / n;
       }
     } else {
@@ -93,7 +93,7 @@ coordinateDescent(double& beta0,
     auto thresholding_results =
       slopeThreshold(c_old - gradient_j / hessian_j,
                      j,
-                     sl1_norm.lambda * sl1_norm.getAlpha() / (hessian_j),
+                     sl1_norm.lambda * sl1_norm.getAlpha() / hessian_j,
                      clusters);
 
     double c_tilde = thresholding_results.value;
