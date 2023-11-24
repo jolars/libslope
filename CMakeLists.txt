@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(Eigen3_DIR external/eigen3/cmake/)
+set(Eigen3_DIR "${CMAKE_SOURCE_DIR}/external/eigen3/cmake")
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
