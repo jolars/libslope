@@ -1,0 +1,21 @@
+name: build-and-test
+on: [push, pull_request]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y cmake g++
+
+      - name: Configure CMake
+        run: |
+          mkdir -p build
+          cmake -B build -S .
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
