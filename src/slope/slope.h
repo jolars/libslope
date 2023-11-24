@@ -56,19 +56,19 @@ template<typename T>
 Results
 slope(const T& x,
       const Eigen::MatrixXd& y,
-      std::string objective_choice,
-      Eigen::ArrayXd alpha,
-      const Eigen::ArrayXd& lambda,
-      bool intercept,
-      bool standardize,
-      int path_length,
-      double alpha_min_ratio,
-      int pgd_freq,
-      double tol,
-      int max_it,
-      int max_it_outer,
-      bool update_clusters,
-      int print_level)
+      Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
+      Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
+      const std::string objective_choice = "gaussian",
+      bool intercept = true,
+      bool standardize = true,
+      int path_length = 100,
+      double alpha_min_ratio = 1e-4,
+      int pgd_freq = 10,
+      double tol = 1e-8,
+      int max_it = 1e6,
+      int max_it_outer = 100,
+      bool update_clusters = false,
+      int print_level = 0)
 {
   using Eigen::VectorXd;
 
