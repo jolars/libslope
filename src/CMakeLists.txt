@@ -10,4 +10,4 @@ add_library(
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp)
 
-# target_include_directories(libslope INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(libslope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
