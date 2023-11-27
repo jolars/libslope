@@ -6,16 +6,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-python@v4
+
       - name: Install dependencies
-        run: sudo apt-get install -y cmake g++
+        run: sudo apt-get install -y g++
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v1.14
+        with:
+          cmake-version: "3.25"
 
       - name: Configure CMake
-        run: |
-          mkdir -p build
-          cmake -B build -S .
+        run: cmake -B build -S . -DBUILD_PYTHON_BINDINGS=ON -DBUILD_TESTING=ON
 
       - name: Build
         run: cmake --build build
+
+      - name: Install
+        run: cmake --install build
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
