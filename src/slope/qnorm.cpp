@@ -1,6 +1,5 @@
 #include <array>
 #include <cmath>
-#include <sstream>
 
 namespace slope {
 

@@ -1,5 +1,5 @@
 #include "math.h"
-#include "objectives/objective.h"
+#include "objectives.h"
 #include "qnorm.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Core>
