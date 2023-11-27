@@ -5,11 +5,15 @@ all: configure build
 
 .PHONY: configure
 configure:
-	mkdir -p $(BUILD_DIR)
 	cmake -B $(BUILD_DIR) -S .
 
 .PHONY: build
 build:
+	cmake --build $(BUILD_DIR)
+
+.PHONY: python
+python:
+	cmake -B $(BUILD_DIR) -S . -DBUILD_PYTHON_BINDINGS=ON
 	cmake --build $(BUILD_DIR)
 
 .PHONY: release
