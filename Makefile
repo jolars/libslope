@@ -11,15 +11,17 @@ configure:
 build:
 	cmake --build $(BUILD_DIR)
 
-.PHONY: python
-python:
-	cmake -B $(BUILD_DIR) -S . -DBUILD_PYTHON_BINDINGS=ON
+.PHONY: docs
+docs:
+	cmake -B $(BUILD_DIR) -S . -DBUILD_DOCS=ON -DBUILD_TESTING=OFF
 	cmake --build $(BUILD_DIR)
+	cmake --install $(BUILD_DIR)
 
 .PHONY: release
 release: clean
-	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=Release
+	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 	$(MAKE) build
+	$(MAKE) install
 
 .PHONY: clean
 clean:

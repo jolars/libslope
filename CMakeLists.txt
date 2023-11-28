@@ -5,7 +5,7 @@ project(
   LANGUAGES CXX
   VERSION 0.1.0)
 
-option(BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
+option(BUILD_DOCS "Build documentation" OFF)
 
 include(FetchContent)
 include(CTest)
@@ -15,6 +15,8 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+set(PROJECT_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 include_directories(${CMAKE_SOURCE_DIR}/external)
 
@@ -39,5 +41,21 @@ if(BUILD_TESTING)
   catch_discover_tests(tests)
 endif()
 
-add_subdirectory(bindings)
-
+if(BUILD_DOCS)
+  find_package(Doxygen REQUIRED)
+  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/docs/Doxyfile.in)
+  set(DOXYGEN_OUT ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
+  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+  add_custom_target(
+    docs ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    COMMENT "Generating Doxygen XML"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/
+    VERBATIM)
+  add_custom_target(
+    docs_sphinx ALL
+    COMMAND make html
+    COMMENT "Generating sphinx HTML"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/
+    VERBATIM)
+endif()

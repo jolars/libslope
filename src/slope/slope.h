@@ -17,7 +17,19 @@
 
 namespace slope {
 
-// This is the convergence criterion from glmnet.
+/**
+ * Computes the maximum delta value for the given inputs.
+ *
+ * @tparam T The type of the input data.
+ * @param x The input data.
+ * @param x_centers The centers of the input data.
+ * @param x_scales The scales of the input data.
+ * @param w The weights.
+ * @param beta_old The old beta values.
+ * @param beta The new beta values.
+ * @param standardize Flag indicating whether to standardize the data.
+ * @return The maximum delta value.
+ */
 template<typename T>
 double
 computeMaxDelta(const T& x,
@@ -51,6 +63,40 @@ computeMaxDelta(const T& x,
   return max_delta;
 }
 
+/**
+ * Calculates the slope coefficients for a linear regression model using the
+ * SortedL1Norm regularization.
+ *
+ * @tparam T The type of the input matrix x.
+ * @param x The input matrix of size n x p, where n is the number of
+ *   observations and p is the number of predictors.
+ * @param y The response matrix of size n x 1.
+ * @param alpha The regularization parameter sequence. If not provided, it will
+ *   be generated automatically.
+ * @param lambda The regularization parameter for the SortedL1Norm
+ *   regularization. If not provided, it will be set to zero.
+ * @param objective_choice The choice of objective function. Default is
+ *   "gaussian".
+ * @param intercept Whether to fit an intercept term. Default is true.
+ * @param standardize Whether to standardize the predictors. Default is true.
+ * @param path_length The number of steps in the regularization path. Default is
+ *   100.
+ * @param alpha_min_ratio The minimum ratio of alpha to the maximum alpha value.
+ *   Default is 1e-4.
+ * @param pgd_freq The frequency of running the proximal gradient descent
+ *   algorithm. Default is 10.
+ * @param tol The tolerance for convergence. Default is 1e-8.
+ * @param max_it The maximum number of iterations for the inner loop. Default is
+ *   1e6.
+ * @param max_it_outer The maximum number of iterations for the outer loop.
+ *   Default is 100.
+ * @param update_clusters Whether to update the clusters during coordinate
+ *   descent. Default is false.
+ * @param print_level The level of verbosity for printing debug information.
+ *   Default is 0.
+ * @return The slope coefficients, intercept values, and primal values for each
+ *   step in the regularization path.
+ */
 template<typename T>
 Results
 slope(const T& x,
