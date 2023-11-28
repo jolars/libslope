@@ -15,3 +15,5 @@ In addition, to build the documentation you need
 - Doxygen
 - Sphinx
 - Breathe
+
+And to build and run the tests, you need Catch2.

@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 
+file(READ "version.txt" project_version)
+
 project(
   slope
   LANGUAGES CXX
-  VERSION 0.1.0)
+  VERSION ${project_version})
 
 option(BUILD_DOCS "Build documentation" OFF)
 
