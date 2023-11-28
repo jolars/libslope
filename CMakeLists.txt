@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-file(READ "version.txt" project_version)
+file(STRINGS "version.txt" project_version)
 
 project(
   slope
