@@ -42,3 +42,6 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 build/
+
+docs/_build/
+docs/_static/
