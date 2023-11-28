@@ -573,9 +573,9 @@ Also add information on how to contact you by electronic and paper mail.
 If the program does terminal interaction, make it output a short notice like this
 when it starts in an interactive mode:
 
-    SLOPE Copyright (C) 2023 Johan Larsson, Jonas Wallin, Malgorzata Bogdan,
-    Ewout van den Berg, Chiara Sabatti, Emmanuel Candes, Evan Patterson,
-    Weijie Su
+    SLOPE Copyright (C) 2023 Johan Larsson, Jonas Wallin, Mathurin Massias, 
+    Quentin Klopfenstein, Malgorzata Bogdan, Ewout van den Berg, Chiara Sabatti,
+    Emmanuel Candes, Evan Patterson, Weijie Su
     This program comes with ABSOLUTELY NO WARRANTY; for details type 'show w'.
     This is free software, and you are welcome to redistribute it
     under certain conditions; type 'show c' for details.
