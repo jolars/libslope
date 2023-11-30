@@ -32,5 +32,7 @@ install:
 	cmake --install $(BUILD_DIR)
 
 .PHONY: test
-test: build
+test: 
+	cmake -B $(BUILD_DIR) -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON
+	cmake --build $(BUILD_DIR)
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
