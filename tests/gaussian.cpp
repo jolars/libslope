@@ -1,9 +1,7 @@
-#include "helpers.hpp"
+#include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <catch2/matchers/catch_matchers_templated.hpp>
 #include <slope/slope.h>
 
 TEST_CASE("Simple low-dimensional design", "[gaussian, dense, ols]")
