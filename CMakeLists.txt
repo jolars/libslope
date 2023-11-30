@@ -22,9 +22,9 @@ set(PROJECT_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 
 include_directories(${CMAKE_SOURCE_DIR}/external)
 
-if(BUILD_TESTING)
-  add_subdirectory(src)
+add_subdirectory(src)
 
+if(BUILD_TESTING)
   find_package(Catch2 3 QUIET)
   if(NOT Catch2_FOUND)
     FetchContent_Declare(

@@ -9,3 +9,11 @@ add_library(
   slope/objectives.cpp)
 
 target_include_directories(libslope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(TARGETS libslope DESTINATION lib)
+install(
+  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/slope/
+  DESTINATION include/slope
+  FILES_MATCHING
+  PATTERN "*.h"
+  PATTERN "*.hpp")
