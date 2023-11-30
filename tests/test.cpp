@@ -1,10 +1,12 @@
+#include "helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <catch2/matchers/catch_matchers_range_equals.hpp>
+#include <catch2/matchers/catch_matchers_templated.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Simple low-dimensional design", "[gaussian, dense]")
+TEST_CASE("Simple low-dimensional design", "[gaussian, dense, ols]")
 {
   using namespace Catch::Matchers;
 
@@ -27,10 +29,9 @@ TEST_CASE("Simple low-dimensional design", "[gaussian, dense]")
   auto no_intercept_no_std =
     slope::slope(x, y, alpha, lambda, "gaussian", false, false);
 
-  REQUIRE_THAT(no_intercept_no_std.betas.coeff(0, 0),
-               WithinAbsMatcher(1, 0.001));
-  REQUIRE_THAT(no_intercept_no_std.betas.coeff(1, 0),
-               WithinAbsMatcher(1, 0.001));
+  Eigen::VectorXd coef = no_intercept_no_std.betas.col(0);
+
+  REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
 }
 
 TEST_CASE("X is identity", "[gaussian, dense]")
@@ -49,8 +50,7 @@ TEST_CASE("X is identity", "[gaussian, dense]")
 
   Eigen::VectorXd betas = res.betas.col(0);
 
-  REQUIRE_THAT(betas(0), WithinAbsMatcher(4.0, 0.001));
-  REQUIRE_THAT(betas(1), WithinAbsMatcher(3.0, 0.001));
-  REQUIRE_THAT(betas(2), WithinAbsMatcher(2.0, 0.001));
-  REQUIRE_THAT(betas(3), WithinAbsMatcher(1.0, 0.001));
+  std::array<double, 4> expected = { 4.0, 3.0, 2.0, 1.0 };
+
+  REQUIRE_THAT(betas, VectorApproxEqual(expected));
 }
