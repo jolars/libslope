@@ -93,7 +93,7 @@ coordinateDescent(double& beta0,
     auto thresholding_results =
       slopeThreshold(c_old - gradient_j / hessian_j,
                      j,
-                     sl1_norm.lambda * sl1_norm.getAlpha() / hessian_j,
+                     sl1_norm.getLambdaRef() * sl1_norm.getAlpha() / hessian_j,
                      clusters);
 
     double c_tilde = thresholding_results.value;

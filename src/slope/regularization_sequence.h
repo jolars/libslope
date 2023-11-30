@@ -55,7 +55,7 @@ regularizationPath(const T& x,
   }
 
   double alpha_max =
-    (penalty.dualNorm(gradient) / cumSum(penalty.lambda)).maxCoeff() /
+    (penalty.dualNorm(gradient) / cumSum(penalty.getLambdaRef())).maxCoeff() /
     static_cast<double>(n);
 
   Eigen::ArrayXd alpha(path_length);

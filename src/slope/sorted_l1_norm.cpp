@@ -38,7 +38,7 @@ SortedL1Norm::prox(const Eigen::VectorXd& beta, const double scale) const
   for (int i = 0; i < p; i++) {
     idx_i[k] = i;
     idx_j[k] = i;
-    s[k] = beta_copy(i) - lambda[i] * alpha * scale;
+    s[k] = beta_copy(i) - this->lambda[i] * this->alpha * scale;
     w[k] = s[k];
 
     while ((k > 0) && (w[k - 1] <= w[k])) {
@@ -74,6 +74,24 @@ double
 SortedL1Norm::getAlpha() const
 {
   return alpha;
+}
+
+void
+SortedL1Norm::setLambda(const Eigen::ArrayXd& new_lambda)
+{
+  lambda = new_lambda;
+}
+
+Eigen::ArrayXd
+SortedL1Norm::getLambda() const
+{
+  return lambda;
+}
+
+const Eigen::ArrayXd&
+SortedL1Norm::getLambdaRef() const
+{
+  return lambda;
 }
 
 Eigen::ArrayXd

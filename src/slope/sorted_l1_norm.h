@@ -10,10 +10,9 @@ class SortedL1Norm
 {
 private:
   double alpha = 1.0;
+  Eigen::ArrayXd lambda;
 
 public:
-  const Eigen::ArrayXd lambda;
-
   SortedL1Norm(const Eigen::ArrayXd& lambda);
 
   double eval(const Eigen::VectorXd& beta) const;
@@ -30,7 +29,13 @@ public:
 
   Eigen::ArrayXd dualNorm(const Eigen::VectorXd& a) const;
 
+  void setLambda(const Eigen::ArrayXd& new_lambda);
+
   void setAlpha(const double new_alpha);
+
+  Eigen::ArrayXd getLambda() const;
+
+  const Eigen::ArrayXd& getLambdaRef() const;
 
   double getAlpha() const;
 };
