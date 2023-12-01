@@ -138,9 +138,7 @@ slope(const T& x,
 
   objective->updateWeightsAndWorkingResponse(w, z, eta, y);
 
-  // The intercept can be fit directly for the null model.
-  double beta0 = intercept ? z.dot(w) / w.sum() : 0.0;
-  eta.array() += beta0;
+  double beta0 = 0.0;
   VectorXd residual = z - eta;
 
   if (alpha.size() == 0) {
