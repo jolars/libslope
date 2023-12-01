@@ -132,13 +132,17 @@ slope(const T& x,
 
   std::unique_ptr<Objective> objective = setupObjective(objective_choice);
 
-  VectorXd eta = VectorXd::Zero(n);
-  VectorXd w(n);
-  VectorXd z(n);
+  // initialize coeficients
+  double beta0 = 0.0;
+  VectorXd beta = VectorXd::Zero(p);
+
+  VectorXd eta = beta0 + x * beta;
+
+  VectorXd w(n); // weights
+  VectorXd z(n); // working response
 
   objective->updateWeightsAndWorkingResponse(w, z, eta, y);
 
-  double beta0 = 0.0;
   VectorXd residual = z - eta;
 
   if (alpha.size() == 0) {
@@ -160,8 +164,6 @@ slope(const T& x,
   if (print_level > 0) {
     printContents(alpha, "alpha");
   }
-
-  VectorXd beta = VectorXd::Zero(p);
 
   VectorXd beta0s(path_length);
   std::vector<Eigen::Triplet<double>> beta_triplets;
