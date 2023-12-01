@@ -136,7 +136,8 @@ slope(const T& x,
   double beta0 = 0.0;
   VectorXd beta = VectorXd::Zero(p);
 
-  VectorXd eta = beta0 + x * beta;
+  VectorXd eta = x * beta;
+  eta.array() += beta0;
 
   VectorXd w(n); // weights
   VectorXd z(n); // working response
