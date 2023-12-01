@@ -1,5 +1,4 @@
 #include "regularization_sequence.h"
-#include "math.h"
 #include "qnorm.h"
 #include <Eigen/Core>
 
