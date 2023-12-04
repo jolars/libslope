@@ -11,6 +11,7 @@
 #include "sorted_l1_norm.h"
 #include "standardize.h"
 #include <Eigen/Sparse>
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -79,6 +80,9 @@ computeMaxDelta(const T& x,
  *   "gaussian".
  * @param intercept Whether to fit an intercept term. Default is true.
  * @param standardize Whether to standardize the predictors. Default is true.
+ * @param lambdaSequence The type of regularization parameter sequence to use.
+ * @param q The q parameter for computation of the lambda sequence. Default is
+ *   0.1.
  * @param path_length The number of steps in the regularization path. Default is
  *   100.
  * @param alpha_min_ratio The minimum ratio of alpha to the maximum alpha value.
@@ -106,6 +110,8 @@ slope(const T& x,
       const std::string objective_choice = "gaussian",
       bool intercept = true,
       bool standardize = true,
+      std::string lambda_type = "bh",
+      double q = 0.1,
       int path_length = 100,
       double alpha_min_ratio = 1e-4,
       int pgd_freq = 10,
@@ -119,8 +125,6 @@ slope(const T& x,
 
   const int n = x.rows();
   const int p = x.cols();
-
-  SortedL1Norm sl1_norm{ lambda };
 
   // standardize
   VectorXd x_centers(p);
@@ -146,8 +150,22 @@ slope(const T& x,
 
   VectorXd residual = z - eta;
 
+  // Setup the regularization sequence and path
+  SortedL1Norm sl1_norm{ lambda };
+
+  if (lambda.size() == 0) {
+    lambda = lambdaSequence(p, q, lambda_type);
+  } else {
+    if (lambda.size() != p) {
+      throw std::invalid_argument(
+        "lambda must be the same length as the number of predictors");
+    }
+    if (lambda.minCoeff() < 0) {
+      throw std::invalid_argument("lambda must be non-negative");
+    }
+  }
+
   if (alpha.size() == 0) {
-    // No user-supplied alpha sequence, so generate one.
     alpha = regularizationPath(x,
                                w,
                                z,

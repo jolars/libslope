@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <memory>
+#include <string>
 
 namespace slope {
 
@@ -19,7 +20,7 @@ namespace slope {
  * @return An Eigen::ArrayXd containing the generated lambda values.
  */
 Eigen::ArrayXd
-lambdaSequence(const int p, const double q);
+lambdaSequence(const int p, const double q, const std::string& type);
 
 template<typename T>
 Eigen::ArrayXd
