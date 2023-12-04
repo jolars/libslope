@@ -1,6 +1,7 @@
 #pragma once
 
 #include "clusters.h"
+#include "parameters.h"
 #include "slope_threshold.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Core>
@@ -20,10 +21,7 @@ coordinateDescent(double& beta0,
                   const SortedL1Norm& sl1_norm,
                   const Eigen::VectorXd& x_centers,
                   const Eigen::VectorXd& x_scales,
-                  bool intercept,
-                  bool standardize,
-                  bool update_clusters,
-                  int print_level)
+                  const SlopeParameters& params)
 {
   using namespace Eigen;
 
@@ -51,7 +49,7 @@ coordinateDescent(double& beta0,
       double s_k = sign(beta(k));
       s.emplace_back(s_k);
 
-      if (standardize) {
+      if (params.standardize) {
         gradient_j = -s_k *
                      (x.col(k).cwiseProduct(w).dot(residual) -
                       w.dot(residual) * x_centers(k)) /
@@ -78,7 +76,7 @@ coordinateDescent(double& beta0,
         double s_k = sign(beta(k));
         s.emplace_back(s_k);
 
-        if (standardize) {
+        if (params.standardize) {
           x_s += x.col(k) * (s_k / x_scales(k));
           x_s.array() -= x_centers(k) * s_k / x_scales(k);
         } else {
@@ -111,7 +109,7 @@ coordinateDescent(double& beta0,
       if (cluster_size == 1) {
         int k = *clusters.cbegin(j);
 
-        if (standardize) {
+        if (params.standardize) {
           residual += x.col(k) * (s[0] * c_diff / x_scales(k));
           residual.array() -= x_centers(k) * s[0] * c_diff / x_scales(k);
         } else {
@@ -122,13 +120,13 @@ coordinateDescent(double& beta0,
       }
     }
 
-    if (update_clusters) {
+    if (params.update_clusters) {
       clusters.update(j, new_index, std::abs(c_tilde));
     } else {
       clusters.setCoeff(j, std::abs(c_tilde));
     }
 
-    if (intercept) {
+    if (params.intercept) {
       double beta0_update = residual.dot(w) / w.sum();
       residual.array() -= beta0_update;
       beta0 += beta0_update;
