@@ -30,10 +30,10 @@ regularizationPath(const T& x,
                    const Eigen::VectorXd& x_centers,
                    const Eigen::VectorXd& x_scales,
                    const SortedL1Norm& penalty,
-                   int path_length,
+                   const int path_length,
                    double alpha_min_ratio,
-                   bool intercept,
-                   bool standardize)
+                   const bool intercept,
+                   const bool standardize)
 {
   const int n = x.rows();
   const int p = x.cols();

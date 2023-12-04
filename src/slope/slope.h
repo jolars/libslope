@@ -65,6 +65,81 @@ computeMaxDelta(const T& x,
 }
 
 /**
+ * @struct SlopeParameters
+ * @brief A struct that holds the parameters for the Slope algorithm.
+ *
+ * This struct holds the parameters that can be used to configure the behavior
+ * of the Slope algorithm. The Slope algorithm is used for regression and
+ * variable selection.
+ *
+ * @var SlopeParameters::intercept
+ * A boolean indicating whether an intercept term should be included in the
+ * model.
+ *
+ * @var SlopeParameters::standardize
+ * A boolean indicating whether the input data should be standardized before
+ * fitting the model.
+ *
+ * @var SlopeParameters::update_clusters
+ * A boolean indicating whether the cluster assignments should be updated during
+ * the optimization process.
+ *
+ * @var SlopeParameters::alpha_min_ratio
+ * A double representing the minimum value of the regularization parameter
+ * alpha. If -1, the value will be set to 1e-4 if n > p and 1e-2 otherwise.
+ *
+ * @var SlopeParameters::q
+ * A double representing the quantile level for the L1 penalty.
+ *
+ * @var SlopeParameters::tol
+ * A double representing the convergence tolerance for the optimization
+ * algorithm.
+ *
+ * @var SlopeParameters::max_it
+ * An integer representing the maximum number of iterations for the optimization
+ * algorithm.
+ *
+ * @var SlopeParameters::max_it_outer
+ * An integer representing the maximum number of outer iterations for the
+ * optimization algorithm.
+ *
+ * @var SlopeParameters::path_length
+ * An integer representing the number of points on the regularization path.
+ *
+ * @var SlopeParameters::pgd_freq
+ * An integer representing the frequency of the proximal gradient descent
+ * updates.
+ *
+ * @var SlopeParameters::print_level
+ * An integer representing the level of verbosity for the optimization
+ * algorithm.
+ *
+ * @var SlopeParameters::lambda_type
+ * A string representing the type of regularization penalty to be used.
+ * Currently only "bh" (Benjamini-Hochberg) is supported.
+ *
+ * @var SlopeParameters::objective
+ * A string representing the choice of objective function for the optimization
+ * algorithm. Currently only "gaussian" is supported.
+ */
+struct SlopeParameters
+{
+  bool intercept = true;
+  bool standardize = true;
+  bool update_clusters = false;
+  double alpha_min_ratio = -1;
+  double q = 0.1;
+  double tol = 1e-8;
+  int max_it = 1e6;
+  int max_it_outer = 100;
+  int path_length = 100;
+  int pgd_freq = 10;
+  int print_level = 0;
+  std::string lambda_type = "bh";
+  std::string objective = "gaussian";
+};
+
+/**
  * Calculates the slope coefficients for a linear regression model using the
  * SortedL1Norm regularization.
  *
@@ -76,28 +151,6 @@ computeMaxDelta(const T& x,
  *   be generated automatically.
  * @param lambda The regularization parameter for the SortedL1Norm
  *   regularization. If not provided, it will be set to zero.
- * @param objective_choice The choice of objective function. Default is
- *   "gaussian".
- * @param intercept Whether to fit an intercept term. Default is true.
- * @param standardize Whether to standardize the predictors. Default is true.
- * @param lambdaSequence The type of regularization parameter sequence to use.
- * @param q The q parameter for computation of the lambda sequence. Default is
- *   0.1.
- * @param path_length The number of steps in the regularization path. Default is
- *   100.
- * @param alpha_min_ratio The minimum ratio of alpha to the maximum alpha value.
- *   Default is 1e-4.
- * @param pgd_freq The frequency of running the proximal gradient descent
- *   algorithm. Default is 10.
- * @param tol The tolerance for convergence. Default is 1e-8.
- * @param max_it The maximum number of iterations for the inner loop. Default is
- *   1e6.
- * @param max_it_outer The maximum number of iterations for the outer loop.
- *   Default is 100.
- * @param update_clusters Whether to update the clusters during coordinate
- *   descent. Default is false.
- * @param print_level The level of verbosity for printing debug information.
- *   Default is 0.
  * @return The slope coefficients, intercept values, and primal values for each
  *   step in the regularization path.
  */
@@ -107,19 +160,7 @@ slope(const T& x,
       const Eigen::MatrixXd& y,
       Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
       Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
-      const std::string objective_choice = "gaussian",
-      bool intercept = true,
-      bool standardize = true,
-      std::string lambda_type = "bh",
-      double q = 0.1,
-      int path_length = 100,
-      double alpha_min_ratio = 1e-4,
-      int pgd_freq = 10,
-      double tol = 1e-8,
-      int max_it = 1e6,
-      int max_it_outer = 100,
-      bool update_clusters = false,
-      int print_level = 0)
+      const SlopeParameters& params = SlopeParameters())
 {
   using Eigen::VectorXd;
 
@@ -130,11 +171,11 @@ slope(const T& x,
   VectorXd x_centers(p);
   VectorXd x_scales(p);
 
-  if (standardize) {
+  if (params.standardize) {
     std::tie(x_centers, x_scales) = computeMeanAndStdDev(x);
   }
 
-  std::unique_ptr<Objective> objective = setupObjective(objective_choice);
+  std::unique_ptr<Objective> objective = setupObjective(params.objective);
 
   // initialize coeficients
   double beta0 = 0.0;
@@ -154,7 +195,7 @@ slope(const T& x,
   SortedL1Norm sl1_norm{ lambda };
 
   if (lambda.size() == 0) {
-    lambda = lambdaSequence(p, q, lambda_type);
+    lambda = lambdaSequence(p, params.q, params.lambda_type);
   } else {
     if (lambda.size() != p) {
       throw std::invalid_argument(
@@ -165,6 +206,8 @@ slope(const T& x,
     }
   }
 
+  int path_length = params.path_length;
+
   if (alpha.size() == 0) {
     alpha = regularizationPath(x,
                                w,
@@ -172,15 +215,15 @@ slope(const T& x,
                                x_centers,
                                x_scales,
                                sl1_norm,
-                               path_length,
-                               alpha_min_ratio,
-                               intercept,
-                               standardize);
+                               params.path_length,
+                               params.alpha_min_ratio,
+                               params.intercept,
+                               params.standardize);
   } else {
     path_length = alpha.size();
   }
 
-  if (print_level > 0) {
+  if (params.print_level > 0) {
     printContents(alpha, "alpha");
   }
 
@@ -198,7 +241,7 @@ slope(const T& x,
 
   // Regularization path loop
   for (int path_step = 0; path_step < path_length; ++path_step) {
-    if (print_level > 0) {
+    if (params.print_level > 0) {
       std::cout << "Path step: " << path_step << ", alpha: " << alpha(path_step)
                 << std::endl;
     }
@@ -206,7 +249,7 @@ slope(const T& x,
     sl1_norm.setAlpha(alpha(path_step));
 
     // IRLS loop
-    for (int it_outer = 0; it_outer < max_it_outer; ++it_outer) {
+    for (int it_outer = 0; it_outer < params.max_it_outer; ++it_outer) {
       eta = z - residual;
 
       double primal = objective->loss(eta, y) + sl1_norm.eval(beta);
@@ -217,32 +260,32 @@ slope(const T& x,
       objective->updateWeightsAndWorkingResponse(w, z, eta, y);
       residual = z - eta;
 
-      if (print_level > 1) {
+      if (params.print_level > 1) {
         std::cout << "  IRLS iteration: " << it_outer << std::endl;
         std::cout << "    primal (main problem): " << primal << std::endl;
       }
 
-      if (print_level > 3) {
+      if (params.print_level > 3) {
         printContents(w, "    weights");
         printContents(z, "    working response");
       }
 
       double max_update_inner = 0;
 
-      for (int it = 0; it < max_it; ++it) {
+      for (int it = 0; it < params.max_it; ++it) {
         max_update_inner = 0;
 
         double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
         double h = sl1_norm.eval(beta);
 
-        if (print_level > 2) {
+        if (params.print_level > 2) {
           std::cout << "    iteration: " << it << std::endl;
           std::cout << "      primal (sub problem): " << g + h << std::endl;
         }
 
-        if (it % pgd_freq == 0) {
+        if (it % params.pgd_freq == 0) {
           VectorXd beta_old = beta;
-          if (print_level > 2) {
+          if (params.print_level > 2) {
             std::cout << "      Running PGD step" << std::endl;
           }
 
@@ -257,28 +300,28 @@ slope(const T& x,
                                   x_centers,
                                   x_scales,
                                   g,
-                                  intercept,
-                                  standardize,
+                                  params.intercept,
+                                  params.standardize,
                                   learning_rate_decr,
-                                  print_level);
+                                  params.print_level);
 
           clusters.update(beta);
 
           max_update_inner = computeMaxDelta(
-            x, x_centers, x_scales, w, beta_old, beta, standardize);
+            x, x_centers, x_scales, w, beta_old, beta, params.standardize);
 
           // TODO: Consider changing this criterion to use the duality gap
           // instead.
-          if (print_level > 2) {
+          if (params.print_level > 2) {
             std::cout << "      max inner update change: " << max_update_inner
-                      << ", tol: " << tol << std::endl;
+                      << ", tol: " << params.tol << std::endl;
           }
 
-          if (max_update_inner <= tol) {
+          if (max_update_inner <= params.tol) {
             break;
           }
         } else {
-          if (print_level > 2) {
+          if (params.print_level > 2) {
             std::cout << "      Running CD step" << std::endl;
           }
 
@@ -292,22 +335,22 @@ slope(const T& x,
                             sl1_norm,
                             x_centers,
                             x_scales,
-                            intercept,
-                            standardize,
-                            update_clusters,
-                            print_level);
+                            params.intercept,
+                            params.standardize,
+                            params.update_clusters,
+                            params.print_level);
         }
       }
 
       double max_update_outer = computeMaxDelta(
-        x, x_centers, x_scales, w, beta_old_outer, beta, standardize);
+        x, x_centers, x_scales, w, beta_old_outer, beta, params.standardize);
 
-      if (print_level > 1) {
+      if (params.print_level > 1) {
         std::cout << "    max outer update change: " << max_update_outer
-                  << ", tol: " << tol << std::endl;
+                  << ", tol: " << params.tol << std::endl;
       }
 
-      if (max_update_outer <= tol) {
+      if (max_update_outer <= params.tol) {
         break;
       }
     }
@@ -315,9 +358,9 @@ slope(const T& x,
     double beta0_out;
     VectorXd beta_out;
 
-    if (standardize) {
-      std::tie(beta0_out, beta_out) =
-        unstandardizeCoefficients(beta0, beta, x_centers, x_scales, intercept);
+    if (params.standardize) {
+      std::tie(beta0_out, beta_out) = unstandardizeCoefficients(
+        beta0, beta, x_centers, x_scales, params.intercept);
     } else {
       beta0_out = beta0;
       beta_out = beta;

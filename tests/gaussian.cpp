@@ -24,8 +24,12 @@ TEST_CASE("Simple low-dimensional design", "[gaussian, dense, ols]")
   Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
   Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(2);
 
-  auto no_intercept_no_std =
-    slope::slope(x, y, alpha, lambda, "gaussian", false, false);
+  slope::SlopeParameters params;
+  params.objective = "gaussian";
+  params.intercept = false;
+  params.standardize = false;
+
+  auto no_intercept_no_std = slope::slope(x, y, alpha, lambda, params);
 
   Eigen::VectorXd coef = no_intercept_no_std.betas.col(0);
 
@@ -44,7 +48,13 @@ TEST_CASE("X is identity", "[gaussian, dense]")
   Eigen::Array4d lambda;
   lambda << 1, 0.75, 0.5, 0.25;
 
-  auto res = slope::slope(x, y, alpha, lambda, "gaussian", false, false);
+  slope::SlopeParameters params;
+
+  params.objective = "gaussian";
+  params.intercept = false;
+  params.standardize = false;
+
+  auto res = slope::slope(x, y, alpha, lambda, params);
 
   Eigen::VectorXd betas = res.betas.col(0);
 
