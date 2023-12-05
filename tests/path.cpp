@@ -1,9 +1,9 @@
+#include "../src/slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <slope/slope.h>
 
 TEST_CASE("Path fitting", "[gaussian]")
 {
