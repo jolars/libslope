@@ -63,8 +63,7 @@ regularizationPath(const T& x,
 
   for (int i = 0; i < path_length; ++i) {
     alpha[i] = alpha_max * std::pow(alpha_min_ratio,
-                                    static_cast<double>(i) /
-                                      static_cast<double>(path_length));
+                                    i / (static_cast<double>(path_length - 1)));
   }
 
   return alpha;
