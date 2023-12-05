@@ -61,9 +61,10 @@ regularizationPath(const T& x,
 
   Eigen::ArrayXd alpha(path_length);
 
+  double div = path_length - 1;
+
   for (int i = 0; i < path_length; ++i) {
-    alpha[i] = alpha_max * std::pow(alpha_min_ratio,
-                                    i / (static_cast<double>(path_length - 1)));
+    alpha[i] = alpha_max * std::pow(alpha_min_ratio, i / div);
   }
 
   return alpha;
