@@ -1,6 +1,5 @@
 #include "slope_threshold.h"
 #include "math.h"
-#include <vector>
 
 namespace slope {
 
