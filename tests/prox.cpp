@@ -1,8 +1,8 @@
-#include "../src/slope/sorted_l1_norm.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <slope/sorted_l1_norm.h>
 
 TEST_CASE("Check that proximal operator works", "[prox]")
 {
