@@ -35,7 +35,7 @@ if(BUILD_TESTING)
   endif()
 
   add_executable(tests tests/gaussian.cpp tests/prox.cpp tests/qnorm.cpp
-                       tests/lambda_sequence.cpp)
+                       tests/lambda_sequence.cpp tests/path.cpp)
   target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
