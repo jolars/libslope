@@ -4,6 +4,20 @@
 
 namespace slope {
 
+/**
+ * Calculates the slope coefficients for a linear regression model using the
+ * SortedL1Norm regularization.
+ *
+ * @param x The dense input matrix of size n x p, where n is the number of
+ *   observations and p is the number of predictors.
+ * @param y The response matrix of size n x 1.
+ * @param alpha The regularization parameter sequence. If not provided, it will
+ *   be generated automatically.
+ * @param lambda The regularization parameter for the SortedL1Norm
+ *   regularization. If not provided, it will be set to zero.
+ * @return The slope coefficients, intercept values, and primal values for each
+ *   step in the regularization path.
+ */
 Results
 slope(const Eigen::MatrixXd& x,
       const Eigen::MatrixXd& y,
@@ -11,6 +25,20 @@ slope(const Eigen::MatrixXd& x,
       Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
       const SlopeParameters& params = SlopeParameters());
 
+/**
+ * Calculates the slope coefficients for a linear regression model using the
+ * SortedL1Norm regularization.
+ *
+ * @param x The sparse input matrix of size n x p, where n is the number of
+ *   observations and p is the number of predictors.
+ * @param y The response matrix of size n x 1.
+ * @param alpha The regularization parameter sequence. If not provided, it will
+ *   be generated automatically.
+ * @param lambda The regularization parameter for the SortedL1Norm
+ *   regularization. If not provided, it will be set to zero.
+ * @return The slope coefficients, intercept values, and primal values for each
+ *   step in the regularization path.
+ */
 Results
 slope(const Eigen::SparseMatrix<double>& x,
       const Eigen::MatrixXd& y,
