@@ -298,7 +298,7 @@ slope(const T& x,
   Eigen::SparseMatrix<double> betas(p, path_length);
   betas.setFromTriplets(beta_triplets.begin(), beta_triplets.end());
 
-  return { beta0s, betas, primals };
+  return { beta0s, betas, alpha, lambda, primals };
 }
 
 } // namespace slope
