@@ -9,7 +9,6 @@
 #include "pgd.h"
 #include "regularization_sequence.h"
 #include "results.h"
-#include "slope_threshold.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
 #include <Eigen/Sparse>
