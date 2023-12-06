@@ -48,7 +48,7 @@ private:
 
 template<typename Range>
 auto
-VectorApproxEqual(const Range& range, const double eps = 1e-6)
+VectorApproxEqual(const Range& range, const double eps = 1e-8)
   -> VectorApproxEqualMatcher<Range>
 {
   return VectorApproxEqualMatcher<Range>{ range, eps };
