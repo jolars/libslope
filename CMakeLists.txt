@@ -22,6 +22,8 @@ set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 add_subdirectory(src)
 
 if(BUILD_TESTING)
