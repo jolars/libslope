@@ -33,7 +33,6 @@ computeMeanAndStdDev(const Eigen::SparseMatrix<double>& x)
 
   for (int j = 0; j < p; ++j) {
     x_means(j) = x.col(j).sum() / n;
-    // TODO: Reconsider this implementation since it might overflow.
     x_stddevs(j) =
       std::sqrt(x.col(j).squaredNorm() / n - std::pow(x_means(j), 2));
   }
