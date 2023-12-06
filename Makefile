@@ -15,7 +15,6 @@ build:
 docs:
 	cmake -B $(BUILD_DIR) -S . -DBUILD_DOCS=ON -DBUILD_TESTING=OFF
 	cmake --build $(BUILD_DIR)
-	cmake --install $(BUILD_DIR)
 
 .PHONY: release
 release: clean
