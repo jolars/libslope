@@ -6,7 +6,7 @@ This is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main pu
 
 libslope has the following dependencies:
 
-- A C++14 compiler
+- A C++17 compiler
 - CMake 3.15 or later
 - Eigen 3.3 or later
 
