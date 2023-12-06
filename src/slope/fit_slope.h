@@ -19,21 +19,6 @@
 
 namespace slope {
 
-/**
- * Calculates the slope coefficients for a linear regression model using the
- * SortedL1Norm regularization.
- *
- * @tparam T The type of the input matrix x.
- * @param x The input matrix of size n x p, where n is the number of
- *   observations and p is the number of predictors.
- * @param y The response matrix of size n x 1.
- * @param alpha The regularization parameter sequence. If not provided, it will
- *   be generated automatically.
- * @param lambda The regularization parameter for the SortedL1Norm
- *   regularization. If not provided, it will be set to zero.
- * @return The slope coefficients, intercept values, and primal values for each
- *   step in the regularization path.
- */
 template<typename T>
 Results
 fitSlope(const T& x,
