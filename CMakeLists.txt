@@ -37,7 +37,7 @@ if(BUILD_TESTING)
   add_executable(
     tests tests/gaussian.cpp tests/prox.cpp tests/qnorm.cpp
           tests/lambda_sequence.cpp tests/path.cpp tests/standardize.cpp)
-  target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain)
+  target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)

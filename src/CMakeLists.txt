@@ -1,5 +1,5 @@
 add_library(
-  libslope
+  slope
   slope/clusters.cpp
   slope/qnorm.cpp
   slope/slope.cpp
@@ -10,9 +10,9 @@ add_library(
   slope/standardize.cpp
   slope/objectives.cpp)
 
-target_include_directories(libslope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(slope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS libslope DESTINATION lib)
+install(TARGETS slope DESTINATION lib)
 install(
   DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/slope/
   DESTINATION include/slope
