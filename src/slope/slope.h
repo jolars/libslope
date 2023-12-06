@@ -10,10 +10,6 @@
 
 namespace slope {
 
-/** @defgroup estimators Estimators
- *  This is the first group
- */
-
 /**
  * Calculates the slope coefficients for a linear regression model using the
  * SortedL1Norm regularization.
@@ -57,7 +53,5 @@ slope(const Eigen::SparseMatrix<double>& x,
       Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
       Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
       const SlopeParameters& params = SlopeParameters());
-
-/** @} */ // end of group1
 
 } // namespace slope
