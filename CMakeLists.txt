@@ -18,9 +18,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(PROJECT_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
+set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
-include_directories(${CMAKE_SOURCE_DIR}/external)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 add_subdirectory(src)
 
@@ -37,7 +37,8 @@ if(BUILD_TESTING)
   add_executable(
     tests tests/gaussian.cpp tests/prox.cpp tests/qnorm.cpp
           tests/lambda_sequence.cpp tests/path.cpp tests/standardize.cpp)
-  target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain)
+  target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain
+                                      Eigen3::Eigen)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
@@ -47,19 +48,6 @@ endif()
 
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
-  set(DOXYGEN_IN ${CMAKE_SOURCE_DIR}/docs/Doxyfile.in)
-  set(DOXYGEN_OUT ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
-  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
-  add_custom_target(
-    docs ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
-    COMMENT "Generating Doxygen XML"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/
-    VERBATIM)
-  add_custom_target(
-    docs_sphinx ALL
-    COMMAND make html
-    COMMENT "Generating sphinx HTML"
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/docs/
-    VERBATIM)
+  doxygen_add_docs(docs ${PROJECT_SOURCE_DIR} ALL
+                   COMMENT "Generate package documentation")
 endif()
