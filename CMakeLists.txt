@@ -50,6 +50,7 @@ endif()
 
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
+  set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
   doxygen_add_docs(docs ${PROJECT_SOURCE_DIR} docs/ ALL
                    COMMENT "Generate package documentation")
 endif()
