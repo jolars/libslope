@@ -48,6 +48,7 @@ endif()
 
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
-  doxygen_add_docs(docs ${PROJECT_SOURCE_DIR} ALL
+  set(DOXYGEN_USE_MDFILE_AS_MAINPAGE README.md)
+  doxygen_add_docs(docs ${PROJECT_SOURCE_DIR} README.md ALL
                    COMMENT "Generate package documentation")
 endif()
