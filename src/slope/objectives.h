@@ -12,6 +12,12 @@ public:
 
   virtual double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y) = 0;
 
+  virtual double dual(const Eigen::VectorXd& theta,
+                      const Eigen::VectorXd& y) = 0;
+
+  virtual Eigen::VectorXd residual(const Eigen::VectorXd& eta,
+                                   const Eigen::VectorXd& y) = 0;
+
   virtual void updateWeightsAndWorkingResponse(
     Eigen::VectorXd& weights,
     Eigen::VectorXd& working_response,
@@ -23,6 +29,11 @@ class Gaussian : public Objective
 {
 public:
   double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y);
+
+  double dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y);
+
+  Eigen::VectorXd residual(const Eigen::VectorXd& eta,
+                           const Eigen::VectorXd& y);
 
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,
@@ -37,6 +48,11 @@ private:
 
 public:
   double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y);
+
+  double dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y);
+
+  Eigen::VectorXd residual(const Eigen::VectorXd& eta,
+                           const Eigen::VectorXd& y);
 
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,

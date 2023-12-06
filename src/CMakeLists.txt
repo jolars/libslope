@@ -3,6 +3,7 @@ add_library(
   slope/clusters.cpp
   slope/qnorm.cpp
   slope/slope.cpp
+  slope/helpers.cpp
   slope/regularization_sequence.cpp
   slope/slope_threshold.cpp
   slope/sorted_l1_norm.cpp

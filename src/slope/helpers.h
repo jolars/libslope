@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <iostream>
+#include <string>
 
 // a template that iterates over a container called x
 template<typename T>
@@ -19,3 +20,6 @@ printContents(const T& x, const std::string what = "")
 
   std::cout << std::endl;
 }
+
+std::string
+indent(const int level);

@@ -42,22 +42,9 @@ regularizationPath(const T& x,
     alpha_min_ratio = n > p ? 1e-4 : 1e-2;
   }
 
-  Eigen::VectorXd gradient(p);
-  Eigen::VectorXd z_w = z.cwiseProduct(w);
+  auto gradient = computeGradient(x, z, x_centers, x_scales, standardize);
 
-  if (standardize) {
-    double z_w_sum = z_w.sum();
-    for (int j = 0; j < p; ++j) {
-      gradient[j] = x.col(j).dot(z_w) / x_scales[j] -
-                    z_w_sum * (x_centers[j] / x_scales[j]);
-    }
-  } else {
-    gradient = x.transpose() * z_w;
-  }
-
-  double alpha_max =
-    (penalty.dualNorm(gradient) / cumSum(penalty.getLambdaRef())).maxCoeff() /
-    static_cast<double>(n);
+  double alpha_max = penalty.dualNorm(gradient);
 
   Eigen::ArrayXd alpha(path_length);
 

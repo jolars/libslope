@@ -5,7 +5,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Path fitting", "[gaussian]")
+TEST_CASE("Path fitting", "[path][gaussian]")
 {
   using namespace Catch::Matchers;
 
@@ -33,9 +33,9 @@ TEST_CASE("Path fitting", "[gaussian]")
     slope::SlopeParameters params;
     params.objective = "gaussian";
 
-    auto no_intercept_no_std = slope::slope(x, y, alpha, lambda, params);
+    auto res = slope::slope(x, y, alpha, lambda, params);
 
-    Eigen::VectorXd coef = no_intercept_no_std.betas.col(2);
+    Eigen::VectorXd coef = res.betas.col(2);
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));

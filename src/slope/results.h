@@ -11,7 +11,8 @@ struct Results
   const Eigen::SparseMatrix<double> betas;
   const Eigen::ArrayXd alpha;
   const Eigen::ArrayXd lambda;
-  const std::vector<double> primals;
+  const std::vector<std::vector<double>> primals;
+  const std::vector<std::vector<double>> dual_gaps;
 };
 
 } // namespace slope

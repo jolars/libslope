@@ -4,7 +4,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Simple low-dimensional design", "[gaussian, dense, ols]")
+TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
 {
   using namespace Catch::Matchers;
 
@@ -29,14 +29,19 @@ TEST_CASE("Simple low-dimensional design", "[gaussian, dense, ols]")
   params.intercept = false;
   params.standardize = false;
 
-  auto no_intercept_no_std = slope::slope(x, y, alpha, lambda, params);
+  auto res = slope::slope(x, y, alpha, lambda, params);
 
-  Eigen::VectorXd coef = no_intercept_no_std.betas.col(0);
+  Eigen::VectorXd coef = res.betas.col(0);
 
   REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
+
+  double gap = res.dual_gaps[0].back();
+  double primal = res.primals[0].back();
+
+  REQUIRE(gap <= primal * 1e-4);
 }
 
-TEST_CASE("X is identity", "[gaussian, dense]")
+TEST_CASE("X is identity", "[gaussian][identity]")
 {
   using namespace Catch::Matchers;
 
@@ -56,9 +61,13 @@ TEST_CASE("X is identity", "[gaussian, dense]")
 
   auto res = slope::slope(x, y, alpha, lambda, params);
 
+  double gap = res.dual_gaps[0].back();
+  double primal = res.primals[0].back();
+
   Eigen::VectorXd betas = res.betas.col(0);
 
   std::array<double, 4> expected = { 4.0, 3.0, 2.0, 1.0 };
 
   REQUIRE_THAT(betas, VectorApproxEqual(expected));
+  REQUIRE(gap < primal * 1e-4);
 }

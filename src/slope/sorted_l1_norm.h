@@ -17,17 +17,17 @@ public:
 
   double eval(const Eigen::VectorXd& beta) const;
 
-  template<typename T>
-  double dual(const T& x, const Eigen::VectorXd& theta) const
-  {
-    Eigen::ArrayXd xt_theta_abs = (x.transpose() * theta).cwiseAbs();
-    sort(xt_theta_abs, true);
-    return (cumSum(xt_theta_abs) / cumSum((lambda * alpha).eval())).maxCoeff();
-  }
+  // template<typename T>
+  // double dual(const Eigen::VectorXd& gradient) const
+  // {
+  //   sort(xt_theta_abs, true);
+  //   return (cumSum(xt_theta_abs) / cumSum((lambda *
+  //   alpha).eval())).maxCoeff();
+  // }
 
   Eigen::VectorXd prox(const Eigen::VectorXd& beta, const double scale) const;
 
-  Eigen::ArrayXd dualNorm(const Eigen::VectorXd& a) const;
+  double dualNorm(const Eigen::VectorXd& a) const;
 
   void setLambda(const Eigen::ArrayXd& new_lambda);
 

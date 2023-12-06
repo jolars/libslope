@@ -1,6 +1,7 @@
 #pragma once
 
 #include "helpers.h"
+#include "math.h"
 #include "parameters.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Dense>
@@ -13,34 +14,18 @@ proximalGradientDescent(double& beta0,
                         Eigen::VectorXd& beta,
                         Eigen::VectorXd& residual,
                         double& learning_rate,
+                        const Eigen::VectorXd& gradient,
                         const T& x,
                         const Eigen::VectorXd& w,
                         const Eigen::VectorXd& z,
                         const SortedL1Norm& sl1_norm,
                         const Eigen::VectorXd& x_centers,
                         const Eigen::VectorXd& x_scales,
-                        double g_old,
+                        const double g_old,
                         const SlopeParameters& params)
 {
   const int n = x.rows();
   const int p = x.cols();
-
-  Eigen::VectorXd gradient(p);
-  Eigen::VectorXd weighted_residual = residual.cwiseProduct(w);
-
-  if (params.standardize) {
-    double wr_sum = weighted_residual.sum();
-    for (int j = 0; j < p; ++j) {
-      gradient(j) = -(x.col(j).dot(weighted_residual) - x_centers(j) * wr_sum) /
-                    (x_scales(j) * n);
-    }
-  } else {
-    gradient = -(x.transpose() * weighted_residual) / n;
-  }
-
-  if (params.print_level > 3) {
-    printContents(gradient, "        gradient (sub problem)");
-  }
 
   // Proximal gradient descent with line search
   if (params.print_level > 2) {

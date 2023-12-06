@@ -3,6 +3,7 @@
 #include "cd.h"
 #include "clusters.h"
 #include "helpers.h"
+#include "math.h"
 #include "objectives.h"
 #include "parameters.h"
 #include "pgd.h"
@@ -18,52 +19,6 @@
 #include <vector>
 
 namespace slope {
-
-/**
- * Computes the maximum delta value for the given inputs.
- *
- * @tparam T The type of the input data.
- * @param x The input data.
- * @param x_centers The centers of the input data.
- * @param x_scales The scales of the input data.
- * @param w The weights.
- * @param beta_old The old beta values.
- * @param beta The new beta values.
- * @param standardize Flag indicating whether to standardize the data.
- * @return The maximum delta value.
- */
-template<typename T>
-double
-computeMaxDelta(const T& x,
-                const Eigen::VectorXd& x_centers,
-                const Eigen::VectorXd& x_scales,
-                const Eigen::VectorXd& w,
-                const Eigen::VectorXd& beta_old,
-                const Eigen::VectorXd& beta,
-                bool standardize)
-{
-  const int p = x.cols();
-
-  double max_delta = 0.0;
-
-  // TODO: There's no need to traverse all the coefficients if we find one that
-  // violates the stopping rule.
-  for (int j = 0; j < p; ++j) {
-    double v_j;
-
-    if (standardize) {
-      v_j = (x.col(j).cwiseAbs2().dot(w) - 2 * x_centers(j) * x.col(j).dot(w) +
-             std::pow(x_centers(j), 2) * w.sum()) /
-            std::pow(x_scales(j), 2);
-    } else {
-      v_j = x.col(j).cwiseAbs2().dot(w);
-    }
-    double delta_j = v_j * std::pow(beta_old(j) - beta(j), 2);
-    max_delta = std::max(max_delta, delta_j);
-  }
-
-  return max_delta;
-}
 
 /**
  * Calculates the slope coefficients for a linear regression model using the
@@ -149,18 +104,19 @@ fitSlope(const T& x,
     path_length = alpha.size();
   }
 
-  if (params.print_level > 0) {
-    printContents(alpha, "alpha");
-  }
-
   VectorXd beta0s(path_length);
   std::vector<Eigen::Triplet<double>> beta_triplets;
 
   std::vector<double> primals;
+  std::vector<double> dual_gaps;
+  std::vector<std::vector<double>> primals_path;
+  std::vector<std::vector<double>> dual_gaps_path;
 
   double learning_rate = 1.0;
 
   VectorXd beta_old_outer = beta;
+
+  Gaussian subprob_objective;
 
   Clusters clusters(beta);
 
@@ -175,49 +131,92 @@ fitSlope(const T& x,
 
     // IRLS loop
     for (int it_outer = 0; it_outer < params.max_it_outer; ++it_outer) {
+      // The residual is kept up to date, but not eta. So we need to compute it
+      // here.
       eta = z - residual;
 
+      // Compute primal, dual, and gap
       double primal = objective->loss(eta, y) + sl1_norm.eval(beta);
       primals.emplace_back(primal);
 
+      VectorXd gen_residual = objective->residual(eta, y);
+
+      VectorXd gradient = computeGradient(
+        x, gen_residual, x_centers, x_scales, params.standardize);
+      VectorXd theta = gen_residual;
+      theta.array() /= std::max(1.0, sl1_norm.dualNorm(gradient));
+      double dual = objective->dual(theta, y);
+
+      double dual_gap = primal - dual;
+
+      dual_gaps.emplace_back(dual_gap);
+
+      double tol = std::abs(primal) * params.tol;
+
+      if (params.print_level > 1) {
+        std::cout << indent(1) << "IRLS iteration: " << it_outer << std::endl
+                  << indent(2) << "primal (main problem): " << primal
+                  << std::endl
+                  << indent(2) << "duality gap (main problem): " << dual_gap
+                  << ", tol: " << tol << std::endl;
+      }
+
+      if (std::max(dual_gap, 0.0) <= tol) {
+        break;
+      }
+
+      // Update weights and working response
       beta_old_outer = beta;
 
       objective->updateWeightsAndWorkingResponse(w, z, eta, y);
       residual = z - eta;
-
-      if (params.print_level > 1) {
-        std::cout << "  IRLS iteration: " << it_outer << std::endl;
-        std::cout << "    primal (main problem): " << primal << std::endl;
-      }
 
       if (params.print_level > 3) {
         printContents(w, "    weights");
         printContents(z, "    working response");
       }
 
-      double max_update_inner = 0;
-
       for (int it = 0; it < params.max_it; ++it) {
-        max_update_inner = 0;
-
-        double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
-        double h = sl1_norm.eval(beta);
-
-        if (params.print_level > 2) {
-          std::cout << "    iteration: " << it << std::endl;
-          std::cout << "      primal (sub problem): " << g + h << std::endl;
-        }
-
         if (it % params.pgd_freq == 0) {
-          VectorXd beta_old = beta;
+          double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
+          double h = sl1_norm.eval(beta);
+          double primal_inner = g + h;
+
+          VectorXd gradient = computeGradient(
+            x, residual, x_centers, x_scales, params.standardize);
+
+          // Obtain a feasible dual point by dual scaling
+          theta = residual;
+          theta.array() /= std::max(1.0, sl1_norm.dualNorm(gradient));
+          double dual_inner = subprob_objective.dual(theta, z);
+
+          double dual_gap_inner = primal_inner - dual_inner;
+
+          double tol_inner = std::abs(primal_inner) * params.tol;
+
           if (params.print_level > 2) {
-            std::cout << "      Running PGD step" << std::endl;
+            std::cout << indent(2) << "iteration: " << it << std::endl
+                      << indent(3) << "primal (inner): " << primal_inner
+                      << std::endl
+                      << indent(3) << "duality gap (inner): " << dual_gap_inner
+                      << ", tol: " << tol_inner << std::endl;
+          }
+
+          if (std::max(dual_gap_inner, 0.0) <= tol_inner) {
+            break;
+          }
+
+          VectorXd beta_old = beta;
+
+          if (params.print_level > 2) {
+            std::cout << indent(3) << "Running PGD step" << std::endl;
           }
 
           proximalGradientDescent(beta0,
                                   beta,
                                   residual,
                                   learning_rate,
+                                  gradient,
                                   x,
                                   w,
                                   z,
@@ -228,23 +227,9 @@ fitSlope(const T& x,
                                   params);
 
           clusters.update(beta);
-
-          max_update_inner = computeMaxDelta(
-            x, x_centers, x_scales, w, beta_old, beta, params.standardize);
-
-          // TODO: Consider changing this criterion to use the duality gap
-          // instead.
-          if (params.print_level > 2) {
-            std::cout << "      max inner update change: " << max_update_inner
-                      << ", tol: " << params.tol << std::endl;
-          }
-
-          if (max_update_inner <= params.tol) {
-            break;
-          }
         } else {
           if (params.print_level > 2) {
-            std::cout << "      Running CD step" << std::endl;
+            std::cout << indent(3) << "Running CD step" << std::endl;
           }
 
           coordinateDescent(beta0,
@@ -260,20 +245,9 @@ fitSlope(const T& x,
                             params);
         }
       }
-
-      double max_update_outer = computeMaxDelta(
-        x, x_centers, x_scales, w, beta_old_outer, beta, params.standardize);
-
-      if (params.print_level > 1) {
-        std::cout << "    max outer update change: " << max_update_outer
-                  << ", tol: " << params.tol << std::endl;
-      }
-
-      if (max_update_outer <= params.tol) {
-        break;
-      }
     }
 
+    // Store everything for this step of the path
     double beta0_out;
     VectorXd beta_out;
 
@@ -285,7 +259,6 @@ fitSlope(const T& x,
       beta_out = beta;
     }
 
-    // Store intercept and coefficients
     beta0s(path_step) = beta0_out;
 
     for (int j = 0; j < p; ++j) {
@@ -293,12 +266,15 @@ fitSlope(const T& x,
         beta_triplets.emplace_back(j, path_step, beta_out(j));
       }
     }
+
+    primals_path.emplace_back(primals);
+    dual_gaps_path.emplace_back(dual_gaps);
   }
 
   Eigen::SparseMatrix<double> betas(p, path_length);
   betas.setFromTriplets(beta_triplets.begin(), beta_triplets.end());
 
-  return { beta0s, betas, alpha, lambda, primals };
+  return { beta0s, betas, alpha, lambda, primals_path, dual_gaps_path };
 }
 
 } // namespace slope
