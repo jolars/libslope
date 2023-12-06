@@ -88,14 +88,11 @@ coordinateDescent(double& beta0,
       gradient_j = -x_s.cwiseProduct(w).dot(residual) / n;
     }
 
-    auto thresholding_results =
+    auto [c_tilde, new_index] =
       slopeThreshold(c_old - gradient_j / hessian_j,
                      j,
                      sl1_norm.getLambdaRef() * sl1_norm.getAlpha() / hessian_j,
                      clusters);
-
-    double c_tilde = thresholding_results.value;
-    int new_index = thresholding_results.new_index;
 
     auto s_it = s.cbegin();
     auto c_it = clusters.cbegin(j);
