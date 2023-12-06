@@ -47,13 +47,7 @@ fitSlope(const T& x,
   const int n = x.rows();
   const int p = x.cols();
 
-  // standardize
-  VectorXd x_centers(p);
-  VectorXd x_scales(p);
-
-  if (params.standardize) {
-    std::tie(x_centers, x_scales) = computeMeanAndStdDev(x);
-  }
+  auto [x_centers, x_scales] = standardize(x, params.standardize);
 
   std::unique_ptr<Objective> objective = setupObjective(params.objective);
 
@@ -247,18 +241,10 @@ fitSlope(const T& x,
     }
 
     // Store everything for this step of the path
-    double beta0_out;
-    VectorXd beta_out;
+    auto [beta0_out, beta_out] =
+      rescaleCoefficients(beta0, beta, x_centers, x_scales, params);
 
-    if (params.standardize) {
-      std::tie(beta0_out, beta_out) = unstandardizeCoefficients(
-        beta0, beta, x_centers, x_scales, params.intercept);
-    } else {
-      beta0_out = beta0;
-      beta_out = beta;
-    }
-
-    beta0s(path_step) = beta0_out;
+    beta0s(path_step) = std::move(beta0_out);
 
     for (int j = 0; j < p; ++j) {
       if (beta_out(j) != 0) {

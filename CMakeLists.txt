@@ -34,8 +34,9 @@ if(BUILD_TESTING)
     FetchContent_MakeAvailable(Catch2)
   endif()
 
-  add_executable(tests tests/gaussian.cpp tests/prox.cpp tests/qnorm.cpp
-                       tests/lambda_sequence.cpp tests/path.cpp)
+  add_executable(
+    tests tests/gaussian.cpp tests/prox.cpp tests/qnorm.cpp
+          tests/lambda_sequence.cpp tests/path.cpp tests/standardize.cpp)
   target_link_libraries(tests PRIVATE libslope Catch2::Catch2WithMain)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
