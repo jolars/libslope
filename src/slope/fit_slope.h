@@ -113,6 +113,8 @@ fitSlope(const T& x,
 
   Clusters clusters(beta);
 
+  int it_total = 0;
+
   // Regularization path loop
   for (int path_step = 0; path_step < path_length; ++path_step) {
     if (params.print_level > 0) {
@@ -238,6 +240,7 @@ fitSlope(const T& x,
                             params);
         }
       }
+      it_total++;
     }
 
     // Store everything for this step of the path
@@ -259,7 +262,9 @@ fitSlope(const T& x,
   Eigen::SparseMatrix<double> betas(p, path_length);
   betas.setFromTriplets(beta_triplets.begin(), beta_triplets.end());
 
-  return { beta0s, betas, alpha, lambda, primals_path, dual_gaps_path };
+  return {
+    beta0s, betas, alpha, lambda, primals_path, dual_gaps_path, it_total
+  };
 }
 
 } // namespace slope

@@ -13,6 +13,7 @@ struct Results
   const Eigen::ArrayXd lambda;
   const std::vector<std::vector<double>> primals;
   const std::vector<std::vector<double>> dual_gaps;
+  const int it_total;
 };
 
 } // namespace slope
