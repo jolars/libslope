@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief An implementation of the coordinate descent step in the hybrid
+ * algorithm for solving SLOPE.
+ */
+
 #pragma once
 
 #include "clusters.h"
@@ -9,6 +15,26 @@
 
 namespace slope {
 
+/**
+ * Coordinate Descent Step
+ *
+ * This function takes a coordinate descent step in the hybrid CD/PGD algorithm
+ * for SLOPE.
+ *
+ * @tparam T The type of the design matrix. This can be either a dense or
+ * sparse.
+ * @param beta0 The intercept
+ * @param beta The coefficients
+ * @param residual The residual vector
+ * @param clusters The cluster information
+ * @param x The design matrix
+ * @param w The weight vector
+ * @param z The response vector
+ * @param sl1_norm The sorted L1 norm object
+ * @param x_centers The center values of the data matrix columns
+ * @param x_scales The scale values of the data matrix columns
+ * @param params The SLOPE parameters
+ */
 template<typename T>
 void
 coordinateDescent(double& beta0,

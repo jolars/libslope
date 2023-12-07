@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief The actual function that fits SLOPE
+ */
+
 #pragma once
 
 #include "cd.h"
@@ -11,6 +16,7 @@
 #include "results.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
+#include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <cassert>
 #include <iostream>
@@ -19,6 +25,23 @@
 
 namespace slope {
 
+/**
+ * Calculates the slope coefficients for a linear regression model using the
+ * SortedL1Norm regularization.
+ *
+ * @param x The dense input matrix of size n x p, where n is the number of
+ *   observations and p is the number of predictors.
+ * @param y The response matrix of size n x 1.
+ * @param alpha The regularization parameter sequence. If not provided, it will
+ *   be generated automatically.
+ * @param lambda The regularization parameter for the SortedL1Norm
+ *   regularization. If not provided, it will be set to zero.
+ * @param params A struct containing the parameters for the calculation. See
+ * SlopeParameters.
+ * @return The slope coefficients, intercept values, and primal values for each
+ *   step in the regularization path.
+ * @see SlopeParameters
+ */
 template<typename T>
 Results
 fitSlope(const T& x,

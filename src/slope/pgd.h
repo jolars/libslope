@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief An implementation of a proximal gradient descent step
+ */
+
 #pragma once
 
 #include "helpers.h"
@@ -8,6 +13,30 @@
 #include <iostream>
 
 namespace slope {
+
+/**
+ * @brief Performs proximal gradient descent with line search.
+ *
+ * This function updates the beta values using the proximal gradient descent
+ * algorithm with line search. It also updates the residual, learning rate, and
+ * other variables as necessary. It assumes that the gradient has already been
+ * computed.
+ *
+ * @tparam T The type of the input data.
+ * @param beta0 The intercept value.
+ * @param beta The coefficient vector.
+ * @param residual The residual vector.
+ * @param learning_rate The learning rate.
+ * @param gradient The gradient vector.
+ * @param x The input data matrix.
+ * @param w The weight vector.
+ * @param z The response vector.
+ * @param sl1_norm The sorted L1 norm object.
+ * @param x_centers The center values of the input data.
+ * @param x_scales The scale values of the input data.
+ * @param g_old The previous value of the objective function.
+ * @param params The slope parameters.
+ */
 template<typename T>
 void
 proximalGradientDescent(double& beta0,

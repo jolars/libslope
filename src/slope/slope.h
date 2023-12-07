@@ -1,7 +1,6 @@
 /**
  * @file
- * @brief This file contains the declaration of the slope namespace and its
- * functions for calculating slope coefficients in linear regression models.
+ * @brief The declaration of the main functions in the slope package
  */
 
 #include "parameters.h"
@@ -21,8 +20,11 @@ namespace slope {
  *   be generated automatically.
  * @param lambda The regularization parameter for the SortedL1Norm
  *   regularization. If not provided, it will be set to zero.
+ * @param params A struct containing the parameters for the calculation. See
+ * SlopeParameters.
  * @return The slope coefficients, intercept values, and primal values for each
  *   step in the regularization path.
+ * @see SlopeParameters
  * @ingroup estimators
  */
 Results
@@ -43,8 +45,11 @@ slope(const Eigen::MatrixXd& x,
  *   be generated automatically.
  * @param lambda The regularization parameter for the SortedL1Norm
  *   regularization. If not provided, it will be set to zero.
+ * @param params A struct containing the parameters for the calculation. See
+ * SlopeParamters.
  * @return The slope coefficients, intercept values, and primal values for each
  *   step in the regularization path.
+ * @see SlopeParameters
  * @ingroup estimators
  */
 Results

@@ -1,10 +1,8 @@
+#pragma once
+
 #include "math.h"
-#include "objectives.h"
-#include "qnorm.h"
 #include "sorted_l1_norm.h"
-#include <Eigen/Core>
-#include <Eigen/SparseCore>
-#include <memory>
+#include <Eigen/Sparse>
 #include <string>
 
 namespace slope {

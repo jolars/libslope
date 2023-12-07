@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief The declaration of the SlopeParameters struct
+ */
+
 #pragma once
 
 #include <string>
@@ -27,6 +32,10 @@ namespace slope {
  * @var SlopeParameters::alpha_min_ratio
  * A double representing the minimum value of the regularization parameter
  * alpha. If -1, the value will be set to 1e-4 if n > p and 1e-2 otherwise.
+ *
+ * @var SlopeParameters::learning_rate_decr
+ * Sets the learning rate decrement for the line search in the proximal gradient
+ * descent step.
  *
  * @var SlopeParameters::q
  * A double representing the quantile level for the L1 penalty.
@@ -79,5 +88,5 @@ struct SlopeParameters
   std::string lambda_type = "bh";
   std::string objective = "gaussian";
 };
- 
+
 } // namespace slope

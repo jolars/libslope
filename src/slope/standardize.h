@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Functions to standardize the design matrix and rescale coefficients
+ */
+
 #pragma once
 
 #include "parameters.h"
@@ -51,10 +56,31 @@ standardize(const T& x, const bool standardize)
   return { x_means, x_stddevs };
 }
 
+/**
+ * @brief Rescales the coefficients using the given parameters.
+ *
+ * This function rescales the coefficients by dividing each coefficient by the
+ * corresponding scale factor and subtracting the product of the center and the
+ * coefficient from the intercept.
+ *
+ * @param beta0 The intercept coefficient.
+ * @param beta The vector of coefficients.
+ * @param x_centers The vector of center values.
+ * @param x_scales The vector of scale factors.
+ * @param params The slope parameters.
+ * @return A tuple containing the rescaled intercept and coefficients.
+ *
+ * @note The input vectors `beta`, `x_centers`, and `x_scales` must have the
+ * same size.
+ * @note The output vector `beta` will be modified in-place.
+ *
+ * @see SlopeParameters
+ */
 std::tuple<double, Eigen::VectorXd>
 rescaleCoefficients(double beta0,
                     Eigen::VectorXd beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
                     const SlopeParameters& params);
+
 } // namespace slope
