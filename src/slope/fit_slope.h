@@ -55,6 +55,10 @@ fitSlope(const T& x,
   const int n = x.rows();
   const int p = x.cols();
 
+  if (n != y.rows()) {
+    throw std::invalid_argument("x and y must have the same number of rows");
+  }
+
   auto [x_centers, x_scales] = standardize(x, params.standardize);
 
   std::unique_ptr<Objective> objective = setupObjective(params.objective);
@@ -85,6 +89,9 @@ fitSlope(const T& x,
     }
     if (lambda.minCoeff() < 0) {
       throw std::invalid_argument("lambda must be non-negative");
+    }
+    if (!lambda.isFinite().all()) {
+      throw std::invalid_argument("lambda must be finite");
     }
   }
 
