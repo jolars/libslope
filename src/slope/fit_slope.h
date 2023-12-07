@@ -63,19 +63,15 @@ fitSlope(const T& x,
 
   std::unique_ptr<Objective> objective = setupObjective(params.objective);
 
-  // initialize coeficients
-  double beta0 = 0.0;
-  VectorXd beta = VectorXd::Zero(p);
-
-  VectorXd eta = x * beta;
-  eta.array() += beta0;
-
-  VectorXd w(n); // weights
-  VectorXd z(n); // working response
+  double beta0 = 0.0;                // intercept
+  VectorXd beta = VectorXd::Zero(p); // coefficients
+  VectorXd eta = VectorXd::Zero(n);  // linear predictor
+  VectorXd w = VectorXd::Ones(n);    // weights
+  VectorXd z = y;                    // working response
 
   objective->updateWeightsAndWorkingResponse(w, z, eta, y);
 
-  VectorXd residual = z - eta;
+  VectorXd residual = z;
 
   // Setup the regularization sequence and path
   SortedL1Norm sl1_norm{ lambda };
