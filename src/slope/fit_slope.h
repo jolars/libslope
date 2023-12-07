@@ -109,6 +109,12 @@ fitSlope(const T& x,
                                params.intercept,
                                params.standardize);
   } else {
+    if (alpha.minCoeff() < 0) {
+      throw std::invalid_argument("alpha must be non-negative");
+    }
+    if (!alpha.isFinite().all()) {
+      throw std::invalid_argument("alpha must be finite");
+    }
     path_length = alpha.size();
   }
 
