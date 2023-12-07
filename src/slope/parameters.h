@@ -79,9 +79,9 @@ struct SlopeParameters
   double alpha_min_ratio = -1;
   double learning_rate_decr = 0.5;
   double q = 0.1;
-  double tol = 1e-8;
+  double tol = 1e-4;
   int max_it = 1e6;
-  int max_it_outer = 100;
+  int max_it_outer = 30;
   int path_length = 100;
   int pgd_freq = 10;
   int print_level = 0;
