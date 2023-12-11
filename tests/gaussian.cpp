@@ -71,3 +71,19 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   REQUIRE_THAT(betas, VectorApproxEqual(expected));
   REQUIRE(gap < primal * 1e-4);
 }
+
+TEST_CASE("Automatic lambda and alpha", "[identity]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::Matrix<double, 3, 2> x;
+  // clang-format off
+  x << 1, 2,
+       0, 1,
+       1, 0;
+  // clang-format on
+  Eigen::Vector3d y;
+  y << -1, 6, 2;
+
+  REQUIRE_NOTHROW(slope::slope(x, y));
+}
