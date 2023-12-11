@@ -30,12 +30,12 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     Eigen::ArrayXd lambda(2);
     lambda << 1.959964, 1.644854;
 
-    slope::SlopeParameters params;
-    params.objective = "gaussian";
+    slope::Slope model;
+    model.setObjective("gaussian");
 
-    auto res = slope::slope(x, y, alpha, lambda, params);
+    model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coef = res.betas.col(2);
+    Eigen::VectorXd coef = model.getCoefs().col(2);
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));
@@ -47,14 +47,12 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     Eigen::ArrayXd lambda(2);
     lambda << 1.959964, 1.644854;
 
-    slope::SlopeParameters params;
-    params.objective = "gaussian";
-    params.path_length = 20;
+    slope::Slope model;
+    model.setPathLength(20);
+    model.fit(x, y, alpha, lambda);
 
-    auto fit = slope::slope(x, y, alpha, lambda, params);
-
-    Eigen::MatrixXd coefs = fit.betas;
-    alpha = fit.alpha;
+    Eigen::MatrixXd coefs = model.getCoefs();
+    alpha = model.getAlpha();
 
     REQUIRE(alpha.rows() == 20);
 

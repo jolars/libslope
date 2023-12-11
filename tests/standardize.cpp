@@ -57,8 +57,9 @@ TEST_CASE("Check that standardization algorithm works",
 
   auto [x_centers_ref, x_scales_ref] = computeMeanAndStdDev(x);
 
-  auto [x_centers, x_scales] = slope::standardize(x, true);
-  auto [x_centers_dense, x_scales_dense] = slope::standardize(x_dense, true);
+  auto [x_centers, x_scales] = slope::computeCentersAndScales(x, true);
+  auto [x_centers_dense, x_scales_dense] =
+    slope::computeCentersAndScales(x_dense, true);
 
   REQUIRE_THAT(x_centers, VectorApproxEqual(x_centers_ref));
   REQUIRE_THAT(x_scales, VectorApproxEqual(x_scales_ref));
