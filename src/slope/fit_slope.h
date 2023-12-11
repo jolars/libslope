@@ -73,9 +73,6 @@ fitSlope(const T& x,
 
   VectorXd residual = z;
 
-  // Setup the regularization sequence and path
-  SortedL1Norm sl1_norm{ lambda };
-
   if (lambda.size() == 0) {
     lambda = lambdaSequence(p, params.q, params.lambda_type);
   } else {
@@ -90,6 +87,9 @@ fitSlope(const T& x,
       throw std::invalid_argument("lambda must be finite");
     }
   }
+
+  // Setup the regularization sequence and path
+  SortedL1Norm sl1_norm{ lambda };
 
   int path_length = params.path_length;
 
