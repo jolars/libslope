@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: sudo apt-get install -y build-essential libeigen3-dev lcov gcov
+        run: sudo apt-get install -y build-essential libeigen3-dev lcov gcovr
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.14
