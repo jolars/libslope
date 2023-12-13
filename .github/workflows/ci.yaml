@@ -20,7 +20,7 @@ jobs:
           cmake-version: "3.25"
 
       - name: Configure CMake
-        run: cmake -B build -S . -DBUILD_TESTING=ON -DBUILD_DOCS=OFF
+        run: cmake -B build -S . -DBUILD_TESTING=ON -DBUILD_DOCS=OFF -DENABLE-COVERAGE
 
       - name: Build
         run: cmake --build build
@@ -30,6 +30,11 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4-beta
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
   docs:
     needs: build-and-test
     runs-on: ubuntu-latest

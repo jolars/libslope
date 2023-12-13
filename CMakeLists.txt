@@ -8,6 +8,7 @@ project(
   VERSION ${project_version})
 
 option(BUILD_DOCS "Build documentation" OFF)
+option(ENABLE_COVERAGE "Generate coverage report" OFF)
 
 include(FetchContent)
 include(CTest)
@@ -42,6 +43,12 @@ if(BUILD_TESTING)
   target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain
                                       Eigen3::Eigen)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
+
+  if(ENABLE_COVERAGE)
+    find_package(codecov)
+    add_coverage(tests)
+    coverage_evaluate()
+  endif()
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
   include(Catch)
