@@ -44,15 +44,16 @@ if(BUILD_TESTING)
                                       Eigen3::Eigen)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
-  if(ENABLE_COVERAGE)
-    find_package(codecov)
-    add_coverage(tests)
-    coverage_evaluate()
-  endif()
-
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
   include(Catch)
   catch_discover_tests(tests)
+
+  if(ENABLE_COVERAGE)
+    find_package(codecov)
+    add_coverage(tests)
+    add_coverage(slope)
+    coverage_evaluate(tests-gcov)
+  endif()
 endif()
 
 if(BUILD_DOCS)
