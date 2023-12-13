@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/jolars/libslope/compare/v0.2.0...v0.3.0) (2023-12-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* change interface to class-based design
+
+### Features
+
+* change interface to class-based design ([7b17034](https://github.com/jolars/libslope/commit/7b17034763186127b313aa858a4c7073395c4b97))
+* modify the default parameters ([13f8efc](https://github.com/jolars/libslope/commit/13f8efc1e5b28f88196e20e931b3303e72be8c34))
+
+
+### Bug Fixes
+
+* setup sl1_norm after creating sequence ([ba47b6d](https://github.com/jolars/libslope/commit/ba47b6db8d18d12999f4ede4b96c1902e311c9a9))
+
 ## [0.2.0](https://github.com/jolars/libslope/compare/v0.1.0...v0.2.0) (2023-12-07)
 
 
