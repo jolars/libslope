@@ -8,7 +8,6 @@ project(
   VERSION ${project_version})
 
 option(BUILD_DOCS "Build documentation" OFF)
-option(ENABLE_COVERAGE "Generate coverage report" OFF)
 
 include(FetchContent)
 include(CTest)
