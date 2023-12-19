@@ -1,7 +1,6 @@
 {
   "packages": {
     ".": {
-      "package-name": "libslope",
       "release-type": "simple",
       "bump-minor-pre-major": true
     }
