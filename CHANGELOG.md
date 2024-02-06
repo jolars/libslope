@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/jolars/libslope/compare/v0.3.0...v0.3.1) (2024-02-06)
+
+
+### Bug Fixes
+
+* avoid infinite loop by bounding stopping criterion ([209414c](https://github.com/jolars/libslope/commit/209414c388423bf71d9680ec4f2ce00751c3b9c2))
+
 ## [0.3.0](https://github.com/jolars/libslope/compare/v0.2.0...v0.3.0) (2023-12-11)
 
 
