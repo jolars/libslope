@@ -28,19 +28,14 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
 
   slope::Slope model;
 
-  model.setIntercept(false);
-  model.setStandardize(false);
-  model.setPrintLevel(3);
-  model.setPgdFreq(1);
+  model.setIntercept(true);
+  model.setStandardize(true);
 
   model.fit(x_sparse, y, alpha, lambda);
   auto coefs_sparse = model.getCoefs();
 
   model.fit(x_dense, y, alpha, lambda);
   auto coefs_dense = model.getCoefs();
-
-  auto dual_gaps = model.getDualGaps();
-  auto primals = model.getPrimals();
 
   Eigen::VectorXd coef_sparse = coefs_sparse.col(0);
   Eigen::VectorXd coef_dense = coefs_dense.col(0);
