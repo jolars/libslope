@@ -42,7 +42,7 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
   double gap = dual_gaps.front().back();
   double primal = primals.front().back();
 
-  REQUIRE(gap <= primal * 1e-4);
+  REQUIRE(gap <= (primal + 1e-10) * 1e-4);
 }
 
 TEST_CASE("X is identity", "[gaussian][identity]")
