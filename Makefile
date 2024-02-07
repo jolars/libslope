@@ -5,7 +5,7 @@ all: configure build
 
 .PHONY: configure
 configure:
-	cmake -B $(BUILD_DIR) -S .
+	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=Debug
 
 .PHONY: build
 build:
