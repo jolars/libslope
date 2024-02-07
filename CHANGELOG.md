@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/jolars/libslope/compare/v0.3.1...v0.3.2) (2024-02-07)
+
+
+### Bug Fixes
+
+* fix error in Welford's standardization algorithm ([3d70d06](https://github.com/jolars/libslope/commit/3d70d06787c13a7dc8e48dcec8b6d0df4c21c91a))
+
 ## [0.3.1](https://github.com/jolars/libslope/compare/v0.3.0...v0.3.1) (2024-02-06)
 
 
