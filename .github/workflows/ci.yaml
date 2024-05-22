@@ -11,7 +11,7 @@ jobs:
         run: sudo apt-get install -y build-essential libeigen3-dev lcov gcovr doxygen
 
       - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.14
+        uses: jwlawson/actions-setup-cmake@v2.0
         with:
           cmake-version: "3.25"
 
@@ -28,7 +28,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v4.4.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   docs:
@@ -49,7 +49,7 @@ jobs:
         run: sudo apt-get install -y build-essential doxygen libeigen3-dev
 
       - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v1.14
+        uses: jwlawson/actions-setup-cmake@v2.0
         with:
           cmake-version: "3.25"
 
@@ -60,7 +60,7 @@ jobs:
         run: cmake --build build
 
       - name: Setup pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
