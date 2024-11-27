@@ -2,10 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 file(STRINGS "version.txt" project_version)
 
-project(
-  slope
-  LANGUAGES CXX
-  VERSION ${project_version})
+project(slope LANGUAGES CXX VERSION ${project_version})
 
 option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_COVERAGE "Generate coverage report" OFF)
@@ -31,7 +28,8 @@ if(BUILD_TESTING)
     FetchContent_Declare(
       Catch2
       GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-      GIT_TAG v3.4.0)
+      GIT_TAG v3.4.0
+    )
     FetchContent_MakeAvailable(Catch2)
   endif()
 
@@ -43,9 +41,12 @@ if(BUILD_TESTING)
     tests/lambda_sequence.cpp
     tests/path.cpp
     tests/standardize.cpp
-    tests/sparse.cpp)
-  target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain
-                                      Eigen3::Eigen)
+    tests/sparse.cpp
+  )
+  target_link_libraries(
+    tests
+    PRIVATE slope Catch2::Catch2WithMain Eigen3::Eigen
+  )
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
@@ -63,6 +64,11 @@ endif()
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
   set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
-  doxygen_add_docs(docs ${PROJECT_SOURCE_DIR} docs/ ALL
-                   COMMENT "Generate package documentation")
+  doxygen_add_docs(
+    docs
+    ${PROJECT_SOURCE_DIR}
+    docs/
+    ALL
+    COMMENT "Generate package documentation"
+  )
 endif()
