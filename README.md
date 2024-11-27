@@ -7,16 +7,16 @@ This is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main pu
 
 ## Dependencies
 
-libslope has the following dependencies:
+### Building
 
 - A C++17 compiler
 - CMake 3.15 or later
 - Eigen 3.3 or later
 
-In addition, to build the documentation you need
+### Documentation
 
 - Doxygen
-- Sphinx
-- Breathe
 
-And to build and run the tests, you need Catch2.
+### Testing
+
+- Catch2
