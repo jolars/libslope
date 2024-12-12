@@ -47,3 +47,5 @@ docs/_build/
 docs/_static/
 
 .direnv
+
+.cache/
