@@ -50,22 +50,64 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
   slope::Slope model;
 
-  model.setIntercept(false);
-  model.setStandardize(false);
-  model.setObjective("binomial");
-  model.setPgdFreq(1);
   model.setTol(1e-9);
+  model.setObjective("binomial");
 
-  model.fit(x, y, alpha, lambda);
+  SECTION("No intercept, no standardization")
+  {
+    model.setStandardize(false);
+    model.setIntercept(false);
 
-  Eigen::Vector3d coef_target;
-  coef_target << 1.3808558, 0.0000000, 0.3205496;
+    Eigen::Vector3d coef_target;
+    coef_target << 1.3808558, 0.0000000, 0.3205496;
 
-  auto coefs = model.getCoefs();
-  Eigen::VectorXd coef = coefs.col(0);
+    // PGD
+    model.setPgdFreq(1);
+    model.fit(x, y, alpha, lambda);
 
-  REQUIRE_THAT(coef, VectorApproxEqual(coef_target, 1e-6));
+    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
 
-  auto dual_gaps = model.getDualGaps();
-  auto primals = model.getPrimals();
+    // Hybrid
+    model.setPgdFreq(10);
+    model.fit(x, y, alpha, lambda);
+
+    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+
+    // auto dual_gaps = model.getDualGaps();
+    // auto primals = model.getPrimals();
+
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+  }
+
+  // SECTION("No intercept, standardization")
+  // {
+  //   model.setIntercept(false);
+  //   model.setStandardize(true);
+  //
+  //   Eigen::Vector3d coef_target;
+  //   coef_target << 1.4144889, 0.0000000, 0.3285132;
+  //
+  //   SECTION("PGD, standardized")
+  //   {
+  //     model.setPgdFreq(1);
+  //     model.fit(x, y, alpha, lambda);
+  //
+  //     auto coefs = model.getCoefs();
+  //     Eigen::VectorXd coef = coefs.col(0);
+  //
+  //     REQUIRE_THAT(coef, VectorApproxEqual(coef_target, 1e-6));
+  //   }
+  //
+  //   SECTION("Hybrid, standardized")
+  //   {
+  //     // Hybrid
+  //     model.setPgdFreq(10);
+  //     model.fit(x, y, alpha, lambda);
+  //
+  //     Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+  //
+  //     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+  //   }
+  // }
 }
