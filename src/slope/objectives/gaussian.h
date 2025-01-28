@@ -22,6 +22,7 @@ public:
    * @brief Calculates the dual function for the Gaussian objective.
    * @param theta The dual variables.
    * @param y The actual values.
+   * @param w The observation weights.
    * @return The dual value.
    */
   double dual(const Eigen::VectorXd& theta,
