@@ -5,24 +5,6 @@
 namespace slope {
 
 void
-Slope::fit(const Eigen::MatrixXd& x,
-           const Eigen::MatrixXd& y,
-           const Eigen::ArrayXd& alpha,
-           const Eigen::ArrayXd& lambda)
-{
-  return fitImpl(x, y, alpha, lambda);
-}
-
-void
-Slope::fit(const Eigen::SparseMatrix<double>& x,
-           const Eigen::MatrixXd& y,
-           const Eigen::ArrayXd& alpha,
-           const Eigen::ArrayXd& lambda)
-{
-  return fitImpl(x, y, alpha, lambda);
-}
-
-void
 Slope::setIntercept(bool intercept)
 {
   this->intercept = intercept;

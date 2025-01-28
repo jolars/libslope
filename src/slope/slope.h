@@ -60,42 +60,6 @@ public:
   }
 
   /**
-   * Sorted L-One Penalized Estimation.
-   *
-   * This function fits a linear regression model to the given data using the
-   * ordinary least squares method.
-   *
-   * @param x The design matrix, where each column represents a feature.
-   * @param y The response matrix. Each row represents an observation.
-   * @param alpha Sequence of multipliers for the sorted l1 norm along the
-   * regularization path.
-   * @param lambda The regularization parameter for the sorted l1 norm, which is
-   * a positive nonincreasing array of weights.
-   */
-  void fit(const Eigen::MatrixXd& x,
-           const Eigen::MatrixXd& y,
-           const Eigen::ArrayXd& alpha = Eigen::ArrayXd::Zero(0),
-           const Eigen::ArrayXd& lambda = Eigen::ArrayXd::Zero(0));
-
-  /**
-   * Sorted L-One Penalized Estimation.
-   *
-   * This function fits a linear regression model to the given data using the
-   * ordinary least squares method.
-   *
-   * @param x The design matrix, where each column represents a feature.
-   * @param y The response matrix. Each row represents an observation.
-   * @param alpha Sequence of multipliers for the sorted l1 norm along the
-   * regularization path.
-   * @param lambda The regularization parameter for the sorted l1 norm, which is
-   * a positive nonincreasing array of weights.
-   */
-  void fit(const Eigen::SparseMatrix<double>& x,
-           const Eigen::MatrixXd& y,
-           const Eigen::ArrayXd& alpha = Eigen::ArrayXd::Zero(0),
-           const Eigen::ArrayXd& lambda = Eigen::ArrayXd::Zero(0));
-
-  /**
    * @brief Sets the intercept flag.
    *
    * @param intercept Should an intercept be fitted?
@@ -261,25 +225,25 @@ public:
    */
   const std::vector<std::vector<double>>& getPrimals() const;
 
-private:
   /**
-   * Calculates the slope coefficients for a linear regression model using the
-   * SortedL1Norm regularization.
+   * Sorted L-One Penalized Estimation.
    *
-   * @param x The dense input matrix of size n x p, where n is the number of
-   *   observations and p is the number of predictors.
-   * @param y The response matrix of size n x 1.
-   * @param alpha The regularization parameter sequence. If not provided, it
-   * will be generated automatically.
-   * @param lambda The regularization parameter for the SortedL1Norm
-   *   regularization. If not provided, it will be set to zero.
-   * @see SlopeParameters
+   * This function fits a linear regression model to the given data using the
+   * ordinary least squares method.
+   *
+   * @param x The design matrix, where each column represents a feature.
+   * @param y The response matrix. Each row represents an observation.
+   * @param alpha Sequence of multipliers for the sorted l1 norm along the
+   * regularization path.
+   * @param lambda The regularization parameter for the sorted l1 norm, which is
+   * a positive nonincreasing array of weights.
+   * @see slopeParameters
    */
   template<typename T>
-  void fitImpl(const T& x,
-               const Eigen::VectorXd& y,
-               Eigen::ArrayXd alpha,
-               Eigen::ArrayXd lambda)
+  void fit(T& x,
+           const Eigen::VectorXd& y,
+           Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
+           Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0))
   {
     using Eigen::VectorXd;
 
@@ -520,6 +484,7 @@ private:
     lambda_out = lambda;
   }
 
+private:
   // parameters
   bool intercept;
   bool standardize;
