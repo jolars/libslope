@@ -128,7 +128,6 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   alpha[0] = 0.05;
 
-  // lambda << 2.128045 / n, 1.833915 / n, 1.644854 / n;
   lambda << 3.0, 2.0, 2.0;
 
   slope::Slope model;
