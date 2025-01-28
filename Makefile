@@ -5,7 +5,7 @@ all: configure build
 
 .PHONY: configure
 configure:
-	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=Debug
+	cmake -B $(BUILD_DIR) -S . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 .PHONY: build
 build:
@@ -37,7 +37,7 @@ install:
 	cmake --install $(BUILD_DIR)
 
 .PHONY: test
-test: 
-	cmake -B $(BUILD_DIR) -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON
+test:
+	cmake -B $(BUILD_DIR) -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug
 	cmake --build $(BUILD_DIR)
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
