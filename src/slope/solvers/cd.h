@@ -14,6 +14,38 @@
 
 namespace slope {
 
+template<typename T>
+std::pair<double, double>
+computeGradientAndHessian(const T& x,
+                          int k,
+                          const Eigen::VectorXd& w,
+                          const Eigen::VectorXd& residual,
+                          const Eigen::VectorXd& x_centers,
+                          const Eigen::VectorXd& x_scales,
+                          double s,
+                          bool standardize,
+                          int n)
+{
+  double gradient, hessian;
+
+  if (standardize) {
+    gradient = -s *
+               (x.col(k).cwiseProduct(w).dot(residual) -
+                w.dot(residual) * x_centers(k)) /
+               (n * x_scales(k));
+
+    hessian =
+      (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
+       std::pow(x_centers(k), 2) * w.sum()) /
+      (std::pow(x_scales(k), 2) * n);
+  } else {
+    gradient = -s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
+    hessian = x.col(k).cwiseAbs2().dot(w) / n;
+  }
+
+  return { gradient, hessian };
+}
+
 /**
  * Coordinate Descent Step
  *
@@ -85,22 +117,8 @@ coordinateDescent(double& beta0,
       double s_k = sign(beta(k));
       s.emplace_back(s_k);
 
-      if (standardize) {
-        gradient_j = -s_k *
-                     (x.col(k).cwiseProduct(w).dot(residual) -
-                      w.dot(residual) * x_centers(k)) /
-                     (n * x_scales(k));
-        // TODO: Consider caching the hessian values. We need to invalidate the
-        // cache every time the cluster is updated or the  signs flip relatively
-        // inside the cluster.
-        hessian_j =
-          (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
-           std::pow(x_centers(k), 2) * w.sum()) /
-          (std::pow(x_scales(k), 2) * n);
-      } else {
-        gradient_j = -s_k * (x.col(k).cwiseProduct(w).dot(residual)) / n;
-        hessian_j = x.col(k).cwiseAbs2().dot(w) / n;
-      }
+      std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
+        x, k, w, residual, x_centers, x_scales, s_k, standardize, n);
     } else {
       // There's no reasonable just-in-time standardization approach for sparse
       // design matrices when there are clusters in the data, so we need to
