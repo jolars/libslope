@@ -1,5 +1,3 @@
-#pragma once
-
 #include "binomial.h"
 #include "../math.h"
 

@@ -5,9 +5,8 @@
 
 #pragma once
 
-#include "helpers.h"
+#include "../sorted_l1_norm.h"
 #include "math.h"
-#include "sorted_l1_norm.h"
 #include <Eigen/Dense>
 #include <iostream>
 

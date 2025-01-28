@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "cd.h"
 #include "clusters.h"
 #include "constants.h"
 #include "helpers.h"
@@ -13,8 +12,9 @@
 #include "objectives/gaussian.h"
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
-#include "pgd.h"
 #include "regularization_sequence.h"
+#include "solvers/cd.h"
+#include "solvers/pgd.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
 #include <Eigen/Core>

@@ -1,16 +1,16 @@
 add_library(
   slope
   slope/clusters.cpp
-  slope/qnorm.cpp
-  slope/slope.cpp
   slope/helpers.cpp
-  slope/regularization_sequence.cpp
-  slope/slope_threshold.cpp
-  slope/sorted_l1_norm.cpp
-  slope/standardize.cpp
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp
   slope/objectives/setup_objective.cpp
+  slope/qnorm.cpp
+  slope/regularization_sequence.cpp
+  slope/slope.cpp
+  slope/solvers/slope_threshold.cpp
+  slope/sorted_l1_norm.cpp
+  slope/standardize.cpp
 )
 
 target_include_directories(slope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
