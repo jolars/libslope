@@ -10,7 +10,7 @@
 namespace slope {
 
 /**
- * Standardizes the given matrix column-wise.
+ * Compute means and standard deviations of the columns of the input matrix.
  *
  * This function uses Welford's algorithm to compute the means and standard
  * deviation.
