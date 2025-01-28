@@ -8,7 +8,9 @@ add_library(
   slope/slope_threshold.cpp
   slope/sorted_l1_norm.cpp
   slope/standardize.cpp
-  slope/objectives.cpp
+  slope/objectives/binomial.cpp
+  slope/objectives/gaussian.cpp
+  slope/objectives/setup_objective.cpp
 )
 
 target_include_directories(slope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
