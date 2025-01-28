@@ -2,6 +2,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
 TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
@@ -105,16 +106,16 @@ TEST_CASE("Gaussian models", "[gaussian]")
   Eigen::VectorXd beta(p);
 
   // clang-format off
-    x <<  0.288,  -0.0452,  0.880,
-          0.788,   0.576,  -0.305,
-          1.510,   0.390,  -0.621,
-         -2.210,  -1.120,  -0.0449,
-         -0.0162,  0.944,   0.821,
-          0.594,   0.919,   0.782,
-          0.0746, -1.990,   0.620,
-         -0.0561, -0.156,  -1.470,
-         -0.478,   0.418,   1.360,
-         -0.103,   0.388,  -0.0538;
+  x <<  0.288,  -0.0452,  0.880,
+        0.788,   0.576,  -0.305,
+        1.510,   0.390,  -0.621,
+       -2.210,  -1.120,  -0.0449,
+       -0.0162,  0.944,   0.821,
+        0.594,   0.919,   0.782,
+        0.0746, -1.990,   0.620,
+       -0.0561, -0.156,  -1.470,
+       -0.478,   0.418,   1.360,
+       -0.103,   0.388,  -0.0538;
   // clang-format on
 
   // Fixed coefficients beta
@@ -130,6 +131,8 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   lambda << 3.0, 2.0, 2.0;
 
+  Eigen::Vector3d coef_target;
+
   slope::Slope model;
 
   model.setTol(1e-9);
@@ -140,7 +143,6 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.setStandardize(false);
     model.setIntercept(false);
 
-    Eigen::Vector3d coef_target;
     coef_target << 0.6864545, -0.6864545, 0.0000000;
 
     // PGD
@@ -157,5 +159,57 @@ TEST_CASE("Gaussian models", "[gaussian]")
     Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+  }
+
+  SECTION("No intercept, with standardization")
+  {
+    model.setStandardize(true);
+    model.setIntercept(false);
+
+    coef_target << 0.700657772, -0.730587233, 0.008997323;
+
+    // PGD
+    model.setPgdFreq(1);
+    model.fit(x, y, alpha, lambda);
+
+    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+
+    // Hybrid
+    model.setPgdFreq(10);
+    model.fit(x, y, alpha, lambda);
+
+    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+  }
+
+  SECTION("With intercept, with standardization")
+  {
+    model.setStandardize(true);
+    model.setIntercept(true);
+
+    coef_target << 0.700657772, -0.730587234, 0.008997323;
+
+    model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs = model.getCoefs().col(0);
+    double intercept = model.getIntercepts()[0];
+
+    REQUIRE_THAT(intercept, WithinAbs(0.040584733, 1e-3));
+    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));
+  }
+
+  SECTION("With intercept, no standardization")
+  {
+    model.setStandardize(false);
+    model.setIntercept(true);
+
+    coef_target << 0.68614138, -0.68614138, 0.00000000;
+
+    model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs = model.getCoefs().col(0);
+    double intercept = model.getIntercepts()[0];
+
+    REQUIRE_THAT(intercept, WithinAbs(0.04148455, 1e-3));
+    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));
   }
 }
