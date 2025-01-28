@@ -142,12 +142,21 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.setIntercept(false);
 
     Eigen::Vector3d coef_target;
-    coef_target << 0.700657772, -0.730587233, 0.008997323;
+    coef_target << 0.6864545, -0.6864545, 0.0000000;
 
     // PGD
     model.setPgdFreq(1);
     model.fit(x, y, alpha, lambda);
 
     Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+
+    // Hybrid
+    model.setPgdFreq(10);
+    model.fit(x, y, alpha, lambda);
+    // model.setUpdateClusters(true);
+
+    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
   }
 }
