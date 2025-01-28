@@ -93,3 +93,61 @@ TEST_CASE("Automatic lambda and alpha", "[gaussian]")
 
   REQUIRE_NOTHROW(model.fit(x, y));
 }
+
+TEST_CASE("Gaussian models", "[gaussian]")
+{
+  using namespace Catch::Matchers;
+
+  const int n = 10;
+  const int p = 3;
+
+  Eigen::Matrix<double, n, p> x;
+  Eigen::VectorXd beta(p);
+
+  // clang-format off
+    x <<  0.288,  -0.0452,  0.880,
+          0.788,   0.576,  -0.305,
+          1.510,   0.390,  -0.621,
+         -2.210,  -1.120,  -0.0449,
+         -0.0162,  0.944,   0.821,
+          0.594,   0.919,   0.782,
+          0.0746, -1.990,   0.620,
+         -0.0561, -0.156,  -1.470,
+         -0.478,   0.418,   1.360,
+         -0.103,   0.388,  -0.0538;
+  // clang-format on
+
+  // Fixed coefficients beta
+  beta << 1, -1, 0.2;
+
+  // Compute linear predictor
+  Eigen::VectorXd y = x * beta;
+
+  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
+  Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(3);
+
+  alpha[0] = 0.05;
+
+  // lambda << 2.128045 / n, 1.833915 / n, 1.644854 / n;
+  lambda << 3.0, 2.0, 2.0;
+
+  slope::Slope model;
+
+  model.setTol(1e-9);
+  model.setObjective("gaussian");
+
+  SECTION("No intercept, no standardization")
+  {
+    model.setStandardize(false);
+    model.setIntercept(false);
+
+    Eigen::Vector3d coef_target;
+    coef_target << 0.700657772, -0.730587233, 0.008997323;
+
+    // PGD
+    model.setPgdFreq(1);
+    model.fit(x, y, alpha, lambda);
+
+    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+  }
+}
