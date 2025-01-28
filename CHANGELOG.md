@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.3](https://github.com/jolars/libslope/compare/v0.3.2...v0.3.3) (2025-01-28)
+
+
+### Bug Fixes
+
+* clamp index to avoid out-of-bounds indexing in thresholder ([7a1dbfa](https://github.com/jolars/libslope/commit/7a1dbfaff2feb3140c00b411962bbd34785d9cf8))
+* fix binomial model ([2250f60](https://github.com/jolars/libslope/commit/2250f607374e90cc679768dab2043edb4b17f6ff))
+
 ## [0.3.2](https://github.com/jolars/libslope/compare/v0.3.1...v0.3.2) (2024-02-07)
 
 
