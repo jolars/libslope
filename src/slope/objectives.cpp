@@ -11,10 +11,17 @@ Gaussian::loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y)
 }
 
 double
-Gaussian::dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y)
+Gaussian::dual(const Eigen::VectorXd& theta,
+               const Eigen::VectorXd& y,
+               const Eigen::VectorXd& w)
 {
   const int n = y.rows();
-  return (y.squaredNorm() - (y - theta).squaredNorm()) / (2.0 * n);
+  const Eigen::VectorXd eta = y - theta;
+  const Eigen::VectorXd w_sqrt = w.cwiseSqrt();
+
+  return (y.cwiseProduct(w_sqrt).squaredNorm() -
+          eta.cwiseProduct(w_sqrt).squaredNorm()) /
+         (2.0 * n);
 }
 
 Eigen::VectorXd
@@ -41,21 +48,25 @@ Binomial::loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y)
 }
 
 double
-Binomial::dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y)
+Binomial::dual(const Eigen::VectorXd& theta,
+               const Eigen::VectorXd& y,
+               const Eigen::VectorXd& w)
 {
   using Eigen::log;
 
   const int n = y.rows();
 
-  Eigen::ArrayXd r = theta.array() / y.array();
+  Eigen::ArrayXd eta =
+    (y - theta).array().log() - (1.0 - y.array() + theta.array()).log();
+  Eigen::ArrayXd x = eta + y.array();
 
-  return (((r - 1.0) * log(1.0 - r)).sum() - (r * log(r)).sum()) / n;
+  return (x * x.log() + (1.0 - x) * (1.0 - x).log()).sum() / n;
 }
 
 Eigen::VectorXd
 Binomial::residual(const Eigen::VectorXd& eta, const Eigen::VectorXd& y)
 {
-  return y.array() / (1.0 + y.cwiseProduct(eta).array().exp());
+  return y.array() - 1.0 / (1.0 + (-eta).array().exp());
 }
 
 void

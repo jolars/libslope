@@ -308,7 +308,7 @@ private:
     } else {
       if (lambda.size() != p) {
         throw std::invalid_argument(
-          "lambda must be the same length as the number of predictors");
+          "lambda must be the saee length as the number of predictors");
       }
       if (lambda.minCoeff() < 0) {
         throw std::invalid_argument("lambda must be non-negative");
@@ -382,10 +382,11 @@ private:
         VectorXd gen_residual = objective->residual(eta, y);
 
         VectorXd gradient = computeGradient(
-          x, gen_residual, x_centers, x_scales, this->standardize);
+          x, gen_residual, x_centers, x_scales, w, this->standardize);
         VectorXd theta = gen_residual;
-        theta.array() /= std::max(1.0, sl1_norm.dualNorm(gradient));
-        double dual = objective->dual(theta, y);
+        double dual_norm = sl1_norm.dualNorm(gradient);
+        theta.array() /= std::max(1.0, dual_norm);
+        double dual = objective->dual(theta, y, w);
 
         double dual_gap = primal - dual;
 
@@ -418,17 +419,17 @@ private:
 
         for (int it = 0; it < this->max_it; ++it) {
           if (it % this->pgd_freq == 0) {
-            double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
+            double g = residual.cwiseAbs2().dot(w) / (2.0 * n);
             double h = sl1_norm.eval(beta);
             double primal_inner = g + h;
 
             VectorXd gradient = computeGradient(
-              x, residual, x_centers, x_scales, this->standardize);
+              x, residual, x_centers, x_scales, w, this->standardize);
 
             // Obtain a feasible dual point by dual scaling
             theta = residual;
             theta.array() /= std::max(1.0, sl1_norm.dualNorm(gradient));
-            double dual_inner = subprob_objective.dual(theta, z);
+            double dual_inner = subprob_objective.dual(theta, z, w);
 
             double dual_gap_inner = primal_inner - dual_inner;
 

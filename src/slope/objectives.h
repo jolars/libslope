@@ -49,7 +49,8 @@ public:
    * @return The dual value.
    */
   virtual double dual(const Eigen::VectorXd& theta,
-                      const Eigen::VectorXd& y) = 0;
+                      const Eigen::VectorXd& y,
+                      const Eigen::VectorXd& w) = 0;
 
   /**
    * @brief Calculates the residual
@@ -103,7 +104,9 @@ public:
    * @param y The actual values.
    * @return The dual value.
    */
-  double dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y);
+  double dual(const Eigen::VectorXd& theta,
+              const Eigen::VectorXd& y,
+              const Eigen::VectorXd& w);
 
   /**
    * @brief Calculates the residuals for the Gaussian objective.
@@ -154,7 +157,9 @@ public:
    * @param y The true labels.
    * @return The dual value.
    */
-  double dual(const Eigen::VectorXd& theta, const Eigen::VectorXd& y);
+  double dual(const Eigen::VectorXd& theta,
+              const Eigen::VectorXd& y,
+              const Eigen::VectorXd& w);
 
   /**
    * @brief Calculates the residual for the binomial objective function.

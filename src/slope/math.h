@@ -101,6 +101,7 @@ computeGradient(const T& x,
                 const Eigen::VectorXd& residual,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
+                const Eigen::VectorXd& w,
                 const bool standardize)
 {
   const int n = x.rows();
@@ -109,13 +110,15 @@ computeGradient(const T& x,
   Eigen::VectorXd gradient(p);
 
   if (standardize) {
-    double wr_sum = residual.sum();
+    const Eigen::VectorXd residual_w = residual.cwiseProduct(w);
+    double wr_sum = residual_w.sum();
+
     for (int j = 0; j < p; ++j) {
       gradient(j) =
-        -(x.col(j).dot(residual) - x_centers(j) * wr_sum) / (x_scales(j) * n);
+        -(x.col(j).dot(residual_w) - x_centers(j) * wr_sum) / (x_scales(j) * n);
     }
   } else {
-    gradient = -(x.transpose() * residual) / n;
+    gradient = -(x.transpose() * residual.cwiseProduct(w)) / n;
   }
 
   return gradient;

@@ -70,6 +70,7 @@ TEST_CASE("Check that in-place standardization works",
   Eigen::VectorXd beta(3);
   beta << 1, 0, -1.8;
   Eigen::VectorXd y = x_dense * beta;
+  Eigen::VectorXd w = Eigen::VectorXd::Ones(3); // weights
 
   Eigen::VectorXd residual = y;
   residual(0) += 1;
@@ -95,9 +96,9 @@ TEST_CASE("Check that in-place standardization works",
   REQUIRE_THAT(residual_dense, VectorApproxEqual(residual_sparse));
 
   auto gradient_dense = slope::computeGradient(
-    x_dense, residual_dense, x_centers_dense, x_scales_dense, true);
+    x_dense, residual_dense, w, x_centers_dense, x_scales_dense, true);
   auto gradient_sparse = slope::computeGradient(
-    x_sparse, residual_sparse, x_centers_sparse, x_scales_sparse, true);
+    x_sparse, residual_sparse, w, x_centers_sparse, x_scales_sparse, true);
 
   REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
 }

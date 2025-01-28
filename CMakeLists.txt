@@ -35,6 +35,7 @@ if(BUILD_TESTING)
 
   add_executable(
     tests
+    tests/binomial.cpp
     tests/gaussian.cpp
     tests/prox.cpp
     tests/qnorm.cpp

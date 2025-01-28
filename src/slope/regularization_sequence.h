@@ -40,7 +40,7 @@ regularizationPath(const T& x,
     alpha_min_ratio = n > p ? 1e-4 : 1e-2;
   }
 
-  auto gradient = computeGradient(x, z, x_centers, x_scales, standardize);
+  auto gradient = computeGradient(x, z, x_centers, x_scales, w, standardize);
 
   double alpha_max = penalty.dualNorm(gradient);
 
