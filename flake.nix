@@ -26,6 +26,7 @@
             doxygen
             eigen
             gcc
+            ghostscript
             gdb
             lldb
           ];
