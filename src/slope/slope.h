@@ -53,6 +53,7 @@ public:
     , max_it_outer(30)
     , path_length(100)
     , pgd_freq(10)
+    , modify_x(false)
     , print_level(0)
     , lambda_type("bh")
     , objective("gaussian")
@@ -174,6 +175,15 @@ public:
   void setObjective(const std::string& objective);
 
   /**
+   * @brief Controls if `x` should be modified-in-place.
+   * @details If `true`, then `x` will be modified in place if
+   *   it is standardized. In case when `x` is dense, it will be both
+   *   centered and scaled. If `x` is sparse, it will be only scaled.
+   * @param modify_x Whether to modfiy `x` in place or not
+   */
+  void setModifyX(const bool objective);
+
+  /**
    * @brief Get the alpha sequence.
    *
    * @return The sequence of weights for the regularization path.
@@ -254,7 +264,16 @@ public:
       throw std::invalid_argument("x and y must have the same number of rows");
     }
 
+    const bool sparse_x = std::is_base_of_v<Eigen::SparseMatrixBase<T>, T>;
+    const bool standardize_jit =
+      (!sparse_x && this->standardize && !this->modify_x) ||
+      (sparse_x && this->standardize);
+
     auto [x_centers, x_scales] = computeCentersAndScales(x, this->standardize);
+
+    if (this->standardize && this->modify_x && !sparse_x) {
+      standardizeFeatures(x, x_centers, x_scales);
+    }
 
     std::unique_ptr<Objective> objective = setupObjective(this->objective);
 
@@ -297,7 +316,7 @@ public:
                                  this->path_length,
                                  this->alpha_min_ratio,
                                  this->intercept,
-                                 this->standardize);
+                                 standardize_jit);
     } else {
       if (alpha.minCoeff() < 0) {
         throw std::invalid_argument("alpha must be non-negative");
@@ -348,7 +367,7 @@ public:
         VectorXd gen_residual = objective->residual(eta, y);
 
         VectorXd gradient = computeGradient(
-          x, gen_residual, x_centers, x_scales, w, this->standardize);
+          x, gen_residual, x_centers, x_scales, w, standardize_jit);
         VectorXd theta = gen_residual;
         double dual_norm = sl1_norm.dualNorm(gradient);
         theta.array() /= std::max(1.0, dual_norm);
@@ -390,7 +409,7 @@ public:
             double primal_inner = g + h;
 
             VectorXd gradient = computeGradient(
-              x, residual, x_centers, x_scales, w, this->standardize);
+              x, residual, x_centers, x_scales, w, standardize_jit);
 
             // Obtain a feasible dual point by dual scaling
             theta = residual;
@@ -433,7 +452,7 @@ public:
                                     x_scales,
                                     g,
                                     intercept,
-                                    standardize,
+                                    standardize_jit,
                                     learning_rate_decr,
                                     print_level);
 
@@ -454,7 +473,7 @@ public:
                               x_centers,
                               x_scales,
                               this->intercept,
-                              this->standardize,
+                              standardize_jit,
                               this->update_clusters,
                               this->print_level);
           }
@@ -489,6 +508,7 @@ private:
   bool intercept;
   bool standardize;
   bool update_clusters;
+  bool modify_x;
   double alpha_min_ratio;
   double learning_rate_decr;
   double q;

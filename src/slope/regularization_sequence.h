@@ -31,7 +31,7 @@ regularizationPath(const T& x,
                    const int path_length,
                    double alpha_min_ratio,
                    const bool intercept,
-                   const bool standardize)
+                   const bool standardize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
@@ -40,7 +40,8 @@ regularizationPath(const T& x,
     alpha_min_ratio = n > p ? 1e-4 : 1e-2;
   }
 
-  auto gradient = computeGradient(x, z, x_centers, x_scales, w, standardize);
+  auto gradient =
+    computeGradient(x, z, x_centers, x_scales, w, standardize_jit);
 
   double alpha_max = penalty.dualNorm(gradient);
 

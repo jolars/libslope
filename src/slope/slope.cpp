@@ -74,6 +74,11 @@ Slope::setObjective(const std::string& objective)
 {
   this->objective = objective;
 }
+void
+Slope::setModifyX(const bool modify_x)
+{
+  this->modify_x = modify_x;
+}
 
 const Eigen::ArrayXd&
 Slope::getAlpha() const

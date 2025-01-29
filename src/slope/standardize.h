@@ -1,5 +1,4 @@
-/**
- * @file
+/** @file
  * @brief Functions to standardize the design matrix and rescale coefficients
  */
 
@@ -56,6 +55,48 @@ computeCentersAndScales(const T& x, const bool standardize)
     x_stddevs(j) = std::sqrt(m2 / n);
   }
   return { x_means, x_stddevs };
+}
+
+/**
+ * Standardize a dense matrix by centering and scaling.
+ *
+ * @param x The dense input matrix.
+ * @param x_centers The means of the columns.
+ * @param x_scales The standard deviations of the columns.
+ */
+template<typename T>
+void
+standardizeFeatures(Eigen::DenseBase<T>& x,
+                    const Eigen::VectorXd& x_centers,
+                    const Eigen::VectorXd& x_scales)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  for (int j = 0; j < p; ++j) {
+    x.col(j) = (x.col(j).array() - x_centers(j)) / x_scales(j);
+  }
+}
+
+/**
+ * Scale a sparse matrix (without centering to preserve sparsity).
+ *
+ * @param x The sparse input matrix.
+ * @param x_scales The standard deviations of the columns.
+ */
+template<typename T>
+void
+standardizeFeatures(Eigen::SparseMatrixBase<T>& x,
+                    const Eigen::VectorXd& x_centers,
+                    const Eigen::VectorXd& x_scales)
+{
+  const int p = x.cols();
+
+  for (int j = 0; j < p; ++j) {
+    for (typename T::InnerIterator it(x.derived(), j); it; ++it) {
+      it.valueRef() = it.value() / x_scales(j);
+    }
+  }
 }
 
 /**

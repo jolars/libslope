@@ -85,7 +85,7 @@ clamp(const T& x, const T& lo, const T& hi)
 }
 
 /**
- * Computes the gradient of a function.
+ * Computes the gradient of the objective with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
@@ -102,14 +102,14 @@ computeGradient(const T& x,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
                 const Eigen::VectorXd& w,
-                const bool standardize)
+                const bool standardize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
 
-  Eigen::VectorXd gradient(p);
+  if (standardize_jit) {
+    Eigen::VectorXd gradient(p);
 
-  if (standardize) {
     const Eigen::VectorXd residual_w = residual.cwiseProduct(w);
     double wr_sum = residual_w.sum();
 
@@ -117,11 +117,12 @@ computeGradient(const T& x,
       gradient(j) =
         -(x.col(j).dot(residual_w) - x_centers(j) * wr_sum) / (x_scales(j) * n);
     }
-  } else {
-    gradient = -(x.transpose() * residual.cwiseProduct(w)) / n;
+
+    return gradient;
   }
 
-  return gradient;
+  // No standardization or already standardized in place
+  return -(x.transpose() * residual.cwiseProduct(w)) / n;
 }
 
 } // namespace slope

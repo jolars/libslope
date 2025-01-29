@@ -55,7 +55,7 @@ proximalGradientDescent(double& beta0,
                         const Eigen::VectorXd& x_scales,
                         const double g_old,
                         const bool intercept,
-                        const bool standardize,
+                        const bool standardize_jit,
                         const double learning_rate_decr,
                         const int print_level)
 {
@@ -74,7 +74,7 @@ proximalGradientDescent(double& beta0,
 
     Eigen::VectorXd beta_diff = beta - beta_old;
 
-    if (standardize) {
+    if (standardize_jit) {
       residual = z - x * beta.cwiseQuotient(x_scales);
       residual.array() += x_centers.cwiseQuotient(x_scales).dot(beta);
     } else {
