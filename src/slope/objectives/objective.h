@@ -1,4 +1,4 @@
-/*
+/**
  * @file
  * @brief The declartion of the Objctive class and its subclasses, which
  * represent the data-fitting part of the composite objective function.
