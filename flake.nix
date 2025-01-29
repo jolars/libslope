@@ -28,6 +28,7 @@
             gcc
             ghostscript
             gdb
+            lcov
             lldb
           ];
         };
