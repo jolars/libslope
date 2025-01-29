@@ -1,5 +1,3 @@
-#pragma once
-
 #include "gaussian.h"
 
 namespace slope {
