@@ -7,8 +7,12 @@ project(slope LANGUAGES CXX VERSION ${project_version})
 option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_COVERAGE "Generate coverage report" OFF)
 
-include(FetchContent)
 include(CTest)
+
+set(
+  CMAKE_CXX_FLAGS_DEBUG
+  "${CMAKE_CXX_FLAGS_DEBUG} -O0 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0"
+)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +21,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
+find_package(OpenMP)
+
+if(OPENMP_FOUND)
+  message(STATUS "OpenMP found")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+endif()
+
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 include_directories(${EIGEN3_INCLUDE_DIR})
@@ -24,15 +35,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 add_subdirectory(src)
 
 if(BUILD_TESTING)
-  find_package(Catch2 3 QUIET)
-  if(NOT Catch2_FOUND)
-    FetchContent_Declare(
-      Catch2
-      GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-      GIT_TAG v3.4.0
-    )
-    FetchContent_MakeAvailable(Catch2)
-  endif()
+  find_package(Catch2 3 REQUIRED)
 
   add_executable(
     tests
