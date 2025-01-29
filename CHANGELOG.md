@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0](https://github.com/jolars/libslope/compare/v0.3.3...v0.4.0) (2025-01-29)
+
+
+### Features
+
+* allow `fit()` to modify X when standardizing ([5f2c757](https://github.com/jolars/libslope/commit/5f2c757d9879e321483b50ad3f0c3d4c71e6faac))
+
+
+### Bug Fixes
+
+* remove pragma from cpp file ([d19addf](https://github.com/jolars/libslope/commit/d19addfa1ab887af19a535dc5aeefe0696896438))
+
+
+### Reverts
+
+* "docs: document gaussian class" ([2ec919a](https://github.com/jolars/libslope/commit/2ec919a431d89428828234e28f1955c80a6bfb1f))
+
 ## [0.3.3](https://github.com/jolars/libslope/compare/v0.3.2...v0.3.3) (2025-01-28)
 
 
