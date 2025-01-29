@@ -30,6 +30,7 @@
             gdb
             lcov
             lldb
+            llvmPackages.openmp
           ];
         };
       }
