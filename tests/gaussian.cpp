@@ -159,6 +159,11 @@ TEST_CASE("Gaussian models", "[gaussian]")
     Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+
+    auto dual_gaps = model.getDualGaps().front();
+
+    REQUIRE(dual_gaps.back() >= 0);
+    REQUIRE(dual_gaps.back() <= 1e-4);
   }
 
   SECTION("No intercept, with standardization")
