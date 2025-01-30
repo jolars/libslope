@@ -19,11 +19,10 @@ Binomial::dual(const Eigen::VectorXd& theta,
 
   const int n = y.rows();
 
-  Eigen::ArrayXd eta =
-    (y - theta).array().log() - (1.0 - y.array() + theta.array()).log();
-  Eigen::ArrayXd x = eta + y.array();
+  // Clamp probabilities to [p_min, 1-p_min]
+  Eigen::ArrayXd pr = (y - theta).array().min(1.0 - p_min).max(p_min);
 
-  return (x * x.log() + (1.0 - x) * (1.0 - x).log()).sum() / n;
+  return -(pr * log(pr) + (1.0 - pr) * log(1.0 - pr)).mean();
 }
 
 Eigen::VectorXd

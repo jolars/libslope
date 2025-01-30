@@ -366,12 +366,16 @@ public:
 
         VectorXd gen_residual = objective->residual(eta, y);
 
-        VectorXd gradient = computeGradient(
-          x, gen_residual, x_centers, x_scales, w, standardize_jit);
+        VectorXd outer_gradient = computeGradient(x,
+                                                  gen_residual,
+                                                  x_centers,
+                                                  x_scales,
+                                                  Eigen::VectorXd::Ones(n),
+                                                  standardize_jit);
         VectorXd theta = gen_residual;
-        double dual_norm = sl1_norm.dualNorm(gradient);
+        double dual_norm = sl1_norm.dualNorm(outer_gradient);
         theta.array() /= std::max(1.0, dual_norm);
-        double dual = objective->dual(theta, y, w);
+        double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
 
         double dual_gap = primal - dual;
 
