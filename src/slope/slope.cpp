@@ -24,46 +24,73 @@ Slope::setUpdateClusters(bool update_clusters)
 void
 Slope::setAlphaMinRatio(double alpha_min_ratio)
 {
+  if (alpha_min_ratio <= 0 || alpha_min_ratio >= 1) {
+    throw std::invalid_argument("alpha_min_ratio must be in (0, 1)");
+  }
   this->alpha_min_ratio = alpha_min_ratio;
 }
 void
 Slope::setLearningRateDecr(double learning_rate_decr)
 {
+  if (learning_rate_decr <= 0 || learning_rate_decr >= 1) {
+    throw std::invalid_argument("learning_rate_decr must be in (0, 1)");
+  }
   this->learning_rate_decr = learning_rate_decr;
 }
 void
 Slope::setQ(double q)
 {
+  if (q < 0 || q > 1) {
+    throw std::invalid_argument("q must be between 0 and 1");
+  }
   this->q = q;
 }
 void
 Slope::setTol(double tol)
 {
+  if (tol < 0) {
+    throw std::invalid_argument("tol must be non-negative");
+  }
   this->tol = tol;
 }
 void
 Slope::setMaxIt(int max_it)
 {
+  if (max_it < 1) {
+    throw std::invalid_argument("max_it must be >= 1");
+  }
   this->max_it = max_it;
 }
 void
 Slope::setMaxItOuter(int maxItOuter)
 {
+  if (maxItOuter < 1) {
+    throw std::invalid_argument("max_it_outer must be >= 1");
+  }
   this->max_it_outer = maxItOuter;
 }
 void
 Slope::setPathLength(int path_length)
 {
+  if (path_length < 1) {
+    throw std::invalid_argument("path_length must be >= 1");
+  }
   this->path_length = path_length;
 }
 void
 Slope::setPgdFreq(int pgd_freq)
 {
+  if (pgd_freq < 1) {
+    throw std::invalid_argument("pgd_freq must be > 1");
+  }
   this->pgd_freq = pgd_freq;
 }
 void
 Slope::setPrintLevel(int print_level)
 {
+  if (print_level < 0) {
+    throw std::invalid_argument("print_level must be >= 0");
+  }
   this->print_level = print_level;
 }
 void
@@ -76,15 +103,7 @@ Slope::setLambdaType(const std::string& lambda_type)
 void
 Slope::setObjective(const std::string& objective)
 {
-  static const std::set<std::string> valid_objectives = { "gaussian",
-                                                          "binomial",
-                                                          "poisson" };
-
-  if (valid_objectives.find(objective) == valid_objectives.end()) {
-    throw std::invalid_argument(
-      "Invalid objective function: " + objective +
-      ". Must be one of: 'gaussian', 'binomial', or 'poisson'");
-  }
+  validateOption(objective, { "gaussian", "binomial", "poisson" }, "objective");
   this->objective = objective;
 }
 void
