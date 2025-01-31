@@ -41,12 +41,13 @@ if(BUILD_TESTING)
     tests
     tests/binomial.cpp
     tests/gaussian.cpp
-    tests/prox.cpp
-    tests/qnorm.cpp
     tests/lambda_sequence.cpp
     tests/path.cpp
-    tests/standardize.cpp
+    tests/poisson.cpp
+    tests/prox.cpp
+    tests/qnorm.cpp
     tests/sparse.cpp
+    tests/standardize.cpp
   )
   target_link_libraries(
     tests

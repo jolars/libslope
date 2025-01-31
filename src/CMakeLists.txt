@@ -4,6 +4,7 @@ add_library(
   slope/helpers.cpp
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp
+  slope/objectives/poisson.cpp
   slope/objectives/setup_objective.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp

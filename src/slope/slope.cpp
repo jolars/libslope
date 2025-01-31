@@ -1,6 +1,7 @@
 #include "slope.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
+#include <set>
 
 namespace slope {
 
@@ -72,6 +73,15 @@ Slope::setLambdaType(const std::string& lambda_type)
 void
 Slope::setObjective(const std::string& objective)
 {
+  static const std::set<std::string> valid_objectives = { "gaussian",
+                                                          "binomial",
+                                                          "poisson" };
+
+  if (valid_objectives.find(objective) == valid_objectives.end()) {
+    throw std::invalid_argument(
+      "Invalid objective function: " + objective +
+      ". Must be one of: 'gaussian', 'binomial', or 'poisson'");
+  }
   this->objective = objective;
 }
 void
