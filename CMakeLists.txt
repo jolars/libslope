@@ -39,6 +39,8 @@ if(BUILD_TESTING)
 
   add_executable(
     tests
+    tests/assertions.cpp
+    tests/binomial.cpp
     tests/binomial.cpp
     tests/gaussian.cpp
     tests/lambda_sequence.cpp
