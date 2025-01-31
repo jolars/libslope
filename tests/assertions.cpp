@@ -25,4 +25,10 @@ TEST_CASE("Assertions", "[assertions]")
 
     REQUIRE_THROWS(model.fit(x, y));
   }
+
+  SECTION("Invalid lambda type")
+  {
+    Eigen::VectorXd lambda(p + 1);
+    REQUIRE_THROWS(model.setLambdaType("l1"));
+  }
 }

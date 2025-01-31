@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include <algorithm> // std::sort
-#include <numeric>   // std::iota
+#include <algorithm>
+#include <numeric>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -151,5 +152,21 @@ move_elements(std::vector<T>& v, const int from, const int to, const int size)
     std::rotate(v.begin() + from, v.begin() + from + size, v.begin() + to + 1);
   }
 }
+
+/**
+ * @brief Validates if a given value exists in a set of valid options
+ *
+ * @details Throws an informative error if the value is not found in the valid
+ * options, listing all valid possibilities in the error message.
+ *
+ * @param value The value to validate
+ * @param valid_options Set of valid options
+ * message)
+ * @throws std::invalid_argument If value is not in valid_options
+ */
+void
+validateOption(const std::string& value,
+               const std::set<std::string>& valid_options,
+               const std::string& parameter_name);
 
 } // namespace slope

@@ -1,4 +1,5 @@
 #include "slope.h"
+#include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <set>
@@ -68,6 +69,8 @@ Slope::setPrintLevel(int print_level)
 void
 Slope::setLambdaType(const std::string& lambda_type)
 {
+  validateOption(lambda_type, { "bh" }, "lambda_type");
+
   this->lambda_type = lambda_type;
 }
 void
