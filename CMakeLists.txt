@@ -72,10 +72,13 @@ endif()
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
   set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+  set(DOXYGEN_USE_MATHJAX YES)
+  set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
   doxygen_add_docs(
     docs
     ${PROJECT_SOURCE_DIR}
     docs/
+    README.md
     ALL
     COMMENT "Generate package documentation"
   )
