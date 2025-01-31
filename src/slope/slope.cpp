@@ -11,16 +11,19 @@ Slope::setIntercept(bool intercept)
 {
   this->intercept = intercept;
 }
+
 void
 Slope::setStandardize(bool standardize)
 {
   this->standardize = standardize;
 }
+
 void
 Slope::setUpdateClusters(bool update_clusters)
 {
   this->update_clusters = update_clusters;
 }
+
 void
 Slope::setAlphaMinRatio(double alpha_min_ratio)
 {
@@ -29,6 +32,7 @@ Slope::setAlphaMinRatio(double alpha_min_ratio)
   }
   this->alpha_min_ratio = alpha_min_ratio;
 }
+
 void
 Slope::setLearningRateDecr(double learning_rate_decr)
 {
@@ -37,6 +41,7 @@ Slope::setLearningRateDecr(double learning_rate_decr)
   }
   this->learning_rate_decr = learning_rate_decr;
 }
+
 void
 Slope::setQ(double q)
 {
@@ -45,6 +50,7 @@ Slope::setQ(double q)
   }
   this->q = q;
 }
+
 void
 Slope::setTol(double tol)
 {
@@ -53,6 +59,7 @@ Slope::setTol(double tol)
   }
   this->tol = tol;
 }
+
 void
 Slope::setMaxIt(int max_it)
 {
@@ -61,6 +68,7 @@ Slope::setMaxIt(int max_it)
   }
   this->max_it = max_it;
 }
+
 void
 Slope::setMaxItOuter(int maxItOuter)
 {
@@ -69,6 +77,7 @@ Slope::setMaxItOuter(int maxItOuter)
   }
   this->max_it_outer = maxItOuter;
 }
+
 void
 Slope::setPathLength(int path_length)
 {
@@ -77,6 +86,7 @@ Slope::setPathLength(int path_length)
   }
   this->path_length = path_length;
 }
+
 void
 Slope::setPgdFreq(int pgd_freq)
 {
@@ -85,6 +95,7 @@ Slope::setPgdFreq(int pgd_freq)
   }
   this->pgd_freq = pgd_freq;
 }
+
 void
 Slope::setPrintLevel(int print_level)
 {
@@ -93,6 +104,7 @@ Slope::setPrintLevel(int print_level)
   }
   this->print_level = print_level;
 }
+
 void
 Slope::setLambdaType(const std::string& lambda_type)
 {
@@ -100,12 +112,14 @@ Slope::setLambdaType(const std::string& lambda_type)
 
   this->lambda_type = lambda_type;
 }
+
 void
 Slope::setObjective(const std::string& objective)
 {
   validateOption(objective, { "gaussian", "binomial", "poisson" }, "objective");
   this->objective = objective;
 }
+
 void
 Slope::setModifyX(const bool modify_x)
 {
@@ -117,6 +131,7 @@ Slope::getAlpha() const
 {
   return alpha_out;
 }
+
 const Eigen::ArrayXd&
 Slope::getLambda() const
 {
