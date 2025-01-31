@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @brief Poisson objective function implementation for SLOPE algorithm
+ * @details This file contains the Gaussian class which implements a Poisson
+ * objective function used in the SLOPE (Sorted L-One Penalized Estimation)
+ * algorithm.
+ */
+
 #pragma once
 
 #include "objective.h"
