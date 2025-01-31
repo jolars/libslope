@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/jolars/libslope/compare/v0.4.0...v0.5.0) (2025-01-31)
+
+
+### Features
+
+* add support for Poisson regression ([3c6529e](https://github.com/jolars/libslope/commit/3c6529e9cef1e6b587051e3775556d29eb738e95)), closes [#34](https://github.com/jolars/libslope/issues/34)
+
+
+### Bug Fixes
+
+* fix dual computation for binomial objective ([ba2fc31](https://github.com/jolars/libslope/commit/ba2fc311988a9be3e90ffc08a84ef9ea812059eb))
+
 ## [0.4.0](https://github.com/jolars/libslope/compare/v0.3.3...v0.4.0) (2025-01-29)
 
 
