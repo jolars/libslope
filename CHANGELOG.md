@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/jolars/libslope/compare/v0.5.0...v0.6.0) (2025-01-31)
+
+
+### Features
+
+* validate input to setters for Slope ([7b5bf66](https://github.com/jolars/libslope/commit/7b5bf661f923ad75d14741bdb71aa1cbede996cd))
+
 ## [0.5.0](https://github.com/jolars/libslope/compare/v0.4.0...v0.5.0) (2025-01-31)
 
 
