@@ -27,11 +27,12 @@
 namespace slope {
 
 /**
- * Abstract class representing an objective function.
+ * Class representing SLOPE (Sorted L-One Penalized Estimation) optimization.
  *
- * This class defines the interface for an objective function, which is used in
- * optimization algorithms. The objective function calculates the loss, dual,
- * residual, and updates the weights and working response.
+ * This class implements the SLOPE algorithm for regularized regression
+ * problems. It supports different loss functions (gaussian, binomial, poisson)
+ * and provides functionality for fitting models with sorted L1 regularization
+ * along a path of regularization parameters.
  */
 class Slope
 {
@@ -158,19 +159,21 @@ public:
   void setPrintLevel(int print_level);
 
   /**
-   * @brief Sets the lambda type.
+   * @brief Sets the lambda type for regularization weights.
    *
-   * @param lambda_type The value to set for the lambda type. Only "bh" is
-   * allowed at the moment, which computed the Benjamini-Hochberg sequence.
-   * @see setQ
+   * @param lambda_type The method used to compute regularization weights.
+   *                   Currently only "bh" (Benjamini-Hochberg) is supported.
    */
   void setLambdaType(const std::string& lambda_type);
 
   /**
-   * @brief Sets the objective.
+   * @brief Sets the objective function type.
    *
-   * @param objective The value to set for the objective. Only "gaussian" is
-   * allowed at the moment, which results in the standard SLOPE.
+   * @param objective The type of objective function to use. Supported values
+   * are:
+   *                 - "gaussian": Gaussian regression
+   *                 - "binomial": Logistic regression
+   *                 - "poisson": Poisson regression
    */
   void setObjective(const std::string& objective);
 
@@ -236,18 +239,19 @@ public:
   const std::vector<std::vector<double>>& getPrimals() const;
 
   /**
-   * Sorted L-One Penalized Estimation.
+   * Fits a SLOPE model to the given data.
    *
-   * This function fits a linear regression model to the given data using the
-   * ordinary least squares method.
+   * This method fits a regularized regression model using the SLOPE penalty,
+   * which combines the benefits of Lasso-type regularization with FDR control.
+   * The algorithm can handle multiple objective functions and automatically
+   * generates regularization paths if not provided.
    *
-   * @param x The design matrix, where each column represents a feature.
-   * @param y The response matrix. Each row represents an observation.
-   * @param alpha Sequence of multipliers for the sorted l1 norm along the
-   * regularization path.
-   * @param lambda The regularization parameter for the sorted l1 norm, which is
-   * a positive nonincreasing array of weights.
-   * @see slopeParameters
+   * @param x The design matrix, where each column represents a feature
+   * @param y The response vector
+   * @param alpha Sequence of multipliers for the sorted L1 norm. If empty,
+   *             automatically generated
+   * @param lambda Weights for the sorted L1 norm. If empty, computed using
+   *              the specified lambda_type
    */
   template<typename T>
   void fit(T& x,
