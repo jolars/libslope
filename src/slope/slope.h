@@ -298,7 +298,7 @@ public:
     } else {
       if (lambda.size() != p) {
         throw std::invalid_argument(
-          "lambda must be the saee length as the number of predictors");
+          "lambda must be the same length as the number of predictors");
       }
       if (lambda.minCoeff() < 0) {
         throw std::invalid_argument("lambda must be non-negative");
