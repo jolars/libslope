@@ -16,8 +16,7 @@ namespace slope {
  * Generates a sequence of regularization weights for the sorted L1 norm.
  *
  * @param p The number of lambda values to generate (number of features)
- * @param q The false discovery rate (FDR) level or quantile value (typically
- * between 0 and 1)
+ * @param q The false discovery rate (FDR) level or quantile value (in (0, 1))
  * @param type The type of sequence to generate:
  *            - "bh": Benjamini-Hochberg sequence
  *            - "gaussian": Gaussian sequence

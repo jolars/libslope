@@ -18,7 +18,7 @@ lambdaSequence(const int p,
   validateOption(type, { "bh", "gaussian", "oscar", "lasso" }, "type");
 
   if (type == "bh" || type == "gaussian") {
-    if (q < 0 || q > 1) {
+    if (q <= 0 || q >= 1) {
       throw std::invalid_argument("q must be between 0 and 1");
     }
 
