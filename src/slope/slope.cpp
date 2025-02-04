@@ -108,7 +108,8 @@ Slope::setPrintLevel(int print_level)
 void
 Slope::setLambdaType(const std::string& lambda_type)
 {
-  validateOption(lambda_type, { "bh" }, "lambda_type");
+  validateOption(
+    lambda_type, { "bh", "gaussian", "oscar", "lasso" }, "lambda_type");
 
   this->lambda_type = lambda_type;
 }

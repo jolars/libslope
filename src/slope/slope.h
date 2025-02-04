@@ -162,7 +162,8 @@ public:
    * @brief Sets the lambda type for regularization weights.
    *
    * @param lambda_type The method used to compute regularization weights.
-   *                   Currently only "bh" (Benjamini-Hochberg) is supported.
+   * Currently "bh" (Benjamini-Hochberg), "gaussian", "oscar", and "lasso" are
+   * supported.
    */
   void setLambdaType(const std::string& lambda_type);
 

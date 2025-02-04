@@ -7,7 +7,7 @@
 TEST_CASE("Test that regularization sequence generation works",
           "[regularization sequence]")
 {
-  SECTION("Test that BH sequence works")
+  SECTION("BH sequence")
   {
     Eigen::ArrayXd lambda1 = slope::lambdaSequence(4, 0.1, "bh");
 
@@ -25,5 +25,44 @@ TEST_CASE("Test that regularization sequence generation works",
     };
 
     REQUIRE_THAT(lambda2, VectorApproxEqual(lambda2_expected, 1e-6));
+  }
+
+  SECTION("Gaussian sequence")
+  {
+    int n = 10;
+    int p = 4;
+    double q = 0.3;
+    double tol = 1e-6;
+
+    Eigen::ArrayXd l1 = slope::lambdaSequence(p, q, "gaussian", n);
+    std::vector<double> l1_ref = { 1.780464, 1.700998, 1.657533, 1.628381 };
+
+    REQUIRE_THAT(l1, VectorApproxEqual(l1_ref, tol));
+
+    n = 3;
+    q = 0.5;
+
+    Eigen::ArrayXd l2 = slope::lambdaSequence(p, q, "gaussian", n);
+    std::vector<double> l2_ref = { 1.5341205, 1.5341205, 1.5341205, 1.5341205 };
+
+    REQUIRE_THAT(l2, VectorApproxEqual(l2_ref, tol));
+  }
+
+  SECTION("OSCAR sequence")
+  {
+    int n = 10;
+    int p = 4;
+    double q = 0.3;
+    double tol = 1e-6;
+
+    Eigen::ArrayXd l3 = slope::lambdaSequence(p, q, "oscar", n, 2.0, 0.1);
+    std::vector<double> l3_ref = {
+      2.3,
+      2.2,
+      2.1,
+      2.0,
+    };
+
+    REQUIRE_THAT(l3, VectorApproxEqual(l3_ref, tol));
   }
 }
