@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_templated.hpp>
+#include <cmath>
 
 template<typename T>
 std::vector<double>
@@ -22,12 +23,21 @@ struct VectorApproxEqualMatcher : Catch::Matchers::MatcherGenericBase
   template<typename OtherRange>
   bool match(OtherRange const& other) const
   {
-
     if (range.size() != other.size()) {
       return false;
     }
 
     for (int i = 0; i < range.size(); ++i) {
+      // Check if either value is NaN
+      if (std::isnan(range[i]) || std::isnan(other[i])) {
+        // If one is NaN and the other isn't, they're not equal
+        if (!std::isnan(range[i]) || !std::isnan(other[i])) {
+          return false;
+        }
+        // If both are NaN, continue to next element
+        continue;
+      }
+      // Normal comparison for non-NaN values
       if (std::abs(range[i] - other[i]) > eps) {
         return false;
       }
