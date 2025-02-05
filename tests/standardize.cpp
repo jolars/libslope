@@ -94,9 +94,9 @@ TEST_CASE("Check that in-place standardization works",
 
   REQUIRE_THAT(residual_dense, VectorApproxEqual(residual_sparse));
 
-  auto gradient_dense = slope::computeGradient(
+  Eigen::VectorXd gradient_dense = slope::computeGradient(
     x_dense, residual_dense, w, x_centers_dense, x_scales_dense, true);
-  auto gradient_sparse = slope::computeGradient(
+  Eigen::VectorXd gradient_sparse = slope::computeGradient(
     x_sparse, residual_sparse, w, x_centers_sparse, x_scales_sparse, true);
 
   REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
@@ -155,11 +155,11 @@ TEST_CASE("JIT standardization and modify-X standardization",
     auto [x_centers, x_scales] = slope::computeCentersAndScales(x, true);
     slope::standardizeFeatures(x, x_centers, x_scales);
 
-    auto gradient =
+    Eigen::VectorXd gradient =
       slope::computeGradient(x, residual, x_centers, x_scales, w, false);
-    auto gradient_jit =
+    Eigen::VectorXd gradient_jit =
       slope::computeGradient(x_copy, residual, x_centers, x_scales, w, true);
-    auto gradient_sparse_jit =
+    Eigen::VectorXd gradient_sparse_jit =
       slope::computeGradient(x_sparse, residual, x_centers, x_scales, w, true);
 
     REQUIRE_THAT(gradient_jit, VectorApproxEqual(gradient, 1e-6));
@@ -168,7 +168,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
   model.fit(x_copy, y);
 
-  Eigen::VectorXd coefs_ref = model.getCoefs().col(0);
+  Eigen::VectorXd coefs_ref = model.getCoefs().front();
 
   SECTION("JIT standardization for dense X")
   {
@@ -176,7 +176,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
     model.fit(x, y);
 
-    Eigen::VectorXd coefs_mod = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_mod = model.getCoefs().front();
 
     REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_ref, 1e-6));
   }
@@ -188,7 +188,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
     model.fit(x_sparse, y);
 
-    Eigen::VectorXd coefs_sparse = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_sparse = model.getCoefs().front();
 
     REQUIRE_THAT(coefs_sparse, VectorApproxEqual(coefs_ref, 1e-6));
   }

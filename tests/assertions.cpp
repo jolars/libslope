@@ -10,7 +10,7 @@ TEST_CASE("Assertions", "[assertions]")
   const int p = 3;
 
   Eigen::Matrix<double, n, p> x;
-  Eigen::VectorXd y(n);
+  Eigen::MatrixXd y(n, 1);
 
   slope::Slope model;
 
@@ -21,7 +21,7 @@ TEST_CASE("Assertions", "[assertions]")
 
   SECTION("Invalid X, y dimensions")
   {
-    Eigen::VectorXd y(n - 1);
+    Eigen::MatrixXd y(n - 1, 1);
 
     REQUIRE_THROWS(model.fit(x, y));
   }

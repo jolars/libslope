@@ -42,8 +42,8 @@ namespace slope {
  */
 template<typename T>
 void
-proximalGradientDescent(double& beta0,
-                        Eigen::VectorXd& beta,
+proximalGradientDescent(Eigen::VectorXd& beta0,
+                        Eigen::MatrixXd& beta,
                         Eigen::VectorXd& residual,
                         double& learning_rate,
                         const Eigen::VectorXd& gradient,
@@ -76,14 +76,15 @@ proximalGradientDescent(double& beta0,
 
     if (standardize_jit) {
       residual = z - x * beta.cwiseQuotient(x_scales);
-      residual.array() += x_centers.cwiseQuotient(x_scales).dot(beta);
+      residual.array() += x_centers.cwiseQuotient(x_scales).dot(beta.col(0));
     } else {
-      residual = z - x * beta;
+      residual = z - x * beta.col(0);
     }
 
     if (intercept) {
-      beta0 = residual.dot(w) / w.sum();
-      residual.array() -= beta0;
+      double intercept_update = residual.dot(w) / w.sum();
+      beta0(0) = intercept_update;
+      residual.array() -= intercept_update;
     }
 
     double g = (0.5 / n) * residual.cwiseAbs2().dot(w);

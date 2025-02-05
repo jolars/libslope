@@ -39,7 +39,7 @@ public:
    * @note The loss is calculated as: \f$ \frac{1}{2n} \sum_{i=1}^n (\eta_i -
    * y_i)^2 \f$
    */
-  double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y);
+  double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
    * @brief Computes the dual function for the Gaussian objective
@@ -52,8 +52,8 @@ public:
    *
    * @see loss() for the primal function
    */
-  double dual(const Eigen::VectorXd& theta,
-              const Eigen::VectorXd& y,
+  double dual(const Eigen::MatrixXd& theta,
+              const Eigen::MatrixXd& y,
               const Eigen::VectorXd& w);
 
   /**
@@ -66,8 +66,8 @@ public:
    *
    * @note Residuals are calculated as: \f$ r_i = y_i - \eta_i \f$
    */
-  Eigen::VectorXd residual(const Eigen::VectorXd& eta,
-                           const Eigen::VectorXd& y);
+  Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
+                           const Eigen::MatrixXd& y);
 
   /**
    * @brief Updates weights and working response for IRLS algorithm
@@ -86,7 +86,7 @@ public:
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,
                                        const Eigen::VectorXd& eta,
-                                       const Eigen::MatrixXd& y);
+                                       const Eigen::VectorXd& y);
 };
 
 } // namespace slope

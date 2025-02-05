@@ -33,7 +33,7 @@ public:
    * @return The negative log-likelihood: \f$-\sum_i(y_i\eta_i - e^{\eta_i})\f$
    * (ignoring constant terms)
    */
-  double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y);
+  double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
    * @brief Calculates the Fenchel conjugate (dual) of the Poisson loss.
@@ -42,8 +42,8 @@ public:
    * @param w The weights vector
    * @return The dual objective value
    */
-  double dual(const Eigen::VectorXd& theta,
-              const Eigen::VectorXd& y,
+  double dual(const Eigen::MatrixXd& theta,
+              const Eigen::MatrixXd& y,
               const Eigen::VectorXd& w);
 
   /**
@@ -53,8 +53,8 @@ public:
    * @param y The observed counts vector \f$y\f$
    * @return The residual vector: \f$y - e^{\eta}\f$
    */
-  Eigen::VectorXd residual(const Eigen::VectorXd& eta,
-                           const Eigen::VectorXd& y);
+  Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
+                           const Eigen::MatrixXd& y);
 
   /**
    * @brief Updates the weights and working response for IRLS (Iteratively
@@ -68,7 +68,7 @@ public:
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,
                                        const Eigen::VectorXd& eta,
-                                       const Eigen::MatrixXd& y);
+                                       const Eigen::VectorXd& y);
 };
 
 } // namespace slope

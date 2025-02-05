@@ -207,7 +207,7 @@ public:
    *
    * @return The coefficients from the path, stored in a sparse matrix.
    */
-  const Eigen::SparseMatrix<double>& getCoefs() const;
+  const std::vector<Eigen::SparseMatrix<double>> getCoefs() const;
 
   /**
    * Get the intercepts from the path.
@@ -215,7 +215,7 @@ public:
    * @return The coefficients from the path, stored in an Eigen vector. If no
    * intercepts were fit, this is a vector of zeros.
    */
-  const Eigen::VectorXd& getIntercepts() const;
+  const std::vector<Eigen::VectorXd> getIntercepts() const;
 
   /**
    * Get the total number of (inner) iterations.
@@ -256,14 +256,18 @@ public:
    */
   template<typename T>
   void fit(T& x,
-           const Eigen::VectorXd& y,
+           const Eigen::MatrixXd& y,
            Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
            Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0))
   {
+    using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     const int n = x.rows();
     const int p = x.cols();
+    const int m = y.cols();
+
+    reset();
 
     if (n != y.rows()) {
       throw std::invalid_argument("x and y must have the same number of rows");
@@ -282,23 +286,20 @@ public:
 
     std::unique_ptr<Objective> objective = setupObjective(this->objective);
 
-    beta0 = 0.0;
-    beta.resize(p);
+    beta0.resize(m);
+    beta0.setZero();
+    beta.resize(p, m);
     beta.setZero();
-    VectorXd eta = VectorXd::Zero(n); // linear predictor
-    VectorXd w = VectorXd::Ones(n);   // weights
-    VectorXd z = y;                   // working response
-
-    objective->updateWeightsAndWorkingResponse(w, z, eta, y);
-
-    VectorXd residual = z;
+    MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
+    VectorXd w = VectorXd::Ones(n);      // weights
+    VectorXd z = y.col(0);
 
     if (lambda.size() == 0) {
-      lambda = lambdaSequence(p, this->q, this->lambda_type);
+      lambda = lambdaSequence(p * m, this->q, this->lambda_type);
     } else {
-      if (lambda.size() != p) {
+      if (lambda.size() != p * m) {
         throw std::invalid_argument(
-          "lambda must be the same length as the number of predictors");
+          "lambda must be the same length as the number of coefficients");
       }
       if (lambda.minCoeff() < 0) {
         throw std::invalid_argument("lambda must be non-negative");
@@ -329,20 +330,13 @@ public:
       if (!alpha.isFinite().all()) {
         throw std::invalid_argument("alpha must be finite");
       }
-      path_length = alpha.size();
+      this->path_length = alpha.size();
     }
 
-    int path_length = this->path_length;
-
-    std::vector<Eigen::Triplet<double>> beta_triplets;
     std::vector<double> dual_gaps;
     std::vector<double> primals;
 
-    beta0s.resize(path_length);
-
     double learning_rate = 1.0;
-
-    VectorXd beta_old_outer = beta;
 
     Gaussian subprob_objective;
 
@@ -351,7 +345,7 @@ public:
     this->it_total = 0;
 
     // Regularization path loop
-    for (int path_step = 0; path_step < path_length; ++path_step) {
+    for (int path_step = 0; path_step < this->path_length; ++path_step) {
       if (this->print_level > 0) {
         std::cout << "Path step: " << path_step
                   << ", alpha: " << alpha(path_step) << std::endl;
@@ -361,17 +355,13 @@ public:
 
       // IRLS loop
       for (int it_outer = 0; it_outer < this->max_it_outer; ++it_outer) {
-        // The residual is kept up to date, but not eta. So we need to compute
-        // it here.
-        eta = z - residual;
-
         // Compute primal, dual, and gap
         double primal = objective->loss(eta, y) + sl1_norm.eval(beta);
         primals.emplace_back(primal);
 
-        VectorXd gen_residual = objective->residual(eta, y);
+        MatrixXd gen_residual = objective->residual(eta, y);
 
-        VectorXd outer_gradient = computeGradient(x,
+        MatrixXd outer_gradient = computeGradient(x,
                                                   gen_residual,
                                                   x_centers,
                                                   x_scales,
@@ -400,11 +390,11 @@ public:
           break;
         }
 
-        // Update weights and working response
-        beta_old_outer = beta;
+        // beta0_inner = beta0(0);
+        // beta_inner = beta.col(0);
 
         objective->updateWeightsAndWorkingResponse(w, z, eta, y);
-        residual = z - eta;
+        VectorXd residual = z - eta;
 
         if (this->print_level > 3) {
           printContents(w, "    weights");
@@ -441,8 +431,6 @@ public:
             if (std::max(dual_gap_inner, 0.0) <= tol_inner) {
               break;
             }
-
-            VectorXd beta_old = beta;
 
             if (this->print_level > 2) {
               std::cout << indent(3) << "Running PGD step" << std::endl;
@@ -488,31 +476,45 @@ public:
           }
         }
         it_total++;
+
+        // The residual is kept up to date, but not eta. So we need to compute
+        // it here.
+        eta = z - residual;
       }
 
       // Store everything for this step of the path
       auto [beta0_out, beta_out] = rescaleCoefficients(
         beta0, beta, x_centers, x_scales, intercept, standardize);
 
-      beta0s(path_step) = std::move(beta0_out);
+      std::vector<Eigen::Triplet<double>> beta_triplets;
 
-      for (int j = 0; j < p; ++j) {
-        if (beta_out(j) != 0) {
-          beta_triplets.emplace_back(j, path_step, beta_out(j));
+      for (int k = 0; k < m; ++k) {
+        for (int j = 0; j < p; ++j) {
+          if (beta_out(j, k) != 0) {
+            beta_triplets.emplace_back(j, k, beta_out(j, k));
+          }
         }
       }
+
+      Eigen::SparseMatrix<double> beta_out_sparse(p, m);
+      beta_out_sparse.setFromTriplets(beta_triplets.begin(),
+                                      beta_triplets.end());
+
+      beta0s.emplace_back(beta0_out);
+      betas.emplace_back(beta_out_sparse);
 
       primals_path.emplace_back(primals);
       dual_gaps_path.emplace_back(dual_gaps);
     }
 
-    betas.resize(p, path_length);
-    betas.setFromTriplets(beta_triplets.begin(), beta_triplets.end());
     alpha_out = alpha;
     lambda_out = lambda;
   }
 
 private:
+  // Reset the output values, but not the current coefficients
+  void reset();
+
   // parameters
   bool intercept;
   bool standardize;
@@ -533,10 +535,10 @@ private:
   // estimates
   Eigen::ArrayXd alpha_out;
   Eigen::ArrayXd lambda_out;
-  Eigen::SparseMatrix<double> betas;
-  Eigen::VectorXd beta0s;
-  Eigen::VectorXd beta;
-  double beta0;
+  std::vector<Eigen::SparseMatrix<double>> betas;
+  std::vector<Eigen::VectorXd> beta0s;
+  Eigen::MatrixXd beta;
+  Eigen::VectorXd beta0;
   int it_total;
   std::vector<std::vector<double>> dual_gaps_path;
   std::vector<std::vector<double>> primals_path;

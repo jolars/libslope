@@ -32,11 +32,11 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
 
   model.fit(x, y, alpha, lambda);
 
-  auto coefs = model.getCoefs();
+  std::vector<Eigen::SparseMatrix<double>> coefs = model.getCoefs();
   auto dual_gaps = model.getDualGaps();
   auto primals = model.getPrimals();
 
-  Eigen::VectorXd coef = coefs.col(0);
+  Eigen::VectorXd coef = coefs.front();
 
   REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
 
@@ -149,14 +149,17 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.setPgdFreq(1);
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
     // Hybrid
     model.setPgdFreq(10);
     model.fit(x, y, alpha, lambda);
     // model.setUpdateClusters(true);
 
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+    // Eigen::VectorXd coefs_hybrid = model.getCoefs()[0];
+
+    std::vector<Eigen::SparseMatrix<double>> coefs = model.getCoefs();
+    Eigen::VectorXd coefs_hybrid = coefs.front();
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
 
@@ -177,13 +180,13 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.setPgdFreq(1);
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
     // Hybrid
     model.setPgdFreq(10);
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
   }
@@ -196,10 +199,11 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.700657772, -0.730587234, 0.008997323;
 
     model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs = model.getCoefs().col(0);
-    double intercept = model.getIntercepts()[0];
+    Eigen::VectorXd coefs = model.getCoefs().front();
+    Eigen::VectorXd intercept = model.getIntercepts().front();
+    std::vector<double> intercept_target = { 0.040584733 };
 
-    REQUIRE_THAT(intercept, WithinAbs(0.040584733, 1e-3));
+    REQUIRE_THAT(intercept, VectorApproxEqual(intercept_target, 1e-3));
     REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));
   }
 
@@ -211,8 +215,8 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.68614138, -0.68614138, 0.00000000;
 
     model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs = model.getCoefs().col(0);
-    double intercept = model.getIntercepts()[0];
+    Eigen::VectorXd coefs = model.getCoefs().front();
+    double intercept = model.getIntercepts().front()[0];
 
     REQUIRE_THAT(intercept, WithinAbs(0.04148455, 1e-3));
     REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));

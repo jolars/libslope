@@ -3,37 +3,37 @@
 namespace slope {
 
 double
-Gaussian::loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y)
+Gaussian::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
   const int n = y.rows();
-  return (eta - y.col(0)).squaredNorm() / (2.0 * n);
+  return (eta.reshaped() - y.reshaped()).squaredNorm() / (2.0 * n);
 }
 
 double
-Gaussian::dual(const Eigen::VectorXd& theta,
-               const Eigen::VectorXd& y,
+Gaussian::dual(const Eigen::MatrixXd& theta,
+               const Eigen::MatrixXd& y,
                const Eigen::VectorXd& w)
 {
   const int n = y.rows();
-  const Eigen::VectorXd eta = y - theta;
+  const Eigen::VectorXd eta = y.reshaped() - theta.reshaped();
   const Eigen::VectorXd w_sqrt = w.cwiseSqrt();
 
-  return (y.cwiseProduct(w_sqrt).squaredNorm() -
+  return (y.reshaped().cwiseProduct(w_sqrt).squaredNorm() -
           eta.cwiseProduct(w_sqrt).squaredNorm()) /
          (2.0 * n);
 }
 
-Eigen::VectorXd
-Gaussian::residual(const Eigen::VectorXd& eta, const Eigen::VectorXd& y)
+Eigen::MatrixXd
+Gaussian::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y - eta;
+  return y.reshaped() - eta.reshaped();
 }
 
 void
 Gaussian::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                           Eigen::VectorXd& z,
                                           const Eigen::VectorXd& eta,
-                                          const Eigen::MatrixXd& y)
+                                          const Eigen::VectorXd& y)
 {
   w.setOnes();
   z = y;

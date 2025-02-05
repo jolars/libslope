@@ -139,13 +139,13 @@ Slope::getLambda() const
   return lambda_out;
 }
 
-const Eigen::SparseMatrix<double>&
+const std::vector<Eigen::SparseMatrix<double>>
 Slope::getCoefs() const
 {
   return betas;
 }
 
-const Eigen::VectorXd&
+const std::vector<Eigen::VectorXd>
 Slope::getIntercepts() const
 {
   return beta0s;
@@ -167,6 +167,16 @@ const std::vector<std::vector<double>>&
 Slope::getPrimals() const
 {
   return primals_path;
+}
+
+void
+Slope::reset()
+{
+  this->dual_gaps_path.clear();
+  this->primals_path.clear();
+  this->betas.clear();
+  this->beta0s.clear();
+  this->it_total = 0;
 }
 
 } // namespace slope

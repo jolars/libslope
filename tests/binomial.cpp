@@ -65,7 +65,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     model.setPgdFreq(1);
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_pgd = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
     auto dual_gaps = model.getDualGaps().front();
 
@@ -78,7 +78,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     model.fit(x, y, alpha, lambda);
     model.setTol(1e-12);
 
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().col(0);
+    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
     // auto dual_gaps = model.getDualGaps();
     // auto primals = model.getPrimals();

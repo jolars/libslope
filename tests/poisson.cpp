@@ -58,7 +58,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
     REQUIRE(dual_gaps.back() >= 0);
     REQUIRE(dual_gaps.back() <= 1e-4);
 
-    Eigen::VectorXd coefs = model.getCoefs().col(0);
+    Eigen::VectorXd coefs = model.getCoefs().front();
 
     coefs_ref << 0.1957634, -0.1612890, 0.1612890;
 
@@ -72,8 +72,8 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs = model.getCoefs().col(0);
-    double intercept = model.getIntercepts()[0];
+    Eigen::VectorXd coefs = model.getCoefs().front();
+    double intercept = model.getIntercepts()[0][0];
 
     coefs_ref << 0.4017805, -0.2396130, 0.4600816;
 

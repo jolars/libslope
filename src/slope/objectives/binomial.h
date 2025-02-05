@@ -22,7 +22,7 @@ public:
    * @param y The true labels.
    * @return The loss value.
    */
-  double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y);
+  double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
    * @brief Calculates the dual for the binomial objective function.
@@ -30,8 +30,8 @@ public:
    * @param y The true labels.
    * @return The dual value.
    */
-  double dual(const Eigen::VectorXd& theta,
-              const Eigen::VectorXd& y,
+  double dual(const Eigen::MatrixXd& theta,
+              const Eigen::MatrixXd& y,
               const Eigen::VectorXd& w);
 
   /**
@@ -40,8 +40,8 @@ public:
    * @param y The true labels.
    * @return The residual vector.
    */
-  Eigen::VectorXd residual(const Eigen::VectorXd& eta,
-                           const Eigen::VectorXd& y);
+  Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
+                           const Eigen::MatrixXd& y);
 
   /**
    * @brief Updates the weights and working response for the binomial objective
@@ -54,7 +54,7 @@ public:
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,
                                        const Eigen::VectorXd& eta,
-                                       const Eigen::MatrixXd& y);
+                                       const Eigen::VectorXd& y);
 };
 
 } // namespace slope

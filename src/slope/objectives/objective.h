@@ -35,7 +35,7 @@ public:
    * @param y The true values.
    * @return The loss value.
    */
-  virtual double loss(const Eigen::VectorXd& eta, const Eigen::MatrixXd& y) = 0;
+  virtual double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y) = 0;
 
   /**
    * @brief Calculates the dual objective
@@ -47,8 +47,8 @@ public:
    * @param y The true values.
    * @return The dual value.
    */
-  virtual double dual(const Eigen::VectorXd& theta,
-                      const Eigen::VectorXd& y,
+  virtual double dual(const Eigen::MatrixXd& theta,
+                      const Eigen::MatrixXd& y,
                       const Eigen::VectorXd& w) = 0;
 
   /**
@@ -61,8 +61,8 @@ public:
    * @param y The true values.
    * @return The residual vector.
    */
-  virtual Eigen::VectorXd residual(const Eigen::VectorXd& eta,
-                                   const Eigen::VectorXd& y) = 0;
+  virtual Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
+                                   const Eigen::MatrixXd& y) = 0;
 
   /**
    * @brief Updates the weights and working response
@@ -79,7 +79,7 @@ public:
     Eigen::VectorXd& weights,
     Eigen::VectorXd& working_response,
     const Eigen::VectorXd& eta,
-    const Eigen::MatrixXd& y) = 0;
+    const Eigen::VectorXd& y) = 0;
 };
 
 } // namespace slope

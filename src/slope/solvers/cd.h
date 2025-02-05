@@ -76,8 +76,8 @@ computeGradientAndHessian(const T& x,
  */
 template<typename T>
 void
-coordinateDescent(double& beta0,
-                  Eigen::VectorXd& beta,
+coordinateDescent(Eigen::VectorXd& beta0,
+                  Eigen::MatrixXd& beta,
                   Eigen::VectorXd& residual,
                   Clusters& clusters,
                   const T& x,
@@ -114,7 +114,7 @@ coordinateDescent(double& beta0,
 
     if (cluster_size == 1) {
       int k = *clusters.cbegin(j);
-      double s_k = sign(beta(k));
+      double s_k = sign(beta(k, 0));
       s.emplace_back(s_k);
 
       std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
@@ -127,7 +127,7 @@ coordinateDescent(double& beta0,
 
       for (auto c_it = clusters.cbegin(j); c_it != clusters.cend(j); ++c_it) {
         int k = *c_it;
-        double s_k = sign(beta(k));
+        double s_k = sign(beta(k, 0));
         s.emplace_back(s_k);
 
         if (standardize_jit) {
@@ -151,7 +151,7 @@ coordinateDescent(double& beta0,
     auto s_it = s.cbegin();
     auto c_it = clusters.cbegin(j);
     for (; c_it != clusters.cend(j); ++c_it, ++s_it) {
-      beta(*c_it) = c_tilde * (*s_it);
+      beta(*c_it, 0) = c_tilde * (*s_it);
     }
 
     double c_diff = c_old - c_tilde;
@@ -180,7 +180,7 @@ coordinateDescent(double& beta0,
     if (intercept) {
       double beta0_update = residual.dot(w) / w.sum();
       residual.array() -= beta0_update;
-      beta0 += beta0_update;
+      beta0(0) += beta0_update;
     }
   }
 }

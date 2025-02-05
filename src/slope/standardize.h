@@ -120,9 +120,9 @@ standardizeFeatures(Eigen::SparseMatrixBase<T>& x,
  *
  * @see SlopeParameters
  */
-std::tuple<double, Eigen::VectorXd>
-rescaleCoefficients(double beta0,
-                    Eigen::VectorXd beta,
+std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
+rescaleCoefficients(Eigen::VectorXd beta0,
+                    Eigen::MatrixXd beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
                     const bool intercept,

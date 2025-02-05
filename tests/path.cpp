@@ -35,7 +35,7 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 
     model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coef = model.getCoefs().col(2);
+    Eigen::VectorXd coef = model.getCoefs()[2];
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));
@@ -51,18 +51,20 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     model.setPathLength(20);
     model.fit(x, y, alpha, lambda);
 
-    Eigen::MatrixXd coefs = model.getCoefs();
+    auto coefs = model.getCoefs();
     alpha = model.getAlpha();
 
     REQUIRE(alpha.rows() == 20);
 
     // First step should be the null model
     std::vector<double> coef_true = { 0, 0 };
-    REQUIRE_THAT(coefs.col(0), VectorApproxEqual(coef_true, 1e-5));
+    Eigen::VectorXd coef = coefs[0];
+    REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-5));
     REQUIRE_THAT(alpha(0), WithinAbs(0.41658754, 1e-5));
     REQUIRE_THAT(alpha(1), WithinAbs(0.25655469, 1e-5));
 
     coef_true = { 0.4487011, 0.6207310 };
-    REQUIRE_THAT(coefs.col(2), VectorApproxEqual(coef_true, 1e-5));
+    coef = coefs[2];
+    REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-5));
   }
 }
