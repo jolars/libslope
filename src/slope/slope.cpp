@@ -145,7 +145,9 @@ Slope::setLambdaType(const std::string& lambda_type)
 void
 Slope::setObjective(const std::string& objective)
 {
-  validateOption(objective, { "gaussian", "binomial", "poisson" }, "objective");
+  validateOption(objective,
+                 { "gaussian", "binomial", "poisson", "multinomial" },
+                 "objective");
   this->objective = objective;
 }
 

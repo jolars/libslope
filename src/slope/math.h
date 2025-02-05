@@ -85,6 +85,26 @@ clamp(const T& x, const T& lo, const T& hi)
 }
 
 /**
+ * LogSumExp
+ *
+ * @param a A matrix
+ * @return \f$\log(\sum_i \exp(a_i))\f$
+ */
+Eigen::VectorXd
+logSumExp(const Eigen::MatrixXd& a);
+
+/**
+ * Softmax
+ *
+ * Computes the softmax function for the given input matrix.
+ *
+ * @param a A matrix
+ * @return \f$\exp(a) / \sum_i \exp(a_i)\f$
+ */
+Eigen::MatrixXd
+softmax(const Eigen::MatrixXd& x);
+
+/**
  * Computes the gradient of the objective with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
@@ -96,7 +116,7 @@ clamp(const T& x, const T& lo, const T& hi)
  * @return The computed gradient vector.
  */
 template<typename T>
-Eigen::VectorXd
+Eigen::MatrixXd
 linearPredictor(const T& x,
                 const Eigen::VectorXd& beta0,
                 const Eigen::MatrixXd& beta,
@@ -105,20 +125,23 @@ linearPredictor(const T& x,
                 const bool standardize_jit,
                 const bool intercept)
 {
-  const int n = x.rows();
-  const int p = x.cols();
+  int n = x.rows();
+  int p = x.cols();
+  int m = beta.cols();
 
-  Eigen::VectorXd eta(n);
+  Eigen::MatrixXd eta(n, m);
 
   if (standardize_jit) {
-    eta = x * beta.cwiseQuotient(x_scales);
-    eta.array() -= x_centers.cwiseQuotient(x_scales).dot(beta.col(0));
+    for (int k = 0; k < m; ++k) {
+      eta.col(k) = x * beta.col(k).cwiseQuotient(x_scales);
+      eta.col(k).array() -= x_centers.cwiseQuotient(x_scales).dot(beta.col(k));
+    }
   } else {
     eta = x * beta;
   }
 
   if (intercept) {
-    eta.array() += beta0(0);
+    eta.rowwise() += beta0.transpose();
   }
 
   return eta;
@@ -136,9 +159,9 @@ linearPredictor(const T& x,
  * @return The computed gradient vector.
  */
 template<typename T>
-Eigen::VectorXd
+Eigen::MatrixXd
 computeGradient(const T& x,
-                const Eigen::VectorXd& residual,
+                const Eigen::MatrixXd& residual,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
                 const Eigen::VectorXd& w,
@@ -146,23 +169,32 @@ computeGradient(const T& x,
 {
   const int n = x.rows();
   const int p = x.cols();
+  const int m = residual.cols();
+
+  Eigen::MatrixXd weighted_residual(residual.rows(), residual.cols());
+
+  for (int k = 0; k < m; ++k) {
+    weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
+  }
 
   if (standardize_jit) {
-    Eigen::VectorXd gradient(p);
+    Eigen::VectorXd gradient(p * m);
 
-    const Eigen::VectorXd residual_w = residual.cwiseProduct(w);
-    double wr_sum = residual_w.sum();
+    for (int k = 0; k < m; ++k) {
+      double wr_sum = weighted_residual.col(k).sum();
 
-    for (int j = 0; j < p; ++j) {
-      gradient(j) =
-        -(x.col(j).dot(residual_w) - x_centers(j) * wr_sum) / (x_scales(j) * n);
+      for (int j = 0; j < p; ++j) {
+        gradient(j, k) =
+          -(x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
+          (x_scales(j) * n);
+      }
     }
 
     return gradient;
   }
 
   // No standardization or already standardized in place
-  return -(x.transpose() * residual.cwiseProduct(w)) / n;
+  return -(x.transpose() * weighted_residual) / n;
 }
 
 /**
@@ -177,29 +209,34 @@ computeGradient(const T& x,
  * @return The computed gradient vector.
  */
 template<typename T>
-Eigen::VectorXd
+Eigen::MatrixXd
 computeGradientOffset(const T& x,
-                      const double offset,
+                      const Eigen::VectorXd& offset,
                       const Eigen::VectorXd& x_centers,
                       const Eigen::VectorXd& x_scales,
                       const bool standardize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
+  const int m = offset.rows();
 
-  Eigen::VectorXd out(p);
+  Eigen::MatrixXd out(p, m);
 
   if (standardize_jit) {
     // This is not necessary if x_centers are already the means, but
     // it is included in case later on we want to use something
     // other than means for the centers.
-    for (int j = 0; j < p; ++j) {
-      out(j) = offset * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+    for (int k = 0; k < m; ++k) {
+      for (int j = 0; j < p; ++j) {
+        out(j) = offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+      }
     }
   } else {
     // return x.colwise().mean().array() * offset;
-    for (int j = 0; j < p; ++j) {
-      out(j) = offset * x.col(j).sum() / n;
+    for (int k = 0; k < m; ++k) {
+      for (int j = 0; j < p; ++j) {
+        out(j, k) = offset(k) * x.col(j).sum() / n;
+      }
     }
   }
 

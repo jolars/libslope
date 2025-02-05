@@ -69,7 +69,7 @@ public:
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
-               const Eigen::VectorXd& y)
+               const Eigen::MatrixXd& y)
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -93,14 +93,15 @@ public:
         objective->updateIntercept(beta0, eta, y);
       }
 
-      Eigen::VectorXd beta_diff = beta - beta_old;
+      Eigen::MatrixXd beta_diff = beta - beta_old;
 
       eta = linearPredictor(
         x, beta0, beta, x_centers, x_scales, standardize_jit, intercept);
 
       double g = objective->loss(eta, y);
-      double q = g_old + beta_diff.dot(gradient.col(0)) +
-                 (1.0 / (2 * learning_rate)) * beta_diff.squaredNorm();
+      double q =
+        g_old + beta_diff.reshaped().dot(gradient.reshaped()) +
+        (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
 
       if (q >= g * (1 - 1e-12)) {
         this->learning_rate *= 1.1;

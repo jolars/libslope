@@ -5,8 +5,7 @@ namespace slope {
 double
 Gaussian::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  const int n = y.rows();
-  return (eta.reshaped() - y.reshaped()).squaredNorm() / (2.0 * n);
+  return (eta - y).squaredNorm() / (2.0 * y.rows());
 }
 
 double
@@ -16,14 +15,19 @@ Gaussian::dual(const Eigen::MatrixXd& theta,
 {
   const int n = y.rows();
 
-  return theta.reshaped().cwiseProduct(w).dot(y.reshaped()) / n -
-         0.5 * theta.reshaped().cwiseProduct(w.cwiseSqrt()).squaredNorm() / n;
+  return (y.squaredNorm() - (y - theta).squaredNorm()) / (2.0 * n);
 }
 
 Eigen::MatrixXd
 Gaussian::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y.reshaped() - eta.reshaped();
+  return y - eta;
+}
+
+Eigen::MatrixXd
+Gaussian::preprocessResponse(const Eigen::MatrixXd& y)
+{
+  return y;
 }
 
 void

@@ -174,6 +174,7 @@ public:
    *                 - "gaussian": Gaussian regression
    *                 - "binomial": Logistic regression
    *                 - "poisson": Poisson regression
+   *                 - "multinomial": Multinomial logistic regression
    */
   void setObjective(const std::string& objective);
 
@@ -255,7 +256,7 @@ public:
    */
   template<typename SolverType = solvers::Hybrid, typename T>
   void fit(T& x,
-           const Eigen::MatrixXd& y,
+           const Eigen::MatrixXd& y_in,
            Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
            Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0))
   {
@@ -264,11 +265,10 @@ public:
 
     const int n = x.rows();
     const int p = x.cols();
-    const int m = y.cols();
 
-    reset();
+    reset(); // Reset all internal variables
 
-    if (n != y.rows()) {
+    if (n != y_in.rows()) {
       throw std::invalid_argument("x and y must have the same number of rows");
     }
 
@@ -285,13 +285,15 @@ public:
 
     std::unique_ptr<Objective> objective = setupObjective(this->objective);
 
+    MatrixXd y = objective->preprocessResponse(y_in);
+
+    const int m = y.cols();
+
     beta0.resize(m);
     beta0.setZero();
     beta.resize(p, m);
     beta.setZero();
     MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
-    VectorXd w = VectorXd::Ones(n);      // weights
-    VectorXd z = y.col(0);
 
     if (lambda.size() == 0) {
       lambda = lambdaSequence(p * m, this->q, this->lambda_type);
@@ -321,8 +323,7 @@ public:
 
     if (alpha.size() == 0) {
       alpha = regularizationPath(x,
-                                 w,
-                                 z,
+                                 y,
                                  x_centers,
                                  x_scales,
                                  sl1_norm,
@@ -343,7 +344,8 @@ public:
     std::vector<double> dual_gaps;
     std::vector<double> primals;
 
-    Clusters clusters(beta);
+    // TODO: We should not do this for all solvers.
+    Clusters clusters(beta.reshaped());
 
     this->it_total = 0;
 
@@ -368,17 +370,17 @@ public:
                                             x_scales,
                                             Eigen::VectorXd::Ones(n),
                                             standardize_jit);
-        VectorXd theta = residual;
+        MatrixXd theta = residual;
 
         // First compute gradient with potential offset for intercept case
-        VectorXd dual_gradient = gradient;
+        MatrixXd dual_gradient = gradient;
         if (this->intercept) {
-          double theta_mean = theta.mean();
-          theta.array() -= theta_mean;
+          VectorXd theta_mean = theta.colwise().mean();
+          theta.rowwise() -= theta_mean.transpose();
 
-          VectorXd gradient_offset = computeGradientOffset(
+          MatrixXd gradient_offset = computeGradientOffset(
             x, theta_mean, x_centers, x_scales, standardize_jit);
-          dual_gradient = gradient.colwise() + gradient_offset;
+          dual_gradient = gradient + gradient_offset;
         }
 
         // Common scaling operation

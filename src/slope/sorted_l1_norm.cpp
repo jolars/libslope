@@ -8,20 +8,23 @@ SortedL1Norm::SortedL1Norm(const Eigen::ArrayXd& lambda)
 }
 
 double
-SortedL1Norm::eval(const Eigen::VectorXd& beta) const
+SortedL1Norm::eval(const Eigen::MatrixXd& beta) const
 {
-  Eigen::ArrayXd beta_abs = beta.array().abs();
+  Eigen::ArrayXd beta_abs = beta.reshaped().array().abs();
   sort(beta_abs, true);
   return alpha * (beta_abs * lambda).sum();
 }
 
-Eigen::VectorXd
-SortedL1Norm::prox(const Eigen::VectorXd& beta, const double scale) const
+Eigen::MatrixXd
+SortedL1Norm::prox(const Eigen::MatrixXd& beta, const double scale) const
 {
   using namespace Eigen;
 
-  ArrayXd beta_sign = beta.array().sign();
-  VectorXd beta_copy = beta.cwiseAbs().eval();
+  // const int p = beta.rows();
+  const int m = beta.cols();
+
+  ArrayXd beta_sign = beta.reshaped().array().sign();
+  VectorXd beta_copy = beta.reshaped().array().abs();
 
   auto ord = sortIndex(beta_copy, true);
   permute(beta_copy, ord);
@@ -61,7 +64,7 @@ SortedL1Norm::prox(const Eigen::VectorXd& beta, const double scale) const
   inversePermute(beta_copy, ord);
   beta_copy.array() *= beta_sign;
 
-  return beta_copy;
+  return beta_copy.reshaped(beta.rows(), beta.cols());
 }
 
 void
@@ -95,10 +98,18 @@ SortedL1Norm::getLambdaRef() const
 }
 
 double
-SortedL1Norm::dualNorm(const Eigen::VectorXd& gradient) const
+SortedL1Norm::dualNorm(const Eigen::MatrixXd& gradient) const
 {
-  Eigen::ArrayXd abs_gradient = gradient.array().abs();
+
+  Eigen::ArrayXd abs_gradient = gradient.reshaped().array().abs();
   sort(abs_gradient, true);
+
+  if (this->alpha == 0 || this->lambda.sum() == 0) {
+    // TODO: this is a crude approach for the unregularized case.
+    // We should consider something more clever and avoid
+    // the division.
+    return (cumSum(abs_gradient) / 1e-6).maxCoeff();
+  }
 
   return (cumSum(abs_gradient) / (this->alpha * cumSum(this->lambda)))
     .maxCoeff();

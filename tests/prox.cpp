@@ -13,7 +13,7 @@ TEST_CASE("Check that proximal operator works", "[prox]")
   lambda << 4, 2;
 
   slope::SortedL1Norm norm(lambda);
-  auto res = norm.prox(beta, 1.0);
+  Eigen::VectorXd res = norm.prox(beta, 1.0);
 
   std::array<double, 2> expected = { 1.0, 0.0 };
 
