@@ -45,6 +45,7 @@ if(BUILD_TESTING)
     tests/lambda_sequence.cpp
     tests/path.cpp
     tests/poisson.cpp
+    tests/printing.cpp
     tests/prox.cpp
     tests/qnorm.cpp
     tests/sparse.cpp

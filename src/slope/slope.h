@@ -13,8 +13,7 @@
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
-#include "solvers/cd.h"
-#include "solvers/pgd.h"
+#include "solvers/hybrid.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
 #include <Eigen/Core>
@@ -254,7 +253,7 @@ public:
    * @param lambda Weights for the sorted L1 norm. If empty, computed using
    *              the specified lambda_type
    */
-  template<typename T>
+  template<typename SolverType = HybridSolver, typename T>
   void fit(T& x,
            const Eigen::MatrixXd& y,
            Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
@@ -312,6 +311,14 @@ public:
     // Setup the regularization sequence and path
     SortedL1Norm sl1_norm{ lambda };
 
+    auto solver = SolverType(this->tol,
+                             this->max_it,
+                             standardize_jit,
+                             this->print_level,
+                             this->intercept,
+                             this->update_clusters,
+                             this->pgd_freq);
+
     if (alpha.size() == 0) {
       alpha = regularizationPath(x,
                                  w,
@@ -335,10 +342,6 @@ public:
 
     std::vector<double> dual_gaps;
     std::vector<double> primals;
-
-    double learning_rate = 1.0;
-
-    Gaussian subprob_objective;
 
     Clusters clusters(beta);
 
@@ -390,96 +393,16 @@ public:
           break;
         }
 
-        // beta0_inner = beta0(0);
-        // beta_inner = beta.col(0);
-
-        objective->updateWeightsAndWorkingResponse(w, z, eta, y);
-        VectorXd residual = z - eta;
-
-        if (this->print_level > 3) {
-          printContents(w, "    weights");
-          printContents(z, "    working response");
-        }
-
-        for (int it = 0; it < this->max_it; ++it) {
-          if (it % this->pgd_freq == 0) {
-            double g = residual.cwiseAbs2().dot(w) / (2.0 * n);
-            double h = sl1_norm.eval(beta);
-            double primal_inner = g + h;
-
-            VectorXd gradient = computeGradient(
-              x, residual, x_centers, x_scales, w, standardize_jit);
-
-            // Obtain a feasible dual point by dual scaling
-            theta = residual;
-            theta.array() /= std::max(1.0, sl1_norm.dualNorm(gradient));
-            double dual_inner = subprob_objective.dual(theta, z, w);
-
-            double dual_gap_inner = primal_inner - dual_inner;
-
-            double tol_inner = (std::abs(primal_inner) + EPSILON) * this->tol;
-
-            if (this->print_level > 2) {
-              std::cout << indent(2) << "iteration: " << it << std::endl
-                        << indent(3) << "primal (inner): " << primal_inner
-                        << std::endl
-                        << indent(3)
-                        << "duality gap (inner): " << dual_gap_inner
-                        << ", tol: " << tol_inner << std::endl;
-            }
-
-            if (std::max(dual_gap_inner, 0.0) <= tol_inner) {
-              break;
-            }
-
-            if (this->print_level > 2) {
-              std::cout << indent(3) << "Running PGD step" << std::endl;
-            }
-
-            proximalGradientDescent(beta0,
-                                    beta,
-                                    residual,
-                                    learning_rate,
-                                    gradient,
-                                    x,
-                                    w,
-                                    z,
-                                    sl1_norm,
-                                    x_centers,
-                                    x_scales,
-                                    g,
-                                    intercept,
-                                    standardize_jit,
-                                    learning_rate_decr,
-                                    print_level);
-
-            clusters.update(beta);
-          } else {
-            if (this->print_level > 2) {
-              std::cout << indent(3) << "Running CD step" << std::endl;
-            }
-
-            coordinateDescent(beta0,
-                              beta,
-                              residual,
-                              clusters,
-                              x,
-                              w,
-                              z,
-                              sl1_norm,
-                              x_centers,
-                              x_scales,
-                              this->intercept,
-                              standardize_jit,
-                              this->update_clusters,
-                              this->print_level);
-          }
-        }
-        it_total++;
-
-        // The residual is kept up to date, but not eta. So we need to compute
-        // it here.
-        eta = z - residual;
+        solver.run(beta0,
+                   beta,
+                   eta,
+                   clusters,
+                   objective,
+                   sl1_norm,
+                   x,
+                   x_centers,
+                   x_scales,
+                   y);
       }
 
       // Store everything for this step of the path
