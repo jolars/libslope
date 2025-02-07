@@ -1,10 +1,38 @@
 #include "slope.h"
+#include "solvers/pgd.h"
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <set>
 
 namespace slope {
+
+// Explicit instantiations for common matrix/solver combinations
+template void
+Slope::fit<solvers::Hybrid, Eigen::MatrixXd>(Eigen::MatrixXd&,
+                                             const Eigen::MatrixXd&,
+                                             Eigen::ArrayXd,
+                                             Eigen::ArrayXd);
+
+template void
+Slope::fit<solvers::Hybrid, Eigen::SparseMatrix<double>>(
+  Eigen::SparseMatrix<double>&,
+  const Eigen::MatrixXd&,
+  Eigen::ArrayXd,
+  Eigen::ArrayXd);
+
+template void
+Slope::fit<solvers::PGD, Eigen::MatrixXd>(Eigen::MatrixXd&,
+                                          const Eigen::MatrixXd&,
+                                          Eigen::ArrayXd,
+                                          Eigen::ArrayXd);
+
+template void
+Slope::fit<solvers::PGD, Eigen::SparseMatrix<double>>(
+  Eigen::SparseMatrix<double>&,
+  const Eigen::MatrixXd&,
+  Eigen::ArrayXd,
+  Eigen::ArrayXd);
 
 void
 Slope::setIntercept(bool intercept)
@@ -64,18 +92,18 @@ void
 Slope::setMaxIt(int max_it)
 {
   if (max_it < 1) {
-    throw std::invalid_argument("max_it must be >= 1");
+    throw std::invalid_argument("max_it_outer must be >= 1");
   }
   this->max_it = max_it;
 }
 
 void
-Slope::setMaxItOuter(int maxItOuter)
+Slope::setMaxItInner(int max_it_inner)
 {
-  if (maxItOuter < 1) {
-    throw std::invalid_argument("max_it_outer must be >= 1");
+  if (max_it_inner < 1) {
+    throw std::invalid_argument("max_it_inner must be >= 1");
   }
-  this->max_it_outer = maxItOuter;
+  this->max_it_inner = max_it_inner;
 }
 
 void
@@ -178,5 +206,7 @@ Slope::reset()
   this->beta0s.clear();
   this->it_total = 0;
 }
+
+// slope.cpp
 
 } // namespace slope

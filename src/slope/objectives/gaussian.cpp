@@ -15,12 +15,9 @@ Gaussian::dual(const Eigen::MatrixXd& theta,
                const Eigen::VectorXd& w)
 {
   const int n = y.rows();
-  const Eigen::VectorXd eta = y.reshaped() - theta.reshaped();
-  const Eigen::VectorXd w_sqrt = w.cwiseSqrt();
 
-  return (y.reshaped().cwiseProduct(w_sqrt).squaredNorm() -
-          eta.cwiseProduct(w_sqrt).squaredNorm()) /
-         (2.0 * n);
+  return theta.reshaped().cwiseProduct(w).dot(y.reshaped()) / n -
+         0.5 * theta.reshaped().cwiseProduct(w.cwiseSqrt()).squaredNorm() / n;
 }
 
 Eigen::MatrixXd

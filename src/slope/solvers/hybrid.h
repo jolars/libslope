@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "cd.h"
-#include "pgd.h"
+#include "hybrid_cd.h"
+#include "hybrid_pgd.h"
 #include "slope/clusters.h"
 #include "slope/helpers.h"
 #include "slope/objectives/objective.h"
@@ -16,6 +16,7 @@
 #include <memory>
 
 namespace slope {
+namespace solvers {
 
 /**
  * @brief Hybrid CD-PGD solver for SLOPE
@@ -30,7 +31,7 @@ namespace slope {
  * The switching between methods is controlled by the pgd_freq parameter, which
  * determines how often PGD steps are taken versus CD steps.
  */
-class HybridSolver : public Solver<HybridSolver>
+class Hybrid : public Solver<Hybrid>
 {
 public:
   /**
@@ -40,8 +41,8 @@ public:
    * @param args Arguments forwarded to base solver constructor
    */
   template<typename... Args>
-  HybridSolver(Args&&... args)
-    : Solver<HybridSolver>(std::forward<Args>(args)...)
+  Hybrid(Args&&... args)
+    : Solver<Hybrid>(std::forward<Args>(args)...)
   {
   }
 
@@ -67,6 +68,7 @@ public:
                Clusters& clusters,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
+               const Eigen::MatrixXd& gradient,
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
@@ -102,13 +104,29 @@ public:
         VectorXd gradient = computeGradient(
           x, residual, x_centers, x_scales, w, this->standardize_jit);
 
+        VectorXd theta = residual;
+
+        // First compute gradient with potential offset for intercept case
+        VectorXd dual_gradient = gradient;
+        if (this->intercept) {
+          double theta_mean = theta.mean();
+          theta.array() -= theta_mean;
+
+          VectorXd gradient_offset = computeGradientOffset(
+            x, theta_mean, x_centers, x_scales, standardize_jit);
+          dual_gradient = gradient.colwise() + gradient_offset;
+        }
+
         // Obtain a feasible dual point by dual scaling
-        VectorXd theta =
-          residual.array() / std::max(1.0, penalty.dualNorm(gradient));
-        double dual_inner =
-          z_w_norm - (z - theta).cwiseProduct(w_sqrt).squaredNorm() / (2.0 * n);
+        theta.array() /= std::max(1.0, penalty.dualNorm(dual_gradient));
+
+        double dual_inner = (theta.cwiseProduct(w).dot(z) -
+                             0.5 * theta.cwiseAbs2().cwiseProduct(w).sum()) /
+                            n;
 
         double dual_gap_inner = primal_inner - dual_inner;
+
+        assert(dual_gap_inner > -1e-5 && "Inner dual gap should be positive");
 
         double tol_inner = (std::abs(primal_inner) + EPSILON) * this->tol;
 
@@ -171,7 +189,6 @@ public:
     // The residual is kept up to date, but not eta. So we need to compute
     // it here.
     eta = z - residual;
-
     // TODO: register convergence status
   }
 
@@ -184,4 +201,5 @@ private:
   int max_it_inner = 10000; ///< Maximum number of inner iterations
 };
 
+} // namespace solvers
 } // namespace slope

@@ -31,4 +31,10 @@ TEST_CASE("Assertions", "[assertions]")
     Eigen::VectorXd lambda(p + 1);
     REQUIRE_THROWS(model.setLambdaType("l1"));
   }
+
+  SECTION("Invalid max iterations")
+  {
+    REQUIRE_THROWS(model.setMaxIt(0));
+    REQUIRE_THROWS(model.setMaxItInner(-1));
+  }
 }

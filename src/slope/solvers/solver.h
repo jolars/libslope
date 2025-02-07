@@ -8,6 +8,7 @@
 #include <Eigen/Core>
 
 namespace slope {
+namespace solvers {
 
 /**
  * @brief Base class template for SLOPE numerical solvers
@@ -74,4 +75,5 @@ protected:
   int pgd_freq;         ///< Frequency of proximal gradient descent updates
 };
 
+} // namespace solvers
 } // namespace slope

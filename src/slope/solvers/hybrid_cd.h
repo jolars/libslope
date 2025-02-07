@@ -13,6 +13,7 @@
 #include <vector>
 
 namespace slope {
+namespace solvers {
 
 template<typename T>
 std::pair<double, double>
@@ -178,10 +179,14 @@ coordinateDescent(Eigen::VectorXd& beta0,
     }
 
     if (intercept) {
-      double beta0_update = residual.dot(w) / w.sum();
+      // TODO: Consider whether this should only be done once per loop instead
+      // of after each coordinate update
+      double beta0_update = residual.dot(w) / n;
       residual.array() -= beta0_update;
       beta0(0) += beta0_update;
     }
   }
 }
-}
+
+} // namespace solvers
+} // namespace slope

@@ -11,7 +11,7 @@
 namespace slope {
 
 /**
- * Abstract class representing an objective function.
+ * Objective function interface
  *
  * This class defines the interface for an objective function, which is used in
  * optimization algorithms. The objective function calculates the loss, dual,
@@ -80,6 +80,35 @@ public:
     Eigen::VectorXd& working_response,
     const Eigen::VectorXd& eta,
     const Eigen::VectorXd& y) = 0;
+
+  /**
+   * @brief Updates the intercept with a
+   * gradient descent update. Also updates the linear predictor (but not the
+   * residual).
+   * @param beta0 The current intercept
+   * @param eta The current linear predictor
+   * @param y The observed counts vector
+   */
+  virtual void updateIntercept(Eigen::VectorXd& beta0,
+                               const Eigen::MatrixXd& eta,
+                               const Eigen::MatrixXd& y)
+  {
+    Eigen::VectorXd residual(y.rows());
+    Eigen::VectorXd beta0_update(y.cols());
+
+    residual = this->residual(eta, y);
+    beta0_update = -residual.colwise().mean() / this->lipschitz_constant;
+    beta0 -= beta0_update;
+  };
+
+protected:
+  explicit Objective(double lipschitz_constant)
+    : lipschitz_constant(lipschitz_constant)
+  {
+  }
+
+private:
+  const double lipschitz_constant;
 };
 
 } // namespace slope
