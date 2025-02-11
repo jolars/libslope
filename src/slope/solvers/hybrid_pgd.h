@@ -89,6 +89,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                (1.0 / (2 * learning_rate)) * beta_diff.squaredNorm();
 
     if (q >= g * (1 - 1e-12)) {
+      learning_rate *= 1.1;
       break;
     } else {
       learning_rate *= learning_rate_decr;
