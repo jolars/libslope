@@ -97,6 +97,46 @@ clamp(const T& x, const T& lo, const T& hi)
  */
 template<typename T>
 Eigen::VectorXd
+linearPredictor(const T& x,
+                const Eigen::VectorXd& beta0,
+                const Eigen::MatrixXd& beta,
+                const Eigen::VectorXd& x_centers,
+                const Eigen::VectorXd& x_scales,
+                const bool standardize_jit,
+                const bool intercept)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  Eigen::VectorXd eta(n);
+
+  if (standardize_jit) {
+    eta = x * beta.cwiseQuotient(x_scales);
+    eta.array() -= x_centers.cwiseQuotient(x_scales).dot(beta.col(0));
+  } else {
+    eta = x * beta;
+  }
+
+  if (intercept) {
+    eta.array() += beta0(0);
+  }
+
+  return eta;
+}
+
+/**
+ * Computes the gradient of the objective with respect to \f(\beta\f).
+ *
+ * @tparam T The type of the input matrix.
+ * @param x The input matrix.
+ * @param residual The residual vector.
+ * @param x_centers The vector of center values for each column of x.
+ * @param x_scales The vector of scale values for each column of x.
+ * @param standardize Flag indicating whether to standardize the gradient.
+ * @return The computed gradient vector.
+ */
+template<typename T>
+Eigen::VectorXd
 computeGradient(const T& x,
                 const Eigen::VectorXd& residual,
                 const Eigen::VectorXd& x_centers,
@@ -123,6 +163,48 @@ computeGradient(const T& x,
 
   // No standardization or already standardized in place
   return -(x.transpose() * residual.cwiseProduct(w)) / n;
+}
+
+/**
+ * Computes the gradient of the objective with respect to \f(\beta\f).
+ *
+ * @tparam T The type of the input matrix.
+ * @param x The input matrix.
+ * @param residual The residual vector.
+ * @param x_centers The vector of center values for each column of x.
+ * @param x_scales The vector of scale values for each column of x.
+ * @param standardize Flag indicating whether to standardize the gradient.
+ * @return The computed gradient vector.
+ */
+template<typename T>
+Eigen::VectorXd
+computeGradientOffset(const T& x,
+                      const double offset,
+                      const Eigen::VectorXd& x_centers,
+                      const Eigen::VectorXd& x_scales,
+                      const bool standardize_jit)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  if (standardize_jit) {
+    // This is not necessary if x_centers are already the means, but
+    // it is included in case later on we want to use something
+    // other than means for the centers.
+    for (int j = 0; j < p; ++j) {
+      out(j) = offset * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+    }
+  } else {
+    // return x.colwise().mean().array() * offset;
+    for (int j = 0; j < p; ++j) {
+      out(j) = offset * x.col(j).sum() / n;
+    }
+  }
+
+  // No standardization or already standardized in place
+  return out;
 }
 
 } // namespace slope

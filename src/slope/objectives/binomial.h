@@ -13,9 +13,14 @@ namespace slope {
 class Binomial : public Objective
 {
 private:
-  double p_min = 1e-5; /**< The minimum probability value. */
+  double p_min = 1e-9; /**< The minimum probability value. */
 
 public:
+  explicit Binomial()
+    : Objective(0.25)
+  {
+  }
+
   /**
    * @brief Calculates the loss for the binomial objective function.
    * @param eta The predicted values.

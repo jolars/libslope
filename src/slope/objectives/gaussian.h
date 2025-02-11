@@ -27,6 +27,10 @@ namespace slope {
 class Gaussian : public Objective
 {
 public:
+  explicit Gaussian()
+    : Objective(1.00)
+  {
+  }
   /**
    * @brief Calculates the Gaussian loss function value
    * @details Computes the squared error loss between predicted and actual

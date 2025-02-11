@@ -25,6 +25,10 @@ class Poisson : public Objective
 {
 
 public:
+  explicit Poisson()
+    : Objective(std::numeric_limits<double>::infinity())
+  {
+  }
   /**
    * @brief Calculates the negative log-likelihood loss for the Poisson
    * regression.
@@ -33,7 +37,7 @@ public:
    * @return The negative log-likelihood: \f$-\sum_i(y_i\eta_i - e^{\eta_i})\f$
    * (ignoring constant terms)
    */
-  double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
+  double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y) override;
 
   /**
    * @brief Calculates the Fenchel conjugate (dual) of the Poisson loss.
@@ -44,7 +48,7 @@ public:
    */
   double dual(const Eigen::MatrixXd& theta,
               const Eigen::MatrixXd& y,
-              const Eigen::VectorXd& w);
+              const Eigen::VectorXd& w) override;
 
   /**
    * @brief Calculates the residual (negative gradient) for the Poisson
@@ -54,7 +58,7 @@ public:
    * @return The residual vector: \f$y - e^{\eta}\f$
    */
   Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
-                           const Eigen::MatrixXd& y);
+                           const Eigen::MatrixXd& y) override;
 
   /**
    * @brief Updates the weights and working response for IRLS (Iteratively
@@ -68,7 +72,21 @@ public:
   void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                        Eigen::VectorXd& z,
                                        const Eigen::VectorXd& eta,
-                                       const Eigen::VectorXd& y);
+                                       const Eigen::VectorXd& y) override;
+
+  /**
+   * @brief Updates the intercept with a
+   * gradient descent update. Unlike the Gaussian and Binomial cases, the
+   * Poisson regression intercept update is not quite as simple since the
+   * gradient is not Lipschitz continuous. Instead we use
+   * a backtracking line search here.
+   * @param beta0 The current intercept
+   * @param eta The current linear predictor
+   * @param y The observed counts vector
+   */
+  void updateIntercept(Eigen::VectorXd& beta0,
+                       const Eigen::MatrixXd& eta,
+                       const Eigen::MatrixXd& y) override;
 };
 
 } // namespace slope

@@ -1,102 +1,120 @@
 /**
  * @file
- * @brief An implementation of a proximal gradient descent step
+ * @brief Proximal Gradient Descent solver implementation for SLOPE
  */
 
 #pragma once
 
 #include "../sorted_l1_norm.h"
 #include "math.h"
+#include "slope/clusters.h"
+#include "slope/math.h"
+#include "slope/objectives/objective.h"
+#include "solver.h"
 #include <Eigen/Dense>
 #include <iostream>
+#include <memory>
 
 namespace slope {
+namespace solvers {
 
 /**
- * @brief Performs proximal gradient descent with line search.
+ * @brief Proximal Gradient Descent solver for SLOPE optimization
  *
- * This function updates the beta values using the proximal gradient descent
- * algorithm with line search. It also updates the residual, learning rate, and
- * other variables as necessary. It assumes that the gradient has already been
- * computed.
- *
- * @tparam T The type of the input data.
- * @param beta0 The intercept value.
- * @param beta The coefficient vector.
- * @param residual The residual vector.
- * @param learning_rate The learning rate.
- * @param gradient The gradient vector.
- * @param x The input data matrix.
- * @param w The weight vector.
- * @param z The response vector.
- * @param sl1_norm The sorted L1 norm object.
- * @param x_centers The center values of the input data.
- * @param x_scales The scale values of the input data.
- * @param g_old The previous value of the objective function.
- * @param intercept Flag indicating whether to include an intercept term.
- * @param standardize Flag indicating whether to standardize the input data.
- * @param learning_rate_decr The learning rate decrement factor.
- * @param print_level The level of verbosity for printing progress.
- *
- * @see SortedL1Norm
+ * This solver implements the proximal gradient descent algorithm with line
+ * search for solving the SLOPE optimization problem. It uses backtracking line
+ * search to automatically adjust the learning rate for optimal convergence.
  */
-template<typename T>
-void
-proximalGradientDescent(Eigen::VectorXd& beta0,
-                        Eigen::MatrixXd& beta,
-                        Eigen::VectorXd& residual,
-                        double& learning_rate,
-                        const Eigen::VectorXd& gradient,
-                        const T& x,
-                        const Eigen::VectorXd& w,
-                        const Eigen::VectorXd& z,
-                        const SortedL1Norm& sl1_norm,
-                        const Eigen::VectorXd& x_centers,
-                        const Eigen::VectorXd& x_scales,
-                        const double g_old,
-                        const bool intercept,
-                        const bool standardize_jit,
-                        const double learning_rate_decr,
-                        const int print_level)
+class PGD : public Solver<PGD>
 {
-  const int n = x.rows();
-  const int p = x.cols();
-
-  // Proximal gradient descent with line search
-  if (print_level > 2) {
-    std::cout << "        Starting line search" << std::endl;
+public:
+  /**
+   * @brief Construct a new PGD Solver
+   *
+   * @tparam Args Variadic template parameters for base solver arguments
+   * @param args Arguments forwarded to base solver constructor
+   */
+  template<typename... Args>
+  PGD(Args&&... args)
+    : Solver<PGD>(std::forward<Args>(args)...)
+    , learning_rate(1.0)
+    , learning_rate_decr(0.5)
+  {
   }
 
-  Eigen::VectorXd beta_old = beta;
+  /**
+   * @brief Implementation of the PGD solver algorithm
+   *
+   * @tparam MatrixType Type of the design matrix
+   * @param beta0 Intercept term (scalar)
+   * @param beta Coefficient matrix
+   * @param residual Residual vector
+   * @param gradient Gradient vector
+   * @param x Design matrix
+   * @param w Weight vector
+   * @param z Response vector
+   * @param sl1_norm Sorted L1 norm object
+   * @param x_centers Feature centers for standardization
+   * @param x_scales Feature scales for standardization
+   * @param g_old Previous value of objective function
+   */
+  template<typename MatrixType>
+  void runImpl(Eigen::VectorXd& beta0,
+               Eigen::MatrixXd& beta,
+               Eigen::MatrixXd& eta,
+               Clusters& clusters,
+               const std::unique_ptr<Objective>& objective,
+               const SortedL1Norm& penalty,
+               const Eigen::MatrixXd& gradient,
+               const MatrixType& x,
+               const Eigen::VectorXd& x_centers,
+               const Eigen::VectorXd& x_scales,
+               const Eigen::VectorXd& y)
+  {
+    using Eigen::MatrixXd;
+    using Eigen::VectorXd;
 
-  while (true) {
-    beta = sl1_norm.prox(beta_old - learning_rate * gradient, learning_rate);
+    const int n = x.rows();
+    const int p = x.cols();
 
-    Eigen::VectorXd beta_diff = beta - beta_old;
-
-    if (standardize_jit) {
-      residual = z - x * beta.cwiseQuotient(x_scales);
-      residual.array() += x_centers.cwiseQuotient(x_scales).dot(beta.col(0));
-    } else {
-      residual = z - x * beta.col(0);
+    if (this->print_level > 2) {
+      std::cout << "        Starting line search" << std::endl;
     }
 
-    if (intercept) {
-      double intercept_update = residual.dot(w) / w.sum();
-      beta0(0) = intercept_update;
-      residual.array() -= intercept_update;
-    }
+    MatrixXd beta_old = beta;
 
-    double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
-    double q = g_old + beta_diff.dot(gradient) +
-               (1.0 / (2 * learning_rate)) * beta_diff.squaredNorm();
+    double g_old = objective->loss(eta, y);
 
-    if (q >= g * (1 - 1e-12)) {
-      break;
-    } else {
-      learning_rate *= learning_rate_decr;
+    while (true) {
+      beta = penalty.prox(beta_old - this->learning_rate * gradient,
+                          this->learning_rate);
+
+      if (intercept) {
+        objective->updateIntercept(beta0, eta, y);
+      }
+
+      Eigen::VectorXd beta_diff = beta - beta_old;
+
+      eta = linearPredictor(
+        x, beta0, beta, x_centers, x_scales, standardize_jit, intercept);
+
+      double g = objective->loss(eta, y);
+      double q = g_old + beta_diff.dot(gradient.col(0)) +
+                 (1.0 / (2 * learning_rate)) * beta_diff.squaredNorm();
+
+      if (q >= g * (1 - 1e-12)) {
+        this->learning_rate *= 1.1;
+        break;
+      } else {
+        this->learning_rate *= this->learning_rate_decr;
+      }
     }
   }
-}
 
+private:
+  double learning_rate;      ///< Current learning rate for gradient steps
+  double learning_rate_decr; ///< Learning rate decrease factor for line search
+};
+
+} // namespace solvers
 } // namespace slope

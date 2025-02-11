@@ -21,8 +21,7 @@ Binomial::dual(const Eigen::MatrixXd& theta,
   const int n = y.rows();
 
   // Clamp probabilities to [p_min, 1-p_min]
-  Eigen::ArrayXd pr =
-    (y.col(0) - theta.col(0)).array().min(1.0 - p_min).max(p_min);
+  Eigen::ArrayXd pr = (y - theta).array().min(1.0 - p_min).max(p_min);
 
   return -(pr * log(pr) + (1.0 - pr) * log(1.0 - pr)).mean();
 }

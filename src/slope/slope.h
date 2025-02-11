@@ -49,8 +49,8 @@ public:
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
-    , max_it(1e6)
-    , max_it_outer(30)
+    , max_it_inner(1e6)
+    , max_it(1e4)
     , path_length(100)
     , pgd_freq(10)
     , modify_x(false)
@@ -118,18 +118,18 @@ public:
    * @brief Sets the maximum number of iterations.
    *
    * @param max_it The value to set for the maximum number of iterations. Must
-   * be positive.
+   * be positive. If negative (the default), then the value will be decided by
+   * the solver.
    */
   void setMaxIt(int max_it);
 
   /**
-   * @brief Sets the maximum number of outer iterations.
+   * @brief Sets the maximum number of inner iterations.
    *
-   * @param max_it_outer The value to set for the maximum number of outer
-   * iterations for the iterative repeated least-squares step. Must be positive.
-   * Has no real effect when the objective is Gaussian.
+   * @param max_it Sets the maximum number of inner iterations for solvers
+   * that use an inner loop. Must be positive.
    */
-  void setMaxItOuter(int max_it_outer);
+  void setMaxItInner(int max_it_inner);
 
   /**
    * @brief Sets the path length.
@@ -253,7 +253,7 @@ public:
    * @param lambda Weights for the sorted L1 norm. If empty, computed using
    *              the specified lambda_type
    */
-  template<typename SolverType = HybridSolver, typename T>
+  template<typename SolverType = solvers::Hybrid, typename T>
   void fit(T& x,
            const Eigen::MatrixXd& y,
            Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
@@ -312,7 +312,7 @@ public:
     SortedL1Norm sl1_norm{ lambda };
 
     auto solver = SolverType(this->tol,
-                             this->max_it,
+                             this->max_it_inner,
                              standardize_jit,
                              this->print_level,
                              this->intercept,
@@ -356,33 +356,47 @@ public:
 
       sl1_norm.setAlpha(alpha(path_step));
 
-      // IRLS loop
-      for (int it_outer = 0; it_outer < this->max_it_outer; ++it_outer) {
+      for (int it = 0; it < this->max_it; ++it) {
         // Compute primal, dual, and gap
         double primal = objective->loss(eta, y) + sl1_norm.eval(beta);
         primals.emplace_back(primal);
 
-        MatrixXd gen_residual = objective->residual(eta, y);
+        MatrixXd residual = objective->residual(eta, y);
+        MatrixXd gradient = computeGradient(x,
+                                            residual,
+                                            x_centers,
+                                            x_scales,
+                                            Eigen::VectorXd::Ones(n),
+                                            standardize_jit);
+        VectorXd theta = residual;
 
-        MatrixXd outer_gradient = computeGradient(x,
-                                                  gen_residual,
-                                                  x_centers,
-                                                  x_scales,
-                                                  Eigen::VectorXd::Ones(n),
-                                                  standardize_jit);
-        VectorXd theta = gen_residual;
-        double dual_norm = sl1_norm.dualNorm(outer_gradient);
+        // First compute gradient with potential offset for intercept case
+        VectorXd dual_gradient = gradient;
+        if (this->intercept) {
+          double theta_mean = theta.mean();
+          theta.array() -= theta_mean;
+
+          VectorXd gradient_offset = computeGradientOffset(
+            x, theta_mean, x_centers, x_scales, standardize_jit);
+          dual_gradient = gradient.colwise() + gradient_offset;
+        }
+
+        // Common scaling operation
+        double dual_norm = sl1_norm.dualNorm(dual_gradient);
         theta.array() /= std::max(1.0, dual_norm);
+
         double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
 
         double dual_gap = primal - dual;
+
+        assert(dual_gap > -1e-5 && "Dual gap should be positive");
 
         dual_gaps.emplace_back(dual_gap);
 
         double tol_scaled = (std::abs(primal) + EPSILON) * this->tol;
 
         if (this->print_level > 1) {
-          std::cout << indent(1) << "IRLS iteration: " << it_outer << std::endl
+          std::cout << indent(1) << "Outer iteration: " << it << std::endl
                     << indent(2) << "primal (main problem): " << primal
                     << std::endl
                     << indent(2) << "duality gap (main problem): " << dual_gap
@@ -399,6 +413,7 @@ public:
                    clusters,
                    objective,
                    sl1_norm,
+                   gradient,
                    x,
                    x_centers,
                    x_scales,
@@ -448,7 +463,7 @@ private:
   double q;
   double tol;
   int max_it;
-  int max_it_outer;
+  int max_it_inner;
   int path_length;
   int pgd_freq;
   int print_level;
