@@ -57,8 +57,7 @@ lambdaSequence(const int p,
 template<typename T>
 Eigen::ArrayXd
 regularizationPath(const T& x,
-                   const Eigen::VectorXd& w,
-                   const Eigen::VectorXd& z,
+                   const Eigen::MatrixXd& y,
                    const Eigen::VectorXd& x_centers,
                    const Eigen::VectorXd& x_scales,
                    const SortedL1Norm& penalty,
@@ -69,13 +68,14 @@ regularizationPath(const T& x,
 {
   const int n = x.rows();
   const int p = x.cols();
+  const int m = y.cols();
 
   if (alpha_min_ratio < 0) {
-    alpha_min_ratio = n > p ? 1e-4 : 1e-2;
+    alpha_min_ratio = n > p * m ? 1e-4 : 1e-2;
   }
 
-  auto gradient =
-    computeGradient(x, z, x_centers, x_scales, w, standardize_jit);
+  auto gradient = computeGradient(
+    x, y, x_centers, x_scales, Eigen::VectorXd::Ones(n), standardize_jit);
 
   double alpha_max = penalty.dualNorm(gradient);
 

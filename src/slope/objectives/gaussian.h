@@ -74,6 +74,15 @@ public:
                            const Eigen::MatrixXd& y);
 
   /**
+   * @brief Preprocesses the response for the Gaussian model
+   * @details Doesn't perform any transformation on the response.
+   *
+   * @param y Responnse vector (n x 1)
+   * @return Modified response
+   */
+  Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y);
+
+  /**
    * @brief Updates weights and working response for IRLS algorithm
    * @details For Gaussian case, weights are set to 1 and working response
    * equals the original response. This implementation is particularly simple

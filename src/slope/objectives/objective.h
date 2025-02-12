@@ -82,6 +82,19 @@ public:
     const Eigen::VectorXd& y) = 0;
 
   /**
+   * @brief Updates the weights and working response
+   *
+   * This function updates the weights and working response given the predicted
+   * values (eta) and the true values (y).
+   *
+   * @param weights The weights to be updated.
+   * @param working_response The working response to be updated.
+   * @param eta The predicted values.
+   * @param y The true values.
+   */
+  virtual Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y) = 0;
+
+  /**
    * @brief Updates the intercept with a
    * gradient descent update. Also updates the linear predictor (but not the
    * residual).
@@ -93,12 +106,14 @@ public:
                                const Eigen::MatrixXd& eta,
                                const Eigen::MatrixXd& y)
   {
-    Eigen::VectorXd residual(y.rows());
-    Eigen::VectorXd beta0_update(y.cols());
+    int m = y.cols();
+    // Eigen::VectorXd beta0_update(m);
 
-    residual = this->residual(eta, y);
-    beta0_update = -residual.colwise().mean() / this->lipschitz_constant;
-    beta0 -= beta0_update;
+    Eigen::MatrixXd residual = this->residual(eta, y);
+    // beta0_update = -residual.colwise().mean() / this->lipschitz_constant;
+    // Eigen::VectorXd beta0_update =
+    //   -residual.colwise().mean() / this->lipschitz_constant;
+    beta0 += residual.colwise().mean() / this->lipschitz_constant;
   };
 
 protected:

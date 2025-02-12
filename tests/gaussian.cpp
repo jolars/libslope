@@ -15,16 +15,18 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
   Eigen::Vector3d y;
 
   // clang-format off
-  x << 1, 2,
-       0, 1,
-       1, 0;
+  x << 1.1, 2.3,
+       0.2, 1.5,
+       0.5, 0.2;
   // clang-format on
-  beta << 1, 1;
+  beta << 1, 2;
 
   y = x * beta;
 
   Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
-  Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(2);
+  Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(2);
+
+  alpha(0) = 1e-12;
 
   slope::Slope model;
 

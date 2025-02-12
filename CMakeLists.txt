@@ -40,6 +40,7 @@ if(BUILD_TESTING)
     tests/binomial.cpp
     tests/gaussian.cpp
     tests/lambda_sequence.cpp
+    tests/multinomial.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/printing.cpp

@@ -2,8 +2,10 @@ add_library(
   slope
   slope/clusters.cpp
   slope/helpers.cpp
+  slope/math.cpp
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp
+  slope/objectives/multinomial.cpp
   slope/objectives/poisson.cpp
   slope/objectives/setup_objective.cpp
   slope/qnorm.cpp

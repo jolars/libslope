@@ -49,6 +49,15 @@ public:
                            const Eigen::MatrixXd& y);
 
   /**
+   * @brief Preprocesses the response for the Gaussian model
+   * @details Checks if the response is in {0, 1} and converts it otherwise
+   *
+   * @param y Response vector (in {0,1})
+   * @return Modified response.
+   */
+  Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y);
+
+  /**
    * @brief Updates the weights and working response for the binomial objective
    * function.
    * @param w The weights.

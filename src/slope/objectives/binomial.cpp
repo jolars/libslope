@@ -7,7 +7,7 @@ double
 Binomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
   double loss =
-    eta.col(0).array().exp().log1p().sum() - y.col(0).dot(eta.col(0));
+    eta.array().exp().log1p().sum() - y.reshaped().dot(eta.reshaped());
   return loss / y.rows();
 }
 
@@ -29,7 +29,21 @@ Binomial::dual(const Eigen::MatrixXd& theta,
 Eigen::MatrixXd
 Binomial::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y.col(0).array() - 1.0 / (1.0 + (-eta).array().exp());
+  return y.array() - 1.0 / (1.0 + (-eta).array().exp());
+}
+
+Eigen::MatrixXd
+Binomial::preprocessResponse(const Eigen::MatrixXd& y)
+{
+  // Check if the response is in {0, 1} and convert it otherwise
+  Eigen::MatrixXd y_clamped = y.array().min(1.0).max(0.0);
+
+  // Throw an error if the response is not binary
+  if ((y_clamped.array() != 0.0 && y_clamped.array() != 1.0).any()) {
+    throw std::invalid_argument("Response must be binary");
+  }
+
+  return y_clamped;
 }
 
 void
@@ -39,15 +53,12 @@ Binomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                           const Eigen::VectorXd& y)
 {
   const int n = y.rows();
-  const int m = y.cols();
 
-  for (int k = 0; k < m; ++k) {
-    for (int i = 0; i < n; ++i) {
-      double p_i = sigmoid(eta(i, k));
-      p_i = clamp(p_i, p_min, 1.0 - p_min);
-      w(i, k) = p_i * (1.0 - p_i);
-      z(i, k) = eta(i, k) + (y(i, k) - p_i) / w(i, k);
-    }
+  for (int i = 0; i < n; ++i) {
+    double p_i = sigmoid(eta(i, 0));
+    p_i = clamp(p_i, p_min, 1.0 - p_min);
+    w(i, 0) = p_i * (1.0 - p_i);
+    z(i, 0) = eta(i, 0) + (y(i, 0) - p_i) / w(i, 0);
   }
 }
 

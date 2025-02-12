@@ -109,12 +109,13 @@ public:
         // First compute gradient with potential offset for intercept case
         VectorXd dual_gradient = gradient;
         if (this->intercept) {
-          double theta_mean = theta.mean();
-          theta.array() -= theta_mean;
+          Eigen::VectorXd theta_mean(1);
+          theta_mean(0) = theta.mean();
+          theta.array() -= theta_mean(0);
 
           VectorXd gradient_offset = computeGradientOffset(
             x, theta_mean, x_centers, x_scales, standardize_jit);
-          dual_gradient = gradient.colwise() + gradient_offset;
+          dual_gradient = gradient + gradient_offset;
         }
 
         // Obtain a feasible dual point by dual scaling

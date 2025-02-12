@@ -75,6 +75,16 @@ public:
                                        const Eigen::VectorXd& y) override;
 
   /**
+   * @brief Preprocesses the response for the Poisson model
+   * @details Checks if the response is non-negative and throws an error
+   * otherwise.
+   *
+   * @param y Predicted values vector (n x 1)
+   * @return Vector of residuals (n x 1)
+   */
+  Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y) override;
+
+  /**
    * @brief Updates the intercept with a
    * gradient descent update. Unlike the Gaussian and Binomial cases, the
    * Poisson regression intercept update is not quite as simple since the

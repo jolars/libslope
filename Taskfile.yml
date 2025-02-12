@@ -10,13 +10,14 @@ tasks:
 
   configure:
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
 
-  configure-debug:
+  debug:
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
 
   build:
+    deps: [configure]
     cmds:
       - cmake --build {{.BUILD_DIR}}
 
@@ -34,9 +35,8 @@ tasks:
   release:
     deps: [clean]
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+      - cmake -B {{.BUILD_DIR}} -S . -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_DOCS=ON
       - task: build
-      - task: install
 
   clean:
     cmds:
@@ -47,7 +47,6 @@ tasks:
       - cmake --install {{.BUILD_DIR}}
 
   test:
+    deps: [build]
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug
-      - cmake --build {{.BUILD_DIR}}
       - ctest --test-dir {{.BUILD_DIR}} --output-on-failure

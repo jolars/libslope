@@ -37,6 +37,16 @@ Poisson::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
   z = eta.array() - 1.0 + y.array() / w.array();
 }
 
+Eigen::MatrixXd
+Poisson::preprocessResponse(const Eigen::MatrixXd& y)
+{
+  if ((y.array() < 0).any()) {
+    throw std::invalid_argument("Response must be non-negative");
+  }
+
+  return y;
+}
+
 void
 Poisson::updateIntercept(Eigen::VectorXd& beta0,
                          const Eigen::MatrixXd& eta,
