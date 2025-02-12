@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0](https://github.com/jolars/libslope/compare/v0.5.0...v0.6.0) (2025-02-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* prepare api for multivariate families
+
+### Features
+
+* add oscar and gaussian paths ([#41](https://github.com/jolars/libslope/issues/41)) ([c3b2ae9](https://github.com/jolars/libslope/commit/c3b2ae98d83c007078a1667f41265ec88e80a31a))
+* add PGD solver ([#45](https://github.com/jolars/libslope/issues/45)) ([fb58c0a](https://github.com/jolars/libslope/commit/fb58c0a130d6806c2608ae2593b61270dad5d910)), closes [#44](https://github.com/jolars/libslope/issues/44)
+* add support for multinomial model ([#46](https://github.com/jolars/libslope/issues/46)) ([8498205](https://github.com/jolars/libslope/commit/8498205ec2192d6dd424bff636cef065cd478a7e))
+* modularize solvers ([#43](https://github.com/jolars/libslope/issues/43)) ([08cddfb](https://github.com/jolars/libslope/commit/08cddfb463e61b4e58a6f8389c453af3020731aa)), closes [#42](https://github.com/jolars/libslope/issues/42)
+* validate input to setters for Slope ([7b5bf66](https://github.com/jolars/libslope/commit/7b5bf661f923ad75d14741bdb71aa1cbede996cd))
+
+
+### Code Refactoring
+
+* prepare api for multivariate families ([3d196c0](https://github.com/jolars/libslope/commit/3d196c0a4f886222c2f9c0f361093a7ff311a116))
+
 ## [0.5.0](https://github.com/jolars/libslope/compare/v0.4.0...v0.5.0) (2025-01-31)
 
 
