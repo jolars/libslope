@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.7.0](https://github.com/jolars/libslope/compare/v0.6.0...v0.7.0) (2025-02-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* use dynamic dispatch for solver setup
+* explicitly instantiate solver matrix type combos
+
+### Features
+
+* explicitly instantiate solver matrix type combos ([ba722aa](https://github.com/jolars/libslope/commit/ba722aa24c2669db671a2121cb0f8df51330746a))
+* raise learning rate in hybrid pgd method if accept ([fd2fd6c](https://github.com/jolars/libslope/commit/fd2fd6cebe00049123d7d473c6a6e1455145381b))
+* use dynamic dispatch for solver setup ([36e32e6](https://github.com/jolars/libslope/commit/36e32e6167262f1ed294e3a5612c2972d5e1a4c4))
+
 ## [0.6.0](https://github.com/jolars/libslope/compare/v0.5.0...v0.6.0) (2025-02-12)
 
 
