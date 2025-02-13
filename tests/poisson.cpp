@@ -13,7 +13,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
   const int n = 10;
   const int p = 3;
 
-  Eigen::Matrix<double, n, p> x;
+  Eigen::MatrixXd x(10, 3);
   Eigen::VectorXd y(n);
 
   // clang-format off

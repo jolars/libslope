@@ -9,9 +9,9 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
 {
   using namespace Catch::Matchers;
 
-  Eigen::Vector<double, 3> beta;
-  Eigen::Vector<double, 10> y;
-  Eigen::Matrix<double, 10, 3> x_dense;
+  Eigen::VectorXd beta(3);
+  Eigen::VectorXd y(10);
+  Eigen::MatrixXd x_dense(10, 3);
 
   // clang-format off
   x_dense << 0.0,        0.13339576, 0.49361983,

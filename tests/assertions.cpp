@@ -9,7 +9,7 @@ TEST_CASE("Assertions", "[assertions]")
   const int n = 10;
   const int p = 3;
 
-  Eigen::Matrix<double, n, p> x;
+  Eigen::MatrixXd x(n, p);
   Eigen::MatrixXd y(n, 1);
 
   slope::Slope model;

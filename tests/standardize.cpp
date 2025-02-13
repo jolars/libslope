@@ -1,3 +1,4 @@
+#include "slope/standardize.h"
 #include "../src/slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>

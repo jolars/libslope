@@ -10,9 +10,9 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
 {
   using namespace Catch::Matchers;
 
-  Eigen::Matrix<double, 3, 2> x;
+  Eigen::MatrixXd x(3, 2);
   Eigen::Vector2d beta;
-  Eigen::Vector3d y;
+  Eigen::VectorXd y(3);
 
   // clang-format off
   x << 1.1, 2.3,
@@ -54,11 +54,11 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   using namespace Catch::Matchers;
 
   Eigen::MatrixXd x = Eigen::MatrixXd::Identity(4, 4);
-  Eigen::Vector4d y;
+  Eigen::VectorXd y(4);
   y << 8, 6, 4, 2;
 
   Eigen::ArrayXd alpha = Eigen::ArrayXd::Ones(1);
-  Eigen::Array4d lambda;
+  Eigen::ArrayXd lambda(4);
   lambda << 1, 0.75, 0.5, 0.25;
 
   slope::Slope model;
@@ -82,7 +82,7 @@ TEST_CASE("Automatic lambda and alpha", "[gaussian]")
 {
   using namespace Catch::Matchers;
 
-  Eigen::Matrix<double, 3, 2> x;
+  Eigen::MatrixXd x(3, 2);
   // clang-format off
   x << 1, 2,
        0, 1,
@@ -104,7 +104,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
   const int n = 10;
   const int p = 3;
 
-  Eigen::Matrix<double, n, p> x;
+  Eigen::MatrixXd x(n, p);
   Eigen::VectorXd beta(p);
 
   // clang-format off

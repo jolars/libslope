@@ -14,7 +14,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
   const int n = 10;
   const int p = 3;
 
-  Eigen::Matrix<double, n, p> x;
+  Eigen::MatrixXd x(n, p);
   Eigen::VectorXd beta(p);
 
   // clang-format off

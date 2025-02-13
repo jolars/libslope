@@ -9,9 +9,9 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 {
   using namespace Catch::Matchers;
 
-  Eigen::Matrix<double, 3, 2> x;
+  Eigen::MatrixXd x(3, 2);
   Eigen::Vector2d beta;
-  Eigen::Vector3d y;
+  Eigen::VectorXd y(3);
 
   // clang-format off
   x << 1, 2,
