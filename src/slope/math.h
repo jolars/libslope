@@ -178,7 +178,7 @@ computeGradient(const T& x,
   }
 
   if (standardize_jit) {
-    Eigen::VectorXd gradient(p * m);
+    Eigen::MatrixXd gradient(p, m);
 
     for (int k = 0; k < m; ++k) {
       double wr_sum = weighted_residual.col(k).sum();
