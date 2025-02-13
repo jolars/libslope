@@ -31,21 +31,58 @@ namespace solvers {
  * The switching between methods is controlled by the pgd_freq parameter, which
  * determines how often PGD steps are taken versus CD steps.
  */
-class Hybrid : public Solver<Hybrid>
+class Hybrid : public SolverBase
 {
 public:
   /**
    * @brief Construct a new Hybrid Solver
    *
-   * @tparam Args Variadic template parameters for base solver arguments
    * @param args Arguments forwarded to base solver constructor
    */
-  template<typename... Args>
-  Hybrid(Args&&... args)
-    : Solver<Hybrid>(std::forward<Args>(args)...)
+  Hybrid(double tol,
+         int max_it,
+         bool standardize_jit,
+         int print_level,
+         bool intercept,
+         bool update_clusters,
+         int pgd_freq)
+    : SolverBase(tol,
+                 max_it,
+                 standardize_jit,
+                 print_level,
+                 intercept,
+                 update_clusters,
+                 pgd_freq)
   {
   }
 
+  // Override for dense matrices
+  void run(Eigen::VectorXd& beta0,
+           Eigen::MatrixXd& beta,
+           Eigen::MatrixXd& eta,
+           Clusters& clusters,
+           const std::unique_ptr<Objective>& objective,
+           SortedL1Norm& penalty,
+           Eigen::MatrixXd& gradient,
+           const Eigen::MatrixXd& x,
+           const Eigen::VectorXd& x_centers,
+           const Eigen::VectorXd& x_scales,
+           const Eigen::MatrixXd& y) override;
+
+  // Override for sparse matrices
+  void run(Eigen::VectorXd& beta0,
+           Eigen::MatrixXd& beta,
+           Eigen::MatrixXd& eta,
+           Clusters& clusters,
+           const std::unique_ptr<Objective>& objective,
+           SortedL1Norm& penalty,
+           Eigen::MatrixXd& gradient,
+           const Eigen::SparseMatrix<double>& x,
+           const Eigen::VectorXd& x_centers,
+           const Eigen::VectorXd& x_scales,
+           const Eigen::MatrixXd& y) override;
+
+private:
   /**
    * @brief Implementation of the hybrid solver algorithm
    *
@@ -89,11 +126,6 @@ public:
     const double z_w_norm = z.cwiseProduct(w_sqrt).squaredNorm() / (2.0 * n);
 
     VectorXd residual = z - eta;
-
-    if (this->print_level > 3) {
-      printContents(w, "    weights");
-      printContents(z, "    working response");
-    }
 
     for (int it = 0; it < this->max_it_inner; ++it) {
       if (it % this->pgd_freq == 0) {
@@ -193,8 +225,6 @@ public:
     // TODO: register convergence status
   }
 
-private:
-private:
   double pgd_learning_rate =
     1.0; ///< Learning rate for proximal gradient descent steps
   double pgd_learning_rate_decr =

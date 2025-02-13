@@ -11,6 +11,9 @@ add_library(
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
   slope/slope.cpp
+  slope/solvers/pgd.cpp
+  slope/solvers/hybrid.cpp
+  slope/solvers/setup_solver.cpp
   slope/solvers/slope_threshold.cpp
   slope/sorted_l1_norm.cpp
   slope/standardize.cpp

@@ -15,6 +15,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wno-cpp")
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
+  add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
+
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 find_package(OpenMP)

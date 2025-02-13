@@ -1,5 +1,4 @@
 #include "../src/slope/slope.h"
-#include "slope/solvers/pgd.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -9,7 +8,6 @@
 TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 {
   using namespace Catch::Matchers;
-  using namespace slope::solvers;
 
   const int n = 10;
   const int p = 3;
@@ -63,7 +61,9 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     Eigen::Vector3d coef_target;
     coef_target << 1.3808558, 0.0000000, 0.3205496;
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+
+    model.fit(x, y, alpha, lambda);
 
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
@@ -73,7 +73,9 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     REQUIRE(dual_gaps.back() >= 0);
     REQUIRE(dual_gaps.back() <= 1e-4);
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+
+    model.fit(x, y, alpha, lambda);
 
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
@@ -89,7 +91,8 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     std::vector<double> coef_target = { 1.2748806, 0.0, 0.2062611 };
     double intercept_target = 0.3184528;
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
     auto coefs = model.getCoefs();
     Eigen::VectorXd coef_pgd = coefs.front();
     double intercept_pgd = model.getIntercepts().front()[0];
@@ -97,7 +100,8 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     REQUIRE_THAT(coef_pgd, VectorApproxEqual(coef_target, 1e-6));
     REQUIRE_THAT(intercept_pgd, WithinAbs(intercept_target, 1e-4));
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
     double intercept_hybrid = model.getIntercepts().front()[0];
 

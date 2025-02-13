@@ -12,6 +12,7 @@
 #include "slope/objectives/objective.h"
 #include "solver.h"
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <iostream>
 #include <memory>
 
@@ -25,22 +26,51 @@ namespace solvers {
  * search for solving the SLOPE optimization problem. It uses backtracking line
  * search to automatically adjust the learning rate for optimal convergence.
  */
-class PGD : public Solver<PGD>
+class PGD : public SolverBase
 {
 public:
-  /**
-   * @brief Construct a new PGD Solver
-   *
-   * @tparam Args Variadic template parameters for base solver arguments
-   * @param args Arguments forwarded to base solver constructor
-   */
-  template<typename... Args>
-  PGD(Args&&... args)
-    : Solver<PGD>(std::forward<Args>(args)...)
+  PGD(double tol,
+      int max_it,
+      bool standardize_jit,
+      int print_level,
+      bool intercept,
+      bool update_clusters,
+      int pgd_freq)
+    : SolverBase(tol,
+                 max_it,
+                 standardize_jit,
+                 print_level,
+                 intercept,
+                 update_clusters,
+                 pgd_freq)
     , learning_rate(1.0)
     , learning_rate_decr(0.5)
   {
   }
+
+  void run(Eigen::VectorXd& beta0,
+           Eigen::MatrixXd& beta,
+           Eigen::MatrixXd& eta,
+           Clusters& clusters,
+           const std::unique_ptr<Objective>& objective,
+           SortedL1Norm& penalty,
+           Eigen::MatrixXd& gradient,
+           const Eigen::MatrixXd& x,
+           const Eigen::VectorXd& x_centers,
+           const Eigen::VectorXd& x_scales,
+           const Eigen::MatrixXd& y) override;
+
+  void run(Eigen::VectorXd& beta0,
+           Eigen::MatrixXd& beta,
+           Eigen::MatrixXd& eta,
+           Clusters& clusters,
+           const std::unique_ptr<Objective>& objective,
+           SortedL1Norm& penalty,
+           Eigen::MatrixXd& gradient,
+           const Eigen::SparseMatrix<double>& x,
+           const Eigen::VectorXd& x_centers,
+           const Eigen::VectorXd& x_scales,
+           const Eigen::MatrixXd& y) override;
 
   /**
    * @brief Implementation of the PGD solver algorithm
@@ -58,6 +88,8 @@ public:
    * @param x_scales Feature scales for standardization
    * @param g_old Previous value of objective function
    */
+
+private:
   template<typename MatrixType>
   void runImpl(Eigen::VectorXd& beta0,
                Eigen::MatrixXd& beta,
@@ -109,7 +141,6 @@ public:
     }
   }
 
-private:
   double learning_rate;      ///< Current learning rate for gradient steps
   double learning_rate_decr; ///< Learning rate decrease factor for line search
 };

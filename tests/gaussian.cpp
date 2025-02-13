@@ -1,4 +1,3 @@
-#include "slope/solvers/pgd.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -99,7 +98,6 @@ TEST_CASE("Automatic lambda and alpha", "[gaussian]")
 TEST_CASE("Gaussian models", "[gaussian]")
 {
   using namespace Catch::Matchers;
-  using namespace slope::solvers;
 
   const int n = 10;
   const int p = 3;
@@ -147,10 +145,12 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     coef_target << 0.6864545, -0.6864545, 0.0000000;
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
@@ -169,10 +169,12 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     coef_target << 0.700657772, -0.730587233, 0.008997323;
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
@@ -186,11 +188,13 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.700657772, -0.730587234, 0.008997323;
     std::vector<double> intercept_target = { 0.040584733 };
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs = model.getCoefs().front();
     Eigen::VectorXd intercept = model.getIntercepts().front();
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
     Eigen::VectorXd intercept_pgd = model.getIntercepts().front();
 
@@ -208,11 +212,13 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     coef_target << 0.68614138, -0.68614138, 0.00000000;
 
-    model.fit<Hybrid>(x, y, alpha, lambda);
+    model.setSolver("hybrid");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs = model.getCoefs().front();
     double intercept = model.getIntercepts().front()[0];
 
-    model.fit<PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
     double intercept_pgd = model.getIntercepts().front()[0];
 

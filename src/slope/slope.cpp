@@ -6,8 +6,7 @@
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
-#include "solvers/hybrid.h"
-#include "solvers/pgd.h"
+#include "solvers/setup_solver.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
 #include "utils.h"
@@ -44,7 +43,7 @@ Slope::reset()
  * @param lambda Weights for the sorted L1 norm. If empty, computed using
  *              the specified lambda_type
  */
-template<typename SolverType, typename T>
+template<typename T>
 void
 Slope::fit(T& x,
            const Eigen::MatrixXd& y_in,
@@ -104,13 +103,16 @@ Slope::fit(T& x,
   // Setup the regularization sequence and path
   SortedL1Norm sl1_norm{ lambda };
 
-  auto solver = SolverType(this->tol,
-                           this->max_it_inner,
-                           standardize_jit,
-                           this->print_level,
-                           this->intercept,
-                           this->update_clusters,
-                           this->pgd_freq);
+  // TODO: Make this part of the slope class
+  auto solver = setupSolver(this->solver_type,
+                            this->objective,
+                            this->tol,
+                            this->max_it_inner,
+                            standardize_jit,
+                            this->print_level,
+                            this->intercept,
+                            this->update_clusters,
+                            this->pgd_freq);
 
   if (alpha.size() == 0) {
     alpha = regularizationPath(x,
@@ -200,17 +202,17 @@ Slope::fit(T& x,
         break;
       }
 
-      solver.run(beta0,
-                 beta,
-                 eta,
-                 clusters,
-                 objective,
-                 sl1_norm,
-                 gradient,
-                 x,
-                 x_centers,
-                 x_scales,
-                 y);
+      solver->run(beta0,
+                  beta,
+                  eta,
+                  clusters,
+                  objective,
+                  sl1_norm,
+                  gradient,
+                  x,
+                  x_centers,
+                  x_scales,
+                  y);
     }
 
     // Store everything for this step of the path
@@ -239,6 +241,13 @@ Slope::fit(T& x,
 
   alpha_out = alpha;
   lambda_out = lambda;
+}
+
+void
+Slope::setSolver(const std::string& solver)
+{
+  validateOption(solver, { "pgd", "hybrid" }, "solver");
+  this->solver_type = solver;
 }
 
 void
@@ -406,32 +415,18 @@ Slope::getPrimals() const
   return primals_path;
 }
 
-// Explicit instantiations for common matrix/solver combinations
+// Explicit instantiations for dense and sparse matrices
 template void
-Slope::fit<solvers::Hybrid, Eigen::MatrixXd>(Eigen::MatrixXd&,
-                                             const Eigen::MatrixXd&,
-                                             Eigen::ArrayXd,
-                                             Eigen::ArrayXd);
+Slope::fit<Eigen::MatrixXd>(Eigen::MatrixXd&,
+                            const Eigen::MatrixXd&,
+                            Eigen::ArrayXd,
+                            Eigen::ArrayXd);
 
 template void
-Slope::fit<solvers::Hybrid, Eigen::SparseMatrix<double>>(
-  Eigen::SparseMatrix<double>&,
-  const Eigen::MatrixXd&,
-  Eigen::ArrayXd,
-  Eigen::ArrayXd);
-
-template void
-Slope::fit<solvers::PGD, Eigen::MatrixXd>(Eigen::MatrixXd&,
-                                          const Eigen::MatrixXd&,
-                                          Eigen::ArrayXd,
-                                          Eigen::ArrayXd);
-
-template void
-Slope::fit<solvers::PGD, Eigen::SparseMatrix<double>>(
-  Eigen::SparseMatrix<double>&,
-  const Eigen::MatrixXd&,
-  Eigen::ArrayXd,
-  Eigen::ArrayXd);
+Slope::fit<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
+                                        const Eigen::MatrixXd&,
+                                        Eigen::ArrayXd,
+                                        Eigen::ArrayXd);
 
 // slope.cpp
 

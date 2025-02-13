@@ -5,7 +5,12 @@
 
 #pragma once
 
+#include "slope/clusters.h"
+#include "slope/objectives/objective.h"
+#include "slope/sorted_l1_norm.h"
 #include <Eigen/Core>
+#include <Eigen/Sparse>
+#include <memory>
 
 namespace slope {
 namespace solvers {
@@ -20,28 +25,16 @@ namespace solvers {
  * (CRTP). SLOPE is a method that generalizes the Lasso by penalizing the sorted
  * magnitudes of the coefficients with decreasing weights.
  */
-template<typename Derived>
-class Solver
+class SolverBase
 {
 public:
-  /**
-   * @brief Construct a new Solver
-   *
-   * @param tol Convergence tolerance
-   * @param max_it Maximum number of iterations
-   * @param standardize_jit Whether to standardize features just-in-time
-   * @param intercept Whether to fit an intercept term
-   * @param update_clusters Whether to update coefficient clusters during
-   * optimization
-   * @param pgd_freq Frequency of proximal gradient descent updates
-   */
-  Solver(double tol,
-         int max_it,
-         bool standardize_jit,
-         int print_level,
-         bool intercept,
-         bool update_clusters,
-         int pgd_freq)
+  SolverBase(double tol,
+             int max_it,
+             bool standardize_jit,
+             int print_level,
+             bool intercept,
+             bool update_clusters,
+             int pgd_freq)
     : tol(tol)
     , max_it(max_it)
     , standardize_jit(standardize_jit)
@@ -51,28 +44,42 @@ public:
     , pgd_freq(pgd_freq)
   {
   }
+  virtual ~SolverBase() = default;
 
-  /**
-   * @brief Run the solver
-   *
-   * @tparam Args Variadic template parameters for solver-specific arguments
-   * @param args Solver-specific arguments forwarded to the implementation
-   */
-  template<typename... Args>
-  void run(Args&&... args)
-  {
-    return static_cast<Derived*>(this)->runImpl(args...);
-  }
+  // All solver-specific arguments are given as parameters
+  virtual void run(Eigen::VectorXd& beta0,
+                   Eigen::MatrixXd& beta,
+                   Eigen::MatrixXd& eta,
+                   Clusters& clusters,
+                   const std::unique_ptr<Objective>& objective,
+                   SortedL1Norm& sl1_norm,
+                   Eigen::MatrixXd& gradient,
+                   const Eigen::MatrixXd& x,
+                   const Eigen::VectorXd& x_centers,
+                   const Eigen::VectorXd& x_scales,
+                   const Eigen::MatrixXd& y) = 0;
+
+  // All solver-specific arguments are given as parameters
+  virtual void run(Eigen::VectorXd& beta0,
+                   Eigen::MatrixXd& beta,
+                   Eigen::MatrixXd& eta,
+                   Clusters& clusters,
+                   const std::unique_ptr<Objective>& objective,
+                   SortedL1Norm& sl1_norm,
+                   Eigen::MatrixXd& gradient,
+                   const Eigen::SparseMatrix<double>& x,
+                   const Eigen::VectorXd& x_centers,
+                   const Eigen::VectorXd& x_scales,
+                   const Eigen::MatrixXd& y) = 0;
 
 protected:
-  double tol;           ///< Convergence tolerance
-  int max_it;           ///< Maximum number of iterations
-  bool standardize_jit; ///< Whether to standardize features just-in-time
-  int print_level;      ///< Verbosity level for solver output
-  bool intercept;       ///< Whether to fit an intercept term
-  bool update_clusters; ///< Whether to update coefficient clusters during
-                        ///< optimization
-  int pgd_freq;         ///< Frequency of proximal gradient descent updates
+  double tol;
+  int max_it;
+  bool standardize_jit;
+  int print_level;
+  bool intercept;
+  bool update_clusters;
+  int pgd_freq;
 };
 
 } // namespace solvers

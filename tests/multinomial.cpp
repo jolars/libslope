@@ -4,7 +4,6 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
-#include <slope/solvers/pgd.h>
 
 TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
 {
@@ -61,7 +60,8 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     alpha(0) = 0.0;
     lambda << 6.0, 5.0, 4.0, 3.0, 2.0, 1.0;
 
-    model.fit<slope::solvers::PGD>(x, y, alpha, lambda);
+    model.setSolver("pgd");
+    model.fit(x, y, alpha, lambda);
 
     // Get coefficients
     Eigen::MatrixXd coef = model.getCoefs().front();

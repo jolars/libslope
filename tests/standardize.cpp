@@ -1,5 +1,6 @@
 #include "slope/standardize.h"
-#include "../src/slope/slope.h"
+#include "slope/math.h"
+#include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>

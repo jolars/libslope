@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "slope/solvers/hybrid.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <cassert>
@@ -45,8 +44,16 @@ public:
     , print_level(0)
     , lambda_type("bh")
     , objective("gaussian")
+    , solver_type("hybrid")
   {
   }
+
+  /**
+   * @brief Sets the intercept flag.
+   *
+   * @param intercept Should an intercept be fitted?
+   */
+  void setSolver(const std::string& solver);
 
   /**
    * @brief Sets the intercept flag.
@@ -228,7 +235,7 @@ public:
   const std::vector<std::vector<double>>& getPrimals() const;
 
   // Declaration of the templated fit() method.
-  template<typename SolverType = solvers::Hybrid, typename T>
+  template<typename T>
   void fit(T& x,
            const Eigen::MatrixXd& y_in,
            Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
@@ -254,6 +261,7 @@ private:
   int print_level;
   std::string lambda_type;
   std::string objective;
+  std::string solver_type;
 
   // estimates
   Eigen::ArrayXd alpha_out;
