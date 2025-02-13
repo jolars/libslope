@@ -9,7 +9,6 @@
 #include "constants.h"
 #include "helpers.h"
 #include "math.h"
-#include "objectives/gaussian.h"
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
