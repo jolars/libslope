@@ -74,9 +74,6 @@ public:
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
-    const int n = x.rows();
-    const int p = x.cols();
-
     if (this->print_level > 2) {
       std::cout << "        Starting line search" << std::endl;
     }
