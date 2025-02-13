@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/jolars/libslope/compare/v0.7.0...v0.7.1) (2025-02-13)
+
+
+### Bug Fixes
+
+* correctly create gradient for standardize JIT case ([b38ec31](https://github.com/jolars/libslope/commit/b38ec318631cf43fb87e1d381d9971ee23645d49))
+
 ## [0.7.0](https://github.com/jolars/libslope/compare/v0.6.0...v0.7.0) (2025-02-13)
 
 
