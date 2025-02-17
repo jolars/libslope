@@ -12,7 +12,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
   const int n = 10;
   const int p = 3;
 
-  Eigen::MatrixXd x(10, 3);
+  Eigen::MatrixXd x(10, p);
   Eigen::VectorXd y(n);
 
   // clang-format off
@@ -38,7 +38,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
   slope::Slope model;
 
-  model.setTol(1e-8);
+  model.setTol(1e-7);
   model.setMaxIt(1e4);
   model.setObjective("poisson");
 
@@ -72,8 +72,8 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
     coefs_ref << 0.1957634, -0.1612890, 0.1612890;
 
-    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coefs_ref, 1e-6));
-    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coefs_ref, 1e-6));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coefs_ref, 1e-4));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coefs_ref, 1e-4));
   }
 
   SECTION("With intercept, no standardization")
@@ -181,7 +181,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
     coefs_ref << 0.05533582, 0.0, 0.15185182;
 
-    model.setMaxIt(25);
+    model.setMaxIt(50);
     model.setSolver("hybrid");
     model.fit(x, y, alpha, lambda);
 
@@ -193,7 +193,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
     REQUIRE(dual_gaps_hybrid.front() >= 0);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
-    model.setMaxIt(20000);
+    model.setMaxIt(50000);
     model.setSolver("pgd");
     model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();

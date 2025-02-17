@@ -64,6 +64,7 @@ public:
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
+           const std::vector<int>& working_set,
            const Eigen::MatrixXd& x,
            const Eigen::VectorXd& x_centers,
            const Eigen::VectorXd& x_scales,
@@ -77,6 +78,7 @@ public:
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
+           const std::vector<int>& working_set,
            const Eigen::SparseMatrix<double>& x,
            const Eigen::VectorXd& x_centers,
            const Eigen::VectorXd& x_scales,
@@ -105,7 +107,8 @@ private:
                Clusters& clusters,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
-               const Eigen::MatrixXd& gradient,
+               Eigen::MatrixXd& gradient_in,
+               const std::vector<int>& working_set,
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
@@ -115,7 +118,6 @@ private:
     using Eigen::VectorXd;
 
     const int n = x.rows();
-    const int p = x.cols();
 
     const double EPSILON = 1e-10;
 
@@ -123,35 +125,47 @@ private:
     VectorXd z = y;
     objective->updateWeightsAndWorkingResponse(w, z, eta, y);
     VectorXd w_sqrt = w.cwiseSqrt();
-    const double z_w_norm = z.cwiseProduct(w_sqrt).squaredNorm() / (2.0 * n);
 
     VectorXd residual = z - eta;
+    MatrixXd gradient = gradient_in;
 
     for (int it = 0; it < this->max_it_inner; ++it) {
       if (it % this->pgd_freq == 0) {
         double g = residual.cwiseAbs2().dot(w) / (2.0 * n);
-        double h = penalty.eval(beta);
+        double h = penalty.eval(beta(working_set, Eigen::all).reshaped());
         double primal_inner = g + h;
 
-        VectorXd gradient = computeGradient(
-          x, residual, x_centers, x_scales, w, this->standardize_jit);
+        updateGradient(gradient,
+                       x,
+                       residual,
+                       working_set,
+                       x_centers,
+                       x_scales,
+                       w,
+                       this->standardize_jit);
 
         VectorXd theta = residual;
 
         // First compute gradient with potential offset for intercept case
-        VectorXd dual_gradient = gradient;
+        MatrixXd dual_gradient = gradient;
         if (this->intercept) {
           Eigen::VectorXd theta_mean(1);
           theta_mean(0) = theta.mean();
           theta.array() -= theta_mean(0);
 
-          VectorXd gradient_offset = computeGradientOffset(
-            x, theta_mean, x_centers, x_scales, standardize_jit);
-          dual_gradient = gradient + gradient_offset;
+          offsetGradient(dual_gradient,
+                         x,
+                         theta_mean,
+                         working_set,
+                         x_centers,
+                         x_scales,
+                         standardize_jit);
         }
 
         // Obtain a feasible dual point by dual scaling
-        theta.array() /= std::max(1.0, penalty.dualNorm(dual_gradient));
+        theta.array() /= std::max(
+          1.0,
+          penalty.dualNorm(dual_gradient(working_set, Eigen::all).reshaped()));
 
         double dual_inner = (theta.cwiseProduct(w).dot(z) -
                              0.5 * theta.cwiseAbs2().cwiseProduct(w).sum()) /
@@ -184,6 +198,7 @@ private:
                                 residual,
                                 this->pgd_learning_rate,
                                 gradient,
+                                working_set,
                                 x,
                                 w,
                                 z,
@@ -196,6 +211,8 @@ private:
                                 this->pgd_learning_rate_decr,
                                 this->print_level);
 
+        // TODO: We might be able to speed up cluster updating since we know
+        // betas outside the active set cannot have changed
         clusters.update(beta);
       } else {
         if (this->print_level > 2) {

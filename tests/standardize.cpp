@@ -96,12 +96,30 @@ TEST_CASE("Check that in-place standardization works",
 
   REQUIRE_THAT(residual_dense, VectorApproxEqual(residual_sparse));
 
-  Eigen::VectorXd gradient_dense = slope::computeGradient(
-    x_dense, residual_dense, w, x_centers_dense, x_scales_dense, true);
-  Eigen::VectorXd gradient_sparse = slope::computeGradient(
-    x_sparse, residual_sparse, w, x_centers_sparse, x_scales_sparse, true);
+  std::vector<int> active_set = { 0, 1, 2 };
 
-  REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+  Eigen::MatrixXd gradient_dense(3, 1);
+  Eigen::MatrixXd gradient_sparse = gradient_dense;
+
+  slope::updateGradient(gradient_dense,
+                        x_dense,
+                        residual_dense,
+                        active_set,
+                        w,
+                        x_centers_dense,
+                        x_scales_dense,
+                        true);
+  slope::updateGradient(gradient_sparse,
+                        x_sparse,
+                        residual_sparse,
+                        active_set,
+                        w,
+                        x_centers_sparse,
+                        x_scales_sparse,
+                        true);
+
+  REQUIRE_THAT(gradient_dense.reshaped(),
+               VectorApproxEqual(gradient_sparse.reshaped()));
 }
 
 TEST_CASE("JIT standardization and modify-X standardization",
@@ -114,6 +132,8 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
   Eigen::MatrixXd x(n, p);
   Eigen::VectorXd beta(p);
+
+  std::vector<int> active_set = { 0, 1, 2 };
 
   // clang-format off
   x <<  0.288,   0,      0.880,
@@ -157,15 +177,27 @@ TEST_CASE("JIT standardization and modify-X standardization",
     auto [x_centers, x_scales] = slope::computeCentersAndScales(x, true);
     slope::standardizeFeatures(x, x_centers, x_scales);
 
-    Eigen::VectorXd gradient =
-      slope::computeGradient(x, residual, x_centers, x_scales, w, false);
-    Eigen::VectorXd gradient_jit =
-      slope::computeGradient(x_copy, residual, x_centers, x_scales, w, true);
-    Eigen::VectorXd gradient_sparse_jit =
-      slope::computeGradient(x_sparse, residual, x_centers, x_scales, w, true);
+    Eigen::MatrixXd gradient(3, 1);
+    Eigen::MatrixXd gradient_jit = gradient;
+    Eigen::MatrixXd gradient_sparse_jit = gradient;
 
-    REQUIRE_THAT(gradient_jit, VectorApproxEqual(gradient, 1e-6));
-    REQUIRE_THAT(gradient_sparse_jit, VectorApproxEqual(gradient, 1e-6));
+    slope::updateGradient(
+      gradient, x, residual, active_set, x_centers, x_scales, w, false);
+    slope::updateGradient(
+      gradient_jit, x_copy, residual, active_set, x_centers, x_scales, w, true);
+    slope::updateGradient(gradient_sparse_jit,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          true);
+
+    REQUIRE_THAT(gradient_jit.reshaped(),
+                 VectorApproxEqual(gradient.reshaped(), 1e-6));
+    REQUIRE_THAT(gradient_sparse_jit.reshaped(),
+                 VectorApproxEqual(gradient.reshaped(), 1e-6));
   }
 
   model.fit(x_copy, y);

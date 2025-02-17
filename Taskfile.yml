@@ -10,10 +10,6 @@ tasks:
 
   configure:
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
-
-  debug:
-    cmds:
       - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
 
   build:
@@ -50,3 +46,9 @@ tasks:
     deps: [build]
     cmds:
       - ctest --test-dir {{.BUILD_DIR}} --output-on-failure
+
+  benchmark:
+    cmds:
+      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
+      - cmake --build {{.BUILD_DIR}}
+      - ./build/tests [!benchmark]

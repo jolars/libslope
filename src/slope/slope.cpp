@@ -2,10 +2,12 @@
 #include "clusters.h"
 #include "constants.h"
 #include "helpers.h"
+#include "kkt_check.h"
 #include "math.h"
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
+#include "screening.h"
 #include "solvers/setup_solver.h"
 #include "sorted_l1_norm.h"
 #include "standardize.h"
@@ -14,6 +16,7 @@
 #include <Eigen/Sparse>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <set>
 
 namespace slope {
@@ -73,6 +76,9 @@ Slope::fit(T& x,
     standardizeFeatures(x, x_centers, x_scales);
   }
 
+  std::vector<int> full_set(p);
+  std::iota(full_set.begin(), full_set.end(), 0);
+
   std::unique_ptr<Objective> objective = setupObjective(this->objective);
 
   MatrixXd y = objective->preprocessResponse(y_in);
@@ -84,6 +90,8 @@ Slope::fit(T& x,
   beta.resize(p, m);
   beta.setZero();
   MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
+  MatrixXd residual = objective->residual(eta, y);
+  MatrixXd gradient(p, m);
 
   if (lambda.size() == 0) {
     lambda = lambdaSequence(p * m, this->q, this->lambda_type);
@@ -114,31 +122,43 @@ Slope::fit(T& x,
                             this->update_clusters,
                             this->pgd_freq);
 
-  if (alpha.size() == 0) {
-    alpha = regularizationPath(x,
-                               y,
-                               x_centers,
-                               x_scales,
-                               sl1_norm,
-                               this->path_length,
-                               this->alpha_min_ratio,
-                               this->intercept,
-                               standardize_jit);
+  updateGradient(gradient,
+                 x,
+                 residual,
+                 full_set,
+                 x_centers,
+                 x_scales,
+                 Eigen::VectorXd::Ones(n),
+                 standardize_jit);
+
+  int alpha_max_ind = whichMax(gradient.reshaped().cwiseAbs());
+  alpha_max_ind = alpha_max_ind % p;
+
+  double alpha_max;
+  std::tie(alpha, alpha_max, this->path_length) =
+    regularizationPath(alpha,
+                       gradient,
+                       sl1_norm,
+                       n,
+                       this->path_length,
+                       this->alpha_min_ratio,
+                       this->intercept,
+                       standardize_jit);
+
+  // Screening stuff
+  std::vector<int> strong_set, previous_set, working_set, inactive_set;
+  if (this->screening_type == "none") {
+    working_set = full_set;
   } else {
-    if (alpha.minCoeff() < 0) {
-      throw std::invalid_argument("alpha must be non-negative");
-    }
-    if (!alpha.isFinite().all()) {
-      throw std::invalid_argument("alpha must be finite");
-    }
-    this->path_length = alpha.size();
+    working_set = { alpha_max_ind };
   }
 
-  std::vector<double> dual_gaps;
-  std::vector<double> primals;
+  std::vector<double> dual_gaps, primals;
 
   // TODO: We should not do this for all solvers.
   Clusters clusters(beta.reshaped());
+
+  double alpha_prev = std::max(alpha_max, alpha(0));
 
   this->it_total = 0;
 
@@ -149,35 +169,74 @@ Slope::fit(T& x,
                 << std::endl;
     }
 
-    sl1_norm.setAlpha(alpha(path_step));
+    double alpha_curr = alpha(path_step);
+
+    assert(alpha_curr <= alpha_prev && "Alpha must be decreasing");
+
+    sl1_norm.setAlpha(alpha_curr);
+
+    Eigen::ArrayXd lambda_curr = alpha_curr * lambda;
+    Eigen::ArrayXd lambda_prev = alpha_prev * lambda;
+
+    if (screening_type == "strong") {
+      // TODO: Only update for inactive set, making sure gradient
+      // is updated for the active set
+      updateGradient(gradient,
+                     x,
+                     residual,
+                     full_set,
+                     x_centers,
+                     x_scales,
+                     Eigen::VectorXd::Ones(n),
+                     standardize_jit);
+
+      previous_set = previouslyActiveSet(beta);
+      strong_set = strongSet(gradient, lambda_curr, lambda_prev);
+      strong_set = setUnion(strong_set, previous_set);
+      working_set = setUnion(previous_set, { alpha_max_ind });
+    }
 
     for (int it = 0; it < this->max_it; ++it) {
+      assert(it < this->max_it - 1 && "Exceeded maximum number of iterations");
       // Compute primal, dual, and gap
-      double primal = objective->loss(eta, y) + sl1_norm.eval(beta);
+      residual = objective->residual(eta, y);
+      updateGradient(gradient,
+                     x,
+                     residual,
+                     working_set,
+                     x_centers,
+                     x_scales,
+                     Eigen::VectorXd::Ones(n),
+                     standardize_jit);
+
+      double primal = objective->loss(eta, y) +
+                      sl1_norm.eval(beta(working_set, Eigen::all).reshaped());
       primals.emplace_back(primal);
 
-      MatrixXd residual = objective->residual(eta, y);
-      MatrixXd gradient = computeGradient(x,
-                                          residual,
-                                          x_centers,
-                                          x_scales,
-                                          Eigen::VectorXd::Ones(n),
-                                          standardize_jit);
       MatrixXd theta = residual;
 
       // First compute gradient with potential offset for intercept case
       MatrixXd dual_gradient = gradient;
+
+      // TODO: Can we avoid this copy? Maybe revert offset afterwards or,
+      // alternatively, solve intercept until convergence and then no longer
+      // need the offset at all.
       if (this->intercept) {
         VectorXd theta_mean = theta.colwise().mean();
         theta.rowwise() -= theta_mean.transpose();
 
-        MatrixXd gradient_offset = computeGradientOffset(
-          x, theta_mean, x_centers, x_scales, standardize_jit);
-        dual_gradient = gradient + gradient_offset;
+        offsetGradient(dual_gradient,
+                       x,
+                       theta_mean,
+                       working_set,
+                       x_centers,
+                       x_scales,
+                       standardize_jit);
       }
 
       // Common scaling operation
-      double dual_norm = sl1_norm.dualNorm(dual_gradient);
+      double dual_norm =
+        sl1_norm.dualNorm(dual_gradient(working_set, Eigen::all).reshaped());
       theta.array() /= std::max(1.0, dual_norm);
 
       double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
@@ -199,7 +258,49 @@ Slope::fit(T& x,
       }
 
       if (std::max(dual_gap, 0.0) <= tol_scaled) {
-        break;
+        if (screening_type == "strong") {
+          updateGradient(gradient,
+                         x,
+                         residual,
+                         strong_set,
+                         x_centers,
+                         x_scales,
+                         Eigen::VectorXd::Ones(n),
+                         standardize_jit);
+
+          auto violations = setDiff(
+            kktCheck(gradient, beta, lambda_curr, strong_set), working_set);
+
+          if (this->print_level > 1) {
+            std::cout << indent(2) << "N active: " << working_set.size()
+                      << std::endl
+                      << indent(2) << "KKT violations: " << violations.size()
+                      << std::endl;
+          }
+
+          if (violations.empty()) {
+            updateGradient(gradient,
+                           x,
+                           residual,
+                           full_set,
+                           x_centers,
+                           x_scales,
+                           Eigen::VectorXd::Ones(n),
+                           standardize_jit);
+
+            violations = setDiff(
+              kktCheck(gradient, beta, lambda_curr, full_set), working_set);
+            if (violations.empty()) {
+              break;
+            } else {
+              working_set = setUnion(working_set, violations);
+            }
+          } else {
+            working_set = setUnion(working_set, violations);
+          }
+        } else {
+          break;
+        }
       }
 
       solver->run(beta0,
@@ -209,6 +310,7 @@ Slope::fit(T& x,
                   objective,
                   sl1_norm,
                   gradient,
+                  working_set,
                   x,
                   x_centers,
                   x_scales,
@@ -237,6 +339,8 @@ Slope::fit(T& x,
 
     primals_path.emplace_back(primals);
     dual_gaps_path.emplace_back(dual_gaps);
+
+    alpha_prev = alpha_curr;
   }
 
   alpha_out = alpha;
@@ -365,6 +469,13 @@ Slope::setObjective(const std::string& objective)
                  { "gaussian", "binomial", "poisson", "multinomial" },
                  "objective");
   this->objective = objective;
+}
+
+void
+Slope::setScreening(const std::string& screening_type)
+{
+  validateOption(screening_type, { "strong", "none" }, "screening_type");
+  this->screening_type = screening_type;
 }
 
 void

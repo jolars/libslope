@@ -37,4 +37,24 @@ softmax(const Eigen::MatrixXd& a)
   return out;
 }
 
+std::vector<int>
+setUnion(const std::vector<int>& a, const std::vector<int>& b)
+{
+  std::vector<int> out;
+  std::set_union(
+    a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(out));
+
+  return out;
+}
+
+std::vector<int>
+setDiff(const std::vector<int>& a, const std::vector<int>& b)
+{
+  std::vector<int> out;
+  std::set_difference(
+    a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(out));
+
+  return out;
+}
+
 } // namespace slope

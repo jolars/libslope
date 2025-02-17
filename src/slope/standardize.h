@@ -23,6 +23,8 @@ template<typename T>
 std::tuple<Eigen::VectorXd, Eigen::VectorXd>
 computeCentersAndScales(const T& x, const bool standardize)
 {
+  // TODO: Standadize flag has no effect; remove it.
+  // TODO: Make this function more general and allow other statistics.
   const int n = x.rows();
   const int p = x.cols();
 
@@ -70,6 +72,7 @@ standardizeFeatures(Eigen::DenseBase<T>& x,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales)
 {
+  // TODO: Switch name to `normalize`.
   const int n = x.rows();
   const int p = x.cols();
 
@@ -90,6 +93,7 @@ standardizeFeatures(Eigen::SparseMatrixBase<T>& x,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales)
 {
+  // TODO: Switch name to `normalize`.
   const int p = x.cols();
 
   for (int j = 0; j < p; ++j) {
