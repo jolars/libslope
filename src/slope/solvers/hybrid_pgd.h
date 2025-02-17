@@ -48,6 +48,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         Eigen::VectorXd& residual,
                         double& learning_rate,
                         const Eigen::VectorXd& gradient,
+                        const std::vector<int>& working_set,
                         const T& x,
                         const Eigen::VectorXd& w,
                         const Eigen::VectorXd& z,
@@ -61,31 +62,37 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         const int print_level)
 {
   const int n = x.rows();
-  const int p = x.cols();
 
   // Proximal gradient descent with line search
   if (print_level > 2) {
     std::cout << "        Starting line search" << std::endl;
   }
 
-  Eigen::VectorXd beta_old = beta;
+  Eigen::VectorXd beta_old = beta(working_set, 0);
+  Eigen::VectorXd gradient_active = gradient(working_set, 0);
 
   while (true) {
-    beta = sl1_norm.prox(beta_old - learning_rate * gradient, learning_rate);
+    beta(working_set, 0) =
+      sl1_norm.prox(beta_old - learning_rate * gradient_active, learning_rate);
 
-    Eigen::VectorXd beta_diff = beta - beta_old;
+    Eigen::VectorXd beta_diff = beta(working_set, 0) - beta_old;
 
     if (intercept) {
       double intercept_update = residual.dot(w) / n;
       beta0(0) += intercept_update;
     }
 
-    residual =
-      z - linearPredictor(
-            x, beta0, beta, x_centers, x_scales, standardize_jit, intercept);
+    residual = z - linearPredictor(x,
+                                   working_set,
+                                   beta0,
+                                   beta,
+                                   x_centers,
+                                   x_scales,
+                                   standardize_jit,
+                                   intercept);
 
     double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
-    double q = g_old + beta_diff.dot(gradient) +
+    double q = g_old + beta_diff.dot(gradient_active) +
                (1.0 / (2 * learning_rate)) * beta_diff.squaredNorm();
 
     if (q >= g * (1 - 1e-12)) {

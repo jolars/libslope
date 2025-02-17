@@ -48,6 +48,22 @@ public:
   {
   }
 
+  /**
+   * @brief Implementation of the PGD solver algorithm
+   *
+   * @tparam MatrixType Type of the design matrix
+   * @param beta0 Intercept term (scalar)
+   * @param beta Coefficient matrix
+   * @param residual Residual vector
+   * @param gradient Gradient vector
+   * @param x Design matrix
+   * @param w Weight vector
+   * @param z Response vector
+   * @param sl1_norm Sorted L1 norm object
+   * @param x_centers Feature centers for standardization
+   * @param x_scales Feature scales for standardization
+   * @param g_old Previous value of objective function
+   */
   void run(Eigen::VectorXd& beta0,
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
@@ -55,19 +71,8 @@ public:
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
+           const std::vector<int>& active_set,
            const Eigen::MatrixXd& x,
-           const Eigen::VectorXd& x_centers,
-           const Eigen::VectorXd& x_scales,
-           const Eigen::MatrixXd& y) override;
-
-  void run(Eigen::VectorXd& beta0,
-           Eigen::MatrixXd& beta,
-           Eigen::MatrixXd& eta,
-           Clusters& clusters,
-           const std::unique_ptr<Objective>& objective,
-           SortedL1Norm& penalty,
-           Eigen::MatrixXd& gradient,
-           const Eigen::SparseMatrix<double>& x,
            const Eigen::VectorXd& x_centers,
            const Eigen::VectorXd& x_scales,
            const Eigen::MatrixXd& y) override;
@@ -88,6 +93,18 @@ public:
    * @param x_scales Feature scales for standardization
    * @param g_old Previous value of objective function
    */
+  void run(Eigen::VectorXd& beta0,
+           Eigen::MatrixXd& beta,
+           Eigen::MatrixXd& eta,
+           Clusters& clusters,
+           const std::unique_ptr<Objective>& objective,
+           SortedL1Norm& penalty,
+           Eigen::MatrixXd& gradient,
+           const std::vector<int>& active_set,
+           const Eigen::SparseMatrix<double>& x,
+           const Eigen::VectorXd& x_centers,
+           const Eigen::VectorXd& x_scales,
+           const Eigen::MatrixXd& y) override;
 
 private:
   template<typename MatrixType>
@@ -97,12 +114,14 @@ private:
                Clusters& clusters,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
-               const Eigen::MatrixXd& gradient,
+               Eigen::MatrixXd& gradient,
+               const std::vector<int>& active_set,
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
                const Eigen::MatrixXd& y)
   {
+    using Eigen::all;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
@@ -110,26 +129,35 @@ private:
       std::cout << "        Starting line search" << std::endl;
     }
 
-    MatrixXd beta_old = beta;
+    MatrixXd beta_old = beta(active_set, all);
 
     double g_old = objective->loss(eta, y);
 
+    MatrixXd gradient_active = gradient(active_set, all);
+
     while (true) {
-      beta = penalty.prox(beta_old - this->learning_rate * gradient,
-                          this->learning_rate);
+      beta(active_set, all) =
+        penalty.prox(beta_old - this->learning_rate * gradient(active_set, all),
+                     this->learning_rate);
 
       if (intercept) {
         objective->updateIntercept(beta0, eta, y);
       }
 
-      Eigen::MatrixXd beta_diff = beta - beta_old;
+      Eigen::MatrixXd beta_diff = beta(active_set, all) - beta_old;
 
-      eta = linearPredictor(
-        x, beta0, beta, x_centers, x_scales, standardize_jit, intercept);
+      eta = linearPredictor(x,
+                            active_set,
+                            beta0,
+                            beta,
+                            x_centers,
+                            x_scales,
+                            standardize_jit,
+                            intercept);
 
       double g = objective->loss(eta, y);
       double q =
-        g_old + beta_diff.reshaped().dot(gradient.reshaped()) +
+        g_old + beta_diff.reshaped().dot(gradient_active.reshaped()) +
         (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
 
       if (q >= g * (1 - 1e-12)) {

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <Eigen/Core>
 #include <algorithm>
 #include <numeric>
 #include <set>
@@ -38,6 +39,20 @@ sort(T& v, const bool descending = false)
   } else {
     std::sort(v.data(), v.data() + v.size(), std::less<double>());
   }
+}
+
+template<typename T>
+std::vector<int>
+which(const T& x)
+{
+  std::vector<int> out;
+  for (int i = 0; i < x.size(); i++) {
+    if (x[i]) {
+      out.emplace_back(i);
+    }
+  }
+
+  return out;
 }
 
 /**

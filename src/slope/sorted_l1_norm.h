@@ -32,7 +32,7 @@ public:
    * @param beta The beta parameter.
    * @return The evaluation result.
    */
-  double eval(const Eigen::MatrixXd& beta) const;
+  double eval(const Eigen::VectorXd& beta) const;
 
   /**
    * @brief Computes the proximal operator of the Sorted L1 Norm.
@@ -47,7 +47,7 @@ public:
    * @param a The vector.
    * @return The dual norm.
    */
-  double dualNorm(const Eigen::MatrixXd& a) const;
+  double dualNorm(const Eigen::VectorXd& a) const;
 
   /**
    * @brief Sets the lambda parameter.

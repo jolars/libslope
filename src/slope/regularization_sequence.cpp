@@ -67,4 +67,46 @@ lambdaSequence(const int p,
   return lambda;
 }
 
+std::tuple<Eigen::ArrayXd, double, int>
+regularizationPath(const Eigen::ArrayXd& alpha_in,
+                   const Eigen::MatrixXd& gradient,
+                   const SortedL1Norm& penalty,
+                   const int n,
+                   const int path_length,
+                   double alpha_min_ratio,
+                   const bool intercept,
+                   const bool standardize_jit)
+{
+  const int p = gradient.rows();
+  const int m = gradient.cols();
+
+  double alpha_max = penalty.dualNorm(gradient.reshaped());
+
+  if (alpha_in.size() != 0) {
+    // User-supplied alpha sequence; just check it
+    if (alpha_in.minCoeff() < 0) {
+      throw std::invalid_argument("alpha must be non-negative");
+    }
+    if (!alpha_in.isFinite().all()) {
+      throw std::invalid_argument("alpha must be finite");
+    }
+
+    return { alpha_in, alpha_max, alpha_in.size() };
+  }
+
+  if (alpha_min_ratio < 0) {
+    alpha_min_ratio = n > p * m ? 1e-4 : 1e-2;
+  }
+
+  Eigen::ArrayXd alpha(path_length);
+
+  double div = path_length - 1;
+
+  for (int i = 0; i < path_length; ++i) {
+    alpha(i) = alpha_max * std::pow(alpha_min_ratio, i / div);
+  }
+
+  return { alpha, alpha_max, path_length };
+}
+
 } // namespace slope

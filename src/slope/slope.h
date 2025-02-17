@@ -32,19 +32,20 @@ public:
     : intercept(true)
     , standardize(true)
     , update_clusters(false)
+    , modify_x(false)
     , alpha_min_ratio(-1)
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
-    , max_it_inner(1e6)
     , max_it(1e4)
+    , max_it_inner(1e6)
     , path_length(100)
     , pgd_freq(10)
-    , modify_x(false)
     , print_level(0)
     , lambda_type("bh")
     , objective("gaussian")
     , solver_type("hybrid")
+    , screening_type("strong")
   {
   }
 
@@ -174,6 +175,17 @@ public:
   void setObjective(const std::string& objective);
 
   /**
+   * @brief Sets the type of feature screening used, which discards predictors
+   * that are unlikely to be active.
+   *
+   * @param screening_type Type of screening. Supported values are:
+   * are:
+   *   - "strong": Strong screening rule ()
+   *   - "none": No screening
+   */
+  void setScreening(const std::string& screening_type);
+
+  /**
    * @brief Controls if `x` should be modified-in-place.
    * @details If `true`, then `x` will be modified in place if
    *   it is standardized. In case when `x` is dense, it will be both
@@ -262,6 +274,7 @@ private:
   std::string lambda_type;
   std::string objective;
   std::string solver_type;
+  std::string screening_type;
 
   // estimates
   Eigen::ArrayXd alpha_out;

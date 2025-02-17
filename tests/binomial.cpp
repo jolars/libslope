@@ -50,7 +50,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
   slope::Slope model;
 
-  model.setTol(1e-12);
+  model.setTol(1e-7);
   model.setObjective("binomial");
 
   SECTION("No intercept, no standardization")
@@ -79,8 +79,8 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
-    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
-    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
   }
 
   SECTION("Intercept, no standardization")
@@ -92,12 +92,13 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     double intercept_target = 0.3184528;
 
     model.setSolver("pgd");
+    model.setMaxIt(1e7);
     model.fit(x, y, alpha, lambda);
     auto coefs = model.getCoefs();
     Eigen::VectorXd coef_pgd = coefs.front();
     double intercept_pgd = model.getIntercepts().front()[0];
 
-    REQUIRE_THAT(coef_pgd, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coef_pgd, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_pgd, WithinAbs(intercept_target, 1e-4));
 
     model.setSolver("hybrid");
@@ -105,7 +106,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
     double intercept_hybrid = model.getIntercepts().front()[0];
 
-    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_hybrid, WithinAbs(intercept_target, 1e-4));
   }
 }

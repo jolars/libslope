@@ -7,6 +7,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <Eigen/Sparse>
 #include <numeric>
 #include <vector>
 
@@ -118,6 +119,7 @@ softmax(const Eigen::MatrixXd& x);
 template<typename T>
 Eigen::MatrixXd
 linearPredictor(const T& x,
+                const std::vector<int>& active_set,
                 const Eigen::VectorXd& beta0,
                 const Eigen::MatrixXd& beta,
                 const Eigen::VectorXd& x_centers,
@@ -129,15 +131,22 @@ linearPredictor(const T& x,
   int p = x.cols();
   int m = beta.cols();
 
-  Eigen::MatrixXd eta(n, m);
+  Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(n, m);
 
   if (standardize_jit) {
     for (int k = 0; k < m; ++k) {
-      eta.col(k) = x * beta.col(k).cwiseQuotient(x_scales);
-      eta.col(k).array() -= x_centers.cwiseQuotient(x_scales).dot(beta.col(k));
+      for (const auto& j : active_set) {
+        eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
+        eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
+      }
     }
   } else {
-    eta = x * beta;
+    // eta = x(Eigen::all, active_set) * beta(active_set);
+    for (int k = 0; k < m; ++k) {
+      for (const auto& j : active_set) {
+        eta.col(k) += x.col(j) * beta(j, k);
+      }
+    }
   }
 
   if (intercept) {
@@ -159,42 +168,48 @@ linearPredictor(const T& x,
  * @return The computed gradient vector.
  */
 template<typename T>
-Eigen::MatrixXd
-computeGradient(const T& x,
-                const Eigen::MatrixXd& residual,
-                const Eigen::VectorXd& x_centers,
-                const Eigen::VectorXd& x_scales,
-                const Eigen::VectorXd& w,
-                const bool standardize_jit)
+void
+updateGradient(Eigen::MatrixXd& gradient,
+               const T& x,
+               const Eigen::MatrixXd& residual,
+               const std::vector<int>& active_set,
+               const Eigen::VectorXd& x_centers,
+               const Eigen::VectorXd& x_scales,
+               const Eigen::VectorXd& w,
+               const bool standardize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
   const int m = residual.cols();
 
-  Eigen::MatrixXd weighted_residual(residual.rows(), residual.cols());
+  assert(gradient.rows() == p && gradient.cols() == m &&
+         "Gradient matrix has incorrect dimensions");
+
+  Eigen::MatrixXd weighted_residual(n, m);
 
   for (int k = 0; k < m; ++k) {
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
   }
 
   if (standardize_jit) {
-    Eigen::MatrixXd gradient(p, m);
-
     for (int k = 0; k < m; ++k) {
       double wr_sum = weighted_residual.col(k).sum();
 
-      for (int j = 0; j < p; ++j) {
+      for (const auto& j : active_set) {
         gradient(j, k) =
           -(x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
           (x_scales(j) * n);
       }
     }
-
-    return gradient;
+  } else {
+    for (int k = 0; k < m; ++k) {
+      for (const auto& j : active_set) {
+        gradient(j, k) = -x.col(j).dot(weighted_residual.col(k)) / n;
+      }
+    }
   }
-
   // No standardization or already standardized in place
-  return -(x.transpose() * weighted_residual) / n;
+  // return -(x(Eigen::all, active_set).transpose() * weighted_residual) / n;
 }
 
 /**
@@ -209,39 +224,52 @@ computeGradient(const T& x,
  * @return The computed gradient vector.
  */
 template<typename T>
-Eigen::MatrixXd
-computeGradientOffset(const T& x,
-                      const Eigen::VectorXd& offset,
-                      const Eigen::VectorXd& x_centers,
-                      const Eigen::VectorXd& x_scales,
-                      const bool standardize_jit)
+void
+offsetGradient(Eigen::MatrixXd& gradient,
+               const T& x,
+               const Eigen::VectorXd& offset,
+               const std::vector<int>& active_set,
+               const Eigen::VectorXd& x_centers,
+               const Eigen::VectorXd& x_scales,
+               const bool standardize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
   const int m = offset.rows();
 
-  Eigen::MatrixXd out(p, m);
+  assert(gradient.rows() == p && gradient.cols() == m &&
+         "Gradient matrix has incorrect dimensions");
 
   if (standardize_jit) {
     // This is not necessary if x_centers are already the means, but
     // it is included in case later on we want to use something
     // other than means for the centers.
     for (int k = 0; k < m; ++k) {
-      for (int j = 0; j < p; ++j) {
-        out(j) = offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+      for (const auto& j : active_set) {
+        gradient(j, k) +=
+          offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
       }
     }
   } else {
-    // return x.colwise().mean().array() * offset;
     for (int k = 0; k < m; ++k) {
-      for (int j = 0; j < p; ++j) {
-        out(j, k) = offset(k) * x.col(j).sum() / n;
+      for (const auto& j : active_set) {
+        gradient(j, k) += offset(k) * x.col(j).sum() / n;
       }
     }
   }
+}
 
-  // No standardization or already standardized in place
-  return out;
+std::vector<int>
+setUnion(const std::vector<int>& a, const std::vector<int>& b);
+
+std::vector<int>
+setDiff(const std::vector<int>& a, const std::vector<int>& b);
+
+template<typename T>
+int
+whichMax(const T& x)
+{
+  return std::distance(x.begin(), std::max_element(x.begin(), x.end()));
 }
 
 } // namespace slope

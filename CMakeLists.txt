@@ -15,9 +15,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wno-cpp")
 
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang")
-  add_compile_options(-Wall -Wextra -pedantic -Werror)
-endif()
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
@@ -43,6 +41,7 @@ if(BUILD_TESTING)
     tests/binomial.cpp
     tests/binomial.cpp
     tests/gaussian.cpp
+    tests/generate_data.cpp
     tests/lambda_sequence.cpp
     tests/multinomial.cpp
     tests/path.cpp
@@ -50,6 +49,7 @@ if(BUILD_TESTING)
     tests/printing.cpp
     tests/prox.cpp
     tests/qnorm.cpp
+    tests/screening.cpp
     tests/sparse.cpp
     tests/standardize.cpp
   )

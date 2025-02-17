@@ -54,40 +54,14 @@ lambdaSequence(const int p,
  * @return Eigen::ArrayXd containing the sequence of regularization parameters
  *         from strongest (alpha_max) to weakest (alpha_max * alpha_min_ratio)
  */
-template<typename T>
-Eigen::ArrayXd
-regularizationPath(const T& x,
-                   const Eigen::MatrixXd& y,
-                   const Eigen::VectorXd& x_centers,
-                   const Eigen::VectorXd& x_scales,
+std::tuple<Eigen::ArrayXd, double, int>
+regularizationPath(const Eigen::ArrayXd& alpha_in,
+                   const Eigen::MatrixXd& gradient,
                    const SortedL1Norm& penalty,
+                   const int n,
                    const int path_length,
                    double alpha_min_ratio,
                    const bool intercept,
-                   const bool standardize_jit)
-{
-  const int n = x.rows();
-  const int p = x.cols();
-  const int m = y.cols();
-
-  if (alpha_min_ratio < 0) {
-    alpha_min_ratio = n > p * m ? 1e-4 : 1e-2;
-  }
-
-  auto gradient = computeGradient(
-    x, y, x_centers, x_scales, Eigen::VectorXd::Ones(n), standardize_jit);
-
-  double alpha_max = penalty.dualNorm(gradient);
-
-  Eigen::ArrayXd alpha(path_length);
-
-  double div = path_length - 1;
-
-  for (int i = 0; i < path_length; ++i) {
-    alpha[i] = alpha_max * std::pow(alpha_min_ratio, i / div);
-  }
-
-  return alpha;
-}
+                   const bool standardize_jit);
 
 } // namespace slope

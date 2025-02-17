@@ -2,6 +2,7 @@ add_library(
   slope
   slope/clusters.cpp
   slope/helpers.cpp
+  slope/kkt_check.cpp
   slope/math.cpp
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp
@@ -10,6 +11,7 @@ add_library(
   slope/objectives/setup_objective.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
+  slope/screening.cpp
   slope/slope.cpp
   slope/solvers/pgd.cpp
   slope/solvers/hybrid.cpp

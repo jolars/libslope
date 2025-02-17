@@ -8,16 +8,17 @@ SortedL1Norm::SortedL1Norm(const Eigen::ArrayXd& lambda)
 }
 
 double
-SortedL1Norm::eval(const Eigen::MatrixXd& beta) const
+SortedL1Norm::eval(const Eigen::VectorXd& beta) const
 {
-  Eigen::ArrayXd beta_abs = beta.reshaped().array().abs();
+  Eigen::ArrayXd beta_abs = beta.array().abs();
   sort(beta_abs, true);
-  return alpha * (beta_abs * lambda).sum();
+  return alpha * (beta_abs * lambda.head(beta_abs.size())).sum();
 }
 
 Eigen::MatrixXd
 SortedL1Norm::prox(const Eigen::MatrixXd& beta, const double scale) const
 {
+  // TODO: Avoid copying beta
   using namespace Eigen;
 
   // const int p = beta.rows();
@@ -98,10 +99,11 @@ SortedL1Norm::getLambdaRef() const
 }
 
 double
-SortedL1Norm::dualNorm(const Eigen::MatrixXd& gradient) const
+SortedL1Norm::dualNorm(const Eigen::VectorXd& gradient) const
 {
+  int p = gradient.size();
 
-  Eigen::ArrayXd abs_gradient = gradient.reshaped().array().abs();
+  Eigen::ArrayXd abs_gradient = gradient.cwiseAbs();
   sort(abs_gradient, true);
 
   if (this->alpha == 0 || this->lambda.sum() == 0) {
@@ -111,7 +113,7 @@ SortedL1Norm::dualNorm(const Eigen::MatrixXd& gradient) const
     return (cumSum(abs_gradient) / 1e-6).maxCoeff();
   }
 
-  return (cumSum(abs_gradient) / (this->alpha * cumSum(this->lambda)))
+  return (cumSum(abs_gradient) / (this->alpha * cumSum(this->lambda.head(p))))
     .maxCoeff();
 }
 
