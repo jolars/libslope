@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/jolars/libslope/compare/v0.7.0...v0.8.0) (2025-02-17)
+
+
+### Features
+
+* add strong screening rule ([#53](https://github.com/jolars/libslope/issues/53)) ([5d4dee3](https://github.com/jolars/libslope/commit/5d4dee32e5dc78098d04f863499d0baed1c76c6f)), closes [#33](https://github.com/jolars/libslope/issues/33)
+
+
+### Bug Fixes
+
+* correctly create gradient for standardize JIT case ([b38ec31](https://github.com/jolars/libslope/commit/b38ec318631cf43fb87e1d381d9971ee23645d49))
+
 ## [0.7.0](https://github.com/jolars/libslope/compare/v0.6.0...v0.7.0) (2025-02-13)
 
 
