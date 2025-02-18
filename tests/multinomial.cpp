@@ -1,3 +1,4 @@
+#include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -43,6 +44,7 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
   slope::Slope model;
 
   model.setObjective("multinomial");
+  model.setSolver("pgd");
   model.setMaxIt(1000);
   model.setTol(1e-6);
 
@@ -60,7 +62,6 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     alpha(0) = 0.0;
     lambda << 6.0, 5.0, 4.0, 3.0, 2.0, 1.0;
 
-    model.setSolver("pgd");
     model.fit(x, y, alpha, lambda);
 
     // Get coefficients
@@ -77,5 +78,21 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     auto gaps = model.getDualGaps().front();
 
     REQUIRE(gaps.back() <= 1e-6);
+  }
+
+  SECTION("Path")
+  {
+    auto data = generateData(200, 20, "multinomial", 3, 0.4, 0.5, 93);
+
+    model.setTol(1e-4);
+    model.fit(data.x, data.y);
+
+    auto null_deviance = model.getNullDeviance();
+    auto deviances = model.getDeviances();
+
+    REQUIRE(null_deviance >= 0);
+    REQUIRE(deviances.size() > 0);
+    REQUIRE(deviances.size() < 100);
+    REQUIRE_THAT(deviances, VectorMonotonic(false, true));
   }
 }

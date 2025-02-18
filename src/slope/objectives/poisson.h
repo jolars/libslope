@@ -97,6 +97,13 @@ public:
   void updateIntercept(Eigen::VectorXd& beta0,
                        const Eigen::MatrixXd& eta,
                        const Eigen::MatrixXd& y) override;
+
+  /**
+   * @brief The link function
+   * @param eta Linear predictor.
+   * @return The result of applying the link function.
+   */
+  Eigen::MatrixXd link(const Eigen::MatrixXd& eta) override;
 };
 
 } // namespace slope

@@ -1,3 +1,4 @@
+#include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -66,5 +67,38 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     coef_true = { 0.4487011, 0.6207310 };
     coef = coefs[2];
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-5));
+  }
+
+  SECTION("Early stopping")
+  {
+    slope::Slope model;
+    model.setPathLength(100);
+    model.setPrintLevel(1);
+
+    auto data = generateData(100, 200);
+
+    model.fit(data.x, data.y);
+
+    auto null_deviance = model.getNullDeviance();
+    auto deviances = model.getDeviances();
+
+    int path_length = deviances.size();
+
+    REQUIRE(null_deviance >= 0);
+    REQUIRE(deviances.size() > 0);
+    REQUIRE(deviances.size() < 100);
+    REQUIRE_THAT(deviances, VectorMonotonic(false, true));
+
+    model.setDevRatioTol(0.99);
+    model.fit(data.x, data.y);
+
+    REQUIRE(model.getDeviances().size() < path_length);
+
+    path_length = model.getDeviances().size();
+
+    model.setDevChangeTol(0.1);
+    model.fit(data.x, data.y);
+
+    REQUIRE(model.getDeviances().size() < path_length);
   }
 }
