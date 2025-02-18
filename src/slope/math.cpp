@@ -22,7 +22,6 @@ logSumExp(const Eigen::MatrixXd& a)
 Eigen::MatrixXd
 softmax(const Eigen::MatrixXd& a)
 {
-  int n = a.rows();
   int m = a.cols();
 
   Eigen::VectorXd max_vals = a.rowwise().maxCoeff();

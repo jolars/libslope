@@ -73,7 +73,6 @@ standardizeFeatures(Eigen::DenseBase<T>& x,
                     const Eigen::VectorXd& x_scales)
 {
   // TODO: Switch name to `normalize`.
-  const int n = x.rows();
   const int p = x.cols();
 
   for (int j = 0; j < p; ++j) {

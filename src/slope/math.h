@@ -128,7 +128,6 @@ linearPredictor(const T& x,
                 const bool intercept)
 {
   int n = x.rows();
-  int p = x.cols();
   int m = beta.cols();
 
   Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(n, m);
