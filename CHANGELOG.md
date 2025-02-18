@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/jolars/libslope/compare/v0.8.0...v0.9.0) (2025-02-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* reparameterize the penalty ([#55](https://github.com/jolars/libslope/issues/55))
+
+### Code Refactoring
+
+* reparameterize the penalty ([#55](https://github.com/jolars/libslope/issues/55)) ([713b892](https://github.com/jolars/libslope/commit/713b8923c6ed63d1d89a9b9a36c759dac554505a))
+
 ## [0.8.0](https://github.com/jolars/libslope/compare/v0.7.0...v0.8.0) (2025-02-17)
 
 
