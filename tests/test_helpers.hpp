@@ -64,3 +64,66 @@ VectorApproxEqual(const Range& range, const double eps = 1e-8)
 {
   return VectorApproxEqualMatcher<Range>{ range, eps };
 }
+
+template<typename Dummy = void>
+struct VectorMonotonicMatcher : Catch::Matchers::MatcherGenericBase
+{
+  VectorMonotonicMatcher(bool increasing, bool strict)
+    : increasing{ increasing }
+    , strict{ strict }
+  {
+  }
+
+  template<typename Range>
+  bool match(const Range& range) const
+  {
+    if (range.size() < 2) {
+      // A single-element (or empty) vector is trivially monotonic.
+      return true;
+    }
+    for (size_t i = 0; i < range.size() - 1; ++i) {
+      if (increasing) {
+        if (strict) {
+          if (!(range[i] < range[i + 1])) {
+            return false;
+          }
+        } else {
+          if (!(range[i] <= range[i + 1])) {
+            return false;
+          }
+        }
+      } else { // decreasing order expected
+        if (strict) {
+          if (!(range[i] > range[i + 1])) {
+            return false;
+          }
+        } else {
+          if (!(range[i] >= range[i + 1])) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  std::string describe() const override
+  {
+    std::string order = increasing ? "increasing" : "decreasing";
+    if (!strict) {
+      order = "non" + order;
+    }
+    return "is " + order;
+  }
+
+private:
+  bool increasing;
+  bool strict;
+};
+
+inline auto
+VectorMonotonic(bool increasing = true, bool strict = false)
+  -> VectorMonotonicMatcher<>
+{
+  return VectorMonotonicMatcher<>{ increasing, strict };
+}

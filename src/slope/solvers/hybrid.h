@@ -9,6 +9,7 @@
 #include "hybrid_cd.h"
 #include "hybrid_pgd.h"
 #include "slope/clusters.h"
+#include "slope/constants.h"
 #include "slope/helpers.h"
 #include "slope/objectives/objective.h"
 #include "slope/sorted_l1_norm.h"
@@ -122,8 +123,6 @@ private:
 
     const int n = x.rows();
 
-    const double EPSILON = 1e-10;
-
     VectorXd w = VectorXd::Ones(n);
     VectorXd z = y;
     objective->updateWeightsAndWorkingResponse(w, z, eta, y);
@@ -180,7 +179,8 @@ private:
 
         assert(dual_gap_inner > -1e-5 && "Inner dual gap should be positive");
 
-        double tol_inner = (std::abs(primal_inner) + EPSILON) * this->tol;
+        double tol_inner =
+          (std::abs(primal_inner) + constants::EPSILON) * this->tol;
 
         if (this->print_level > 2) {
           std::cout << indent(2) << "iteration: " << it << std::endl

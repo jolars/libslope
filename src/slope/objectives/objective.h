@@ -110,6 +110,46 @@ public:
     beta0 += residual.colwise().mean() / this->lipschitz_constant;
   };
 
+  /**
+   * @brief The link function
+   * @param eta Linear predictor.
+   * @return The result of applyin the link function.
+   */
+  virtual Eigen::MatrixXd link(const Eigen::MatrixXd& eta) = 0;
+
+  /**
+   * @brief Computes deviance, which is just twice the loss function
+   * @param eta The predicted values.
+   * @param y The true values.
+   */
+  virtual double deviance(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
+  {
+    return 2 * this->loss(eta, y);
+  }
+
+  /**
+   * @brief Computes null deviance.
+   * @param y The response matrix.
+   * @param intercept Whether an intercept should be fit.
+   */
+  double nullDeviance(const Eigen::MatrixXd& y, const bool intercept)
+  {
+    int n = y.rows();
+    int m = y.cols();
+
+    Eigen::MatrixXd eta(n, m);
+
+    if (intercept) {
+      Eigen::RowVectorXd beta0(m);
+      beta0 = this->link(y.colwise().mean());
+      eta.rowwise() = beta0;
+    } else {
+      eta.setZero();
+    }
+
+    return deviance(eta, y);
+  }
+
 protected:
   explicit Objective(double lipschitz_constant)
     : lipschitz_constant(lipschitz_constant)

@@ -26,6 +26,7 @@ Slope::reset()
 {
   this->dual_gaps_path.clear();
   this->primals_path.clear();
+  this->deviances.clear();
   this->betas.clear();
   this->beta0s.clear();
   this->it_total = 0;
@@ -62,9 +63,10 @@ Slope::fit(T& x,
   reset(); // Reset all internal variables
 
   if (n != y_in.rows()) {
-    throw std::invalid_argument("x and y must have the same number of rows");
+    throw std::invalid_argument("x and y_in must have the same number of rows");
   }
 
+  // TODO: This is not very tidy. We should have a better way to handle this.
   const bool sparse_x = std::is_base_of_v<Eigen::SparseMatrixBase<T>, T>;
   const bool standardize_jit =
     (!sparse_x && this->standardize && !this->modify_x) ||
@@ -93,7 +95,9 @@ Slope::fit(T& x,
   MatrixXd residual = objective->residual(eta, y);
   MatrixXd gradient(p, m);
 
-  if (lambda.size() == 0) {
+  bool user_alpha = alpha.size() > 0;
+
+  if (!user_alpha) {
     lambda = lambdaSequence(p * m, this->q, this->lambda_type);
   } else {
     if (lambda.size() != p * m) {
@@ -152,7 +156,9 @@ Slope::fit(T& x,
     working_set = { alpha_max_ind };
   }
 
+  // Path variables
   std::vector<double> dual_gaps, primals;
+  this->null_deviance = objective->nullDeviance(y, intercept);
 
   // TODO: We should not do this for all solvers.
   Clusters clusters(beta.reshaped());
@@ -246,7 +252,7 @@ Slope::fit(T& x,
 
       dual_gaps.emplace_back(dual_gap);
 
-      double tol_scaled = (std::abs(primal) + EPSILON) * this->tol;
+      double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
 
       if (this->print_level > 1) {
         std::cout << indent(1) << "Outer iteration: " << it << std::endl
@@ -341,6 +347,31 @@ Slope::fit(T& x,
     dual_gaps_path.emplace_back(dual_gaps);
 
     alpha_prev = alpha_curr;
+
+    // Compute early stopping criteria
+    double dev = objective->deviance(eta, y);
+    double dev_ratio = 1.0 - dev / this->null_deviance;
+    double dev_change =
+      this->deviances.empty()
+        ? 1.0
+        : (this->deviances.back() - dev) / this->deviances.back();
+
+    this->deviances.emplace_back(dev);
+
+    clusters.update(beta.reshaped());
+
+    if (this->print_level > 0) {
+      std::cout << indent(1) << "N clusters: " << clusters.n_clusters()
+                << ", dev: " << dev << ", dev ratio: " << dev_ratio
+                << ", dev change: " << dev_change << std::endl;
+    }
+
+    if (!user_alpha) {
+      if (dev_ratio > dev_ratio_tol || dev_change < dev_change_tol ||
+          clusters.n_clusters() >= this->max_clusters.value_or(n + 1)) {
+        break;
+      }
+    }
   }
 
   alpha_out = alpha;
@@ -484,6 +515,36 @@ Slope::setModifyX(const bool modify_x)
   this->modify_x = modify_x;
 }
 
+void
+Slope::setDevChangeTol(const double dev_change_tol)
+{
+  if (dev_change_tol < 0 || dev_change_tol > 1) {
+    throw std::invalid_argument("dev_change_tol must be in [0, 1]");
+  }
+
+  this->dev_change_tol = dev_change_tol;
+}
+
+void
+Slope::setDevRatioTol(const double dev_ratio_tol)
+{
+  if (dev_ratio_tol < 0 || dev_ratio_tol > 1) {
+    throw std::invalid_argument("dev_ratio_tol must be in [0, 1]");
+  }
+
+  this->dev_ratio_tol = dev_ratio_tol;
+}
+
+void
+Slope::setMaxClusters(const int max_clusters)
+{
+  if (max_clusters < 1) {
+    throw std::invalid_argument("max_clusters must be >= 1");
+  }
+
+  this->max_clusters = max_clusters;
+}
+
 const Eigen::ArrayXd&
 Slope::getAlpha() const
 {
@@ -524,6 +585,18 @@ const std::vector<std::vector<double>>&
 Slope::getPrimals() const
 {
   return primals_path;
+}
+
+const std::vector<double>&
+Slope::getDeviances() const
+{
+  return deviances;
+}
+
+const double&
+Slope::getNullDeviance() const
+{
+  return null_deviance;
 }
 
 // Explicit instantiations for dense and sparse matrices

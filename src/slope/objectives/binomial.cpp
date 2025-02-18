@@ -1,4 +1,5 @@
 #include "binomial.h"
+#include "../constants.h"
 #include "../math.h"
 
 namespace slope {
@@ -59,5 +60,24 @@ Binomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
     z(i, 0) = eta(i, 0) + (y(i, 0) - p_i) / w(i, 0);
   }
 }
+
+Eigen::MatrixXd
+Binomial::link(const Eigen::MatrixXd& eta)
+{
+  return eta.unaryExpr([](const double& x) {
+    return logit(std::clamp(x, constants::P_MIN, constants::P_MAX));
+  });
+}
+
+// double
+// Binomial::nullDeviance(const Eigen::MatrixXd& y, const bool intercept)
+// {
+//   double beta0 = intercept ? logit(y.mean()) : 0.0;
+//
+//   Eigen::MatrixXd eta(y.rows(), y.cols());
+//   eta.setConstant(beta0);
+//
+//   return deviance(eta, y);
+// }
 
 } // namespace slope

@@ -1,4 +1,5 @@
 #include "multinomial.h"
+#include "../constants.h"
 #include "../math.h"
 
 namespace slope {
@@ -71,6 +72,14 @@ Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
 {
   // Not implemented
   // TODO: Create not-implmented error, maybe as part of parent class.
+}
+
+Eigen::MatrixXd
+Multinomial::link(const Eigen::MatrixXd& eta)
+{
+  return eta.unaryExpr([](const double& x) {
+    return logit(std::clamp(x, constants::P_MIN, constants::P_MAX));
+  });
 }
 
 // TODO: Consider adjusting the coefficients somehow.

@@ -59,4 +59,10 @@ Poisson::updateIntercept(Eigen::VectorXd& beta0,
   beta0(0) -= grad / hess;
 }
 
+Eigen::MatrixXd
+Poisson::link(const Eigen::MatrixXd& eta)
+{
+  return eta.array().log();
+}
+
 } // namespace slope

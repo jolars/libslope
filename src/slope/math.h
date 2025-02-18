@@ -70,6 +70,24 @@ sigmoid(const T& x)
 }
 
 /**
+ * The logit
+ *
+ * The logit function is defined as \f$\log(\frac{x}{1 - x})\f$.
+ *
+ * @tparam T The type of the input.
+ * @param x The input value.
+ * @return The result of the logit function.
+ */
+template<typename T>
+T
+logit(const T& x)
+{
+  assert(x > 0 && x < 1 && "Input must be in (0, 1)");
+
+  return std::log(x) - std::log1p(-x);
+}
+
+/**
  * Returns the value of x clamped between the specified lower and upper bounds.
  *
  * @tparam T the type of the values being clamped

@@ -40,4 +40,21 @@ Gaussian::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
   z = y;
 }
 
+Eigen::MatrixXd
+Gaussian::link(const Eigen::MatrixXd& eta)
+{
+  return eta;
+}
+
+// double
+// Gaussian::nullDeviance(const Eigen::MatrixXd& y, const bool intercept)
+// {
+//   double beta0 = intercept ? y.mean() : 0.0;
+//
+//   Eigen::MatrixXd eta(y.rows(), y.cols());
+//   eta.setConstant(beta0);
+//
+//   return deviance(eta, y);
+// }
+
 } // namespace slope

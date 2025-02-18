@@ -8,6 +8,7 @@
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <cassert>
+#include <optional>
 #include <vector>
 
 namespace slope {
@@ -30,10 +31,12 @@ public:
    */
   Slope()
     : intercept(true)
+    , modify_x(false)
     , standardize(true)
     , update_clusters(false)
-    , modify_x(false)
-    , alpha_min_ratio(-1)
+    , alpha_min_ratio(-1) // TODO: Use std::optional for alpha_min_ratio
+    , dev_change_tol(1e-5)
+    , dev_ratio_tol(0.999)
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
@@ -42,10 +45,11 @@ public:
     , path_length(100)
     , pgd_freq(10)
     , print_level(0)
+    , max_clusters(std::optional<int>())
     , lambda_type("bh")
     , objective("gaussian")
-    , solver_type("hybrid")
     , screening_type("strong")
+    , solver_type("hybrid")
   {
   }
 
@@ -195,6 +199,28 @@ public:
   void setModifyX(const bool objective);
 
   /**
+   * @brief Sets tolerance in deviance change for early stopping.
+   * @param dev_change_tol The tolerance for the change in deviance.
+   */
+  void setDevChangeTol(const double dev_change_tol);
+
+  /**
+   * @brief Sets tolerance in deviance change for early stopping.
+   * @param dev_ratio_tol The tolerance for the dev ratio. If the deviance
+   * exceeds this value, the path will terminate.
+   */
+  void setDevRatioTol(const double dev_ratio_tol);
+
+  /**
+   * @brief Sets tolerance in deviance change for early stopping.
+   * @param max_clusters The maximum number of clusters. SLOPE
+   * can (theoretically) select at most select min(n, p) clusters (unique
+   * non-zero betas). By default, this is set to -1, which means that the number
+   * of clusters will be automatically set to the number of observations + 1.
+   */
+  void setMaxClusters(const int max_clusters);
+
+  /**
    * @brief Get the alpha sequence.
    *
    * @return The sequence of weights for the regularization path.
@@ -246,6 +272,20 @@ public:
    */
   const std::vector<std::vector<double>>& getPrimals() const;
 
+  /**
+   * Get the deviances
+   *
+   * @return Get the primal objective values from the path.
+   */
+  const std::vector<double>& getDeviances() const;
+
+  /**
+   * Get the deviance for the null model
+   *
+   * @return Get the primal objective values from the path.
+   */
+  const double& getNullDeviance() const;
+
   // Declaration of the templated fit() method.
   template<typename T>
   void fit(T& x,
@@ -259,10 +299,12 @@ private:
 
   // parameters
   bool intercept;
+  bool modify_x;
   bool standardize;
   bool update_clusters;
-  bool modify_x;
   double alpha_min_ratio;
+  double dev_change_tol;
+  double dev_ratio_tol;
   double learning_rate_decr;
   double q;
   double tol;
@@ -271,19 +313,22 @@ private:
   int path_length;
   int pgd_freq;
   int print_level;
+  std::optional<int> max_clusters;
   std::string lambda_type;
   std::string objective;
-  std::string solver_type;
   std::string screening_type;
+  std::string solver_type;
 
   // estimates
   Eigen::ArrayXd alpha_out;
   Eigen::ArrayXd lambda_out;
-  std::vector<Eigen::SparseMatrix<double>> betas;
-  std::vector<Eigen::VectorXd> beta0s;
   Eigen::MatrixXd beta;
   Eigen::VectorXd beta0;
+  double null_deviance;
   int it_total;
+  std::vector<Eigen::SparseMatrix<double>> betas;
+  std::vector<Eigen::VectorXd> beta0s;
+  std::vector<double> deviances;
   std::vector<std::vector<double>> dual_gaps_path;
   std::vector<std::vector<double>> primals_path;
 };

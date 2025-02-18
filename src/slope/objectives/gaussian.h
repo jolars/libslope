@@ -100,6 +100,13 @@ public:
                                        Eigen::VectorXd& z,
                                        const Eigen::VectorXd& eta,
                                        const Eigen::VectorXd& y);
+
+  /**
+   * @brief The link function
+   * @param eta Linear predictor.
+   * @return The result of applyin the link function.
+   */
+  Eigen::MatrixXd link(const Eigen::MatrixXd& eta);
 };
 
 } // namespace slope

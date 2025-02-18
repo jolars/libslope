@@ -37,4 +37,11 @@ TEST_CASE("Assertions", "[assertions]")
     REQUIRE_THROWS(model.setMaxIt(0));
     REQUIRE_THROWS(model.setMaxItInner(-1));
   }
+
+  SECTION("Invalid early stopping criteria")
+  {
+    REQUIRE_THROWS(model.setDevChangeTol(1.1));
+    REQUIRE_THROWS(model.setMaxClusters(0));
+    REQUIRE_THROWS(model.setDevRatioTol(-1));
+  }
 }
