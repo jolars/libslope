@@ -36,9 +36,6 @@ kktCheck(const Eigen::MatrixXd& gradient,
   tmp(ord, 0) = tmp.col(0).eval();
   tmp.resize(indices.size(), m);
 
-  // ArrayXb violations =
-  //   tmp.rowwise().any() && (beta(indices, all).array() ==
-  //   0.0).rowwise().any();
   ArrayXb violations = tmp.rowwise().any();
 
   return which(violations);

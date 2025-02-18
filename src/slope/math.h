@@ -141,7 +141,6 @@ linearPredictor(const T& x,
       }
     }
   } else {
-    // eta = x(Eigen::all, active_set) * beta(active_set);
     for (int k = 0; k < m; ++k) {
       for (const auto& j : active_set) {
         eta.col(k) += x.col(j) * beta(j, k);
@@ -208,8 +207,6 @@ updateGradient(Eigen::MatrixXd& gradient,
       }
     }
   }
-  // No standardization or already standardized in place
-  // return -(x(Eigen::all, active_set).transpose() * weighted_residual) / n;
 }
 
 /**

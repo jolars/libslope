@@ -31,11 +31,8 @@ strongSet(const Eigen::MatrixXd& gradient_prev,
   assert((lambda <= lambda_prev).all() &&
          "New lambda values must be smaller than or equal to previous values");
 
-  // const vec abs_grad = abs(vectorise(gradient_prev.tail_rows(p / m)));
   const VectorXd abs_grad = gradient_prev.reshaped().cwiseAbs();
-  // const uvec ord = sort_index(abs_grad, "descend");
   std::vector<int> ord = sortIndex(abs_grad, true);
-  // const vec tmp = abs_grad(ord) + lambda_prev - 2 * lambda;
 
   assert(abs_grad.size() == lambda.size());
 
@@ -59,19 +56,15 @@ strongSet(const Eigen::MatrixXd& gradient_prev,
     }
   }
 
-  // uvec active_set(p, fill::zeros);
   ArrayXXb active_set = ArrayXXb::Zero(p * m, 1);
 
   active_set.topRows(k).setOnes();
-  // active_set.head(k).ones();
 
   // reset order
   active_set(ord, 0) = active_set.col(0).eval();
 
-  // umat active_set_mat = reshape(active_set, p / m, m);
   active_set.resize(p, m);
 
-  // uvec out = find(any(active_set, 1));
   // TODO: Don't use rowwise here. Coefficients should be screened elementwise.
   ArrayXb active = active_set.array().rowwise().any();
 
