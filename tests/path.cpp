@@ -93,5 +93,12 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     model.fit(data.x, data.y);
 
     REQUIRE(model.getDeviances().size() < path_length);
+
+    path_length = model.getDeviances().size();
+
+    model.setDevChangeTol(0.1);
+    model.fit(data.x, data.y);
+
+    REQUIRE(model.getDeviances().size() < path_length);
   }
 }
