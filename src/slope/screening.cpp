@@ -37,6 +37,9 @@ strongSet(const Eigen::MatrixXd& gradient_prev,
   // const uvec ord = sort_index(abs_grad, "descend");
   std::vector<int> ord = sortIndex(abs_grad, true);
   // const vec tmp = abs_grad(ord) + lambda_prev - 2 * lambda;
+
+  assert(abs_grad.size() == lambda.size());
+
   const VectorXd tmp =
     abs_grad(ord).array().eval() + lambda_prev - 2.0 * lambda;
 
