@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.10.0](https://github.com/jolars/libslope/compare/v0.9.0...v0.10.0) (2025-02-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove unused standardize argument
+
+### Features
+
+* enable early stopping criteria for path ([#64](https://github.com/jolars/libslope/issues/64)) ([6b387f5](https://github.com/jolars/libslope/commit/6b387f5c4d404e6970594939d0016d027c228c10))
+* remove unused standardize argument ([fc6d468](https://github.com/jolars/libslope/commit/fc6d468463a5c3e591525167bb23f56b88d257e9))
+
+
+### Bug Fixes
+
+* correctly honor `coef_sparsity` and `x_sparsity` ([d65665d](https://github.com/jolars/libslope/commit/d65665dbfac0415e39291ade870a0c3cf7ea2db1))
+* use matrix for beta in `generateData()` ([b4f1fd5](https://github.com/jolars/libslope/commit/b4f1fd50b8cd94d78a274f64a8dbdec09e48f05f))
+
 ## [0.9.0](https://github.com/jolars/libslope/compare/v0.8.0...v0.9.0) (2025-02-18)
 
 
