@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "math.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Sparse>
 #include <string>

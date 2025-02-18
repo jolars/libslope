@@ -7,6 +7,7 @@
 #pragma once
 
 #include "../clusters.h"
+#include "../math.h"
 #include "../sorted_l1_norm.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>

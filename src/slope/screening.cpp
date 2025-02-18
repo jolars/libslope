@@ -1,7 +1,6 @@
 #include "screening.h"
 #include "slope/utils.h"
 #include <Eigen/Core>
-#include <iostream>
 
 namespace slope {
 
