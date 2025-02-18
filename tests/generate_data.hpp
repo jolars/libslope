@@ -8,7 +8,7 @@ struct SimulatedData
   SimulatedData(const int n, const int p, const int m);
   Eigen::MatrixXd x;
   Eigen::VectorXd y;
-  Eigen::VectorXd beta;
+  Eigen::MatrixXd beta;
 };
 
 SimulatedData
