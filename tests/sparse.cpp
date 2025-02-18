@@ -28,9 +28,9 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
   Eigen::SparseMatrix<double> x_sparse = x_dense.sparseView().eval();
 
   auto [x_centers_sparse, x_scales_sparse] =
-    slope::computeCentersAndScales(x_sparse, true);
+    slope::computeCentersAndScales(x_sparse);
   auto [x_centers_dense, x_scales_dense] =
-    slope::computeCentersAndScales(x_dense, true);
+    slope::computeCentersAndScales(x_dense);
 
   REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse));
   REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse));

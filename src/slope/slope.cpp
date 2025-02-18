@@ -70,7 +70,7 @@ Slope::fit(T& x,
     (!sparse_x && this->standardize && !this->modify_x) ||
     (sparse_x && this->standardize);
 
-  auto [x_centers, x_scales] = computeCentersAndScales(x, this->standardize);
+  auto [x_centers, x_scales] = computeCentersAndScales(x);
 
   if (this->standardize && this->modify_x && !sparse_x) {
     standardizeFeatures(x, x_centers, x_scales);

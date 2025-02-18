@@ -16,12 +16,11 @@ namespace slope {
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
- * @param standardize Flag indicating whether to standardize the matrix.
  * @return A tuple containing the means and standard deviations of the columns.
  */
 template<typename T>
 std::tuple<Eigen::VectorXd, Eigen::VectorXd>
-computeCentersAndScales(const T& x, const bool standardize)
+computeCentersAndScales(const T& x)
 {
   // TODO: Standadize flag has no effect; remove it.
   // TODO: Make this function more general and allow other statistics.
