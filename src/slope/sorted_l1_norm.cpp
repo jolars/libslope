@@ -40,23 +40,23 @@ SortedL1Norm::prox(const Eigen::MatrixXd& beta, const double scale) const
   int k = 0;
 
   for (int i = 0; i < p; i++) {
-    idx_i[k] = i;
-    idx_j[k] = i;
-    s[k] = beta_copy(i) - this->lambda(i) * this->alpha * scale;
-    w[k] = s[k];
+    idx_i(k) = i;
+    idx_j(k) = i;
+    s(k) = beta_copy(i) - this->lambda(i) * this->alpha * scale;
+    w(k) = s(k);
 
-    while ((k > 0) && (w[k - 1] <= w[k])) {
+    while ((k > 0) && (w(k - 1) <= w(k))) {
       k--;
-      idx_j[k] = i;
-      s[k] += s[k + 1];
-      w[k] = s[k] / (i - idx_i[k] + 1.0);
+      idx_j(k) = i;
+      s(k) += s(k + 1);
+      w(k) = s(k) / (i - idx_i(k) + 1.0);
     }
     k++;
   }
 
   for (int j = 0; j < k; j++) {
-    double d = std::max(w[j], 0.0);
-    for (int i = idx_i[j]; i <= idx_j[j]; i++) {
+    double d = std::max(w(j), 0.0);
+    for (int i = idx_i(j); i <= idx_j(j); i++) {
       beta_copy(i) = d;
     }
   }
