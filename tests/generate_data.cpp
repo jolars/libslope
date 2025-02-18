@@ -28,7 +28,7 @@ generateData(int n,
   std::normal_distribution<double> norm(0.0, 1.0);
 
   for (int j = 0; j < p; ++j) {
-    int n_nonzero = std::floor(x_sparsity * n * p);
+    int n_nonzero = std::floor(x_sparsity * n);
     std::vector<int> indices(n);
     std::iota(indices.begin(), indices.end(), 0);
     std::shuffle(indices.begin(), indices.end(), rng);
@@ -41,7 +41,7 @@ generateData(int n,
   }
 
   for (int k = 0; k < m; ++k) {
-    int n_nonzero = std::floor(coef_sparsity * std::min(n, p * k));
+    int n_nonzero = std::floor(coef_sparsity * std::min(n, p));
     std::vector<int> indices(p);
     std::iota(indices.begin(), indices.end(), 0);
     std::shuffle(indices.begin(), indices.end(), rng);
