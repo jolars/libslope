@@ -142,9 +142,7 @@ Slope::fit(T& x,
                        lambda,
                        n,
                        this->path_length,
-                       this->alpha_min_ratio,
-                       this->intercept,
-                       standardize_jit);
+                       this->alpha_min_ratio);
 
   // Screening stuff
   std::vector<int> strong_set, previous_set, working_set, inactive_set;

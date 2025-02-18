@@ -74,9 +74,7 @@ regularizationPath(const Eigen::ArrayXd& alpha_in,
                    const Eigen::ArrayXd& lambda,
                    const int n,
                    const int path_length,
-                   double alpha_min_ratio,
-                   const bool intercept,
-                   const bool standardize_jit)
+                   double alpha_min_ratio)
 {
   const int p = gradient.rows();
   const int m = gradient.cols();
