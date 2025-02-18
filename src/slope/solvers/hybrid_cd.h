@@ -81,6 +81,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   Eigen::MatrixXd& beta,
                   Eigen::VectorXd& residual,
                   Clusters& clusters,
+                  const Eigen::ArrayXd& lambda,
                   const T& x,
                   const Eigen::VectorXd& w,
                   const Eigen::VectorXd& z,
@@ -143,11 +144,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
       gradient_j = -x_s.cwiseProduct(w).dot(residual) / n;
     }
 
-    auto [c_tilde, new_index] =
-      slopeThreshold(c_old - gradient_j / hessian_j,
-                     j,
-                     sl1_norm.getLambdaRef() * sl1_norm.getAlpha() / hessian_j,
-                     clusters);
+    auto [c_tilde, new_index] = slopeThreshold(
+      c_old - gradient_j / hessian_j, j, lambda / hessian_j, clusters);
 
     auto s_it = s.cbegin();
     auto c_it = clusters.cbegin(j);

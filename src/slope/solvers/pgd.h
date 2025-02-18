@@ -68,6 +68,7 @@ public:
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
            Clusters& clusters,
+           const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
@@ -97,6 +98,7 @@ public:
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
            Clusters& clusters,
+           const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
@@ -112,6 +114,7 @@ private:
                Eigen::MatrixXd& beta,
                Eigen::MatrixXd& eta,
                Clusters& clusters,
+               const Eigen::ArrayXd& lambda,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
                Eigen::MatrixXd& gradient,
@@ -133,12 +136,10 @@ private:
 
     double g_old = objective->loss(eta, y);
 
-    MatrixXd gradient_active = gradient(active_set, all);
-
     while (true) {
       beta(active_set, all) =
         penalty.prox(beta_old - this->learning_rate * gradient(active_set, all),
-                     this->learning_rate);
+                     this->learning_rate * lambda.head(beta_old.size()));
 
       if (intercept) {
         objective->updateIntercept(beta0, eta, y);
@@ -157,7 +158,7 @@ private:
 
       double g = objective->loss(eta, y);
       double q =
-        g_old + beta_diff.reshaped().dot(gradient_active.reshaped()) +
+        g_old + beta_diff.reshaped().dot(gradient(active_set, all).reshaped()) +
         (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
 
       if (q >= g * (1 - 1e-12)) {

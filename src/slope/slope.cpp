@@ -109,7 +109,7 @@ Slope::fit(T& x,
   }
 
   // Setup the regularization sequence and path
-  SortedL1Norm sl1_norm{ lambda };
+  SortedL1Norm sl1_norm;
 
   // TODO: Make this part of the slope class
   auto solver = setupSolver(this->solver_type,
@@ -139,6 +139,7 @@ Slope::fit(T& x,
     regularizationPath(alpha,
                        gradient,
                        sl1_norm,
+                       lambda,
                        n,
                        this->path_length,
                        this->alpha_min_ratio,
@@ -172,8 +173,6 @@ Slope::fit(T& x,
     double alpha_curr = alpha(path_step);
 
     assert(alpha_curr <= alpha_prev && "Alpha must be decreasing");
-
-    sl1_norm.setAlpha(alpha_curr);
 
     Eigen::ArrayXd lambda_curr = alpha_curr * lambda;
     Eigen::ArrayXd lambda_prev = alpha_prev * lambda;
@@ -210,7 +209,8 @@ Slope::fit(T& x,
                      standardize_jit);
 
       double primal = objective->loss(eta, y) +
-                      sl1_norm.eval(beta(working_set, Eigen::all).reshaped());
+                      sl1_norm.eval(beta(working_set, Eigen::all).reshaped(),
+                                    lambda_curr.head(working_set.size() * m));
       primals.emplace_back(primal);
 
       MatrixXd theta = residual;
@@ -236,7 +236,8 @@ Slope::fit(T& x,
 
       // Common scaling operation
       double dual_norm =
-        sl1_norm.dualNorm(dual_gradient(working_set, Eigen::all).reshaped());
+        sl1_norm.dualNorm(dual_gradient(working_set, Eigen::all).reshaped(),
+                          lambda_curr.head(working_set.size() * m));
       theta.array() /= std::max(1.0, dual_norm);
 
       double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
@@ -307,6 +308,7 @@ Slope::fit(T& x,
                   beta,
                   eta,
                   clusters,
+                  lambda_curr,
                   objective,
                   sl1_norm,
                   gradient,

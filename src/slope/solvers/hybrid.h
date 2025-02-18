@@ -61,6 +61,7 @@ public:
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
            Clusters& clusters,
+           const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
@@ -75,6 +76,7 @@ public:
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
            Clusters& clusters,
+           const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
@@ -105,6 +107,7 @@ private:
                Eigen::MatrixXd& beta,
                Eigen::MatrixXd& eta,
                Clusters& clusters,
+               const Eigen::ArrayXd& lambda,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
                Eigen::MatrixXd& gradient_in,
@@ -132,7 +135,8 @@ private:
     for (int it = 0; it < this->max_it_inner; ++it) {
       if (it % this->pgd_freq == 0) {
         double g = residual.cwiseAbs2().dot(w) / (2.0 * n);
-        double h = penalty.eval(beta(working_set, Eigen::all).reshaped());
+        double h = penalty.eval(beta(working_set, Eigen::all).reshaped(),
+                                lambda.head(working_set.size()));
         double primal_inner = g + h;
 
         updateGradient(gradient,
@@ -163,9 +167,10 @@ private:
         }
 
         // Obtain a feasible dual point by dual scaling
-        theta.array() /= std::max(
-          1.0,
-          penalty.dualNorm(dual_gradient(working_set, Eigen::all).reshaped()));
+        double dual_norm =
+          penalty.dualNorm(dual_gradient(working_set, Eigen::all).reshaped(),
+                           lambda.head(working_set.size()));
+        theta.array() /= std::max(1.0, dual_norm);
 
         double dual_inner = (theta.cwiseProduct(w).dot(z) -
                              0.5 * theta.cwiseAbs2().cwiseProduct(w).sum()) /
@@ -197,6 +202,7 @@ private:
                                 beta,
                                 residual,
                                 this->pgd_learning_rate,
+                                lambda,
                                 gradient,
                                 working_set,
                                 x,
@@ -223,6 +229,7 @@ private:
                           beta,
                           residual,
                           clusters,
+                          lambda,
                           x,
                           w,
                           z,

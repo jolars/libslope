@@ -71,6 +71,7 @@ std::tuple<Eigen::ArrayXd, double, int>
 regularizationPath(const Eigen::ArrayXd& alpha_in,
                    const Eigen::MatrixXd& gradient,
                    const SortedL1Norm& penalty,
+                   const Eigen::ArrayXd& lambda,
                    const int n,
                    const int path_length,
                    double alpha_min_ratio,
@@ -80,7 +81,7 @@ regularizationPath(const Eigen::ArrayXd& alpha_in,
   const int p = gradient.rows();
   const int m = gradient.cols();
 
-  double alpha_max = penalty.dualNorm(gradient.reshaped());
+  double alpha_max = penalty.dualNorm(gradient.reshaped(), lambda);
 
   if (alpha_in.size() != 0) {
     // User-supplied alpha sequence; just check it

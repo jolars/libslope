@@ -58,6 +58,7 @@ std::tuple<Eigen::ArrayXd, double, int>
 regularizationPath(const Eigen::ArrayXd& alpha_in,
                    const Eigen::MatrixXd& gradient,
                    const SortedL1Norm& penalty,
+                   const Eigen::ArrayXd& lambda,
                    const int n,
                    const int path_length,
                    double alpha_min_ratio,

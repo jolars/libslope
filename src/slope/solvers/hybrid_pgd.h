@@ -47,6 +47,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         Eigen::MatrixXd& beta,
                         Eigen::VectorXd& residual,
                         double& learning_rate,
+                        const Eigen::ArrayXd& lambda,
                         const Eigen::VectorXd& gradient,
                         const std::vector<int>& working_set,
                         const T& x,
@@ -73,7 +74,8 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
 
   while (true) {
     beta(working_set, 0) =
-      sl1_norm.prox(beta_old - learning_rate * gradient_active, learning_rate);
+      sl1_norm.prox(beta_old - learning_rate * gradient_active,
+                    lambda.head(beta_old.size()) * learning_rate);
 
     Eigen::VectorXd beta_diff = beta(working_set, 0) - beta_old;
 

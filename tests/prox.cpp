@@ -12,8 +12,8 @@ TEST_CASE("Check that proximal operator works", "[prox]")
   beta << 5, 2;
   lambda << 4, 2;
 
-  slope::SortedL1Norm norm(lambda);
-  Eigen::VectorXd res = norm.prox(beta, 1.0);
+  slope::SortedL1Norm norm;
+  Eigen::VectorXd res = norm.prox(beta, lambda);
 
   std::array<double, 2> expected = { 1.0, 0.0 };
 
@@ -22,8 +22,7 @@ TEST_CASE("Check that proximal operator works", "[prox]")
   beta << 3, 3;
   lambda << 3, 3;
 
-  norm.setLambda(lambda);
-  res = norm.prox(beta, 1.0);
+  res = norm.prox(beta, lambda);
   expected = { 0.0, 0.0 };
 
   REQUIRE_THAT(res, VectorApproxEqual(expected, 1e-6));
@@ -31,8 +30,7 @@ TEST_CASE("Check that proximal operator works", "[prox]")
   beta << 2, 1;
   lambda << 3, 0;
 
-  norm.setLambda(lambda);
-  res = norm.prox(beta, 1.0);
+  res = norm.prox(beta, lambda);
   expected = { 0.0, 0.0 };
 
   REQUIRE_THAT(res, VectorApproxEqual(expected, 1e-6));
