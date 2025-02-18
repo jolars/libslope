@@ -70,6 +70,7 @@ Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                              const Eigen::VectorXd& y)
 {
   // Not implemented
+  // TODO: Create not-implmented error, maybe as part of parent class.
 }
 
 // TODO: Consider adjusting the coefficients somehow.
