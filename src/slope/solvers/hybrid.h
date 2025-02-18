@@ -232,14 +232,11 @@ private:
                           lambda,
                           x,
                           w,
-                          z,
-                          penalty,
                           x_centers,
                           x_scales,
                           this->intercept,
                           this->standardize_jit,
-                          this->update_clusters,
-                          this->print_level);
+                          this->update_clusters);
       }
     }
 

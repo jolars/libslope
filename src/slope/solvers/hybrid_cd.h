@@ -8,7 +8,6 @@
 
 #include "../clusters.h"
 #include "../math.h"
-#include "../sorted_l1_norm.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
 #include <vector>
@@ -62,7 +61,6 @@ computeGradientAndHessian(const T& x,
  * @param clusters The cluster information, stored in a Cluster object.
  * @param x The design matrix
  * @param w The weight vector
- * @param z The response vector
  * @param sl1_norm The sorted L1 norm object
  * @param x_centers The center values of the data matrix columns
  * @param x_scales The scale values of the data matrix columns
@@ -71,7 +69,6 @@ computeGradientAndHessian(const T& x,
  *   just-in-time.
  * @param update_clusters Flag indicating whether to update the cluster
  * information
- * @param print_level The level of verbosity for printing debug information
  *
  * @see Clusters
  * @see SortedL1Norm
@@ -85,14 +82,11 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const Eigen::ArrayXd& lambda,
                   const T& x,
                   const Eigen::VectorXd& w,
-                  const Eigen::VectorXd& z,
-                  const SortedL1Norm& sl1_norm,
                   const Eigen::VectorXd& x_centers,
                   const Eigen::VectorXd& x_scales,
                   const bool intercept,
                   const bool standardize_jit,
-                  const bool update_clusters,
-                  const int print_level)
+                  const bool update_clusters)
 {
   using namespace Eigen;
 
