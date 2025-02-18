@@ -82,9 +82,16 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     auto null_deviance = model.getNullDeviance();
     auto deviances = model.getDeviances();
 
+    int path_length = deviances.size();
+
     REQUIRE(null_deviance >= 0);
     REQUIRE(deviances.size() > 0);
     REQUIRE(deviances.size() < 100);
     REQUIRE_THAT(deviances, VectorMonotonic(false, true));
+
+    model.setDevRatioTol(0.99);
+    model.fit(data.x, data.y);
+
+    REQUIRE(model.getDeviances().size() < path_length);
   }
 }
