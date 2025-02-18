@@ -23,11 +23,12 @@ struct VectorApproxEqualMatcher : Catch::Matchers::MatcherGenericBase
   template<typename OtherRange>
   bool match(OtherRange const& other) const
   {
-    if (range.size() != other.size()) {
+    size_t n = range.size();
+    if (n != other.size()) {
       return false;
     }
 
-    for (int i = 0; i < range.size(); ++i) {
+    for (size_t i = 0; i < range.size(); ++i) {
       // Check if either value is NaN
       if (std::isnan(range[i]) || std::isnan(other[i])) {
         // If one is NaN and the other isn't, they're not equal
