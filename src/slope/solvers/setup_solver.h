@@ -17,8 +17,6 @@ namespace slope {
  * @param tol Convergence tolerance for the solver
  * @param max_it_inner Maximum number of inner iterations
  * @param standardize_jit Whether to standardize features just-in-time
- * @param print_level Level of verbosity for solver output (0: none, 1: some, 2:
- * verbose)
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
  * optimization
@@ -33,7 +31,6 @@ setupSolver(const std::string& solver_type,
             double tol,
             int max_it_inner,
             bool standardize_jit,
-            int print_level,
             bool intercept,
             bool update_clusters,
             int pgd_freq);

@@ -1,7 +1,6 @@
 #include "slope.h"
 #include "clusters.h"
 #include "constants.h"
-#include "helpers.h"
 #include "kkt_check.h"
 #include "math.h"
 #include "normalize.h"
@@ -14,7 +13,6 @@
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
-#include <iostream>
 #include <memory>
 #include <numeric>
 #include <set>
@@ -114,7 +112,6 @@ Slope::path(T& x,
                             this->tol,
                             this->max_it_inner,
                             standardize_jit,
-                            this->print_level,
                             this->intercept,
                             this->update_clusters,
                             this->pgd_freq);
@@ -160,11 +157,6 @@ Slope::path(T& x,
 
   // Regularization path loop
   for (int path_step = 0; path_step < this->path_length; ++path_step) {
-    if (this->print_level > 0) {
-      std::cout << "Path step: " << path_step << ", alpha: " << alpha(path_step)
-                << std::endl;
-    }
-
     double alpha_curr = alpha(path_step);
 
     assert(alpha_curr <= alpha_prev && "Alpha must be decreasing");
@@ -245,14 +237,6 @@ Slope::path(T& x,
 
       double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
 
-      if (this->print_level > 1) {
-        std::cout << indent(1) << "Outer iteration: " << it << std::endl
-                  << indent(2) << "primal (main problem): " << primal
-                  << std::endl
-                  << indent(2) << "duality gap (main problem): " << dual_gap
-                  << ", tol: " << tol_scaled << std::endl;
-      }
-
       if (std::max(dual_gap, 0.0) <= tol_scaled) {
         if (screening_type == "strong") {
           updateGradient(gradient,
@@ -266,13 +250,6 @@ Slope::path(T& x,
 
           auto violations = setDiff(
             kktCheck(gradient, beta, lambda_curr, strong_set), working_set);
-
-          if (this->print_level > 1) {
-            std::cout << indent(2) << "N active: " << working_set.size()
-                      << std::endl
-                      << indent(2) << "KKT violations: " << violations.size()
-                      << std::endl;
-          }
 
           if (violations.empty()) {
             updateGradient(gradient,
@@ -335,12 +312,6 @@ Slope::path(T& x,
     deviances.emplace_back(dev);
 
     clusters.update(beta.reshaped());
-
-    if (this->print_level > 0) {
-      std::cout << indent(1) << "N clusters: " << clusters.n_clusters()
-                << ", dev: " << dev << ", dev ratio: " << dev_ratio
-                << ", dev change: " << dev_change << std::endl;
-    }
 
     if (!user_alpha) {
       if (dev_ratio > dev_ratio_tol || dev_change < dev_change_tol ||
@@ -467,15 +438,6 @@ Slope::setPgdFreq(int pgd_freq)
     throw std::invalid_argument("pgd_freq must be > 1");
   }
   this->pgd_freq = pgd_freq;
-}
-
-void
-Slope::setPrintLevel(int print_level)
-{
-  if (print_level < 0) {
-    throw std::invalid_argument("print_level must be >= 0");
-  }
-  this->print_level = print_level;
 }
 
 void

@@ -10,7 +10,6 @@
 #include "hybrid_pgd.h"
 #include "slope/clusters.h"
 #include "slope/constants.h"
-#include "slope/helpers.h"
 #include "slope/objectives/objective.h"
 #include "slope/sorted_l1_norm.h"
 #include "solver.h"
@@ -43,14 +42,12 @@ public:
   Hybrid(double tol,
          int max_it,
          bool standardize_jit,
-         int print_level,
          bool intercept,
          bool update_clusters,
          int pgd_freq)
     : SolverBase(tol,
                  max_it,
                  standardize_jit,
-                 print_level,
                  intercept,
                  update_clusters,
                  pgd_freq)
@@ -182,20 +179,8 @@ private:
         double tol_inner =
           (std::abs(primal_inner) + constants::EPSILON) * this->tol;
 
-        if (this->print_level > 2) {
-          std::cout << indent(2) << "iteration: " << it << std::endl
-                    << indent(3) << "primal (inner): " << primal_inner
-                    << std::endl
-                    << indent(3) << "duality gap (inner): " << dual_gap_inner
-                    << ", tol: " << tol_inner << std::endl;
-        }
-
         if (std::max(dual_gap_inner, 0.0) <= tol_inner) {
           break;
-        }
-
-        if (this->print_level > 2) {
-          std::cout << indent(3) << "Running PGD step" << std::endl;
         }
 
         proximalGradientDescent(beta0,
@@ -214,17 +199,12 @@ private:
                                 g,
                                 this->intercept,
                                 this->standardize_jit,
-                                this->pgd_learning_rate_decr,
-                                this->print_level);
+                                this->pgd_learning_rate_decr);
 
         // TODO: We might be able to speed up cluster updating since we know
         // betas outside the active set cannot have changed
         clusters.update(beta);
       } else {
-        if (this->print_level > 2) {
-          std::cout << indent(3) << "Running CD step" << std::endl;
-        }
-
         coordinateDescent(beta0,
                           beta,
                           residual,

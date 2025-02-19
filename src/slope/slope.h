@@ -45,7 +45,6 @@ public:
     , max_it_inner(1e6)
     , path_length(100)
     , pgd_freq(10)
-    , print_level(0)
     , max_clusters(std::optional<int>())
     , lambda_type("bh")
     , objective("gaussian")
@@ -152,16 +151,6 @@ public:
   void setPgdFreq(int pgd_freq);
 
   /**
-   * @brief Sets the print level.
-   *
-   * @param print_level The value to set for the print level. A print level of 1
-   * prints values from the outer loop, a level of 2 from the inner loop, and a
-   * level of 3 some extra debugging information. A level of 0 means no
-   * printing.
-   */
-  void setPrintLevel(int print_level);
-
-  /**
    * @brief Sets the lambda type for regularization weights.
    *
    * @param lambda_type The method used to compute regularization weights.
@@ -253,7 +242,6 @@ private:
   int max_it_inner;
   int path_length;
   int pgd_freq;
-  int print_level;
   std::optional<int> max_clusters;
   std::string lambda_type;
   std::string objective;

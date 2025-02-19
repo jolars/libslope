@@ -60,7 +60,6 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   slope::Slope model;
   model.setIntercept(false);
   model.setStandardize(false);
-  model.setPrintLevel(3);
   auto fit = model.fit(x, y, alpha, lambda);
 
   double gap = fit.getGaps().back();

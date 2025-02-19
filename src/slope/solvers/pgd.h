@@ -13,7 +13,6 @@
 #include "solver.h"
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <iostream>
 #include <memory>
 
 namespace slope {
@@ -32,7 +31,6 @@ public:
   PGD(double tol,
       int max_it,
       bool standardize_jit,
-      int print_level,
       bool intercept,
       bool update_clusters,
       int pgd_freq,
@@ -40,7 +38,6 @@ public:
     : SolverBase(tol,
                  max_it,
                  standardize_jit,
-                 print_level,
                  intercept,
                  update_clusters,
                  pgd_freq)
@@ -130,10 +127,6 @@ private:
     using Eigen::all;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
-
-    if (this->print_level > 2) {
-      std::cout << "        Starting line search" << std::endl;
-    }
 
     beta_old = beta(active_set, all);
 

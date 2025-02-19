@@ -73,7 +73,6 @@ TEST_CASE("Path fitting", "[path][gaussian]")
   {
     slope::Slope model;
     model.setPathLength(100);
-    model.setPrintLevel(1);
 
     auto data = generateData(100, 200);
 

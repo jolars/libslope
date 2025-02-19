@@ -45,7 +45,6 @@ if(BUILD_TESTING)
     tests/multinomial.cpp
     tests/path.cpp
     tests/poisson.cpp
-    tests/printing.cpp
     tests/prox.cpp
     tests/qnorm.cpp
     tests/screening.cpp

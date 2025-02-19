@@ -31,14 +31,12 @@ public:
   SolverBase(double tol,
              int max_it,
              bool standardize_jit,
-             int print_level,
              bool intercept,
              bool update_clusters,
              int pgd_freq)
     : tol(tol)
     , max_it(max_it)
     , standardize_jit(standardize_jit)
-    , print_level(print_level)
     , intercept(intercept)
     , update_clusters(update_clusters)
     , pgd_freq(pgd_freq)
@@ -80,7 +78,6 @@ protected:
   double tol;
   int max_it;
   bool standardize_jit;
-  int print_level;
   bool intercept;
   bool update_clusters;
   int pgd_freq;

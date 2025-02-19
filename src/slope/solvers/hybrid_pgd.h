@@ -8,7 +8,6 @@
 #include "../sorted_l1_norm.h"
 #include "math.h"
 #include <Eigen/Dense>
-#include <iostream>
 
 namespace slope {
 namespace solvers {
@@ -37,7 +36,6 @@ namespace solvers {
  * @param intercept Flag indicating whether to include an intercept term.
  * @param standardize Flag indicating whether to standardize the input data.
  * @param learning_rate_decr The learning rate decrement factor.
- * @param print_level The level of verbosity for printing progress.
  *
  * @see SortedL1Norm
  */
@@ -59,15 +57,11 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         const double g_old,
                         const bool intercept,
                         const bool standardize_jit,
-                        const double learning_rate_decr,
-                        const int print_level)
+                        const double learning_rate_decr)
 {
   const int n = x.rows();
 
   // Proximal gradient descent with line search
-  if (print_level > 2) {
-    std::cout << "        Starting line search" << std::endl;
-  }
 
   Eigen::VectorXd beta_old = beta(working_set, 0);
   Eigen::VectorXd gradient_active = gradient(working_set, 0);

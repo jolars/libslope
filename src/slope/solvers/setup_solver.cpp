@@ -12,7 +12,6 @@ setupSolver(const std::string& solver_type,
             double tol,
             int max_it_inner,
             bool standardize_jit,
-            int print_level,
             bool intercept,
             bool update_clusters,
             int pgd_freq)
@@ -34,7 +33,6 @@ setupSolver(const std::string& solver_type,
     return std::make_unique<solvers::PGD>(tol,
                                           max_it_inner,
                                           standardize_jit,
-                                          print_level,
                                           intercept,
                                           update_clusters,
                                           pgd_freq,
@@ -43,19 +41,13 @@ setupSolver(const std::string& solver_type,
     return std::make_unique<solvers::PGD>(tol,
                                           max_it_inner,
                                           standardize_jit,
-                                          print_level,
                                           intercept,
                                           update_clusters,
                                           pgd_freq,
                                           "fista");
   } else if (solver_choice == "hybrid") {
-    return std::make_unique<solvers::Hybrid>(tol,
-                                             max_it_inner,
-                                             standardize_jit,
-                                             print_level,
-                                             intercept,
-                                             update_clusters,
-                                             pgd_freq);
+    return std::make_unique<solvers::Hybrid>(
+      tol, max_it_inner, standardize_jit, intercept, update_clusters, pgd_freq);
   } else {
     throw std::invalid_argument("solver type not recognized");
   }
