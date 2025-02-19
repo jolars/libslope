@@ -35,7 +35,8 @@ public:
       int print_level,
       bool intercept,
       bool update_clusters,
-      int pgd_freq)
+      int pgd_freq,
+      const std::string& update_type)
     : SolverBase(tol,
                  max_it,
                  standardize_jit,
@@ -45,6 +46,8 @@ public:
                  pgd_freq)
     , learning_rate(1.0)
     , learning_rate_decr(0.5)
+    , update_type{ update_type }
+    , t(1.0)
   {
   }
 
@@ -132,9 +135,12 @@ private:
       std::cout << "        Starting line search" << std::endl;
     }
 
-    MatrixXd beta_old = beta(active_set, all);
+    beta_old = beta(active_set, all);
 
     double g_old = objective->loss(eta, y);
+    double t_old = t;
+
+    Eigen::MatrixXd beta_diff(beta_old.rows(), beta_old.cols());
 
     while (true) {
       beta(active_set, all) =
@@ -145,7 +151,7 @@ private:
         objective->updateIntercept(beta0, eta, y);
       }
 
-      Eigen::MatrixXd beta_diff = beta(active_set, all) - beta_old;
+      beta_diff = beta(active_set, all) - beta_old;
 
       eta = linearPredictor(x,
                             active_set,
@@ -168,10 +174,26 @@ private:
         this->learning_rate *= this->learning_rate_decr;
       }
     }
+
+    if (update_type == "fista") {
+      this->t = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t_old * t_old));
+      beta(active_set, all) += beta_diff * (t_old - 1.0) / this->t;
+      eta = linearPredictor(x,
+                            active_set,
+                            beta0,
+                            beta,
+                            x_centers,
+                            x_scales,
+                            standardize_jit,
+                            intercept);
+    }
   }
 
   double learning_rate;      ///< Current learning rate for gradient steps
   double learning_rate_decr; ///< Learning rate decrease factor for line search
+  std::string update_type;   ///< Update type for PGD
+  double t;                  ///< FISTA step size
+  Eigen::MatrixXd beta_old;  ///< Old beta values
 };
 
 } // namespace solvers

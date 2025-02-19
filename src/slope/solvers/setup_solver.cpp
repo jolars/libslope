@@ -22,12 +22,12 @@ setupSolver(const std::string& solver_type,
   if (solver_type == "auto") {
     // TODO: Make this more sophisticated, e.g. define in solver class
     // and check if compatible with objective.
-    solver_choice = objective == "multinomial" ? "pgd" : "hybrid";
+    solver_choice = objective == "multinomial" ? "fista" : "hybrid";
   }
 
-  if (objective == "multinomial" && solver_choice != "pgd") {
-    throw std::invalid_argument(
-      "multinomial objective is only supported with pgd solver");
+  if (objective == "multinomial" && solver_choice == "hybrid") {
+    throw std::invalid_argument("multinomial objective is currently not "
+                                "supported with the hybrid solver");
   }
 
   if (solver_choice == "pgd") {
@@ -37,7 +37,17 @@ setupSolver(const std::string& solver_type,
                                           print_level,
                                           intercept,
                                           update_clusters,
-                                          pgd_freq);
+                                          pgd_freq,
+                                          "pgd");
+  } else if (solver_choice == "fista") {
+    return std::make_unique<solvers::PGD>(tol,
+                                          max_it_inner,
+                                          standardize_jit,
+                                          print_level,
+                                          intercept,
+                                          update_clusters,
+                                          pgd_freq,
+                                          "fista");
   } else if (solver_choice == "hybrid") {
     return std::make_unique<solvers::Hybrid>(tol,
                                              max_it_inner,

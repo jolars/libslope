@@ -368,7 +368,7 @@ Slope::fit(T& x,
 void
 Slope::setSolver(const std::string& solver)
 {
-  validateOption(solver, { "pgd", "hybrid" }, "solver");
+  validateOption(solver, { "auto", "pgd", "hybrid", "fista" }, "solver");
   this->solver_type = solver;
 }
 
