@@ -145,7 +145,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     coef_target << 0.6864545, -0.6864545, 0.0000000;
 
-    model.setSolver("pgd");
+    model.setSolver("fista");
     model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = model.getCoefs().front();
 

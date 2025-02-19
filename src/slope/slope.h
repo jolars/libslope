@@ -56,7 +56,7 @@ public:
   /**
    * @brief Sets the numerical solver used to fit the model.
    *
-   * @param solver One of "auto", "pgd", or "hybrid". In the first case
+   * @param solver One of "auto", "pgd", "fista", or "hybrid". In the first case
    * (the default), the solver is automatically selected based on availability
    * of the hybrid solver, which currently means that the hybrid solver is used
    * everywhere except for the multinomial objective.
