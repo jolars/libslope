@@ -34,9 +34,9 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     slope::Slope model;
     model.setObjective("gaussian");
 
-    model.fit(x, y, alpha, lambda);
+    auto fit = model.path(x, y, alpha, lambda);
 
-    Eigen::VectorXd coef = model.getCoefs()[2];
+    Eigen::VectorXd coef = fit.getCoefs(2);
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));
@@ -50,10 +50,10 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 
     slope::Slope model;
     model.setPathLength(20);
-    model.fit(x, y, alpha, lambda);
+    auto fit = model.path(x, y, alpha, lambda);
 
-    auto coefs = model.getCoefs();
-    alpha = model.getAlpha();
+    auto coefs = fit.getCoefs();
+    alpha = fit.getAlpha();
 
     REQUIRE(alpha.rows() == 20);
 
@@ -77,12 +77,11 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 
     auto data = generateData(100, 200);
 
-    model.fit(data.x, data.y);
+    auto path = model.path(data.x, data.y);
 
-    auto null_deviance = model.getNullDeviance();
-    auto deviances = model.getDeviances();
-
-    int path_length = deviances.size();
+    auto null_deviance = path.getNullDeviance();
+    auto deviances = path.getDeviance();
+    auto path_length = deviances.size();
 
     REQUIRE(null_deviance >= 0);
     REQUIRE(deviances.size() > 0);
@@ -90,15 +89,15 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     REQUIRE_THAT(deviances, VectorMonotonic(false, true));
 
     model.setDevRatioTol(0.99);
-    model.fit(data.x, data.y);
+    auto fit = model.path(data.x, data.y);
 
-    REQUIRE(model.getDeviances().size() < path_length);
+    REQUIRE(fit.getDeviance().size() < path_length);
 
-    path_length = model.getDeviances().size();
+    path_length = fit.getDeviance().size();
 
     model.setDevChangeTol(0.1);
-    model.fit(data.x, data.y);
+    fit = model.path(data.x, data.y);
 
-    REQUIRE(model.getDeviances().size() < path_length);
+    REQUIRE(fit.getDeviance().size() < path_length);
   }
 }

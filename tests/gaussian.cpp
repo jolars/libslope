@@ -22,28 +22,25 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
 
   y = x * beta;
 
-  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
+  double alpha = 1e-12;
   Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(2);
 
-  alpha(0) = 1e-12;
-
   slope::Slope model;
+  slope::SlopeFit fit;
 
   model.setIntercept(false);
   model.setStandardize(false);
 
-  model.fit(x, y, alpha, lambda);
+  fit = model.fit(x, y, alpha, lambda);
 
-  std::vector<Eigen::SparseMatrix<double>> coefs = model.getCoefs();
-  auto dual_gaps = model.getDualGaps();
-  auto primals = model.getPrimals();
-
-  Eigen::VectorXd coef = coefs.front();
+  Eigen::VectorXd coef = fit.getCoefs();
+  auto dual_gaps = fit.getGaps();
+  auto primals = fit.getPrimals();
 
   REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
 
-  double gap = dual_gaps.front().back();
-  double primal = primals.front().back();
+  double gap = dual_gaps.back();
+  double primal = primals.back();
 
   REQUIRE(gap <= (primal + 1e-10) * 1e-4);
 }
@@ -56,7 +53,7 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   Eigen::VectorXd y(4);
   y << 8, 6, 4, 2;
 
-  Eigen::ArrayXd alpha = Eigen::ArrayXd::Ones(1);
+  double alpha = 1.0;
   Eigen::ArrayXd lambda(4);
   lambda << 1, 0.75, 0.5, 0.25;
 
@@ -64,12 +61,12 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   model.setIntercept(false);
   model.setStandardize(false);
   model.setPrintLevel(3);
-  model.fit(x, y, alpha, lambda);
+  auto fit = model.fit(x, y, alpha, lambda);
 
-  double gap = model.getDualGaps()[0].back();
-  double primal = model.getPrimals()[0].back();
+  double gap = fit.getGaps().back();
+  double primal = fit.getPrimals().back();
 
-  Eigen::VectorXd coefs = model.getCoefs().front();
+  Eigen::VectorXd coefs = fit.getCoefs();
 
   std::array<double, 4> expected = { 4.0, 3.0, 2.0, 1.0 };
 
@@ -92,7 +89,7 @@ TEST_CASE("Automatic lambda and alpha", "[gaussian]")
 
   slope::Slope model;
 
-  REQUIRE_NOTHROW(model.fit(x, y));
+  REQUIRE_NOTHROW(model.path(x, y));
 }
 
 TEST_CASE("Gaussian models", "[gaussian]")
@@ -124,10 +121,9 @@ TEST_CASE("Gaussian models", "[gaussian]")
   // Compute linear predictor
   Eigen::VectorXd y = x * beta;
 
-  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
   Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(3);
 
-  alpha[0] = 0.05;
+  double alpha = 0.05;
 
   lambda << 3.0, 2.0, 2.0;
 
@@ -146,17 +142,17 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.6864545, -0.6864545, 0.0000000;
 
     model.setSolver("fista");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
+    auto fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_pgd = fit.getCoefs();
 
     model.setSolver("hybrid");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_hybrid = fit.getCoefs();
 
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
 
-    auto dual_gaps = model.getDualGaps().front();
+    auto dual_gaps = fit.getGaps();
 
     REQUIRE(dual_gaps.back() >= 0);
     REQUIRE(dual_gaps.back() <= 1e-4);
@@ -170,12 +166,12 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.700657772, -0.730587233, 0.008997323;
 
     model.setSolver("pgd");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
+    auto fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_pgd = fit.getCoefs();
 
     model.setSolver("hybrid");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_hybrid = fit.getCoefs();
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
@@ -190,14 +186,14 @@ TEST_CASE("Gaussian models", "[gaussian]")
     std::vector<double> intercept_target = { 0.040584733 };
 
     model.setSolver("hybrid");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs = model.getCoefs().front();
-    Eigen::VectorXd intercept = model.getIntercepts().front();
+    auto fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs = fit.getCoefs();
+    Eigen::VectorXd intercept = fit.getIntercepts();
 
     model.setSolver("pgd");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
-    Eigen::VectorXd intercept_pgd = model.getIntercepts().front();
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_pgd = fit.getCoefs();
+    Eigen::VectorXd intercept_pgd = fit.getIntercepts();
 
     REQUIRE_THAT(intercept, VectorApproxEqual(intercept_target, 1e-3));
     REQUIRE_THAT(intercept_pgd, VectorApproxEqual(intercept_target, 1e-3));
@@ -214,14 +210,14 @@ TEST_CASE("Gaussian models", "[gaussian]")
     coef_target << 0.68614138, -0.68614138, 0.00000000;
 
     model.setSolver("hybrid");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs = model.getCoefs().front();
-    double intercept = model.getIntercepts().front()[0];
+    auto fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs = fit.getCoefs();
+    double intercept = fit.getIntercepts()[0];
 
     model.setSolver("pgd");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
-    double intercept_pgd = model.getIntercepts().front()[0];
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_pgd = fit.getCoefs();
+    double intercept_pgd = fit.getIntercepts()[0];
 
     REQUIRE_THAT(intercept, WithinAbs(0.04148455, 1e-3));
     REQUIRE_THAT(intercept_pgd, WithinAbs(0.04148455, 1e-3));

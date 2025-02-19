@@ -29,5 +29,5 @@ TEST_CASE("Printing", "[path][gaussian]")
 
   model.setPrintLevel(3);
 
-  REQUIRE_NOTHROW(model.fit(x, y));
+  REQUIRE_NOTHROW(model.path(x, y));
 }
