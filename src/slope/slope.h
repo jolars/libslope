@@ -49,7 +49,7 @@ public:
     , lambda_type("bh")
     , objective("gaussian")
     , screening_type("strong")
-    , solver_type("hybrid")
+    , solver_type("auto")
   {
   }
 
