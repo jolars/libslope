@@ -13,7 +13,7 @@ Poisson::dual(const Eigen::MatrixXd& theta,
               const Eigen::MatrixXd& y,
               const Eigen::VectorXd& w)
 {
-  const Eigen::ArrayXd e = y - theta;
+  const Eigen::ArrayXd e = theta + y;
 
   assert((e >= 0).all() &&
          "Dual function is not defined for negative residuals");
@@ -24,7 +24,7 @@ Poisson::dual(const Eigen::MatrixXd& theta,
 Eigen::MatrixXd
 Poisson::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y.array() - eta.array().exp();
+  return eta.array().exp() - y.array();
 }
 
 void
@@ -53,7 +53,7 @@ Poisson::updateIntercept(Eigen::VectorXd& beta0,
                          const Eigen::MatrixXd& y)
 {
   Eigen::VectorXd residual = this->residual(eta, y);
-  double grad = -residual.mean();
+  double grad = residual.mean();
   double hess = eta.array().exp().mean();
 
   beta0(0) -= grad / hess;

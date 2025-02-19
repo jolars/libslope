@@ -68,7 +68,7 @@ public:
    * @param y Actual values vector (n x 1)
    * @return Vector of residuals (n x 1)
    *
-   * @note Residuals are calculated as: \f$ r_i = y_i - \eta_i \f$
+   * @note Residuals are calculated as: \f$ r_i = \eta_i - y_i \f$
    */
   Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
                            const Eigen::MatrixXd& y);

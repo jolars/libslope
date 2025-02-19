@@ -20,7 +20,7 @@ Binomial::dual(const Eigen::MatrixXd& theta,
   using Eigen::log;
 
   // Clamp probabilities to [p_min, 1-p_min]
-  Eigen::ArrayXd pr = (y - theta).array().min(1.0 - p_min).max(p_min);
+  Eigen::ArrayXd pr = (theta + y).array().min(1.0 - p_min).max(p_min);
 
   return -(pr * log(pr) + (1.0 - pr) * log(1.0 - pr)).mean();
 }
@@ -28,7 +28,7 @@ Binomial::dual(const Eigen::MatrixXd& theta,
 Eigen::MatrixXd
 Binomial::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y.array() - 1.0 / (1.0 + (-eta).array().exp());
+  return 1.0 / (1.0 + (-eta).array().exp()) - y.array();
 }
 
 Eigen::MatrixXd

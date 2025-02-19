@@ -30,7 +30,7 @@ computeGradientAndHessian(const T& x,
   double gradient, hessian;
 
   if (standardize_jit) {
-    gradient = -s *
+    gradient = s *
                (x.col(k).cwiseProduct(w).dot(residual) -
                 w.dot(residual) * x_centers(k)) /
                (n * x_scales(k));
@@ -40,7 +40,7 @@ computeGradientAndHessian(const T& x,
        std::pow(x_centers(k), 2) * w.sum()) /
       (std::pow(x_scales(k), 2) * n);
   } else {
-    gradient = -s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
+    gradient = s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
     hessian = x.col(k).cwiseAbs2().dot(w) / n;
   }
 
@@ -136,7 +136,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
       }
 
       hessian_j = x_s.cwiseAbs2().dot(w) / n;
-      gradient_j = -x_s.cwiseProduct(w).dot(residual) / n;
+      gradient_j = x_s.cwiseProduct(w).dot(residual) / n;
     }
 
     auto [c_tilde, new_index] = slopeThreshold(
@@ -155,13 +155,13 @@ coordinateDescent(Eigen::VectorXd& beta0,
         int k = *clusters.cbegin(j);
 
         if (standardize_jit) {
-          residual += x.col(k) * (s[0] * c_diff / x_scales(k));
-          residual.array() -= x_centers(k) * s[0] * c_diff / x_scales(k);
+          residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
+          residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
         } else {
-          residual += x.col(k) * (s[0] * c_diff);
+          residual -= x.col(k) * (s[0] * c_diff);
         }
       } else {
-        residual += x_s * c_diff;
+        residual -= x_s * c_diff;
       }
     }
 
@@ -176,7 +176,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
       // of after each coordinate update
       double beta0_update = residual.dot(w) / n;
       residual.array() -= beta0_update;
-      beta0(0) += beta0_update;
+      beta0(0) -= beta0_update;
     }
   }
 }
