@@ -22,7 +22,6 @@ template<typename T>
 std::tuple<Eigen::VectorXd, Eigen::VectorXd>
 computeCentersAndScales(const T& x)
 {
-  // TODO: Standadize flag has no effect; remove it.
   // TODO: Make this function more general and allow other statistics.
   const int n = x.rows();
   const int p = x.cols();
