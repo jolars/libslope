@@ -10,6 +10,7 @@ class SlopeFit
 private:
   Eigen::VectorXd intercepts;
   Eigen::SparseMatrix<double> coefs;
+  double alpha;
   Eigen::ArrayXd lambda;
   double deviance;
   double null_deviance;
@@ -21,6 +22,7 @@ public:
 
   SlopeFit(const Eigen::VectorXd& intercepts,
            const Eigen::SparseMatrix<double>& coefs,
+           const double alpha,
            const Eigen::ArrayXd& lambda,
            double deviance,
            double null_deviance,
@@ -28,6 +30,7 @@ public:
            const std::vector<double>& duals)
     : intercepts{ intercepts }
     , coefs{ coefs }
+    , alpha{ alpha }
     , lambda{ lambda }
     , deviance{ deviance }
     , null_deviance{ null_deviance }
@@ -39,6 +42,7 @@ public:
   const Eigen::VectorXd& getIntercepts() const { return intercepts; }
   const Eigen::SparseMatrix<double>& getCoefs() const { return coefs; }
   const Eigen::ArrayXd& getLambda() const { return lambda; }
+  double getAlpha() const { return alpha; }
   double getDeviance() const { return deviance; }
   double getNullDeviance() const { return null_deviance; }
   const std::vector<double>& getPrimals() const { return primals; }

@@ -336,11 +336,10 @@ Slope::fit(T& x,
   alpha_arr(0) = alpha;
   SlopePath res = path(x, y_in, alpha_arr, lambda);
 
-  return {
-    res.getIntercepts().back(), res.getCoefs().back(), res.getLambda(),
-    res.getAlpha()[0],          res.getNullDeviance(), res.getPrimals().back(),
-    res.getDuals().back()
-  };
+  return { res.getIntercepts().back(), res.getCoefs().back(),
+           res.getAlpha()[0],          res.getLambda(),
+           res.getDeviance().back(),   res.getNullDeviance(),
+           res.getPrimals().back(),    res.getDuals().back() };
 };
 
 void
