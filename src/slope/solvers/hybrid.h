@@ -128,7 +128,7 @@ private:
     objective->updateWeightsAndWorkingResponse(w, z, eta, y);
     VectorXd w_sqrt = w.cwiseSqrt();
 
-    VectorXd residual = z - eta;
+    VectorXd residual = eta - z;
     MatrixXd gradient = gradient_in;
 
     for (int it = 0; it < this->max_it_inner; ++it) {
@@ -171,7 +171,7 @@ private:
                            lambda.head(working_set.size()));
         theta.array() /= std::max(1.0, dual_norm);
 
-        double dual_inner = (theta.cwiseProduct(w).dot(z) -
+        double dual_inner = ((-theta).cwiseProduct(w).dot(z) -
                              0.5 * theta.cwiseAbs2().cwiseProduct(w).sum()) /
                             n;
 
@@ -242,7 +242,7 @@ private:
 
     // The residual is kept up to date, but not eta. So we need to compute
     // it here.
-    eta = z - residual;
+    eta = residual + z;
     // TODO: register convergence status
   }
 

@@ -81,17 +81,18 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
 
     if (intercept) {
       double intercept_update = residual.dot(w) / n;
-      beta0(0) += intercept_update;
+      beta0(0) -= intercept_update;
     }
 
-    residual = z - linearPredictor(x,
-                                   working_set,
-                                   beta0,
-                                   beta,
-                                   x_centers,
-                                   x_scales,
-                                   standardize_jit,
-                                   intercept);
+    residual = linearPredictor(x,
+                               working_set,
+                               beta0,
+                               beta,
+                               x_centers,
+                               x_scales,
+                               standardize_jit,
+                               intercept) -
+               z;
 
     double g = (0.5 / n) * residual.cwiseAbs2().dot(w);
     double q = g_old + beta_diff.dot(gradient_active) +

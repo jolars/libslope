@@ -45,8 +45,8 @@ TEST_CASE("Strong screening rule", "[screening]")
     // Modified, incorrect solution, which should now have a KKT violation
     beta_hat(0) = 0.0;
 
-    residual = y - x * beta_hat;
-    gradient = -x.transpose() * residual;
+    residual = x * beta_hat - y;
+    gradient = x.transpose() * residual;
 
     auto violations = kktCheck(gradient, beta_hat, lambda, { 0, 1, 2 });
 
@@ -58,8 +58,8 @@ TEST_CASE("Strong screening rule", "[screening]")
     lambda *= 10 * 1.25 * n;
     beta_hat << 0.0, 0.09096501, 0.0;
 
-    residual = y - x * beta_hat;
-    gradient = -x.transpose() * residual;
+    residual = x * beta_hat - y;
+    gradient = x.transpose() * residual;
 
     Eigen::ArrayXd lambda_prev = lambda;
     lambda *= 0.99;

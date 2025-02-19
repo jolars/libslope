@@ -73,7 +73,7 @@ TEST_CASE("Check that in-place standardization works",
   Eigen::VectorXd y = x_dense * beta;
   Eigen::VectorXd w = Eigen::VectorXd::Ones(3); // weights
 
-  Eigen::VectorXd residual = y;
+  Eigen::VectorXd residual = -y;
   residual(0) += 1;
   residual(1) += -0.2;
   residual(2) += 0.9;
@@ -85,13 +85,13 @@ TEST_CASE("Check that in-place standardization works",
   REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse));
 
   Eigen::VectorXd residual_dense =
-    y - x_dense * beta.cwiseQuotient(x_scales_dense);
-  residual_dense.array() +=
+    x_dense * beta.cwiseQuotient(x_scales_dense) - y;
+  residual_dense.array() -=
     x_centers_dense.cwiseQuotient(x_scales_dense).dot(beta);
 
   Eigen::VectorXd residual_sparse =
-    y - x_sparse * beta.cwiseQuotient(x_scales_sparse);
-  residual_sparse.array() +=
+    x_sparse * beta.cwiseQuotient(x_scales_sparse) - y;
+  residual_sparse.array() -=
     x_centers_sparse.cwiseQuotient(x_scales_sparse).dot(beta);
 
   REQUIRE_THAT(residual_dense, VectorApproxEqual(residual_sparse));
@@ -154,7 +154,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
   Eigen::VectorXd y = x * beta;
   Eigen::VectorXd w = Eigen::VectorXd::Ones(n); // weights
 
-  Eigen::VectorXd residual = y;
+  Eigen::VectorXd residual = -y;
   residual(0) += 1;
   residual(1) -= 0.2;
   residual(2) += 0.9;

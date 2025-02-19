@@ -55,7 +55,7 @@ public:
    * regression.
    * @param eta The linear predictor vector \f$\eta\f$
    * @param y The observed counts vector \f$y\f$
-   * @return The residual vector: \f$y - e^{\eta}\f$
+   * @return The residual vector: \f$e^{\eta} - y\f$
    */
   Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
                            const Eigen::MatrixXd& y) override;

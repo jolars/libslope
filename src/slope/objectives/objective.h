@@ -107,7 +107,7 @@ public:
                                const Eigen::MatrixXd& y)
   {
     Eigen::MatrixXd residual = this->residual(eta, y);
-    beta0 += residual.colwise().mean() / this->lipschitz_constant;
+    beta0 -= residual.colwise().mean() / this->lipschitz_constant;
   };
 
   /**

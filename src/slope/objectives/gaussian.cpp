@@ -15,13 +15,13 @@ Gaussian::dual(const Eigen::MatrixXd& theta,
 {
   const int n = y.rows();
 
-  return (y.squaredNorm() - (y - theta).squaredNorm()) / (2.0 * n);
+  return (y.squaredNorm() - (theta + y).squaredNorm()) / (2.0 * n);
 }
 
 Eigen::MatrixXd
 Gaussian::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y - eta;
+  return eta - y;
 }
 
 Eigen::MatrixXd

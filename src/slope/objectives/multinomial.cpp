@@ -23,7 +23,7 @@ Multinomial::dual(const Eigen::MatrixXd& theta,
                   const Eigen::MatrixXd& y,
                   const Eigen::VectorXd& w)
 {
-  const Eigen::MatrixXd r = y - theta;
+  const Eigen::MatrixXd r = theta + y;
 
   return -(r.array() * r.array().max(1e-9).log()).sum() / y.rows();
 }
@@ -31,7 +31,7 @@ Multinomial::dual(const Eigen::MatrixXd& theta,
 Eigen::MatrixXd
 Multinomial::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return y - softmax(eta);
+  return softmax(eta) - y;
 }
 
 Eigen::MatrixXd

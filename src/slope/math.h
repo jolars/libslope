@@ -213,14 +213,14 @@ updateGradient(Eigen::MatrixXd& gradient,
 
       for (const auto& j : active_set) {
         gradient(j, k) =
-          -(x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
+          (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
           (x_scales(j) * n);
       }
     }
   } else {
     for (int k = 0; k < m; ++k) {
       for (const auto& j : active_set) {
-        gradient(j, k) = -x.col(j).dot(weighted_residual.col(k)) / n;
+        gradient(j, k) = x.col(j).dot(weighted_residual.col(k)) / n;
       }
     }
   }
@@ -260,14 +260,14 @@ offsetGradient(Eigen::MatrixXd& gradient,
     // other than means for the centers.
     for (int k = 0; k < m; ++k) {
       for (const auto& j : active_set) {
-        gradient(j, k) +=
+        gradient(j, k) -=
           offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
       }
     }
   } else {
     for (int k = 0; k < m; ++k) {
       for (const auto& j : active_set) {
-        gradient(j, k) += offset(k) * x.col(j).sum() / n;
+        gradient(j, k) -= offset(k) * x.col(j).sum() / n;
       }
     }
   }
