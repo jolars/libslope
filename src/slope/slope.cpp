@@ -327,21 +327,8 @@ Slope::fit(T& x,
     auto [beta0_out, beta_out] = rescaleCoefficients(
       beta0, beta, x_centers, x_scales, intercept, standardize);
 
-    std::vector<Eigen::Triplet<double>> beta_triplets;
-
-    for (int k = 0; k < m; ++k) {
-      for (int j = 0; j < p; ++j) {
-        if (beta_out(j, k) != 0) {
-          beta_triplets.emplace_back(j, k, beta_out(j, k));
-        }
-      }
-    }
-
-    Eigen::SparseMatrix<double> beta_out_sparse(p, m);
-    beta_out_sparse.setFromTriplets(beta_triplets.begin(), beta_triplets.end());
-
     beta0s.emplace_back(beta0_out);
-    betas.emplace_back(beta_out_sparse);
+    betas.emplace_back(beta_out.sparseView());
 
     primals_path.emplace_back(primals);
     dual_gaps_path.emplace_back(dual_gaps);
