@@ -51,14 +51,10 @@ Binomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                           const Eigen::VectorXd& eta,
                                           const Eigen::VectorXd& y)
 {
-  const int n = y.rows();
-
-  for (int i = 0; i < n; ++i) {
-    double p_i = sigmoid(eta(i, 0));
-    p_i = clamp(p_i, p_min, 1.0 - p_min);
-    w(i, 0) = p_i * (1.0 - p_i);
-    z(i, 0) = eta(i, 0) + (y(i, 0) - p_i) / w(i, 0);
-  }
+  Eigen::ArrayXd pr =
+    (1.0 / (1.0 + (-eta.array()).exp())).min(1.0 - p_min).max(p_min);
+  w = pr * (1.0 - pr);
+  z = eta.array() + (y.array() - pr) / w.array();
 }
 
 Eigen::MatrixXd
