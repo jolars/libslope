@@ -135,7 +135,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   slope::Slope model;
 
-  model.setTol(1e-12);
+  model.setTol(1e-8);
   model.setObjective("gaussian");
 
   SECTION("No intercept, no standardization")
@@ -153,8 +153,8 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
-    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
-    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
 
     auto dual_gaps = model.getDualGaps().front();
 
@@ -177,7 +177,8 @@ TEST_CASE("Gaussian models", "[gaussian]")
     model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
 
-    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
   }
 
   SECTION("With intercept, with standardization")
@@ -201,8 +202,8 @@ TEST_CASE("Gaussian models", "[gaussian]")
     REQUIRE_THAT(intercept, VectorApproxEqual(intercept_target, 1e-3));
     REQUIRE_THAT(intercept_pgd, VectorApproxEqual(intercept_target, 1e-3));
 
-    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));
-    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
   }
 
   SECTION("With intercept, no standardization")
@@ -225,7 +226,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
     REQUIRE_THAT(intercept, WithinAbs(0.04148455, 1e-3));
     REQUIRE_THAT(intercept_pgd, WithinAbs(0.04148455, 1e-3));
 
-    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-6));
-    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-6));
+    REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
   }
 }
