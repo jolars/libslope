@@ -2,6 +2,41 @@
 
 namespace slope {
 
+/**
+ * Standardize a dense matrix by centering and scaling.
+ *
+ * @param x The dense input matrix.
+ * @param x_centers The means of the columns.
+ * @param x_scales The standard deviations of the columns.
+ */
+void
+standardizeFeatures(Eigen::MatrixXd& x,
+                    const Eigen::VectorXd& x_centers,
+                    const Eigen::VectorXd& x_scales)
+{
+  // TODO: Switch name to `normalize`.
+  const int p = x.cols();
+
+  for (int j = 0; j < p; ++j) {
+    x.col(j) = (x.col(j).array() - x_centers(j)) / x_scales(j);
+  }
+}
+
+void
+standardizeFeatures(Eigen::SparseMatrix<double>& x,
+                    const Eigen::VectorXd& x_centers,
+                    const Eigen::VectorXd& x_scales)
+{
+  // TODO: Switch name to `normalize`.
+  const int p = x.cols();
+
+  for (int j = 0; j < p; ++j) {
+    for (Eigen::SparseMatrix<double>::InnerIterator it(x, j); it; ++it) {
+      it.valueRef() = it.value() / x_scales(j);
+    }
+  }
+}
+
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
 rescaleCoefficients(Eigen::VectorXd beta0,
                     Eigen::MatrixXd beta,

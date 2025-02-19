@@ -64,19 +64,10 @@ computeCentersAndScales(const T& x)
  * @param x_centers The means of the columns.
  * @param x_scales The standard deviations of the columns.
  */
-template<typename T>
 void
-standardizeFeatures(Eigen::DenseBase<T>& x,
+standardizeFeatures(Eigen::MatrixXd& x,
                     const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales)
-{
-  // TODO: Switch name to `normalize`.
-  const int p = x.cols();
-
-  for (int j = 0; j < p; ++j) {
-    x.col(j) = (x.col(j).array() - x_centers(j)) / x_scales(j);
-  }
-}
+                    const Eigen::VectorXd& x_scales);
 
 /**
  * Scale a sparse matrix (without centering to preserve sparsity).
@@ -84,21 +75,10 @@ standardizeFeatures(Eigen::DenseBase<T>& x,
  * @param x The sparse input matrix.
  * @param x_scales The standard deviations of the columns.
  */
-template<typename T>
 void
-standardizeFeatures(Eigen::SparseMatrixBase<T>& x,
+standardizeFeatures(Eigen::SparseMatrix<double>& x,
                     const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales)
-{
-  // TODO: Switch name to `normalize`.
-  const int p = x.cols();
-
-  for (int j = 0; j < p; ++j) {
-    for (typename T::InnerIterator it(x.derived(), j); it; ++it) {
-      it.valueRef() = it.value() / x_scales(j);
-    }
-  }
-}
+                    const Eigen::VectorXd& x_scales);
 
 /**
  * @brief Rescales the coefficients using the given parameters.
