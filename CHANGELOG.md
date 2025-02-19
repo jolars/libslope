@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.0](https://github.com/jolars/libslope/compare/v0.10.0...v0.11.0) (2025-02-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* no longer print anything
+* Separate `fit()` and `path()` methods ([#71](https://github.com/jolars/libslope/issues/71))
+
+### Features
+
+* add FISTA solver ([#67](https://github.com/jolars/libslope/issues/67)) ([d7e510a](https://github.com/jolars/libslope/commit/d7e510a461387f7027b1957af638c6baabd3efd3)), closes [#63](https://github.com/jolars/libslope/issues/63)
+* no longer print anything ([f90ff48](https://github.com/jolars/libslope/commit/f90ff486a112fd9e4dd4749a7970ce3577256841))
+* Separate `fit()` and `path()` methods ([#71](https://github.com/jolars/libslope/issues/71)) ([9712a19](https://github.com/jolars/libslope/commit/9712a1920f0668135eafc89be889642db54672cd))
+
+
+### Performance Improvements
+
+* vectorize binomial weight updates ([15964d6](https://github.com/jolars/libslope/commit/15964d69fbb71719d8cbb7b8b88f3831fe3734aa))
+
 ## [0.10.0](https://github.com/jolars/libslope/compare/v0.9.0...v0.10.0) (2025-02-18)
 
 
