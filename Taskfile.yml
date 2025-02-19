@@ -8,6 +8,11 @@ tasks:
   default:
     deps: [configure, build]
 
+  debug:
+    cmds:
+      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS_DEBUG="-O0 -Wno-cpp"
+      - cmake --build {{.BUILD_DIR}}
+
   configure:
     cmds:
       - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Debug
