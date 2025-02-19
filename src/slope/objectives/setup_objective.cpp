@@ -14,11 +14,12 @@ namespace slope {
  * on the specified statistical distribution family. The supported families are:
  * - "binomial": For binary classification problems (logistic regression)
  * - "poisson": For count data modeling (Poisson regression)
+ * - "multinomial": For multi-class classification problems
  * - "gaussian": For continuous response variables (linear regression, default
- * if unspecified)
+ *   if unspecified)
  *
  * @param family A string specifying the distribution family ("binomial",
- * "poisson", or "gaussian")
+ * "poisson", "multinomial", or "gaussian")
  * @return std::unique_ptr<Objective> A unique pointer to the appropriate
  * objective function object
  */
