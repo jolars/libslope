@@ -200,17 +200,17 @@ TEST_CASE("JIT standardization and modify-X standardization",
                  VectorApproxEqual(gradient.reshaped(), 1e-6));
   }
 
-  model.fit(x_copy, y);
+  auto fit = model.path(x_copy, y);
 
-  Eigen::VectorXd coefs_ref = model.getCoefs().front();
+  Eigen::VectorXd coefs_ref = fit.getCoefs().back();
 
   SECTION("JIT standardization for dense X")
   {
     model.setModifyX(false);
 
-    model.fit(x, y);
+    fit = model.path(x, y);
 
-    Eigen::VectorXd coefs_mod = model.getCoefs().front();
+    Eigen::VectorXd coefs_mod = fit.getCoefs().back();
 
     REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_ref, 1e-6));
   }
@@ -220,9 +220,9 @@ TEST_CASE("JIT standardization and modify-X standardization",
     // Never modify sparse X
     model.setModifyX(false);
 
-    model.fit(x_sparse, y);
+    fit = model.path(x_sparse, y);
 
-    Eigen::VectorXd coefs_sparse = model.getCoefs().front();
+    Eigen::VectorXd coefs_sparse = fit.getCoefs().back();
 
     REQUIRE_THAT(coefs_sparse, VectorApproxEqual(coefs_ref, 1e-6));
   }

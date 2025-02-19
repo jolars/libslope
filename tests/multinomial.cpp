@@ -38,7 +38,6 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
 
   Eigen::MatrixXd expected_coef(2, 3);
   Eigen::VectorXd expected_intercept(2);
-  Eigen::VectorXd alpha(1);
   Eigen::VectorXd lambda(6);
 
   slope::Slope model;
@@ -59,13 +58,13 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     model.setIntercept(false);
     model.setStandardize(false);
 
-    alpha(0) = 0.0;
+    double alpha = 0;
     lambda << 6.0, 5.0, 4.0, 3.0, 2.0, 1.0;
 
-    model.fit(x, y, alpha, lambda);
+    auto fit = model.fit(x, y, alpha, lambda);
 
     // Get coefficients
-    Eigen::MatrixXd coef = model.getCoefs().front();
+    Eigen::MatrixXd coef = fit.getCoefs();
 
     // Normalize hack to make comparison with glmnet output correct
     coef.row(0).array() -= coef(0, 1);
@@ -75,9 +74,7 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     REQUIRE_THAT(coef.reshaped(),
                  VectorApproxEqual(expected_coef.reshaped(), 1e-4));
 
-    auto gaps = model.getDualGaps().front();
-
-    REQUIRE(gaps.back() <= 1e-6);
+    REQUIRE(fit.getGaps().back() <= 1e-6);
   }
 
   SECTION("Path")
@@ -85,10 +82,10 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
     auto data = generateData(200, 20, "multinomial", 3, 0.4, 0.5, 93);
 
     model.setTol(1e-4);
-    model.fit(data.x, data.y);
+    auto fit = model.path(data.x, data.y);
 
-    auto null_deviance = model.getNullDeviance();
-    auto deviances = model.getDeviances();
+    auto null_deviance = fit.getNullDeviance();
+    auto deviances = fit.getDeviance();
 
     REQUIRE(null_deviance >= 0);
     REQUIRE(deviances.size() > 0);

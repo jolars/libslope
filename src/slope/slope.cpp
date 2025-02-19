@@ -21,19 +21,8 @@
 
 namespace slope {
 
-void
-Slope::reset()
-{
-  this->dual_gaps_path.clear();
-  this->primals_path.clear();
-  this->deviances.clear();
-  this->betas.clear();
-  this->beta0s.clear();
-  this->it_total = 0;
-}
-
 /**
- * Fits a SLOPE model to the given data.
+ * Fits the SLOPE path.
  *
  * This method fits a regularized regression model using the SLOPE penalty,
  * which combines the benefits of Lasso-type regularization with FDR control.
@@ -48,19 +37,17 @@ Slope::reset()
  *              the specified lambda_type
  */
 template<typename T>
-void
-Slope::fit(T& x,
-           const Eigen::MatrixXd& y_in,
-           Eigen::ArrayXd alpha,
-           Eigen::ArrayXd lambda)
+SlopePath
+Slope::path(T& x,
+            const Eigen::MatrixXd& y_in,
+            Eigen::ArrayXd alpha,
+            Eigen::ArrayXd lambda)
 {
   using Eigen::MatrixXd;
   using Eigen::VectorXd;
 
   const int n = x.rows();
   const int p = x.cols();
-
-  reset(); // Reset all internal variables
 
   if (n != y_in.rows()) {
     throw std::invalid_argument("x and y_in must have the same number of rows");
@@ -87,13 +74,19 @@ Slope::fit(T& x,
 
   const int m = y.cols();
 
-  beta0.resize(m);
-  beta0.setZero();
-  beta.resize(p, m);
-  beta.setZero();
+  VectorXd beta0 = VectorXd::Zero(m);
+  MatrixXd beta = MatrixXd::Zero(p, m);
+
   MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
   MatrixXd residual = objective->residual(eta, y);
   MatrixXd gradient(p, m);
+
+  // Path data
+  std::vector<VectorXd> beta0s;
+  std::vector<Eigen::SparseMatrix<double>> betas;
+  std::vector<double> deviances;
+  std::vector<std::vector<double>> primals_path;
+  std::vector<std::vector<double>> duals_path;
 
   bool user_alpha = alpha.size() > 0;
 
@@ -157,15 +150,13 @@ Slope::fit(T& x,
   }
 
   // Path variables
-  std::vector<double> dual_gaps, primals;
-  this->null_deviance = objective->nullDeviance(y, intercept);
+  std::vector<double> duals, primals;
+  double null_deviance = objective->nullDeviance(y, intercept);
 
   // TODO: We should not do this for all solvers.
   Clusters clusters(beta.reshaped());
 
   double alpha_prev = std::max(alpha_max, alpha(0));
-
-  this->it_total = 0;
 
   // Regularization path loop
   for (int path_step = 0; path_step < this->path_length; ++path_step) {
@@ -215,7 +206,6 @@ Slope::fit(T& x,
       double primal = objective->loss(eta, y) +
                       sl1_norm.eval(beta(working_set, Eigen::all).reshaped(),
                                     lambda_curr.head(working_set.size() * m));
-      primals.emplace_back(primal);
 
       MatrixXd theta = residual;
 
@@ -246,11 +236,12 @@ Slope::fit(T& x,
 
       double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
 
+      primals.emplace_back(primal);
+      duals.emplace_back(dual);
+
       double dual_gap = primal - dual;
 
       assert(dual_gap > -1e-5 && "Dual gap should be positive");
-
-      dual_gaps.emplace_back(dual_gap);
 
       double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
 
@@ -331,19 +322,17 @@ Slope::fit(T& x,
     betas.emplace_back(beta_out.sparseView());
 
     primals_path.emplace_back(primals);
-    dual_gaps_path.emplace_back(dual_gaps);
+    duals_path.emplace_back(duals);
 
     alpha_prev = alpha_curr;
 
     // Compute early stopping criteria
     double dev = objective->deviance(eta, y);
-    double dev_ratio = 1.0 - dev / this->null_deviance;
+    double dev_ratio = 1.0 - dev / null_deviance;
     double dev_change =
-      this->deviances.empty()
-        ? 1.0
-        : (this->deviances.back() - dev) / this->deviances.back();
+      deviances.empty() ? 1.0 : (deviances.back() - dev) / deviances.back();
 
-    this->deviances.emplace_back(dev);
+    deviances.emplace_back(dev);
 
     clusters.update(beta.reshaped());
 
@@ -361,9 +350,27 @@ Slope::fit(T& x,
     }
   }
 
-  alpha_out = alpha;
-  lambda_out = lambda;
+  return { beta0s,    betas,         alpha,        lambda,
+           deviances, null_deviance, primals_path, duals_path };
 }
+
+template<typename T>
+SlopeFit
+Slope::fit(T& x,
+           const Eigen::MatrixXd& y_in,
+           const double alpha,
+           Eigen::ArrayXd lambda)
+{
+  Eigen::ArrayXd alpha_arr(1);
+  alpha_arr(0) = alpha;
+  SlopePath res = path(x, y_in, alpha_arr, lambda);
+
+  return {
+    res.getIntercepts().back(), res.getCoefs().back(), res.getLambda(),
+    res.getAlpha()[0],          res.getNullDeviance(), res.getPrimals().back(),
+    res.getDuals().back()
+  };
+};
 
 void
 Slope::setSolver(const std::string& solver)
@@ -532,71 +539,29 @@ Slope::setMaxClusters(const int max_clusters)
   this->max_clusters = max_clusters;
 }
 
-const Eigen::ArrayXd&
-Slope::getAlpha() const
-{
-  return alpha_out;
-}
-
-const Eigen::ArrayXd&
-Slope::getLambda() const
-{
-  return lambda_out;
-}
-
-const std::vector<Eigen::SparseMatrix<double>>
-Slope::getCoefs() const
-{
-  return betas;
-}
-
-const std::vector<Eigen::VectorXd>
-Slope::getIntercepts() const
-{
-  return beta0s;
-}
-
-int
-Slope::getTotalIterations() const
-{
-  return it_total;
-}
-
-const std::vector<std::vector<double>>&
-Slope::getDualGaps() const
-{
-  return dual_gaps_path;
-}
-
-const std::vector<std::vector<double>>&
-Slope::getPrimals() const
-{
-  return primals_path;
-}
-
-const std::vector<double>&
-Slope::getDeviances() const
-{
-  return deviances;
-}
-
-const double&
-Slope::getNullDeviance() const
-{
-  return null_deviance;
-}
-
 // Explicit instantiations for dense and sparse matrices
-template void
+template SlopePath
+Slope::path<Eigen::MatrixXd>(Eigen::MatrixXd&,
+                             const Eigen::MatrixXd&,
+                             Eigen::ArrayXd,
+                             Eigen::ArrayXd);
+
+template SlopePath
+Slope::path<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
+                                         const Eigen::MatrixXd&,
+                                         Eigen::ArrayXd,
+                                         Eigen::ArrayXd);
+
+template SlopeFit
 Slope::fit<Eigen::MatrixXd>(Eigen::MatrixXd&,
                             const Eigen::MatrixXd&,
-                            Eigen::ArrayXd,
+                            const double,
                             Eigen::ArrayXd);
 
-template void
+template SlopeFit
 Slope::fit<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
                                         const Eigen::MatrixXd&,
-                                        Eigen::ArrayXd,
+                                        const double,
                                         Eigen::ArrayXd);
 
 // slope.cpp

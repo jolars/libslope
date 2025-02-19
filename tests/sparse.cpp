@@ -48,11 +48,11 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
   model.setIntercept(false);
   model.setStandardize(true);
 
-  model.fit(x_sparse, y, alpha, lambda);
-  auto coefs_sparse = model.getCoefs();
+  auto fit = model.path(x_sparse, y, alpha, lambda);
+  auto coefs_sparse = fit.getCoefs();
 
-  model.fit(x_dense, y, alpha, lambda);
-  auto coefs_dense = model.getCoefs();
+  fit = model.path(x_dense, y, alpha, lambda);
+  auto coefs_dense = fit.getCoefs();
 
   Eigen::VectorXd coef_sparse = coefs_sparse.front();
   Eigen::VectorXd coef_dense = coefs_dense.front();

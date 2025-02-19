@@ -76,12 +76,12 @@ TEST_CASE("Strong screening rule", "[screening]")
     slope::Slope model;
 
     model.setScreening("none");
-    model.fit(data.x, data.y);
-    Eigen::VectorXd coefs = model.getCoefs().back();
+    auto fit = model.path(data.x, data.y);
+    Eigen::VectorXd coefs = fit.getCoefs().back();
 
     model.setScreening("strong");
-    model.fit(data.x, data.y);
-    Eigen::VectorXd coefs_screen = model.getCoefs().back();
+    fit = model.path(data.x, data.y);
+    Eigen::VectorXd coefs_screen = fit.getCoefs().back();
 
     REQUIRE_THAT(coefs, VectorApproxEqual(coefs_screen, 1e-4));
   }
@@ -94,8 +94,8 @@ TEST_CASE("Screening benchmarks", "[!benchmark]")
   slope::Slope model;
 
   model.setIntercept(false);
-  model.fit(data.x, data.y);
-  Eigen::VectorXd coefs = model.getCoefs().back();
+  auto fit = model.path(data.x, data.y);
+  Eigen::VectorXd coefs = fit.getCoefs().back();
 
   BENCHMARK("No screening")
   {

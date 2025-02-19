@@ -42,16 +42,17 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
   Eigen::VectorXd y =
     prob.unaryExpr([](double p) { return p > 0.5 ? 1.0 : 0.0; });
 
-  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
+  double alpha = 0.05;
   Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(3);
 
-  alpha[0] = 0.05;
   lambda << 2.128045, 1.833915, 1.644854;
 
   slope::Slope model;
 
   model.setTol(1e-7);
   model.setObjective("binomial");
+
+  slope::SlopeFit fit;
 
   SECTION("No intercept, no standardization")
   {
@@ -63,11 +64,11 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
     model.setSolver("pgd");
 
-    model.fit(x, y, alpha, lambda);
+    fit = model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_pgd = model.getCoefs().front();
+    Eigen::VectorXd coefs_pgd = fit.getCoefs();
 
-    auto dual_gaps = model.getDualGaps().front();
+    auto dual_gaps = fit.getGaps();
 
     REQUIRE(dual_gaps.front() >= 0);
     REQUIRE(dual_gaps.back() >= 0);
@@ -75,9 +76,9 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
     model.setSolver("hybrid");
 
-    model.fit(x, y, alpha, lambda);
+    fit = model.fit(x, y, alpha, lambda);
 
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
+    Eigen::VectorXd coefs_hybrid = fit.getCoefs();
 
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
@@ -93,18 +94,17 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
     model.setSolver("pgd");
     model.setMaxIt(1e7);
-    model.fit(x, y, alpha, lambda);
-    auto coefs = model.getCoefs();
-    Eigen::VectorXd coef_pgd = coefs.front();
-    double intercept_pgd = model.getIntercepts().front()[0];
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coef_pgd = fit.getCoefs();
+    double intercept_pgd = fit.getIntercepts()[0];
 
     REQUIRE_THAT(coef_pgd, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_pgd, WithinAbs(intercept_target, 1e-4));
 
     model.setSolver("hybrid");
-    model.fit(x, y, alpha, lambda);
-    Eigen::VectorXd coefs_hybrid = model.getCoefs().front();
-    double intercept_hybrid = model.getIntercepts().front()[0];
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coefs_hybrid = fit.getCoefs();
+    double intercept_hybrid = fit.getIntercepts()[0];
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_hybrid, WithinAbs(intercept_target, 1e-4));

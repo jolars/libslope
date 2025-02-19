@@ -5,11 +5,12 @@
 
 #pragma once
 
+#include "slope_fit.h"
+#include "slope_path.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <cassert>
 #include <optional>
-#include <vector>
 
 namespace slope {
 
@@ -223,84 +224,21 @@ public:
    */
   void setMaxClusters(const int max_clusters);
 
-  /**
-   * @brief Get the alpha sequence.
-   *
-   * @return The sequence of weights for the regularization path.
-   */
-  const Eigen::ArrayXd& getAlpha() const;
-
-  /**
-   * @brief Get the lambda sequence.
-   *
-   * @return The sequence of lambda values for the weights of the sorted L1
-   * norm.
-   */
-  const Eigen::ArrayXd& getLambda() const;
-
-  /**
-   * Get the coefficients from the path.
-   *
-   * @return The coefficients from the path, stored in a sparse matrix.
-   */
-  const std::vector<Eigen::SparseMatrix<double>> getCoefs() const;
-
-  /**
-   * Get the intercepts from the path.
-   *
-   * @return The coefficients from the path, stored in an Eigen vector. If no
-   * intercepts were fit, this is a vector of zeros.
-   */
-  const std::vector<Eigen::VectorXd> getIntercepts() const;
-
-  /**
-   * Get the total number of (inner) iterations.
-   *
-   * @return The toral number of iterations from the inner loop, computed across
-   * the path.
-   */
-  int getTotalIterations() const;
-
-  /**
-   * Get the duality gaps.
-   *
-   * @return Get the duality gaps from the path.
-   */
-  const std::vector<std::vector<double>>& getDualGaps() const;
-
-  /**
-   * Get the primal objective values.
-   *
-   * @return Get the primal objective values from the path.
-   */
-  const std::vector<std::vector<double>>& getPrimals() const;
-
-  /**
-   * Get the deviances
-   *
-   * @return Get the primal objective values from the path.
-   */
-  const std::vector<double>& getDeviances() const;
-
-  /**
-   * Get the deviance for the null model
-   *
-   * @return Get the primal objective values from the path.
-   */
-  const double& getNullDeviance() const;
+  // Declaration of the templated path() method.
+  template<typename T>
+  SlopePath path(T& x,
+                 const Eigen::MatrixXd& y_in,
+                 Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
+                 Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
 
   // Declaration of the templated fit() method.
   template<typename T>
-  void fit(T& x,
-           const Eigen::MatrixXd& y_in,
-           Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
-           Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
+  SlopeFit fit(T& x,
+               const Eigen::MatrixXd& y_in,
+               const double alpha = 1.0,
+               Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
 
 private:
-  // Reset the output values, but not the current coefficients
-  void reset();
-
-  // parameters
   bool intercept;
   bool modify_x;
   bool standardize;
@@ -321,19 +259,6 @@ private:
   std::string objective;
   std::string screening_type;
   std::string solver_type;
-
-  // estimates
-  Eigen::ArrayXd alpha_out;
-  Eigen::ArrayXd lambda_out;
-  Eigen::MatrixXd beta;
-  Eigen::VectorXd beta0;
-  double null_deviance;
-  int it_total;
-  std::vector<Eigen::SparseMatrix<double>> betas;
-  std::vector<Eigen::VectorXd> beta0s;
-  std::vector<double> deviances;
-  std::vector<std::vector<double>> dual_gaps_path;
-  std::vector<std::vector<double>> primals_path;
 };
 
 } // namespace slope
