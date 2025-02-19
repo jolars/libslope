@@ -1,18 +1,11 @@
-#include "standardize.h"
+#include "normalize.h"
 
 namespace slope {
 
-/**
- * Standardize a dense matrix by centering and scaling.
- *
- * @param x The dense input matrix.
- * @param x_centers The means of the columns.
- * @param x_scales The standard deviations of the columns.
- */
 void
-standardizeFeatures(Eigen::MatrixXd& x,
-                    const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales)
+normalize(Eigen::MatrixXd& x,
+          const Eigen::VectorXd& x_centers,
+          const Eigen::VectorXd& x_scales)
 {
   // TODO: Switch name to `normalize`.
   const int p = x.cols();
@@ -23,9 +16,9 @@ standardizeFeatures(Eigen::MatrixXd& x,
 }
 
 void
-standardizeFeatures(Eigen::SparseMatrix<double>& x,
-                    const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales)
+normalize(Eigen::SparseMatrix<double>& x,
+          const Eigen::VectorXd& x_centers,
+          const Eigen::VectorXd& x_scales)
 {
   // TODO: Switch name to `normalize`.
   const int p = x.cols();

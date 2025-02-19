@@ -1,5 +1,5 @@
-#include "slope/standardize.h"
 #include "slope/math.h"
+#include "slope/normalize.h"
 #include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
@@ -175,7 +175,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
   SECTION("Gradient computations for JIT standardization")
   {
     auto [x_centers, x_scales] = slope::computeCentersAndScales(x);
-    slope::standardizeFeatures(x, x_centers, x_scales);
+    slope::normalize(x, x_centers, x_scales);
 
     Eigen::MatrixXd gradient(3, 1);
     Eigen::MatrixXd gradient_jit = gradient;

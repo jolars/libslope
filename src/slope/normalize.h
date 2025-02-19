@@ -58,27 +58,28 @@ computeCentersAndScales(const T& x)
 }
 
 /**
- * Standardize a dense matrix by centering and scaling.
+ * Normalize a dense matrix by centering and scaling.
  *
  * @param x The dense input matrix.
- * @param x_centers The means of the columns.
- * @param x_scales The standard deviations of the columns.
+ * @param x_centers The locations of the columns.
+ * @param x_scales The scales of the columns.
  */
 void
-standardizeFeatures(Eigen::MatrixXd& x,
-                    const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales);
+normalize(Eigen::MatrixXd& x,
+          const Eigen::VectorXd& x_centers,
+          const Eigen::VectorXd& x_scales);
 
 /**
- * Scale a sparse matrix (without centering to preserve sparsity).
+ * Normalize a sparse matrix (without centering to preserve sparsity).
  *
  * @param x The sparse input matrix.
- * @param x_scales The standard deviations of the columns.
+ * @param x_centers The locations of the columns.
+ * @param x_scales The scales of the columns.
  */
 void
-standardizeFeatures(Eigen::SparseMatrix<double>& x,
-                    const Eigen::VectorXd& x_centers,
-                    const Eigen::VectorXd& x_scales);
+normalize(Eigen::SparseMatrix<double>& x,
+          const Eigen::VectorXd& x_centers,
+          const Eigen::VectorXd& x_scales);
 
 /**
  * @brief Rescales the coefficients using the given parameters.

@@ -4,6 +4,7 @@ add_library(
   slope/helpers.cpp
   slope/kkt_check.cpp
   slope/math.cpp
+  slope/normalize.cpp
   slope/objectives/binomial.cpp
   slope/objectives/gaussian.cpp
   slope/objectives/multinomial.cpp
@@ -13,12 +14,11 @@ add_library(
   slope/regularization_sequence.cpp
   slope/screening.cpp
   slope/slope.cpp
-  slope/solvers/pgd.cpp
   slope/solvers/hybrid.cpp
+  slope/solvers/pgd.cpp
   slope/solvers/setup_solver.cpp
   slope/solvers/slope_threshold.cpp
   slope/sorted_l1_norm.cpp
-  slope/standardize.cpp
   slope/utils.cpp
 )
 

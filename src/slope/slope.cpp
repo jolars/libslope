@@ -4,13 +4,13 @@
 #include "helpers.h"
 #include "kkt_check.h"
 #include "math.h"
+#include "normalize.h"
 #include "objectives/objective.h"
 #include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
 #include "screening.h"
 #include "solvers/setup_solver.h"
 #include "sorted_l1_norm.h"
-#include "standardize.h"
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
@@ -75,7 +75,7 @@ Slope::fit(T& x,
   auto [x_centers, x_scales] = computeCentersAndScales(x);
 
   if (this->standardize && this->modify_x && !sparse_x) {
-    standardizeFeatures(x, x_centers, x_scales);
+    normalize(x, x_centers, x_scales);
   }
 
   std::vector<int> full_set(p);

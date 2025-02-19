@@ -50,7 +50,7 @@ if(BUILD_TESTING)
     tests/qnorm.cpp
     tests/screening.cpp
     tests/sparse.cpp
-    tests/standardize.cpp
+    tests/normalization.cpp
   )
   target_link_libraries(
     tests
