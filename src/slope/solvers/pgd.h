@@ -113,7 +113,7 @@ private:
   void runImpl(Eigen::VectorXd& beta0,
                Eigen::MatrixXd& beta,
                Eigen::MatrixXd& eta,
-               Clusters& clusters,
+               Clusters&,
                const Eigen::ArrayXd& lambda,
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,

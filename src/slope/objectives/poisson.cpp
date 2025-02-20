@@ -11,7 +11,7 @@ Poisson::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 double
 Poisson::dual(const Eigen::MatrixXd& theta,
               const Eigen::MatrixXd& y,
-              const Eigen::VectorXd& w)
+              const Eigen::VectorXd&)
 {
   const Eigen::ArrayXd e = theta + y;
 

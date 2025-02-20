@@ -21,7 +21,7 @@ Multinomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 double
 Multinomial::dual(const Eigen::MatrixXd& theta,
                   const Eigen::MatrixXd& y,
-                  const Eigen::VectorXd& w)
+                  const Eigen::VectorXd&)
 {
   const Eigen::MatrixXd r = theta + y;
 
@@ -65,10 +65,10 @@ Multinomial::preprocessResponse(const Eigen::MatrixXd& y)
 }
 
 void
-Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                             Eigen::VectorXd& z,
-                                             const Eigen::VectorXd& eta,
-                                             const Eigen::VectorXd& y)
+Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd&,
+                                             Eigen::VectorXd&,
+                                             const Eigen::VectorXd&,
+                                             const Eigen::VectorXd&)
 {
   // Not implemented
   // TODO: Create not-implmented error, maybe as part of parent class.

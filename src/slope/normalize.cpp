@@ -17,7 +17,7 @@ normalize(Eigen::MatrixXd& x,
 
 void
 normalize(Eigen::SparseMatrix<double>& x,
-          const Eigen::VectorXd& x_centers,
+          const Eigen::VectorXd&,
           const Eigen::VectorXd& x_scales)
 {
   // TODO: Switch name to `normalize`.

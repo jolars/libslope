@@ -15,7 +15,7 @@ Binomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 double
 Binomial::dual(const Eigen::MatrixXd& theta,
                const Eigen::MatrixXd& y,
-               const Eigen::VectorXd& w)
+               const Eigen::VectorXd&)
 {
   using Eigen::log;
 

@@ -11,7 +11,7 @@ Gaussian::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 double
 Gaussian::dual(const Eigen::MatrixXd& theta,
                const Eigen::MatrixXd& y,
-               const Eigen::VectorXd& w)
+               const Eigen::VectorXd&)
 {
   const int n = y.rows();
 
@@ -33,7 +33,7 @@ Gaussian::preprocessResponse(const Eigen::MatrixXd& y)
 void
 Gaussian::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
                                           Eigen::VectorXd& z,
-                                          const Eigen::VectorXd& eta,
+                                          const Eigen::VectorXd&,
                                           const Eigen::VectorXd& y)
 {
   w.setOnes();
