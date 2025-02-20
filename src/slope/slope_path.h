@@ -57,7 +57,7 @@ public:
 
   const Eigen::SparseMatrix<double>& getCoefs(const std::size_t i) const
   {
-    assert(i >= 0 && i < coefs.size() && "Index out of bounds");
+    assert(i < coefs.size() && "Index out of bounds");
     return coefs[i];
   }
 
