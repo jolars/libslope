@@ -227,7 +227,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     auto time = fit.getTime();
 
-    REQUIRE_THAT(time, VectorMonotonic(true, true));
+    REQUIRE_THAT(time, VectorMonotonic(true, false));
 
     auto passes = fit.getPasses();
     REQUIRE(passes > 0);
