@@ -18,8 +18,8 @@ add_library(
   slope/solvers/setup_solver.cpp
   slope/solvers/slope_threshold.cpp
   slope/sorted_l1_norm.cpp
-  slope/utils.cpp
   slope/timer.cpp
+  slope/utils.cpp
 )
 
 target_include_directories(slope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
