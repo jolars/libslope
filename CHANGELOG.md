@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0](https://github.com/jolars/libslope/compare/v0.11.0...v0.12.0) (2025-02-20)
+
+
+### Features
+
+* return passes from solver ([fd8b512](https://github.com/jolars/libslope/commit/fd8b512db3b5a360c8c864e73a0b650bda103c5f))
+* return wall clock time from solver ([2b72b4b](https://github.com/jolars/libslope/commit/2b72b4be2d5888dad1114ec2b27350392fcca00f))
+
+
+### Bug Fixes
+
+* return alpha correctly from `Slope::fit()` ([fab20f1](https://github.com/jolars/libslope/commit/fab20f16d542c081b9c1554d25ad3ca31565f046))
+
 ## [0.11.0](https://github.com/jolars/libslope/compare/v0.10.0...v0.11.0) (2025-02-19)
 
 
