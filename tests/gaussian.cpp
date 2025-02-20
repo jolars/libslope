@@ -223,5 +223,9 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
     REQUIRE_THAT(coefs, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coef_target, 1e-4));
+
+    auto time = fit.getTime();
+
+    REQUIRE_THAT(time, VectorMonotonic(true, true));
   }
 }

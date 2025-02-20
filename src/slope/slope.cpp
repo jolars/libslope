@@ -10,6 +10,7 @@
 #include "screening.h"
 #include "solvers/setup_solver.h"
 #include "sorted_l1_norm.h"
+#include "timer.h"
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
@@ -85,6 +86,7 @@ Slope::path(T& x,
   std::vector<double> deviances;
   std::vector<std::vector<double>> primals_path;
   std::vector<std::vector<double>> duals_path;
+  std::vector<std::vector<double>> time_path;
 
   bool user_alpha = alpha.size() > 0;
 
@@ -147,13 +149,17 @@ Slope::path(T& x,
   }
 
   // Path variables
-  std::vector<double> duals, primals;
+  std::vector<double> duals, primals, time;
   double null_deviance = objective->nullDeviance(y, intercept);
+
+  Timer timer;
 
   // TODO: We should not do this for all solvers.
   Clusters clusters(beta.reshaped());
 
   double alpha_prev = std::max(alpha_max, alpha(0));
+
+  timer.start();
 
   // Regularization path loop
   for (int path_step = 0; path_step < this->path_length; ++path_step) {
@@ -230,6 +236,7 @@ Slope::path(T& x,
 
       primals.emplace_back(primal);
       duals.emplace_back(dual);
+      time.emplace_back(timer.elapsed());
 
       double dual_gap = primal - dual;
 
@@ -300,6 +307,7 @@ Slope::path(T& x,
 
     primals_path.emplace_back(primals);
     duals_path.emplace_back(duals);
+    time_path.emplace_back(time);
 
     alpha_prev = alpha_curr;
 
@@ -321,8 +329,8 @@ Slope::path(T& x,
     }
   }
 
-  return { beta0s,    betas,         alpha,        lambda,
-           deviances, null_deviance, primals_path, duals_path };
+  return { beta0s,        betas,        alpha,      lambda,   deviances,
+           null_deviance, primals_path, duals_path, time_path };
 }
 
 template<typename T>
@@ -339,7 +347,8 @@ Slope::fit(T& x,
   return { res.getIntercepts().back(), res.getCoefs().back(),
            res.getAlpha()[0],          res.getLambda(),
            res.getDeviance().back(),   res.getNullDeviance(),
-           res.getPrimals().back(),    res.getDuals().back() };
+           res.getPrimals().back(),    res.getDuals().back(),
+           res.getTime().back() };
 };
 
 void

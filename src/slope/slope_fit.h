@@ -16,6 +16,7 @@ private:
   double null_deviance;
   std::vector<double> primals;
   std::vector<double> duals;
+  std::vector<double> time;
 
 public:
   SlopeFit() = default;
@@ -27,7 +28,8 @@ public:
            double deviance,
            double null_deviance,
            const std::vector<double>& primals,
-           const std::vector<double>& duals)
+           const std::vector<double>& duals,
+           const std::vector<double>& time)
     : intercepts{ intercepts }
     , coefs{ coefs }
     , alpha{ alpha }
@@ -36,6 +38,7 @@ public:
     , null_deviance{ null_deviance }
     , primals{ primals }
     , duals{ duals }
+    , time{ time }
   {
   }
 
@@ -47,6 +50,7 @@ public:
   double getNullDeviance() const { return null_deviance; }
   const std::vector<double>& getPrimals() const { return primals; }
   const std::vector<double>& getDuals() const { return duals; }
+  const std::vector<double>& getTime() const { return time; }
 
   double getDevianceRatios() const { return 1.0 - deviance / null_deviance; }
 
