@@ -87,6 +87,7 @@ Slope::path(T& x,
   std::vector<std::vector<double>> primals_path;
   std::vector<std::vector<double>> duals_path;
   std::vector<std::vector<double>> time_path;
+  std::vector<int> passes;
 
   bool user_alpha = alpha.size() > 0;
 
@@ -188,8 +189,10 @@ Slope::path(T& x,
       working_set = setUnion(previous_set, { alpha_max_ind });
     }
 
-    for (int it = 0; it < this->max_it; ++it) {
+    int it = 0;
+    for (; it < this->max_it; ++it) {
       assert(it < this->max_it - 1 && "Exceeded maximum number of iterations");
+
       // Compute primal, dual, and gap
       residual = objective->residual(eta, y);
       updateGradient(gradient,
@@ -318,6 +321,7 @@ Slope::path(T& x,
       deviances.empty() ? 1.0 : (deviances.back() - dev) / deviances.back();
 
     deviances.emplace_back(dev);
+    passes.emplace_back(it);
 
     clusters.update(beta.reshaped());
 
@@ -329,8 +333,8 @@ Slope::path(T& x,
     }
   }
 
-  return { beta0s,        betas,        alpha,      lambda,   deviances,
-           null_deviance, primals_path, duals_path, time_path };
+  return { beta0s,        betas,        alpha,      lambda,    deviances,
+           null_deviance, primals_path, duals_path, time_path, passes };
 }
 
 template<typename T>
@@ -348,7 +352,7 @@ Slope::fit(T& x,
            res.getAlpha()[0],          res.getLambda(),
            res.getDeviance().back(),   res.getNullDeviance(),
            res.getPrimals().back(),    res.getDuals().back(),
-           res.getTime().back() };
+           res.getTime().back(),       res.getPasses().back() };
 };
 
 void

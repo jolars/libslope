@@ -17,6 +17,7 @@ private:
   std::vector<std::vector<double>> primals;
   std::vector<std::vector<double>> duals;
   std::vector<std::vector<double>> time;
+  std::vector<int> passes;
 
 public:
   SlopePath() = default;
@@ -29,7 +30,8 @@ public:
             double null_deviance,
             const std::vector<std::vector<double>>& primals,
             const std::vector<std::vector<double>>& duals,
-            const std::vector<std::vector<double>>& time)
+            const std::vector<std::vector<double>>& time,
+            const std::vector<int>& passes)
     : intercepts{ intercepts }
     , coefs{ coefs }
     , alpha{ alpha }
@@ -39,6 +41,7 @@ public:
     , primals{ primals }
     , duals{ duals }
     , time{ time }
+    , passes{ passes }
   {
   }
 
@@ -65,6 +68,7 @@ public:
   const std::vector<std::vector<double>>& getPrimals() const { return primals; }
   const std::vector<std::vector<double>>& getDuals() const { return duals; }
   const std::vector<std::vector<double>>& getTime() const { return time; }
+  const std::vector<int>& getPasses() const { return passes; }
 
   const std::vector<double> getDevianceRatios() const
   {

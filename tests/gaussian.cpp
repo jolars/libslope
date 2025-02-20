@@ -205,6 +205,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
   {
     model.setStandardize(false);
     model.setIntercept(true);
+    model.setMaxIt(1e5);
 
     coef_target << 0.68614138, -0.68614138, 0.00000000;
 
@@ -227,5 +228,9 @@ TEST_CASE("Gaussian models", "[gaussian]")
     auto time = fit.getTime();
 
     REQUIRE_THAT(time, VectorMonotonic(true, true));
+
+    auto passes = fit.getPasses();
+    REQUIRE(passes > 0);
+    REQUIRE(passes < 1e5);
   }
 }
