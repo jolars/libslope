@@ -67,6 +67,17 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     coef_true = { 0.4487011, 0.6207310 };
     coef = coefs[2];
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-5));
+
+    fit = model.path(x, y, alpha);
+
+    REQUIRE(fit.getAlpha().size() == 20);
+    REQUIRE(fit.getLambda().size() == 2);
+
+    Eigen::ArrayXd alpha_manual =
+      Eigen::ArrayXd::LinSpaced(10, 0.01, 1.0).reverse();
+    fit = model.path(x, y, alpha_manual);
+
+    REQUIRE(fit.getAlpha().size() == 10);
   }
 
   SECTION("Early stopping")

@@ -90,8 +90,9 @@ Slope::path(T& x,
   std::vector<int> passes;
 
   bool user_alpha = alpha.size() > 0;
+  bool user_lambda = lambda.size() > 0;
 
-  if (!user_alpha) {
+  if (!user_lambda) {
     lambda = lambdaSequence(p * m, this->q, this->lambda_type);
   } else {
     if (lambda.size() != p * m) {
