@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/jolars/libslope/compare/v0.12.0...v0.12.1) (2025-02-20)
+
+
+### Bug Fixes
+
+* correctly setup lambda path when using auto alpha ([a402ed2](https://github.com/jolars/libslope/commit/a402ed2976fc761b19fe8d452801c7589e882c1b))
+
 ## [0.12.0](https://github.com/jolars/libslope/compare/v0.11.0...v0.12.0) (2025-02-20)
 
 
