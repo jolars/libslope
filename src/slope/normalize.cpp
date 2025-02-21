@@ -48,7 +48,7 @@ rescaleCoefficients(Eigen::VectorXd beta0,
       }
 
       if (intercept) {
-        beta0(0) -= x_bar_beta_sum;
+        beta0(k) -= x_bar_beta_sum;
       }
     }
   }
