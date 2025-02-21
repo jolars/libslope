@@ -36,7 +36,6 @@ rescaleCoefficients(Eigen::VectorXd beta0,
                     const bool intercept,
                     const bool standardize)
 {
-  // TODO: Don't pass by value.
   const int p = beta.rows();
   const int m = beta.cols();
 
