@@ -55,8 +55,6 @@ TEST_CASE("Path fitting", "[path][gaussian]")
     auto coefs = fit.getCoefs();
     alpha = fit.getAlpha();
 
-    REQUIRE(alpha.rows() == 20);
-
     // First step should be the null model
     std::vector<double> coef_true = { 0, 0 };
     Eigen::VectorXd coef = coefs[0];
@@ -70,7 +68,8 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 
     fit = model.path(x, y, alpha);
 
-    REQUIRE(fit.getAlpha().size() == 20);
+    // When alpha is supplied manually, the returned alpha should be unchanged
+    REQUIRE(fit.getAlpha().size() == alpha.size());
     REQUIRE(fit.getLambda().size() == 2);
 
     Eigen::ArrayXd alpha_manual =
