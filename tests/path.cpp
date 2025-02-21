@@ -110,4 +110,18 @@ TEST_CASE("Path fitting", "[path][gaussian]")
 
     REQUIRE(fit.getDeviance().size() < path_length);
   }
+
+  SECTION("Sanity checks")
+  {
+    slope::Slope model;
+    model.setPathLength(100);
+
+    auto data = generateData(100, 10);
+
+    Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(1);
+    alpha << 1000000;
+    Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0);
+
+    REQUIRE_NOTHROW(model.path(data.x, data.y, alpha, lambda));
+  }
 }
