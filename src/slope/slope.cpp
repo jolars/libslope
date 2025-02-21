@@ -55,7 +55,8 @@ Slope::path(T& x,
   bool normalize_jit = normalize(x,
                                  this->x_centers,
                                  this->x_scales,
-                                 this->normalization_type,
+                                 this->centering_type,
+                                 this->scaling_type,
                                  this->modify_x);
 
   std::vector<int> full_set(p);
@@ -119,8 +120,8 @@ Slope::path(T& x,
                  x,
                  residual,
                  full_set,
-                 x_centers,
-                 x_scales,
+                 this->x_centers,
+                 this->x_scales,
                  Eigen::VectorXd::Ones(n),
                  normalize_jit);
 
@@ -220,8 +221,8 @@ Slope::path(T& x,
                        x,
                        theta_mean,
                        working_set,
-                       x_centers,
-                       x_scales,
+                       this->x_centers,
+                       this->x_scales,
                        normalize_jit);
       }
 
@@ -298,12 +299,8 @@ Slope::path(T& x,
     }
 
     // Store everything for this step of the path
-    auto [beta0_out, beta_out] = rescaleCoefficients(beta0,
-                                                     beta,
-                                                     this->x_centers,
-                                                     this->x_scales,
-                                                     this->intercept,
-                                                     this->normalization_type);
+    auto [beta0_out, beta_out] = rescaleCoefficients(
+      beta0, beta, this->x_centers, this->x_scales, this->intercept);
 
     beta0s.emplace_back(beta0_out);
     betas.emplace_back(beta_out.sparseView());
@@ -375,21 +372,41 @@ Slope::setNormalization(const std::string& type)
 {
   validateOption(type, { "standardization", "none" }, "type");
 
-  this->normalization_type = type;
+  if (type == "standardization") {
+    this->centering_type = "mean";
+    this->scaling_type = "sd";
+  } else if (type == "none") {
+    this->centering_type = "none";
+    this->scaling_type = "none";
+  }
 }
 
 void
-Slope::setCenters(const Eigen::VectorXd& x_centers)
+Slope::setCentering(const std::string& type)
+{
+  validateOption(type, { "mean", "none" }, "type");
+  this->centering_type = type;
+}
+
+void
+Slope::setCentering(const Eigen::VectorXd& x_centers)
 {
   this->x_centers = x_centers;
-  this->normalization_type = "manual";
+  this->centering_type = "manual";
 }
 
 void
-Slope::setScales(const Eigen::VectorXd& x_scales)
+Slope::setScaling(const std::string& type)
+{
+  validateOption(type, { "sd", "none" }, "type");
+  this->scaling_type = type;
+}
+
+void
+Slope::setScaling(const Eigen::VectorXd& x_scales)
 {
   this->x_scales = x_scales;
-  this->normalization_type = "manual";
+  this->scaling_type = "manual";
 }
 
 void

@@ -38,10 +38,11 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
 
   SECTION("Standardization for sparse and dense")
   {
-    slope::computeCentersAndScales(
-      x_sparse, x_centers_sparse, x_centers_sparse, "standardization");
-    slope::computeCentersAndScales(
-      x_dense, x_centers_dense, x_centers_dense, "standardization");
+    slope::computeCenters(x_centers_sparse, x_sparse, "mean");
+    slope::computeScales(x_scales_sparse, x_sparse, "sd");
+
+    slope::computeCenters(x_centers_dense, x_dense, "mean");
+    slope::computeScales(x_scales_dense, x_dense, "sd");
 
     REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse));
     REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse));
@@ -73,8 +74,8 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
   {
     x_centers << 0, 0, 0;
     x_scales << 1, 1, 1;
-    model.setCenters(x_centers);
-    model.setScales(x_scales);
+    model.setCentering(x_centers);
+    model.setScaling(x_scales);
 
     auto fit_manual_dense = model.fit(x_dense, y);
     auto fit_manual_sparse = model.fit(x_sparse, y);

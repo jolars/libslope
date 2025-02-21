@@ -6,18 +6,29 @@ bool
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
-          const std::string& type,
+          const std::string& centering_type,
+          const std::string& scaling_type,
           const bool modify_x)
 {
   const int p = x.cols();
 
-  computeCentersAndScales(x, x_centers, x_scales, type);
+  computeCenters(x_centers, x, centering_type);
+  computeScales(x_scales, x, scaling_type);
 
-  bool normalize_jit = type != "none" && !modify_x;
+  bool center = centering_type != "none";
+  bool scale = scaling_type != "none";
+  bool normalize = center || scale;
 
-  if (modify_x && type != "none") {
+  bool normalize_jit = normalize && !modify_x;
+
+  if (modify_x && normalize) {
     for (int j = 0; j < p; ++j) {
-      x.col(j) = (x.col(j).array() - x_centers(j)) / x_scales(j);
+      if (center) {
+        x.col(j).array() -= x_centers(j);
+      }
+      if (scale) {
+        x.col(j).array() /= x_scales(j);
+      }
     }
   }
 
@@ -28,18 +39,18 @@ bool
 normalize(Eigen::SparseMatrix<double>& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
-          const std::string& type,
+          const std::string& centering_type,
+          const std::string& scaling_type,
           const bool)
 {
-  // const int p = x.cols();
-
-  computeCentersAndScales(x, x_centers, x_scales, type);
+  computeCenters(x_centers, x, centering_type);
+  computeScales(x_scales, x, scaling_type);
 
   // TODO: Actually allow normalization in place for sparse matrices
   // Maybe we need to use separate scale_jit and center_jit, which we probably
   // need for the case when the user supplies only one or the other anyway. bool
   // normalize_jit = type != "none" && !modify_x;
-  bool normalize_jit = type != "none";
+  bool normalize_jit = (centering_type != "none") || (scaling_type != "none");
 
   // if (modify_x) {
   //   for (int j = 0; j < p; ++j) {
@@ -57,18 +68,24 @@ rescaleCoefficients(Eigen::VectorXd beta0,
                     Eigen::MatrixXd beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
-                    const bool intercept,
-                    const std::string& normalization_type)
+                    const bool intercept)
 {
   const int p = beta.rows();
   const int m = beta.cols();
 
-  if (normalization_type != "none") {
+  bool centering = x_centers.size() > 0;
+  bool scaling = x_scales.size() > 0;
+
+  if (centering || scaling) {
     for (int k = 0; k < m; ++k) {
       double x_bar_beta_sum = 0.0;
       for (int j = 0; j < p; ++j) {
-        beta(j, k) /= x_scales(j);
-        x_bar_beta_sum += x_centers(j) * beta(j, k);
+        if (scaling) {
+          beta(j, k) /= x_scales(j);
+        }
+        if (centering) {
+          x_bar_beta_sum += x_centers(j) * beta(j, k);
+        }
       }
 
       if (intercept) {

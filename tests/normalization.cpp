@@ -58,10 +58,10 @@ TEST_CASE("Check that standardization algorithm works",
 
   auto [x_centers_ref, x_scales_ref] = computeMeanAndStdDev(x);
 
-  slope::computeCentersAndScales(
-    x, x_centers_sparse, x_scales_sparse, "standardization");
-  slope::computeCentersAndScales(
-    x_dense, x_centers_dense, x_scales_dense, "standardization");
+  slope::computeCenters(x_centers_sparse, x, "mean");
+  slope::computeScales(x_scales_sparse, x, "sd");
+  slope::computeCenters(x_centers_dense, x_dense, "mean");
+  slope::computeScales(x_scales_dense, x_dense, "sd");
 
   REQUIRE_THAT(x_centers_sparse, VectorApproxEqual(x_centers_ref));
   REQUIRE_THAT(x_scales_sparse, VectorApproxEqual(x_scales_ref));
@@ -186,7 +186,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
   {
     Eigen::VectorXd x_centers(p);
     Eigen::VectorXd x_scales(p);
-    slope::normalize(x, x_centers, x_scales, "standardization", true);
+    slope::normalize(x, x_centers, x_scales, "mean", "sd", true);
 
     Eigen::MatrixXd gradient(3, 1);
     Eigen::MatrixXd gradient_jit = gradient;
@@ -245,17 +245,17 @@ TEST_CASE("JIT standardization and modify-X standardization",
     Eigen::VectorXd centers_wrong = Eigen::VectorXd::Ones(p - 1);
     Eigen::VectorXd scales_wrong = Eigen::VectorXd::Ones(p + 5);
 
-    model.setCenters(centers);
-    model.setScales(scales);
+    model.setCentering(centers);
+    model.setScaling(scales);
 
     REQUIRE_NOTHROW(model.fit(x_sparse, y));
 
-    model.setCenters(centers_wrong);
+    model.setCentering(centers_wrong);
 
     REQUIRE_THROWS_AS(model.fit(x_sparse, y), std::invalid_argument);
 
-    model.setCenters(centers);
-    model.setScales(scales_wrong);
+    model.setCentering(centers);
+    model.setScaling(scales_wrong);
 
     REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
 
@@ -264,14 +264,14 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
     scales_nan(0) = std::log(-1);
 
-    model.setScales(scales_nan);
+    model.setScaling(scales_nan);
 
     REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
 
     centers_nan(0) = std::log(-1);
 
-    model.setScales(centers);
-    model.setCenters(centers_nan);
+    model.setScaling(centers);
+    model.setCentering(centers_nan);
 
     REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
   }

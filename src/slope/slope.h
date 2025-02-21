@@ -46,7 +46,8 @@ public:
     , pgd_freq(10)
     , max_clusters(std::optional<int>())
     , lambda_type("bh")
-    , normalization_type("standardization")
+    , centering_type("mean")
+    , scaling_type("sd")
     , objective("gaussian")
     , screening_type("strong")
     , solver_type("auto")
@@ -74,8 +75,8 @@ public:
    * @brief Sets normalization type for the design matrix.
    *
    * @param type Type of normalization: one of "standardization" or "none".
-   * @see setCenters() For manually setting centers
-   * @see setScales() For manually setting scales
+   * @see setCentering() For setting centers, specifically
+   * @see setScaling() For setting scales, specifically
    */
   void setNormalization(const std::string& type);
 
@@ -224,18 +225,30 @@ public:
   void setMaxClusters(const int max_clusters);
 
   /**
-   * @brief Sets the center points for feature normalization
+   * @brief Sets the center points for feature normalization.
+   * @param type Type of centering, one of: "mean", "none"
+   */
+  void setCentering(const std::string& type);
+
+  /**
+   * @brief Sets the center points for feature normalization.
    * @param x_centers Vector containing center values for each feature
    * Used in feature normalization: x_normalized = (x - center) / scale
    */
-  void setCenters(const Eigen::VectorXd& x_centers);
+  void setCentering(const Eigen::VectorXd& x_centers);
 
   /**
-   * @brief Sets the scaling factors for feature normalization
-   * @param x_centers Vector containing scale values for each feature
+   * @brief Sets the scaling type
+   * @param type Type of scaling, one of: "sd", "none"
+   */
+  void setScaling(const std::string& type);
+
+  /**
+   * @brief Sets the scaling factors for feature normalization.
+   * @param x_scales Vector containing scale values for each feature
    * Used in feature normalization: x_normalized = (x - center) / scale
    */
-  void setScales(const Eigen::VectorXd& x_scales);
+  void setScaling(const Eigen::VectorXd& x_scales);
 
   // Declaration of the templated path() method.
   template<typename T>
@@ -270,7 +283,8 @@ private:
   int pgd_freq;
   std::optional<int> max_clusters;
   std::string lambda_type;
-  std::string normalization_type;
+  std::string centering_type;
+  std::string scaling_type;
   std::string objective;
   std::string screening_type;
   std::string solver_type;

@@ -9,25 +9,31 @@
 
 namespace slope {
 
-/**
- * Compute means and standard deviations of the columns of the input matrix.
- *
- * This function uses Welford's algorithm to compute the means and standard
- * deviation.
- *
- * @tparam T The type of the input matrix.
- * @param x The input matrix.
- * @param x_centers A vector where the computed means will be stored.
- * @param x_scales A vector where the computed standard deviations will be
- * stored.
- * @return A tuple containing the means and standard deviations of the columns.
- */
 template<typename T>
-void
-standardize(const T& x, Eigen::VectorXd& x_centers, Eigen::VectorXd& x_scales)
+Eigen::VectorXd
+means(const T& x)
 {
   const int n = x.rows();
   const int p = x.cols();
+
+  Eigen::VectorXd x_centers(p);
+
+  for (int j = 0; j < p; ++j) {
+    x_centers(j) = x.col(j).sum() / n;
+  }
+
+  return x_centers;
+}
+
+template<typename T>
+Eigen::VectorXd
+stdDev(const T& x)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  Eigen::VectorXd x_centers = means(x);
+  Eigen::VectorXd x_scales(p);
 
   for (int j = 0; j < p; ++j) {
     double mean = 0.0;
@@ -51,19 +57,18 @@ standardize(const T& x, Eigen::VectorXd& x_centers, Eigen::VectorXd& x_scales)
       m2 += delta * delta2;
     }
 
-    x_centers(j) = mean;
     x_scales(j) = std::sqrt(m2 / n);
   }
+
+  return x_scales;
 }
 
 /**
- * Compute centers and scales for the columns of the input matrix.
+ * Compute centers.
  *
- * There are three supported normalization types:
+ * There are two supported centering types:
  * - "none": Do not compute centers and scales.
- * - "manual": Use the provided centers and scales. If one is missing, a default
- *   of zeros for centers or ones for scales will be used.
- * - "standardization": Compute centers and scales using Welford’s algorithm.
+ * - "mean": Use arithmetic means.
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
@@ -79,53 +84,62 @@ standardize(const T& x, Eigen::VectorXd& x_centers, Eigen::VectorXd& x_scales)
  */
 template<typename T>
 void
-computeCentersAndScales(const T& x,
-                        Eigen::VectorXd& x_centers,
-                        Eigen::VectorXd& x_scales,
-                        const std::string& type)
+computeCenters(Eigen::VectorXd& x_centers, const T& x, const std::string& type)
 {
   int p = x.cols();
 
-  if (type != "none" && type != "manual") {
-    x_centers.resize(p);
-    x_scales.resize(p);
-  }
-
-  if (type == "none") {
-  } else if (type == "manual") {
-    // Manual centers and scales provided, just check that they are valid
-
-    // TODO: Right now we force both centers and scales to be present, but we
-    // should allow for only specifying one or the other, which is also what
-    // some types of normalization (max-abs) are defined as.
-    if (x_centers.size() == 0) {
-      x_centers = Eigen::VectorXd::Zero(p);
-    }
-
-    if (x_scales.size() == 0) {
-      x_centers = Eigen::VectorXd::Ones(p);
-    }
-
+  if (type == "manual") {
     if (x_centers.size() != p) {
       throw std::invalid_argument("Invalid dimensions in centers");
-    }
-
-    if (x_scales.size() != p) {
-      throw std::invalid_argument("Invalid dimensions in scales");
     }
 
     if (!x_centers.allFinite()) {
       throw std::invalid_argument("Centers must be finite");
     }
 
+  } else if (type == "mean") {
+    x_centers = means(x);
+  } else if (type != "none") {
+    throw std::invalid_argument("Invalid centering type");
+  }
+}
+
+/**
+ * Compute scales
+ *
+ * There are two supported scaling types:
+ * - "none": Do not compute centers and scales.
+ * - "sd": Compute centers and scales using Welford’s algorithm.
+ *
+ * @tparam T The type of the input matrix.
+ * @param x The input matrix.
+ * @param x_centers A vector where the computed or provided centers will be
+ * stored.
+ * @param x_scales A vector where the computed or provided scales will be
+ * stored.
+ * @param type A string specifying the normalization type ("none", "manual", or
+ * "standardization").
+ *
+ * @throws std::invalid_argument if the provided manual centers or scales have
+ * invalid dimensions or contain non-finite values.
+ */
+template<typename T>
+void
+computeScales(Eigen::VectorXd& x_scales, const T& x, const std::string& type)
+{
+  int p = x.cols();
+
+  if (type == "manual") {
+    if (x_scales.size() != p) {
+      throw std::invalid_argument("Invalid dimensions in scales");
+    }
     if (!x_scales.allFinite()) {
       throw std::invalid_argument("Scales must be finite");
     }
-
-  } else if (type == "standardization") {
-    standardize(x, x_centers, x_scales);
-  } else {
-    throw std::invalid_argument("Invalid normalization type");
+  } else if (type == "sd") {
+    x_scales = stdDev(x);
+  } else if (type != "none") {
+    throw std::invalid_argument("Invalid scaling type");
   }
 }
 
@@ -152,7 +166,8 @@ bool
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
-          const std::string& type,
+          const std::string& centering_type,
+          const std::string& scaling_type,
           const bool modify_x);
 
 /**
@@ -180,7 +195,8 @@ bool
 normalize(Eigen::SparseMatrix<double>& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
-          const std::string& type,
+          const std::string& centering_type,
+          const std::string& scaling_type,
           const bool modify_x);
 
 /**
@@ -209,7 +225,6 @@ rescaleCoefficients(Eigen::VectorXd beta0,
                     Eigen::MatrixXd beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
-                    const bool intercept,
-                    const std::string& normalization_type);
+                    const bool intercept);
 
 } // namespace slope
