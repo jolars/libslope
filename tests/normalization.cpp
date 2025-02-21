@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 
 std::tuple<Eigen::VectorXd, Eigen::VectorXd>
 computeMeanAndStdDev(const Eigen::MatrixXd& x)
@@ -37,7 +38,10 @@ TEST_CASE("Check that standardization algorithm works",
 {
   using Catch::Matchers::WithinAbs;
 
-  Eigen::SparseMatrix<double> x(3, 3);
+  int n = 3;
+  int p = 3;
+
+  Eigen::SparseMatrix<double> x(n, p);
 
   x.coeffRef(0, 0) = 1;
   x.coeffRef(1, 0) = 98.2;
@@ -47,17 +51,23 @@ TEST_CASE("Check that standardization algorithm works",
 
   Eigen::MatrixXd x_dense = x;
 
+  Eigen::VectorXd x_centers_sparse(p);
+  Eigen::VectorXd x_scales_sparse(p);
+  Eigen::VectorXd x_centers_dense(p);
+  Eigen::VectorXd x_scales_dense(p);
+
   auto [x_centers_ref, x_scales_ref] = computeMeanAndStdDev(x);
 
-  auto [x_centers, x_scales] = slope::computeCentersAndScales(x);
-  auto [x_centers_dense, x_scales_dense] =
-    slope::computeCentersAndScales(x_dense);
+  slope::computeCentersAndScales(
+    x, x_centers_sparse, x_scales_sparse, "standardization");
+  slope::computeCentersAndScales(
+    x_dense, x_centers_dense, x_scales_dense, "standardization");
 
-  REQUIRE_THAT(x_centers, VectorApproxEqual(x_centers_ref));
-  REQUIRE_THAT(x_scales, VectorApproxEqual(x_scales_ref));
+  REQUIRE_THAT(x_centers_sparse, VectorApproxEqual(x_centers_ref));
+  REQUIRE_THAT(x_scales_sparse, VectorApproxEqual(x_scales_ref));
 
   REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_ref));
-  REQUIRE_THAT(x_scales, VectorApproxEqual(x_scales_ref));
+  REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_ref));
 }
 
 TEST_CASE("Check that in-place standardization works",
@@ -166,7 +176,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
   model.setTol(1e-4);
   model.setObjective("gaussian");
-  model.setStandardize(true);
+  model.setNormalization("standardization");
   model.setModifyX(true);
   model.setIntercept(false);
 
@@ -174,8 +184,9 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
   SECTION("Gradient computations for JIT standardization")
   {
-    auto [x_centers, x_scales] = slope::computeCentersAndScales(x);
-    slope::normalize(x, x_centers, x_scales);
+    Eigen::VectorXd x_centers(p);
+    Eigen::VectorXd x_scales(p);
+    slope::normalize(x, x_centers, x_scales, "standardization", true);
 
     Eigen::MatrixXd gradient(3, 1);
     Eigen::MatrixXd gradient_jit = gradient;
@@ -225,5 +236,43 @@ TEST_CASE("JIT standardization and modify-X standardization",
     Eigen::VectorXd coefs_sparse = fit.getCoefs().back();
 
     REQUIRE_THAT(coefs_sparse, VectorApproxEqual(coefs_ref, 1e-6));
+  }
+
+  SECTION("Assertions")
+  {
+    Eigen::VectorXd centers = Eigen::VectorXd::Ones(p);
+    Eigen::VectorXd scales = Eigen::VectorXd::Ones(p);
+    Eigen::VectorXd centers_wrong = Eigen::VectorXd::Ones(p - 1);
+    Eigen::VectorXd scales_wrong = Eigen::VectorXd::Ones(p + 5);
+
+    model.setCenters(centers);
+    model.setScales(scales);
+
+    REQUIRE_NOTHROW(model.fit(x_sparse, y));
+
+    model.setCenters(centers_wrong);
+
+    REQUIRE_THROWS_AS(model.fit(x_sparse, y), std::invalid_argument);
+
+    model.setCenters(centers);
+    model.setScales(scales_wrong);
+
+    REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
+
+    Eigen::VectorXd centers_nan = centers;
+    Eigen::VectorXd scales_nan = scales;
+
+    scales_nan(0) = std::log(-1);
+
+    model.setScales(scales_nan);
+
+    REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
+
+    centers_nan(0) = std::log(-1);
+
+    model.setScales(centers);
+    model.setCenters(centers_nan);
+
+    REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
   }
 }

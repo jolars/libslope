@@ -1,4 +1,4 @@
-/**
+/*
  * @file
  * @brief The actual function that fits SLOPE
  */
@@ -33,10 +33,9 @@ public:
   Slope()
     : intercept(true)
     , modify_x(false)
-    , standardize(true)
     , update_clusters(false)
-    , alpha_min_ratio(-1) // TODO: Use std::optional for alpha_min_ratio
-    , dev_change_tol(1e-5)
+    , alpha_min_ratio(-1)
+    , dev_change_tol(1e-5) // TODO: Use std::optional for alpha_min_ratio
     , dev_ratio_tol(0.999)
     , learning_rate_decr(0.5)
     , q(0.1)
@@ -47,6 +46,7 @@ public:
     , pgd_freq(10)
     , max_clusters(std::optional<int>())
     , lambda_type("bh")
+    , normalization_type("standardization")
     , objective("gaussian")
     , screening_type("strong")
     , solver_type("auto")
@@ -71,11 +71,13 @@ public:
   void setIntercept(bool intercept);
 
   /**
-   * @brief Sets the standardize flag.
+   * @brief Sets normalization type for the design matrix.
    *
-   * @param standardize Should the design matrix be standardized?
+   * @param type Type of normalization: one of "standardization" or "none".
+   * @see setCenters() For manually setting centers
+   * @see setScales() For manually setting scales
    */
-  void setStandardize(bool standardize);
+  void setNormalization(const std::string& type);
 
   /**
    * @brief Sets the update clusters flag.
@@ -193,7 +195,7 @@ public:
   /**
    * @brief Controls if `x` should be modified-in-place.
    * @details If `true`, then `x` will be modified in place if
-   *   it is standardized. In case when `x` is dense, it will be both
+   *   it is normalized. In case when `x` is dense, it will be both
    *   centered and scaled. If `x` is sparse, it will be only scaled.
    * @param modify_x Whether to modfiy `x` in place or not
    */
@@ -221,6 +223,20 @@ public:
    */
   void setMaxClusters(const int max_clusters);
 
+  /**
+   * @brief Sets the center points for feature normalization
+   * @param x_centers Vector containing center values for each feature
+   * Used in feature normalization: x_normalized = (x - center) / scale
+   */
+  void setCenters(const Eigen::VectorXd& x_centers);
+
+  /**
+   * @brief Sets the scaling factors for feature normalization
+   * @param x_centers Vector containing scale values for each feature
+   * Used in feature normalization: x_normalized = (x - center) / scale
+   */
+  void setScales(const Eigen::VectorXd& x_scales);
+
   // Declaration of the templated path() method.
   template<typename T>
   SlopePath path(T& x,
@@ -236,9 +252,9 @@ public:
                Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
 
 private:
+  // Parameters
   bool intercept;
   bool modify_x;
-  bool standardize;
   bool update_clusters;
   double alpha_min_ratio;
   double dev_change_tol;
@@ -254,9 +270,14 @@ private:
   int pgd_freq;
   std::optional<int> max_clusters;
   std::string lambda_type;
+  std::string normalization_type;
   std::string objective;
   std::string screening_type;
   std::string solver_type;
+
+  // Data
+  Eigen::VectorXd x_centers;
+  Eigen::VectorXd x_scales;
 };
 
 } // namespace slope

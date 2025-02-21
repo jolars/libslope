@@ -56,7 +56,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
   SECTION("No intercept, no standardization")
   {
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(false);
 
     Eigen::Vector3d coef_target;
@@ -87,7 +87,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
   SECTION("Intercept, no standardization")
   {
     model.setIntercept(true);
-    model.setStandardize(false);
+    model.setNormalization("none");
 
     std::vector<double> coef_target = { 1.2748806, 0.0, 0.2062611 };
     double intercept_target = 0.3184528;

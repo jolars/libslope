@@ -52,17 +52,11 @@ Slope::path(T& x,
     throw std::invalid_argument("x and y_in must have the same number of rows");
   }
 
-  // TODO: This is not very tidy. We should have a better way to handle this.
-  const bool sparse_x = std::is_base_of_v<Eigen::SparseMatrixBase<T>, T>;
-  const bool standardize_jit =
-    (!sparse_x && this->standardize && !this->modify_x) ||
-    (sparse_x && this->standardize);
-
-  auto [x_centers, x_scales] = computeCentersAndScales(x);
-
-  if (this->standardize && this->modify_x && !sparse_x) {
-    normalize(x, x_centers, x_scales);
-  }
+  bool standardize_jit = normalize(x,
+                                   this->x_centers,
+                                   this->x_scales,
+                                   this->normalization_type,
+                                   this->modify_x);
 
   std::vector<int> full_set(p);
   std::iota(full_set.begin(), full_set.end(), 0);
@@ -180,8 +174,8 @@ Slope::path(T& x,
                      x,
                      residual,
                      full_set,
-                     x_centers,
-                     x_scales,
+                     this->x_centers,
+                     this->x_scales,
                      Eigen::VectorXd::Ones(n),
                      standardize_jit);
 
@@ -201,8 +195,8 @@ Slope::path(T& x,
                      x,
                      residual,
                      working_set,
-                     x_centers,
-                     x_scales,
+                     this->x_centers,
+                     this->x_scales,
                      Eigen::VectorXd::Ones(n),
                      standardize_jit);
 
@@ -255,8 +249,8 @@ Slope::path(T& x,
                          x,
                          residual,
                          strong_set,
-                         x_centers,
-                         x_scales,
+                         this->x_centers,
+                         this->x_scales,
                          Eigen::VectorXd::Ones(n),
                          standardize_jit);
 
@@ -268,8 +262,8 @@ Slope::path(T& x,
                            x,
                            residual,
                            full_set,
-                           x_centers,
-                           x_scales,
+                           this->x_centers,
+                           this->x_scales,
                            Eigen::VectorXd::Ones(n),
                            standardize_jit);
 
@@ -298,14 +292,18 @@ Slope::path(T& x,
                   gradient,
                   working_set,
                   x,
-                  x_centers,
-                  x_scales,
+                  this->x_centers,
+                  this->x_scales,
                   y);
     }
 
     // Store everything for this step of the path
-    auto [beta0_out, beta_out] = rescaleCoefficients(
-      beta0, beta, x_centers, x_scales, intercept, standardize);
+    auto [beta0_out, beta_out] = rescaleCoefficients(beta0,
+                                                     beta,
+                                                     this->x_centers,
+                                                     this->x_scales,
+                                                     this->intercept,
+                                                     this->normalization_type);
 
     beta0s.emplace_back(beta0_out);
     betas.emplace_back(beta_out.sparseView());
@@ -373,9 +371,25 @@ Slope::setIntercept(bool intercept)
 }
 
 void
-Slope::setStandardize(bool standardize)
+Slope::setNormalization(const std::string& type)
 {
-  this->standardize = standardize;
+  validateOption(type, { "standardization", "none" }, "type");
+
+  this->normalization_type = type;
+}
+
+void
+Slope::setCenters(const Eigen::VectorXd& x_centers)
+{
+  this->x_centers = x_centers;
+  this->normalization_type = "manual";
+}
+
+void
+Slope::setScales(const Eigen::VectorXd& x_scales)
+{
+  this->x_scales = x_scales;
+  this->normalization_type = "manual";
 }
 
 void
