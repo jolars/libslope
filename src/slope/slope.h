@@ -111,6 +111,14 @@ public:
   void setQ(double q);
 
   /**
+   * @brief Sets OSCAR parameters.
+   *
+   * @param theta1 Parameter for OSCAR.
+   * @param theta1 Parameter for OSCAR.
+   */
+  void setOscarParameters(const double theta1, const double theta2);
+
+  /**
    * @brief Sets the tolerance value.
    *
    * @param tol The value to set for the tolerance value. Must be positive.
@@ -237,6 +245,8 @@ private:
   double dev_ratio_tol;
   double learning_rate_decr;
   double q;
+  double theta1;
+  double theta2;
   double tol;
   int max_it;
   int max_it_inner;

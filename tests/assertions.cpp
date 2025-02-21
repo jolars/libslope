@@ -52,4 +52,13 @@ TEST_CASE("Assertions", "[assertions]")
     y << 1, 0, 1, 2, 1, 0, 2, 0, 3, 0;
     REQUIRE_THROWS_AS(model.fit(x, y), std::invalid_argument);
   }
+
+  SECTION("Invalid OSCAR parameters")
+  {
+    model.setLambdaType("oscar");
+    REQUIRE_THROWS_AS(model.setOscarParameters(-0.1, 2.0),
+                      std::invalid_argument);
+    REQUIRE_THROWS_AS(model.setOscarParameters(1.0, -2.0),
+                      std::invalid_argument);
+  }
 }

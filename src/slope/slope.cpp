@@ -93,7 +93,8 @@ Slope::path(T& x,
   bool user_lambda = lambda.size() > 0;
 
   if (!user_lambda) {
-    lambda = lambdaSequence(p * m, this->q, this->lambda_type, n);
+    lambda = lambdaSequence(
+      p * m, this->q, this->lambda_type, n, this->theta1, this->theta2);
   } else {
     if (lambda.size() != p * m) {
       throw std::invalid_argument(
@@ -408,6 +409,21 @@ Slope::setQ(double q)
     throw std::invalid_argument("q must be between 0 and 1");
   }
   this->q = q;
+}
+
+void
+Slope::setOscarParameters(const double theta1, const double theta2)
+{
+  if (theta1 < 0) {
+    throw std::invalid_argument("theta1 must be between 0 and 1");
+  }
+
+  if (theta2 < 0) {
+    throw std::invalid_argument("theta2 must be between 0 and 1");
+  }
+
+  this->theta1 = theta1;
+  this->theta2 = theta2;
 }
 
 void
