@@ -7,7 +7,6 @@ normalize(Eigen::MatrixXd& x,
           const Eigen::VectorXd& x_centers,
           const Eigen::VectorXd& x_scales)
 {
-  // TODO: Switch name to `normalize`.
   const int p = x.cols();
 
   for (int j = 0; j < p; ++j) {
@@ -20,7 +19,6 @@ normalize(Eigen::SparseMatrix<double>& x,
           const Eigen::VectorXd&,
           const Eigen::VectorXd& x_scales)
 {
-  // TODO: Switch name to `normalize`.
   const int p = x.cols();
 
   for (int j = 0; j < p; ++j) {
