@@ -36,25 +36,19 @@ stdDev(const T& x)
   Eigen::VectorXd x_scales(p);
 
   for (int j = 0; j < p; ++j) {
-    double mean = 0.0;
     double m2 = 0.0;
-    int count = 0;
+    const double mean = x_centers(j);
 
+    // Process non-zero elements
     for (typename T::InnerIterator it(x, j); it; ++it) {
-      count++;
       double delta = it.value() - mean;
-      mean += delta / count;
-      double delta2 = it.value() - mean;
-      m2 += delta * delta2;
+      m2 += delta * delta;
     }
 
-    // Account for zeros in the column
-    while (count < n) {
-      count++;
-      double delta = -mean;
-      mean += delta / count;
-      double delta2 = -mean;
-      m2 += delta * delta2;
+    // Account for zeros
+    int nz_count = x.col(j).nonZeros();
+    if (nz_count < n) {
+      m2 += (n - nz_count) * mean * mean;
     }
 
     x_scales(j) = std::sqrt(m2 / n);
