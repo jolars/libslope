@@ -131,7 +131,7 @@ softmax(const Eigen::MatrixXd& x);
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param normalize_jit Flag indicating whether to standardize the gradient.
+ * @param normalize_jit Flag indicating whether we are normaliziing just-in-time
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -142,7 +142,7 @@ linearPredictor(const T& x,
                 const Eigen::MatrixXd& beta,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
-                const bool standardize_jit,
+                const bool normalize_jit,
                 const bool intercept)
 {
   int n = x.rows();
@@ -150,7 +150,7 @@ linearPredictor(const T& x,
 
   Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(n, m);
 
-  if (standardize_jit) {
+  if (normalize_jit) {
     for (int k = 0; k < m; ++k) {
       for (const auto& j : active_set) {
         eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
@@ -180,7 +180,7 @@ linearPredictor(const T& x,
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param standardize Flag indicating whether to standardize the gradient.
+ * @param normalize_jit Flag indicating whether we are normalizing just-in-time.
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -192,7 +192,7 @@ updateGradient(Eigen::MatrixXd& gradient,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
                const Eigen::VectorXd& w,
-               const bool standardize_jit)
+               const bool normalize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
@@ -207,7 +207,7 @@ updateGradient(Eigen::MatrixXd& gradient,
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
   }
 
-  if (standardize_jit) {
+  if (normalize_jit) {
     for (int k = 0; k < m; ++k) {
       double wr_sum = weighted_residual.col(k).sum();
 
@@ -234,7 +234,7 @@ updateGradient(Eigen::MatrixXd& gradient,
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param standardize Flag indicating whether to standardize the gradient.
+ * @param normalize_jit Flag indicating whether we are normalizing just-in-time.
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -245,7 +245,7 @@ offsetGradient(Eigen::MatrixXd& gradient,
                const std::vector<int>& active_set,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
-               const bool standardize_jit)
+               const bool normalize_jit)
 {
   const int n = x.rows();
   const int p = x.cols();
@@ -254,7 +254,7 @@ offsetGradient(Eigen::MatrixXd& gradient,
   assert(gradient.rows() == p && gradient.cols() == m &&
          "Gradient matrix has incorrect dimensions");
 
-  if (standardize_jit) {
+  if (normalize_jit) {
     // This is not necessary if x_centers are already the means, but
     // it is included in case later on we want to use something
     // other than means for the centers.

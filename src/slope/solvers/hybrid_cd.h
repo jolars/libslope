@@ -24,12 +24,12 @@ computeGradientAndHessian(const T& x,
                           const Eigen::VectorXd& x_centers,
                           const Eigen::VectorXd& x_scales,
                           double s,
-                          bool standardize_jit,
+                          bool normalize_jit,
                           int n)
 {
   double gradient, hessian;
 
-  if (standardize_jit) {
+  if (normalize_jit) {
     gradient = s *
                (x.col(k).cwiseProduct(w).dot(residual) -
                 w.dot(residual) * x_centers(k)) /
@@ -65,7 +65,7 @@ computeGradientAndHessian(const T& x,
  * @param x_centers The center values of the data matrix columns
  * @param x_scales The scale values of the data matrix columns
  * @param intercept Shuold an intervept be fit?
- * @param standardize_jit Flag indicating whether we are standardizing `x`
+ * @param normalize_jit Flag indicating whether we are standardizing `x`
  *   just-in-time.
  * @param update_clusters Flag indicating whether to update the cluster
  * information
@@ -85,7 +85,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const Eigen::VectorXd& x_centers,
                   const Eigen::VectorXd& x_scales,
                   const bool intercept,
-                  const bool standardize_jit,
+                  const bool normalize_jit,
                   const bool update_clusters)
 {
   using namespace Eigen;
@@ -115,7 +115,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
       s.emplace_back(s_k);
 
       std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
-        x, k, w, residual, x_centers, x_scales, s_k, standardize_jit, n);
+        x, k, w, residual, x_centers, x_scales, s_k, normalize_jit, n);
     } else {
       // There's no reasonable just-in-time standardization approach for sparse
       // design matrices when there are clusters in the data, so we need to
@@ -127,7 +127,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
         double s_k = sign(beta(k, 0));
         s.emplace_back(s_k);
 
-        if (standardize_jit) {
+        if (normalize_jit) {
           x_s += x.col(k) * (s_k / x_scales(k));
           x_s.array() -= x_centers(k) * s_k / x_scales(k);
         } else {
@@ -154,7 +154,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
       if (cluster_size == 1) {
         int k = *clusters.cbegin(j);
 
-        if (standardize_jit) {
+        if (normalize_jit) {
           residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
           residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
         } else {

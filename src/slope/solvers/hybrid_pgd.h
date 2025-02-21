@@ -34,7 +34,7 @@ namespace solvers {
  * @param x_scales The scale values of the input data.
  * @param g_old The previous value of the objective function.
  * @param intercept Flag indicating whether to include an intercept term.
- * @param standardize Flag indicating whether to standardize the input data.
+ * @param normalize_jit Flag indicating wheter we are normalizing just-in-time.
  * @param learning_rate_decr The learning rate decrement factor.
  *
  * @see SortedL1Norm
@@ -56,7 +56,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         const Eigen::VectorXd& x_scales,
                         const double g_old,
                         const bool intercept,
-                        const bool standardize_jit,
+                        const bool normalize_jit,
                         const double learning_rate_decr)
 {
   const int n = x.rows();
@@ -84,7 +84,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                                beta,
                                x_centers,
                                x_scales,
-                               standardize_jit,
+                               normalize_jit,
                                intercept) -
                z;
 

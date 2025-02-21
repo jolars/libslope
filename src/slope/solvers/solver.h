@@ -30,13 +30,13 @@ class SolverBase
 public:
   SolverBase(double tol,
              int max_it,
-             bool standardize_jit,
+             bool normalize_jit,
              bool intercept,
              bool update_clusters,
              int pgd_freq)
     : tol(tol)
     , max_it(max_it)
-    , standardize_jit(standardize_jit)
+    , normalize_jit(normalize_jit)
     , intercept(intercept)
     , update_clusters(update_clusters)
     , pgd_freq(pgd_freq)
@@ -77,7 +77,7 @@ public:
 protected:
   double tol;
   int max_it;
-  bool standardize_jit;
+  bool normalize_jit;
   bool intercept;
   bool update_clusters;
   int pgd_freq;

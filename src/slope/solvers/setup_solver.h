@@ -16,7 +16,7 @@ namespace slope {
  * "poisson", "multinomial")
  * @param tol Convergence tolerance for the solver
  * @param max_it_inner Maximum number of inner iterations
- * @param standardize_jit Whether to standardize features just-in-time
+ * @param normalize_jit Whether we are normalizing just-in-time.
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
  * optimization
@@ -30,7 +30,7 @@ setupSolver(const std::string& solver_type,
             const std::string& objective,
             double tol,
             int max_it_inner,
-            bool standardize_jit,
+            bool normalize_jit,
             bool intercept,
             bool update_clusters,
             int pgd_freq);
