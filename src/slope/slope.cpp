@@ -334,8 +334,10 @@ Slope::path(T& x,
     }
   }
 
-  return { beta0s,        betas,        alpha,      lambda,    deviances,
-           null_deviance, primals_path, duals_path, time_path, passes };
+  return { beta0s,       betas,      alpha.head(betas.size()),
+           lambda,       deviances,  null_deviance,
+           primals_path, duals_path, time_path,
+           passes };
 }
 
 template<typename T>
