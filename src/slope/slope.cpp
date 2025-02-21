@@ -93,7 +93,7 @@ Slope::path(T& x,
   bool user_lambda = lambda.size() > 0;
 
   if (!user_lambda) {
-    lambda = lambdaSequence(p * m, this->q, this->lambda_type);
+    lambda = lambdaSequence(p * m, this->q, this->lambda_type, n);
   } else {
     if (lambda.size() != p * m) {
       throw std::invalid_argument(
