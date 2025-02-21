@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.13.0](https://github.com/jolars/libslope/compare/v0.12.1...v0.13.0) (2025-02-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename standardize_jit to normalize_jit
+* allow user-specified scales and centers ([#76](https://github.com/jolars/libslope/issues/76))
+
+### Features
+
+* allow user-specified scales and centers ([#76](https://github.com/jolars/libslope/issues/76)) ([bae335d](https://github.com/jolars/libslope/commit/bae335d043ac6bad06b8175aaea13dfb6232507c)), closes [#37](https://github.com/jolars/libslope/issues/37)
+
+
+### Bug Fixes
+
+* crop returned alpha path to length of path ([23f387d](https://github.com/jolars/libslope/commit/23f387d4f63dad3d8fd9ecc51bfc95764ee8f794))
+* expose OSCAR parameters through `Slope::setOscarParameters()` ([a60e6f3](https://github.com/jolars/libslope/commit/a60e6f3a26fc471ac43339e1d8d1d48f66edc9c8))
+* provide n to `lambdaSequence()` ([3058290](https://github.com/jolars/libslope/commit/305829097ceb2a7f5e6bdc160a4782809c1d4c11))
+* rescale intercepts for multinomial case correctly ([f8cea24](https://github.com/jolars/libslope/commit/f8cea24aeca6409013e2f11be5eaea1d4521d527))
+
+
+### Code Refactoring
+
+* rename standardize_jit to normalize_jit ([f2ca28e](https://github.com/jolars/libslope/commit/f2ca28e74006334eee666bbf136237bdd642c46c))
+
 ## [0.12.1](https://github.com/jolars/libslope/compare/v0.12.0...v0.12.1) (2025-02-20)
 
 
