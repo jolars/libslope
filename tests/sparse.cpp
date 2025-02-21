@@ -9,9 +9,16 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
 {
   using namespace Catch::Matchers;
 
-  Eigen::VectorXd beta(3);
+  int p = 3;
+  Eigen::VectorXd beta(p);
   Eigen::VectorXd y(10);
-  Eigen::MatrixXd x_dense(10, 3);
+  Eigen::MatrixXd x_dense(10, p);
+  Eigen::VectorXd x_centers(p);
+  Eigen::VectorXd x_centers_dense(p);
+  Eigen::VectorXd x_centers_sparse(p);
+  Eigen::VectorXd x_scales(p);
+  Eigen::VectorXd x_scales_dense(p);
+  Eigen::VectorXd x_scales_sparse(p);
 
   // clang-format off
   x_dense << 0.0,        0.13339576, 0.49361983,
@@ -27,35 +34,59 @@ TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
   // clang-format on
   Eigen::SparseMatrix<double> x_sparse = x_dense.sparseView().eval();
 
-  auto [x_centers_sparse, x_scales_sparse] =
-    slope::computeCentersAndScales(x_sparse);
-  auto [x_centers_dense, x_scales_dense] =
-    slope::computeCentersAndScales(x_dense);
-
-  REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse));
-  REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse));
-
-  beta << 1, 2, -0.9;
-
-  y = x_dense * beta;
-
-  Eigen::ArrayXd alpha = Eigen::ArrayXd::Ones(1);
-  Eigen::Array<double, 3, 1> lambda;
-  lambda << 0.5, 0.5, 0.2;
-
   slope::Slope model;
 
-  model.setIntercept(false);
-  model.setStandardize(true);
+  SECTION("Standardization for sparse and dense")
+  {
+    slope::computeCentersAndScales(
+      x_sparse, x_centers_sparse, x_centers_sparse, "standardization");
+    slope::computeCentersAndScales(
+      x_dense, x_centers_dense, x_centers_dense, "standardization");
 
-  auto fit = model.path(x_sparse, y, alpha, lambda);
-  auto coefs_sparse = fit.getCoefs();
+    REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse));
+    REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse));
 
-  fit = model.path(x_dense, y, alpha, lambda);
-  auto coefs_dense = fit.getCoefs();
+    beta << 1, 2, -0.9;
 
-  Eigen::VectorXd coef_sparse = coefs_sparse.front();
-  Eigen::VectorXd coef_dense = coefs_dense.front();
+    y = x_dense * beta;
 
-  REQUIRE_THAT(coef_sparse, VectorApproxEqual(coef_dense, 1e-6));
+    Eigen::ArrayXd alpha = Eigen::ArrayXd::Ones(1);
+    Eigen::Array<double, 3, 1> lambda;
+    lambda << 0.5, 0.5, 0.2;
+
+    model.setIntercept(false);
+    model.setNormalization("standardization");
+
+    auto fit = model.path(x_sparse, y, alpha, lambda);
+    auto coefs_sparse = fit.getCoefs();
+
+    fit = model.path(x_dense, y, alpha, lambda);
+    auto coefs_dense = fit.getCoefs();
+
+    Eigen::VectorXd coef_sparse = coefs_sparse.front();
+    Eigen::VectorXd coef_dense = coefs_dense.front();
+
+    REQUIRE_THAT(coef_sparse, VectorApproxEqual(coef_dense, 1e-6));
+  }
+
+  SECTION("Manual centers and scales")
+  {
+    x_centers << 0, 0, 0;
+    x_scales << 1, 1, 1;
+    model.setCenters(x_centers);
+    model.setScales(x_scales);
+
+    auto fit_manual_dense = model.fit(x_dense, y);
+    auto fit_manual_sparse = model.fit(x_sparse, y);
+
+    model.setNormalization("none");
+
+    auto fit_auto_dense = model.fit(x_dense, y);
+    auto fit_auto_sparse = model.fit(x_sparse, y);
+
+    Eigen::VectorXd coef_manual_dense = fit_manual_dense.getCoefs();
+    Eigen::VectorXd coef_manual_sparse = fit_manual_dense.getCoefs();
+
+    REQUIRE_THAT(coef_manual_dense, VectorApproxEqual(coef_manual_sparse));
+  }
 }

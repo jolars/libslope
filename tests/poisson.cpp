@@ -45,7 +45,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
   SECTION("No intercept, no standardization")
   {
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(false);
 
     model.setMaxIt(25);
@@ -77,7 +77,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
   SECTION("With intercept, no standardization")
   {
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(true);
 
     coefs_ref << 0.3925911, -0.2360691, 0.4464808;
@@ -108,7 +108,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
   SECTION("With intercept, with standardization")
   {
-    model.setStandardize(true);
+    model.setNormalization("standardization");
     model.setIntercept(true);
 
     coefs_ref << 0.4017805, -0.2396130, 0.4600816;
@@ -140,7 +140,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
 
     lambda << 1.0, 1.0, 1.0;
 
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(false);
 
     coefs_ref << 0.010928758, 0.0, 0.007616257;
@@ -173,7 +173,7 @@ TEST_CASE("Poisson models", "[models][poisson]")
     lambda << 1.0, 1.0, 1.0;
     double alpha = 0.1;
 
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(true);
 
     coefs_ref << 0.05533582, 0.0, 0.15185182;

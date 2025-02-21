@@ -29,7 +29,7 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
   slope::SlopeFit fit;
 
   model.setIntercept(false);
-  model.setStandardize(false);
+  model.setNormalization("none");
 
   fit = model.fit(x, y, alpha, lambda);
 
@@ -59,7 +59,7 @@ TEST_CASE("X is identity", "[gaussian][identity]")
 
   slope::Slope model;
   model.setIntercept(false);
-  model.setStandardize(false);
+  model.setNormalization("none");
   auto fit = model.fit(x, y, alpha, lambda);
 
   double gap = fit.getGaps().back();
@@ -135,7 +135,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   SECTION("No intercept, no standardization")
   {
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(false);
 
     coef_target << 0.6864545, -0.6864545, 0.0000000;
@@ -159,8 +159,9 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   SECTION("No intercept, with standardization")
   {
-    model.setStandardize(true);
+    model.setNormalization("standardization");
     model.setIntercept(false);
+    // model.setModifyX(true);
 
     coef_target << 0.700657772, -0.730587233, 0.008997323;
 
@@ -178,7 +179,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   SECTION("With intercept, with standardization")
   {
-    model.setStandardize(true);
+    model.setNormalization("standardization");
     model.setIntercept(true);
 
     coef_target << 0.700657772, -0.730587234, 0.008997323;
@@ -203,7 +204,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   SECTION("With intercept, no standardization")
   {
-    model.setStandardize(false);
+    model.setNormalization("none");
     model.setIntercept(true);
     model.setMaxIt(1e5);
 

@@ -56,7 +56,7 @@ TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
 
     // Fit the model
     model.setIntercept(false);
-    model.setStandardize(false);
+    model.setNormalization("none");
 
     double alpha = 0;
     lambda << 6.0, 5.0, 4.0, 3.0, 2.0, 1.0;

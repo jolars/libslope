@@ -131,7 +131,7 @@ softmax(const Eigen::MatrixXd& x);
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param standardize Flag indicating whether to standardize the gradient.
+ * @param normalize_jit Flag indicating whether to standardize the gradient.
  * @return The computed gradient vector.
  */
 template<typename T>
