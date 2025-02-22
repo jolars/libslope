@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.0](https://github.com/jolars/libslope/compare/v0.13.0...v0.14.0) (2025-02-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* change centering and scaling API
+
+### Features
+
+* change centering and scaling API ([ac3b6c6](https://github.com/jolars/libslope/commit/ac3b6c65527f4dc39afcde99d4bffcb96db8b8d2))
+* support additional scaling and centering types ([71e502b](https://github.com/jolars/libslope/commit/71e502b32c716e606c702789134fb08986cf33bc))
+
+
+### Performance Improvements
+
+* simplify stddev computation ([9228aa4](https://github.com/jolars/libslope/commit/9228aa42905106276720d1bb6c1e6b9b9c51bb93))
+
 ## [0.13.0](https://github.com/jolars/libslope/compare/v0.12.1...v0.13.0) (2025-02-21)
 
 
