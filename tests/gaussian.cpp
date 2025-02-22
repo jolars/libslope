@@ -30,6 +30,7 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
 
   model.setIntercept(false);
   model.setNormalization("none");
+  model.setDiagnostics(true);
 
   fit = model.fit(x, y, alpha, lambda);
 
@@ -60,6 +61,7 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   slope::Slope model;
   model.setIntercept(false);
   model.setNormalization("none");
+  model.setDiagnostics(true);
   auto fit = model.fit(x, y, alpha, lambda);
 
   double gap = fit.getGaps().back();
@@ -132,6 +134,7 @@ TEST_CASE("Gaussian models", "[gaussian]")
 
   model.setTol(1e-8);
   model.setObjective("gaussian");
+  model.setDiagnostics(true);
 
   SECTION("No intercept, no standardization")
   {

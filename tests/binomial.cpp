@@ -51,6 +51,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
 
   model.setTol(1e-7);
   model.setObjective("binomial");
+  model.setDiagnostics(true);
 
   slope::SlopeFit fit;
 

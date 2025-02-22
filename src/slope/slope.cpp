@@ -234,9 +234,11 @@ Slope::path(T& x,
 
       double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
 
-      primals.emplace_back(primal);
-      duals.emplace_back(dual);
-      time.emplace_back(timer.elapsed());
+      if (collect_diagnostics) {
+        primals.emplace_back(primal);
+        duals.emplace_back(dual);
+        time.emplace_back(timer.elapsed());
+      }
 
       double dual_gap = primal - dual;
 
@@ -569,6 +571,12 @@ Slope::setMaxClusters(const int max_clusters)
   }
 
   this->max_clusters = max_clusters;
+}
+
+void
+Slope::setDiagnostics(const bool collect_diagnostics)
+{
+  this->collect_diagnostics = collect_diagnostics;
 }
 
 // Explicit instantiations for dense and sparse matrices

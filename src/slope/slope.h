@@ -34,6 +34,7 @@ public:
     : intercept(true)
     , modify_x(false)
     , update_clusters(false)
+    , collect_diagnostics(false)
     , alpha_min_ratio(-1)
     , dev_change_tol(1e-5) // TODO: Use std::optional for alpha_min_ratio
     , dev_ratio_tol(0.999)
@@ -244,6 +245,14 @@ public:
   void setScaling(const std::string& type);
 
   /**
+   * @brief Toggles collection of diagnostics.
+   * @param collect_diagnostics Whether to collect diagnostics, i.e.
+   * dual gap, objective value, etc. These will be stored in the SlopeFit and
+   * SlopePath objects.
+   */
+  void setDiagnostics(const bool collect_diagnostics);
+
+  /**
    * @brief Sets the scaling factors for feature normalization.
    * @param x_scales Vector containing scale values for each feature
    * Used in feature normalization: x_normalized = (x - center) / scale
@@ -269,6 +278,7 @@ private:
   bool intercept;
   bool modify_x;
   bool update_clusters;
+  bool collect_diagnostics;
   double alpha_min_ratio;
   double dev_change_tol;
   double dev_ratio_tol;
