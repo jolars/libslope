@@ -43,39 +43,6 @@ means(const Eigen::MatrixXd& x)
   return x.colwise().mean();
 }
 
-bool
-normalize(Eigen::MatrixXd& x,
-          Eigen::VectorXd& x_centers,
-          Eigen::VectorXd& x_scales,
-          const std::string& centering_type,
-          const std::string& scaling_type,
-          const bool modify_x)
-{
-  const int p = x.cols();
-
-  computeCenters(x_centers, x, centering_type);
-  computeScales(x_scales, x, scaling_type);
-
-  bool center = centering_type != "none";
-  bool scale = scaling_type != "none";
-  bool normalize = center || scale;
-
-  bool normalize_jit = normalize && !modify_x;
-
-  if (modify_x && normalize) {
-    for (int j = 0; j < p; ++j) {
-      if (center) {
-        x.col(j).array() -= x_centers(j);
-      }
-      if (scale) {
-        x.col(j).array() /= x_scales(j);
-      }
-    }
-  }
-
-  return normalize_jit;
-}
-
 Eigen::VectorXd
 ranges(const Eigen::SparseMatrix<double>& x)
 {
@@ -157,6 +124,39 @@ Eigen::VectorXd
 mins(const Eigen::MatrixXd& x)
 {
   return x.colwise().minCoeff();
+}
+
+bool
+normalize(Eigen::MatrixXd& x,
+          Eigen::VectorXd& x_centers,
+          Eigen::VectorXd& x_scales,
+          const std::string& centering_type,
+          const std::string& scaling_type,
+          const bool modify_x)
+{
+  const int p = x.cols();
+
+  computeCenters(x_centers, x, centering_type);
+  computeScales(x_scales, x, scaling_type);
+
+  bool center = centering_type != "none";
+  bool scale = scaling_type != "none";
+  bool normalize = center || scale;
+
+  bool normalize_jit = normalize && !modify_x;
+
+  if (modify_x && normalize) {
+    for (int j = 0; j < p; ++j) {
+      if (center) {
+        x.col(j).array() -= x_centers(j);
+      }
+      if (scale) {
+        x.col(j).array() /= x_scales(j);
+      }
+    }
+  }
+
+  return normalize_jit;
 }
 
 bool
