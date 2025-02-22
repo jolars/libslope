@@ -239,7 +239,7 @@ public:
 
   /**
    * @brief Sets the scaling type
-   * @param type Type of scaling, one of: "sd", "none"
+   * @param type Type of scaling, one of: "sd", "l1", "none"
    */
   void setScaling(const std::string& type);
 

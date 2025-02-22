@@ -11,33 +11,75 @@ namespace slope {
 
 template<typename T>
 Eigen::VectorXd
+l1Norms(const T& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    out(j) = x.col(j).cwiseAbs().sum();
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+l2Norms(const Eigen::SparseMatrix<double>& x);
+
+Eigen::VectorXd
+l2Norms(const Eigen::MatrixXd& x);
+
+template<typename T>
+Eigen::VectorXd
+maxAbs(const T& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_maxabs = 0.0;
+
+    for (typename T::InnerIterator it(x, j); it; ++it) {
+      x_j_maxabs = std::max(x_j_maxabs, std::abs(it.value()));
+    }
+
+    out(j) = x_j_maxabs;
+  }
+
+  return out;
+}
+
+template<typename T>
+Eigen::VectorXd
 means(const T& x)
 {
   const int n = x.rows();
   const int p = x.cols();
 
-  Eigen::VectorXd x_centers(p);
+  Eigen::VectorXd out(p);
 
   for (int j = 0; j < p; ++j) {
-    x_centers(j) = x.col(j).sum() / n;
+    out(j) = x.col(j).sum() / n;
   }
 
-  return x_centers;
+  return out;
 }
 
 template<typename T>
 Eigen::VectorXd
-stdDev(const T& x)
+stdDevs(const T& x)
 {
   const int n = x.rows();
   const int p = x.cols();
 
-  Eigen::VectorXd x_centers = means(x);
-  Eigen::VectorXd x_scales(p);
+  Eigen::VectorXd x_means = means(x);
+  Eigen::VectorXd out(p);
 
   for (int j = 0; j < p; ++j) {
     double m2 = 0.0;
-    const double mean = x_centers(j);
+    const double mean = x_means(j);
 
     // Process non-zero elements
     for (typename T::InnerIterator it(x, j); it; ++it) {
@@ -51,10 +93,54 @@ stdDev(const T& x)
       m2 += (n - nz_count) * mean * mean;
     }
 
-    x_scales(j) = std::sqrt(m2 / n);
+    out(j) = std::sqrt(m2 / n);
   }
 
-  return x_scales;
+  return out;
+}
+
+template<typename T>
+Eigen::VectorXd
+ranges(const T& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_max = 0.0;
+    double x_j_min = 0.0;
+
+    for (typename T::InnerIterator it(x, j); it; ++it) {
+      x_j_max = std::max(x_j_max, it.value());
+      x_j_min = std::min(x_j_min, it.value());
+    }
+
+    out(j) = x_j_max - x_j_min;
+  }
+
+  return out;
+}
+
+template<typename T>
+Eigen::VectorXd
+mins(const T& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_min = 0.0;
+
+    for (typename T::InnerIterator it(x, j); it; ++it) {
+      x_j_min = std::min(x_j_min, it.value());
+    }
+
+    out(j) = x_j_min;
+  }
+
+  return out;
 }
 
 /**
@@ -93,6 +179,8 @@ computeCenters(Eigen::VectorXd& x_centers, const T& x, const std::string& type)
 
   } else if (type == "mean") {
     x_centers = means(x);
+  } else if (type == "min") {
+    x_centers = mins(x);
   } else if (type != "none") {
     throw std::invalid_argument("Invalid centering type");
   }
@@ -131,7 +219,15 @@ computeScales(Eigen::VectorXd& x_scales, const T& x, const std::string& type)
       throw std::invalid_argument("Scales must be finite");
     }
   } else if (type == "sd") {
-    x_scales = stdDev(x);
+    x_scales = stdDevs(x);
+  } else if (type == "l1") {
+    x_scales = l1Norms(x);
+  } else if (type == "l2") {
+    x_scales = l2Norms(x);
+  } else if (type == "max_abs") {
+    x_scales = maxAbs(x);
+  } else if (type == "range") {
+    x_scales = ranges(x);
   } else if (type != "none") {
     throw std::invalid_argument("Invalid scaling type");
   }

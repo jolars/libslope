@@ -245,6 +245,9 @@ TEST_CASE("JIT standardization and modify-X standardization",
     Eigen::VectorXd centers_wrong = Eigen::VectorXd::Ones(p - 1);
     Eigen::VectorXd scales_wrong = Eigen::VectorXd::Ones(p + 5);
 
+    REQUIRE_THROWS_AS(model.setScaling("minabs"), std::invalid_argument);
+    REQUIRE_THROWS_AS(model.setCentering("quantile"), std::invalid_argument);
+
     model.setCentering(centers);
     model.setScaling(scales);
 
@@ -274,5 +277,23 @@ TEST_CASE("JIT standardization and modify-X standardization",
     model.setCentering(centers_nan);
 
     REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
+  }
+
+  SECTION("Loop over normalization types")
+  {
+    std::vector<std::string> centering_types = { "none", "mean", "min" };
+    std::vector<std::string> scaling_types = { "none", "sd",      "l1",
+                                               "l2",   "max_abs", "range" };
+
+    model.setModifyX(false);
+
+    for (const auto& centering_type : centering_types) {
+      for (const auto& scaling_type : scaling_types) {
+        model.setCentering(centering_type);
+        model.setScaling(scaling_type);
+
+        REQUIRE_NOTHROW(model.fit(x, y));
+      }
+    }
   }
 }

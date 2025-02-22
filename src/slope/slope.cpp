@@ -370,7 +370,8 @@ Slope::setIntercept(bool intercept)
 void
 Slope::setNormalization(const std::string& type)
 {
-  validateOption(type, { "standardization", "none" }, "type");
+  validateOption(
+    type, { "standardization", "min_max", "max_abs", "none" }, "type");
 
   if (type == "standardization") {
     this->centering_type = "mean";
@@ -378,13 +379,19 @@ Slope::setNormalization(const std::string& type)
   } else if (type == "none") {
     this->centering_type = "none";
     this->scaling_type = "none";
+  } else if (type == "min_max") {
+    this->centering_type = "min";
+    this->scaling_type = "range";
+  } else if (type == "max_abs") {
+    this->centering_type = "none";
+    this->scaling_type = "max_abs";
   }
 }
 
 void
 Slope::setCentering(const std::string& type)
 {
-  validateOption(type, { "mean", "none" }, "type");
+  validateOption(type, { "mean", "min", "none" }, "type");
   this->centering_type = type;
 }
 
@@ -398,7 +405,8 @@ Slope::setCentering(const Eigen::VectorXd& x_centers)
 void
 Slope::setScaling(const std::string& type)
 {
-  validateOption(type, { "sd", "none" }, "type");
+  validateOption(
+    type, { "sd", "l1", "l2", "range", "max_abs", "none" }, "type");
   this->scaling_type = type;
 }
 

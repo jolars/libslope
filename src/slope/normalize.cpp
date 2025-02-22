@@ -2,6 +2,26 @@
 
 namespace slope {
 
+Eigen::VectorXd
+l2Norms(const Eigen::SparseMatrix<double>& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    out(j) = x.col(j).norm();
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+l2Norms(const Eigen::MatrixXd& x)
+{
+  return x.colwise().norm();
+}
+
 bool
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
