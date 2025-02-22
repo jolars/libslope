@@ -22,6 +22,27 @@ l2Norms(const Eigen::MatrixXd& x)
   return x.colwise().norm();
 }
 
+Eigen::VectorXd
+means(const Eigen::SparseMatrix<double>& x)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    out(j) = x.col(j).sum() / n;
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+means(const Eigen::MatrixXd& x)
+{
+  return x.colwise().mean();
+}
+
 bool
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
@@ -53,6 +74,89 @@ normalize(Eigen::MatrixXd& x,
   }
 
   return normalize_jit;
+}
+
+Eigen::VectorXd
+ranges(const Eigen::SparseMatrix<double>& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_max = 0.0;
+    double x_j_min = 0.0;
+
+    for (typename Eigen::SparseMatrix<double>::InnerIterator it(x, j); it;
+         ++it) {
+      x_j_max = std::max(x_j_max, it.value());
+      x_j_min = std::min(x_j_min, it.value());
+    }
+
+    out(j) = x_j_max - x_j_min;
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+ranges(const Eigen::MatrixXd& x)
+{
+  return x.colwise().maxCoeff() - x.colwise().minCoeff();
+}
+
+Eigen::VectorXd
+maxAbs(const Eigen::SparseMatrix<double>& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_maxabs = 0.0;
+
+    for (typename Eigen::SparseMatrix<double>::InnerIterator it(x, j); it;
+         ++it) {
+      x_j_maxabs = std::max(x_j_maxabs, std::abs(it.value()));
+    }
+
+    out(j) = x_j_maxabs;
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+maxAbs(const Eigen::MatrixXd& x)
+{
+  return x.cwiseAbs().colwise().maxCoeff();
+}
+
+Eigen::VectorXd
+mins(const Eigen::SparseMatrix<double>& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double x_j_min = 0.0;
+
+    for (typename Eigen::SparseMatrix<double>::InnerIterator it(x, j); it;
+         ++it) {
+      x_j_min = std::min(x_j_min, it.value());
+    }
+
+    out(j) = x_j_min;
+  }
+
+  return out;
+}
+
+Eigen::VectorXd
+mins(const Eigen::MatrixXd& x)
+{
+  return x.colwise().minCoeff();
 }
 
 bool
