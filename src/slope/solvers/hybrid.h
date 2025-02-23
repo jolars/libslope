@@ -35,9 +35,13 @@ class Hybrid : public SolverBase
 {
 public:
   /**
-   * @brief Construct a new Hybrid Solver
-   *
-   * @param args Arguments forwarded to base solver constructor
+   * @brief Constructs Hybrid solver for SLOPE optimization
+   * @param tol Convergence tolerance threshold
+   * @param max_it Maximum number of iterations
+   * @param jit_normalization Feature normalization strategy
+   * @param intercept If true, fits intercept term
+   * @param update_clusters If true, updates clusters during optimization
+   * @param pgd_freq Frequency of proximal gradient descent updates
    */
   Hybrid(double tol,
          int max_it,
@@ -54,7 +58,7 @@ public:
   {
   }
 
-  // Override for dense matrices
+  /// @copydoc SolverBase::run
   void run(Eigen::VectorXd& beta0,
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
@@ -69,7 +73,7 @@ public:
            const Eigen::VectorXd& x_scales,
            const Eigen::MatrixXd& y) override;
 
-  // Override for sparse matrices
+  /// @copydoc SolverBase::run
   void run(Eigen::VectorXd& beta0,
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,

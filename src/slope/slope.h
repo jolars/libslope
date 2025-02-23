@@ -12,6 +12,9 @@
 #include <cassert>
 #include <optional>
 
+/** @namespace slope
+ *  @brief Namespace containing SLOPE regression implementation
+ */
 namespace slope {
 
 /**
@@ -118,7 +121,7 @@ public:
    * @brief Sets OSCAR parameters.
    *
    * @param theta1 Parameter for OSCAR.
-   * @param theta1 Parameter for OSCAR.
+   * @param theta2 Parameter for OSCAR.
    */
   void setOscarParameters(const double theta1, const double theta2);
 
@@ -141,7 +144,7 @@ public:
   /**
    * @brief Sets the maximum number of inner iterations.
    *
-   * @param max_it Sets the maximum number of inner iterations for solvers
+   * @param max_it_inner Sets the maximum number of inner iterations for solvers
    * that use an inner loop. Must be positive.
    */
   void setMaxItInner(int max_it_inner);
@@ -201,7 +204,7 @@ public:
    *   centered and scaled. If `x` is sparse, it will be only scaled.
    * @param modify_x Whether to modfiy `x` in place or not
    */
-  void setModifyX(const bool objective);
+  void setModifyX(const bool modify_x);
 
   /**
    * @brief Sets tolerance in deviance change for early stopping.
@@ -259,14 +262,43 @@ public:
    */
   void setScaling(const Eigen::VectorXd& x_scales);
 
-  // Declaration of the templated path() method.
+  /**
+   * @brief Computes SLOPE regression solution path for multiple alpha and
+   * lambda values
+   *
+   * @tparam T Matrix type for feature input (supports dense or sparse matrices)
+   * @param x Feature matrix of size n x p
+   * @param y_in Response matrix of size n x m
+   * @param alpha Sequence of mixing parameters for elastic net regularization
+   * @param lambda Sequence of regularization parameters (if empty, computed
+   * automatically)
+   * @return SlopePath Object containing full solution path and optimization
+   * metrics
+   *
+   * Fits SLOPE models for each combination of alpha and lambda values, storing
+   * all solutions and optimization metrics in a SlopePath object.
+   */
   template<typename T>
   SlopePath path(T& x,
                  const Eigen::MatrixXd& y_in,
                  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
                  Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
 
-  // Declaration of the templated fit() method.
+  /**
+   * @brief Fits a single SLOPE regression model for given alpha and lambda
+   * values
+   *
+   * @tparam T Matrix type for feature input (supports dense or sparse matrices)
+   * @param x Feature matrix of size n x p
+   * @param y_in Response matrix of size n x m
+   * @param alpha Mixing parameter for elastic net regularization
+   * @param lambda Vector of regularization parameters (if empty, computed
+   * automatically)
+   * @return SlopeFit Object containing fitted model and optimization metrics
+   *
+   * Fits a single SLOPE model with specified regularization parameters,
+   * returning coefficients and optimization details in a SlopeFit object.
+   */
   template<typename T>
   SlopeFit fit(T& x,
                const Eigen::MatrixXd& y_in,

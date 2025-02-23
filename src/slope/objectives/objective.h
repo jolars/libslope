@@ -45,6 +45,7 @@ public:
    *
    * @param theta The estimated parameters.
    * @param y The true values.
+   * @param w Weights.
    * @return The dual value.
    */
   virtual double dual(const Eigen::MatrixXd& theta,
@@ -70,27 +71,20 @@ public:
    * This function updates the weights and working response given the predicted
    * values (eta) and the true values (y).
    *
-   * @param weights The weights to be updated.
-   * @param working_response The working response to be updated.
+   * @param w The weights to be updated.
+   * @param z The working response to be updated.
    * @param eta The predicted values.
    * @param y The true values.
    */
-  virtual void updateWeightsAndWorkingResponse(
-    Eigen::VectorXd& weights,
-    Eigen::VectorXd& working_response,
-    const Eigen::VectorXd& eta,
-    const Eigen::VectorXd& y) = 0;
+  virtual void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
+                                               Eigen::VectorXd& z,
+                                               const Eigen::VectorXd& eta,
+                                               const Eigen::VectorXd& y) = 0;
 
   /**
-   * @brief Updates the weights and working response
+   * @brief Preprocess response
    *
-   * This function updates the weights and working response given the predicted
-   * values (eta) and the true values (y).
-   *
-   * @param weights The weights to be updated.
-   * @param working_response The working response to be updated.
-   * @param eta The predicted values.
-   * @param y The true values.
+   * @param y The response
    */
   virtual Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y) = 0;
 
@@ -151,6 +145,13 @@ public:
   }
 
 protected:
+  /**
+   * @brief Constructs an Objective with specified Lipschitz constant
+   * @param lipschitz_constant The Lipschitz constant for the objective function
+   *
+   * The Lipschitz constant is used to ensure convergence in gradient-based
+   * optimization by bounding the rate of change of the gradient.
+   */
   explicit Objective(double lipschitz_constant)
     : lipschitz_constant(lipschitz_constant)
   {

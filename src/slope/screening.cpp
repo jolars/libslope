@@ -8,7 +8,7 @@ typedef Eigen::Array<bool, Eigen::Dynamic, 1> ArrayXb;
 typedef Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> ArrayXXb;
 
 std::vector<int>
-previouslyActiveSet(const Eigen::MatrixXd& beta)
+activeSet(const Eigen::MatrixXd& beta)
 {
   ArrayXb active = (beta.array() != 0.0).rowwise().any();
 

@@ -118,7 +118,7 @@ logSumExp(const Eigen::MatrixXd& a);
  *
  * Computes the softmax function for the given input matrix.
  *
- * @param a A matrix
+ * @param x A matrix
  * @return \f$\exp(a) / \sum_i \exp(a_i)\f$
  */
 Eigen::MatrixXd
@@ -129,10 +129,13 @@ softmax(const Eigen::MatrixXd& x);
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
- * @param residual The residual vector.
+ * @param active_set Indicies for active set
+ * @param beta0 Intercept
+ * @param beta Coefficients
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
  * @param jit_normalization Type of JIT normalization.
+ * @param intercept Whether to fit an intercept.
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -201,13 +204,15 @@ linearPredictor(const T& x,
  * Computes the gradient of the objective with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
+ * @param gradient The gradient vector.
  * @param x The input matrix.
  * @param residual The residual vector.
+ * @param active_set The indices for the active set.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
+ * @param w Working weights
  * @param jit_normalization Type of JIT normalization
  * just-in-time.
- * @return The computed gradient vector.
  */
 template<typename T>
 void
@@ -262,13 +267,14 @@ updateGradient(Eigen::MatrixXd& gradient,
  * Computes the gradient of the objective with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
+ * @param gradient The residual vector.
  * @param x The input matrix.
- * @param residual The residual vector.
+ * @param offset Gradient offset
+ * @param active_set Indices for the active_set
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
  * @param jit_normalization Type of JIT normalization
  * just-in-time.
- * @return The computed gradient vector.
  */
 template<typename T>
 void

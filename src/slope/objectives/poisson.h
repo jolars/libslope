@@ -29,6 +29,7 @@ public:
     : Objective(std::numeric_limits<double>::infinity())
   {
   }
+
   /**
    * @brief Calculates the negative log-likelihood loss for the Poisson
    * regression.

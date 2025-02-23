@@ -26,10 +26,12 @@ namespace solvers {
  * @param beta The coefficient vector.
  * @param residual The residual vector.
  * @param learning_rate The learning rate.
- * @param gradient The gradient vector.
- * @param x The input data matrix.
- * @param w The weight vector.
- * @param z The response vector.
+ * @param lambda Regularization weights
+ * @param gradient Gradient
+ * @param working_set Indices of working set
+ * @param x The design matrix
+ * @param w The working weights
+ * @param z The working response
  * @param sl1_norm The sorted L1 norm object.
  * @param x_centers The center values of the input data.
  * @param x_scales The scale values of the input data.

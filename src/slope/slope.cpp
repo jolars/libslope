@@ -20,21 +20,6 @@
 
 namespace slope {
 
-/**
- * Fits the SLOPE path.
- *
- * This method fits a regularized regression model using the SLOPE penalty,
- * which combines the benefits of Lasso-type regularization with FDR control.
- * The algorithm can handle multiple objective functions and automatically
- * generates regularization paths if not provided.
- *
- * @param x The design matrix, where each column represents a feature
- * @param y The response vector
- * @param alpha Sequence of multipliers for the sorted L1 norm. If empty,
- *             automatically generated
- * @param lambda Weights for the sorted L1 norm. If empty, computed using
- *              the specified lambda_type
- */
 template<typename T>
 SlopePath
 Slope::path(T& x,
@@ -180,7 +165,7 @@ Slope::path(T& x,
                      Eigen::VectorXd::Ones(n),
                      jit_normalization);
 
-      previous_set = previouslyActiveSet(beta);
+      previous_set = activeSet(beta);
       strong_set = strongSet(gradient, lambda_curr, lambda_prev);
       strong_set = setUnion(strong_set, previous_set);
       working_set = setUnion(previous_set, { alpha_max_ind });
@@ -579,7 +564,8 @@ Slope::setDiagnostics(const bool collect_diagnostics)
   this->collect_diagnostics = collect_diagnostics;
 }
 
-// Explicit instantiations for dense and sparse matrices
+/// @cond
+// Explicit template instantiations
 template SlopePath
 Slope::path<Eigen::MatrixXd>(Eigen::MatrixXd&,
                              const Eigen::MatrixXd&,
@@ -603,7 +589,6 @@ Slope::fit<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
                                         const Eigen::MatrixXd&,
                                         const double,
                                         Eigen::ArrayXd);
-
-// slope.cpp
+/// @endcond
 
 } // namespace slope

@@ -15,10 +15,41 @@
 namespace slope {
 namespace solvers {
 
+/**
+ * Computes the gradient and Hessian for coordinate descent optimization with
+ * different normalization strategies.
+ *
+ * @tparam T Matrix type (expected to support col() operations like Eigen
+ * matrices)
+ *
+ * @param x Input matrix
+ * @param k Column index to compute derivatives for
+ * @param w Vector of weights
+ * @param residual Residual vector
+ * @param x_centers Vector of feature centers (means)
+ * @param x_scales Vector of feature scales (standard deviations)
+ * @param s Step size parameter
+ * @param jit_normalization Normalization strategy (Both, Center, Scale, or
+ * None)
+ * @param n Number of samples
+ *
+ * @return std::pair<double, double> containing:
+ *         - first: gradient of the objective function
+ *         - second: diagonal Hessian element
+ *
+ * The function handles four different normalization cases:
+ * - Both: Applies both centering and scaling
+ * - Center: Applies only centering
+ * - Scale: Applies only scaling
+ * - None: No normalization
+ *
+ * Each case computes the gradient and Hessian differently based on the
+ * normalization strategy.
+ */
 template<typename T>
 std::pair<double, double>
 computeGradientAndHessian(const T& x,
-                          int k,
+                          const int k,
                           const Eigen::VectorXd& w,
                           const Eigen::VectorXd& residual,
                           const Eigen::VectorXd& x_centers,
@@ -80,9 +111,9 @@ computeGradientAndHessian(const T& x,
  * @param beta The coefficients
  * @param residual The residual vector
  * @param clusters The cluster information, stored in a Cluster object.
+ * @param lambda Regularization weights
  * @param x The design matrix
  * @param w The weight vector
- * @param sl1_norm The sorted L1 norm object
  * @param x_centers The center values of the data matrix columns
  * @param x_scales The scale values of the data matrix columns
  * @param intercept Shuold an intervept be fit?
@@ -92,6 +123,7 @@ computeGradientAndHessian(const T& x,
  *
  * @see Clusters
  * @see SortedL1Norm
+ * @see JitNormalization
  */
 template<typename T>
 void

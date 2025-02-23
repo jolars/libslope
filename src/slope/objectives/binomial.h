@@ -33,6 +33,7 @@ public:
    * @brief Calculates the dual for the binomial objective function.
    * @param theta The dual variables.
    * @param y The true labels.
+   * @param w Weights
    * @return The dual value.
    */
   double dual(const Eigen::MatrixXd& theta,

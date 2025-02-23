@@ -41,6 +41,18 @@ sort(T& v, const bool descending = false)
   }
 }
 
+/**
+ * Returns indices of true values in a boolean container.
+ *
+ * @tparam T Container type supporting size() and operator[] (e.g.,
+ * std::vector<bool>, std::array<bool>)
+ * @param x Input container with boolean-convertible values
+ * @return std::vector<int> containing indices where x[i] evaluates to true
+ *
+ * Example:
+ *   std::vector<bool> v = {true, false, true, false, true};
+ *   auto indices = which(v); // returns {0, 2, 4}
+ */
 template<typename T>
 std::vector<int>
 which(const T& x)
@@ -176,7 +188,8 @@ move_elements(std::vector<T>& v, const int from, const int to, const int size)
  *
  * @param value The value to validate
  * @param valid_options Set of valid options
- * message)
+ * @param parameter_name Name of the parameter being validated (used in error
+ * message).
  * @throws std::invalid_argument If value is not in valid_options
  */
 void

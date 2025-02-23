@@ -69,16 +69,54 @@ public:
   {
   }
 
-  // Getter methods
+  /**
+   * @brief Gets the intercept terms for this SLOPE fit
+   */
   const Eigen::VectorXd& getIntercepts() const { return intercepts; }
+
+  /**
+   * @brief Gets the sparse coefficient matrix for this fit
+   */
   const Eigen::SparseMatrix<double>& getCoefs() const { return coefs; }
+
+  /**
+   * @brief Gets the lambda (regularization) parameter used
+   */
   const Eigen::ArrayXd& getLambda() const { return lambda; }
+
+  /**
+   * @brief Gets the alpha (mixing) parameter used
+   */
   double getAlpha() const { return alpha; }
+
+  /**
+   * @brief Gets the model deviance
+   */
   double getDeviance() const { return deviance; }
+
+  /**
+   * @brief Gets the null model deviance
+   */
   double getNullDeviance() const { return null_deviance; }
+
+  /**
+   * @brief Gets the sequence of primal objective values during optimization
+   */
   const std::vector<double>& getPrimals() const { return primals; }
+
+  /**
+   * @brief Gets the sequence of dual objective values during optimization
+   */
   const std::vector<double>& getDuals() const { return duals; }
+
+  /**
+   * @brief Gets the sequence of computation times during optimization
+   */
   const std::vector<double>& getTime() const { return time; }
+
+  /**
+   * @brief Gets the total number of optimization iterations
+   */
   int getPasses() const { return passes; }
 
   /**

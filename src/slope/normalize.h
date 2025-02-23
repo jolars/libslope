@@ -243,11 +243,9 @@ mins(const Eigen::MatrixXd& x);
  * - "mean": Use arithmetic means.
  *
  * @tparam T The type of the input matrix.
- * @param x The input matrix.
  * @param x_centers A vector where the computed or provided centers will be
  * stored.
- * @param x_scales A vector where the computed or provided scales will be
- * stored.
+ * @param x The input matrix.
  * @param type A string specifying the normalization type ("none", "manual", or
  * "standardization").
  *
@@ -287,8 +285,6 @@ computeCenters(Eigen::VectorXd& x_centers, const T& x, const std::string& type)
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
- * @param x_centers A vector where the computed or provided centers will be
- * stored.
  * @param x_scales A vector where the computed or provided scales will be
  * stored.
  * @param type A string specifying the normalization type ("none", "manual", or
@@ -332,15 +328,17 @@ computeScales(Eigen::VectorXd& x_scales, const T& x, const std::string& type)
  * specified normalization type ("none", "manual", or "standardization"). If
  * modify_x is true, the normalization is applied directly to the input matrix.
  *
- * @param x         The dense input matrix to be normalized.
+ * @param x The dense input matrix to be normalized.
  * @param x_centers A vector that will hold the column centers. It will be
- *                  resized to match the number of columns.
+ * resized to match the number of columns.
  * @param x_scales  A vector that will hold the column scaling factors. It will
- *                  be resized to match the number of columns.
- * @param type      A string specifying the normalization type ("none",
- *                  "manual", or "standardization").
- * @param modify_x  If true, modifies x in-place; otherwise, x remains unchanged
- *                  (centers/scales are still computed).
+ * be resized to match the number of columns.
+ * @param centering_type A string specifying the normalization type ("none",
+ * "manual", or "standardization").
+ * @param scaling_type A string specifying the normalization type ("none",
+ * "manual", or "standardization").
+ * @param modify_x If true, modifies x in-place; otherwise, x remains unchanged
+ * (centers/scales are still computed).
  *
  * @return true if normalization succeeds, false otherwise.
  */
@@ -366,7 +364,9 @@ normalize(Eigen::MatrixXd& x,
  * parameter is maintained for consistency.
  * @param x_scales  A vector that will hold the column scaling factors. It will
  * be resized to match the number of columns.
- * @param type A string specifying the normalization type ("none",
+ * @param centering_type A string specifying the normalization type ("none",
+ * "manual", or "standardization").
+ * @param scaling_type A string specifying the normalization type ("none",
  * "manual", or "standardization").
  * @param modify_x If true, performs in-place scaling on x; otherwise, leaves x
  * unchanged.
@@ -393,7 +393,6 @@ normalize(Eigen::SparseMatrix<double>& x,
  * @param x_centers The vector of center values.
  * @param x_scales The vector of scale factors.
  * @param intercept Should an intercept be fit?
- * @param normalization_type type of normalization
  * @return A tuple containing the rescaled intercept and coefficients.
  *
  * @note The input vectors `beta`, `x_centers`, and `x_scales` must have the

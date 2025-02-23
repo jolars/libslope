@@ -28,6 +28,16 @@ namespace solvers {
 class PGD : public SolverBase
 {
 public:
+  /**
+   * @brief Constructs Proximal Gradient Descent solver for SLOPE optimization
+   * @param tol Convergence tolerance threshold
+   * @param max_it Maximum number of iterations
+   * @param jit_normalization Feature normalization strategy
+   * @param intercept If true, fits intercept term
+   * @param update_clusters If true, updates clusters during optimization
+   * @param pgd_freq Frequency of proximal gradient descent updates
+   * @param update_type Type of update strategy to use
+   */
   PGD(double tol,
       int max_it,
       JitNormalization jit_normalization,
@@ -48,22 +58,7 @@ public:
   {
   }
 
-  /**
-   * @brief Implementation of the PGD solver algorithm
-   *
-   * @tparam MatrixType Type of the design matrix
-   * @param beta0 Intercept term (scalar)
-   * @param beta Coefficient matrix
-   * @param residual Residual vector
-   * @param gradient Gradient vector
-   * @param x Design matrix
-   * @param w Weight vector
-   * @param z Response vector
-   * @param sl1_norm Sorted L1 norm object
-   * @param x_centers Feature centers for standardization
-   * @param x_scales Feature scales for standardization
-   * @param g_old Previous value of objective function
-   */
+  /// @copydoc SolverBase::run
   void run(Eigen::VectorXd& beta0,
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
@@ -72,28 +67,13 @@ public:
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
-           const std::vector<int>& active_set,
+           const std::vector<int>& working_set,
            const Eigen::MatrixXd& x,
            const Eigen::VectorXd& x_centers,
            const Eigen::VectorXd& x_scales,
            const Eigen::MatrixXd& y) override;
 
-  /**
-   * @brief Implementation of the PGD solver algorithm
-   *
-   * @tparam MatrixType Type of the design matrix
-   * @param beta0 Intercept term (scalar)
-   * @param beta Coefficient matrix
-   * @param residual Residual vector
-   * @param gradient Gradient vector
-   * @param x Design matrix
-   * @param w Weight vector
-   * @param z Response vector
-   * @param sl1_norm Sorted L1 norm object
-   * @param x_centers Feature centers for standardization
-   * @param x_scales Feature scales for standardization
-   * @param g_old Previous value of objective function
-   */
+  /// @copydoc SolverBase::run
   void run(Eigen::VectorXd& beta0,
            Eigen::MatrixXd& beta,
            Eigen::MatrixXd& eta,
@@ -102,7 +82,7 @@ public:
            const std::unique_ptr<Objective>& objective,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
-           const std::vector<int>& active_set,
+           const std::vector<int>& working_set,
            const Eigen::SparseMatrix<double>& x,
            const Eigen::VectorXd& x_centers,
            const Eigen::VectorXd& x_scales,
@@ -118,7 +98,7 @@ private:
                const std::unique_ptr<Objective>& objective,
                const SortedL1Norm& penalty,
                Eigen::MatrixXd& gradient,
-               const std::vector<int>& active_set,
+               const std::vector<int>& working_set,
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
@@ -128,7 +108,7 @@ private:
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
-    beta_old = beta(active_set, all);
+    beta_old = beta(working_set, all);
 
     double g_old = objective->loss(eta, y);
     double t_old = t;
@@ -136,18 +116,18 @@ private:
     Eigen::MatrixXd beta_diff(beta_old.rows(), beta_old.cols());
 
     while (true) {
-      beta(active_set, all) =
-        penalty.prox(beta_old - this->learning_rate * gradient(active_set, all),
-                     this->learning_rate * lambda.head(beta_old.size()));
+      beta(working_set, all) = penalty.prox(
+        beta_old - this->learning_rate * gradient(working_set, all),
+        this->learning_rate * lambda.head(beta_old.size()));
 
       if (intercept) {
         objective->updateIntercept(beta0, eta, y);
       }
 
-      beta_diff = beta(active_set, all) - beta_old;
+      beta_diff = beta(working_set, all) - beta_old;
 
       eta = linearPredictor(x,
-                            active_set,
+                            working_set,
                             beta0,
                             beta,
                             x_centers,
@@ -157,7 +137,8 @@ private:
 
       double g = objective->loss(eta, y);
       double q =
-        g_old + beta_diff.reshaped().dot(gradient(active_set, all).reshaped()) +
+        g_old +
+        beta_diff.reshaped().dot(gradient(working_set, all).reshaped()) +
         (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
 
       if (q >= g * (1 - 1e-12)) {
@@ -170,9 +151,9 @@ private:
 
     if (update_type == "fista") {
       this->t = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t_old * t_old));
-      beta(active_set, all) += beta_diff * (t_old - 1.0) / this->t;
+      beta(working_set, all) += beta_diff * (t_old - 1.0) / this->t;
       eta = linearPredictor(x,
-                            active_set,
+                            working_set,
                             beta0,
                             beta,
                             x_centers,

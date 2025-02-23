@@ -5,9 +5,6 @@
 
 namespace slope {
 
-typedef Eigen::Array<bool, Eigen::Dynamic, 1> ArrayXb;
-typedef Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic> ArrayXXb;
-
 std::vector<int>
 kktCheck(const Eigen::MatrixXd& gradient,
          const Eigen::MatrixXd& beta,
