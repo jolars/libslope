@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.15.0](https://github.com/jolars/libslope/compare/v0.14.0...v0.15.0) (2025-02-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* make collecting diagnostics configurable
+
+### Features
+
+* make collecting diagnostics configurable ([3fd42e7](https://github.com/jolars/libslope/commit/3fd42e794cb5c97cfe4bca156b54af7a3567f952))
+
+
+### Bug Fixes
+
+* correctly handle centers without scales or vice versa ([db1e49e](https://github.com/jolars/libslope/commit/db1e49eed4a23a014a8b7b9bfe95ecda66069bfd))
+
 ## [0.14.0](https://github.com/jolars/libslope/compare/v0.13.0...v0.14.0) (2025-02-22)
 
 
