@@ -5,7 +5,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Poisson models", "[models][poisson]")
+TEST_CASE("Poisson, models", "[poisson]")
 {
   using namespace Catch::Matchers;
 

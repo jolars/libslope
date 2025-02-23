@@ -32,8 +32,7 @@ computeMeanAndStdDev(const Eigen::SparseMatrix<double>& x)
   return computeMeanAndStdDev(x_dense);
 }
 
-TEST_CASE("Check that standardization algorithm works",
-          "[utils][standardization]")
+TEST_CASE("Normalization, check solutions", "[normalization]")
 {
   using Catch::Matchers::WithinAbs;
 
@@ -69,8 +68,7 @@ TEST_CASE("Check that standardization algorithm works",
   REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_ref));
 }
 
-TEST_CASE("Check that in-place standardization works",
-          "[utils][standardization]")
+TEST_CASE("Normalization, JIT", "[normalization]")
 {
   using Catch::Matchers::WithinAbs;
 
@@ -133,8 +131,7 @@ TEST_CASE("Check that in-place standardization works",
                VectorApproxEqual(gradient_sparse.reshaped()));
 }
 
-TEST_CASE("JIT standardization and modify-X standardization",
-          "[standardization]")
+TEST_CASE("Normalization, JIT modify-X", "[normalization]")
 {
   using Catch::Matchers::WithinAbs;
 
@@ -293,7 +290,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
   }
 }
 
-TEST_CASE("Normalization loop", "[normalization]")
+TEST_CASE("Normalization, loop combinations", "[normalization]")
 {
   slope::Slope model;
 

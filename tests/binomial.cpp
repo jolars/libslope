@@ -5,7 +5,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE("Binomial, simple fixed design", "[binomial][basic]")
+TEST_CASE("Binomial, simple fixed design", "[binomial]")
 {
   using namespace Catch::Matchers;
 

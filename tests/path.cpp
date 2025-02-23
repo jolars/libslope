@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Path fitting", "[path][gaussian]")
+TEST_CASE("Path fitting", "[path][gaussian][alpha]")
 {
   using namespace Catch::Matchers;
 

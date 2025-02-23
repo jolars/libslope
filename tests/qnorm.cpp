@@ -3,7 +3,7 @@
 #include <limits>
 #include <slope/qnorm.h>
 
-TEST_CASE("Check that normal quantile algorithm works", "[utils]")
+TEST_CASE("Check that normal quantile algorithm works", "[stats]")
 {
   using Catch::Matchers::WithinAbs;
   using slope::normalQuantile;

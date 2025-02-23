@@ -5,7 +5,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
+TEST_CASE("Guassian, simple design", "[gaussian]")
 {
   using namespace Catch::Matchers;
 
@@ -46,7 +46,7 @@ TEST_CASE("Simple low-dimensional design", "[gaussian][basic]")
   REQUIRE(gap <= (primal + 1e-10) * 1e-4);
 }
 
-TEST_CASE("X is identity", "[gaussian][identity]")
+TEST_CASE("Gaussian, X is identity", "[gaussian]")
 {
   using namespace Catch::Matchers;
 
@@ -75,7 +75,7 @@ TEST_CASE("X is identity", "[gaussian][identity]")
   REQUIRE(gap < primal * 1e-4);
 }
 
-TEST_CASE("Automatic lambda and alpha", "[gaussian]")
+TEST_CASE("Gaussian, automatic lambda and alpha", "[gaussian]")
 {
   using namespace Catch::Matchers;
 
@@ -93,7 +93,7 @@ TEST_CASE("Automatic lambda and alpha", "[gaussian]")
   REQUIRE_NOTHROW(model.path(x, y));
 }
 
-TEST_CASE("Gaussian models", "[gaussian]")
+TEST_CASE("Gaussian, various models", "[gaussian]")
 {
   using namespace Catch::Matchers;
 

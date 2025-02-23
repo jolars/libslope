@@ -5,7 +5,7 @@
 #include <slope/regularization_sequence.h>
 
 TEST_CASE("Test that regularization sequence generation works",
-          "[regularization sequence]")
+          "[lambda][alpha]")
 {
   double tol = 1e-6;
   int n = 10;

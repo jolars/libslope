@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Multinomial objective: unpenalized", "[objective][multinomial]")
+TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 {
   Eigen::MatrixXd x(20, 2);
 
