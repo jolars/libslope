@@ -309,12 +309,41 @@ offsetGradient(Eigen::MatrixXd& gradient,
   }
 }
 
+/**
+ * @brief Computes the union of two sorted integer vectors
+ *
+ * @param a First sorted vector of integers
+ * @param b Second sorted vector of integers
+ * @return std::vector<int> Vector containing all elements that appear in either
+ * a or b, without duplicates and in sorted order
+ */
 std::vector<int>
 setUnion(const std::vector<int>& a, const std::vector<int>& b);
 
+/**
+ * @brief Computes the set difference of two sorted integer vectors
+ *
+ * @param a First sorted vector of integers (set to subtract from)
+ * @param b Second sorted vector of integers (set to subtract)
+ * @return std::vector<int> Vector containing elements in a that do not appear
+ * in b, maintaining sorted order
+ *
+ * Returns A \ B = {x ∈ A | x ∉ B}
+ */
 std::vector<int>
 setDiff(const std::vector<int>& a, const std::vector<int>& b);
 
+/**
+ * @brief Returns the index of the maximum element in a container
+ *
+ * @tparam T Container type that supports iterators and std::max_element
+ * @param x Container whose maximum element's index is to be found
+ * @return int Zero-based index position of the maximum element
+ *
+ * Uses std::max_element to find the iterator to the maximum element,
+ * then converts to index position using std::distance.
+ * For containers with multiple maximum elements, returns the first occurrence.
+ */
 template<typename T>
 int
 whichMax(const T& x)
