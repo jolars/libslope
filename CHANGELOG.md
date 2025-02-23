@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/jolars/libslope/compare/v0.15.0...v0.15.1) (2025-02-23)
+
+
+### Bug Fixes
+
+* correctly setup JIT scaling ([737c808](https://github.com/jolars/libslope/commit/737c808dcf832f37da23b161003735ba8e45eaf1))
+
 ## [0.15.0](https://github.com/jolars/libslope/compare/v0.14.0...v0.15.0) (2025-02-23)
 
 
