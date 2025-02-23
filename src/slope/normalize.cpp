@@ -142,7 +142,7 @@ normalize(Eigen::MatrixXd& x,
   bool center = centering_type != "none";
   bool scale = scaling_type != "none";
   bool center_jit = center && !modify_x;
-  bool scale_jit = center && !modify_x;
+  bool scale_jit = scale && !modify_x;
 
   JitNormalization jit_normalization;
 
