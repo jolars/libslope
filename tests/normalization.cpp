@@ -316,14 +316,29 @@ TEST_CASE("JIT standardization and modify-X standardization",
     std::vector<std::string> scaling_types = { "none", "sd",      "l1",
                                                "l2",   "max_abs", "range" };
 
-    model.setModifyX(false);
-
     for (const auto& centering_type : centering_types) {
       for (const auto& scaling_type : scaling_types) {
         model.setCentering(centering_type);
         model.setScaling(scaling_type);
 
-        REQUIRE_NOTHROW(model.fit(x, y));
+        // clang-format off
+        x << 1.1, 2.3,
+             0.2, 1.5,
+             0.5, 0.2;
+        // clang-format on
+
+        model.setModifyX(false);
+        auto fit_mod = model.fit(x, y);
+        double intercept_mod = fit_mod.getIntercepts()[0];
+        Eigen::VectorXd coefs_mod = fit_mod.getCoefs();
+
+        model.setModifyX(true);
+        auto fit_nomod = model.fit(x, y);
+        Eigen::VectorXd coefs_nomod = fit_nomod.getCoefs();
+        double intercept_nomod = fit_mod.getIntercepts()[0];
+
+        REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_nomod, 1e-4));
+        REQUIRE_THAT(intercept_mod, WithinAbs(intercept_nomod, 1e-4));
       }
     }
   }
