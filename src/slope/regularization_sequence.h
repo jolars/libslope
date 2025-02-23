@@ -6,7 +6,7 @@
 #pragma once
 
 #include "sorted_l1_norm.h"
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <string>
 
 namespace slope {

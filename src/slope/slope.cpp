@@ -13,7 +13,7 @@
 #include "timer.h"
 #include "utils.h"
 #include <Eigen/Core>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <memory>
 #include <numeric>
 #include <set>

@@ -10,7 +10,7 @@
 #include "slope/objectives/objective.h"
 #include "slope/sorted_l1_norm.h"
 #include <Eigen/Core>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <memory>
 
 namespace slope {

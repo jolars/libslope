@@ -12,7 +12,7 @@
 #include "slope/objectives/objective.h"
 #include "solver.h"
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <memory>
 
 namespace slope {

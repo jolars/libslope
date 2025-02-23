@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 
 namespace slope {
 

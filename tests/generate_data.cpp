@@ -1,7 +1,7 @@
 #include "generate_data.hpp"
 
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <cmath>
 #include <random>
 

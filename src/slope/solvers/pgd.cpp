@@ -9,7 +9,7 @@
 #include "slope/clusters.h"
 #include "slope/objectives/objective.h"
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <memory>
 
 namespace slope {

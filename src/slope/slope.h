@@ -8,7 +8,7 @@
 #include "slope_fit.h"
 #include "slope_path.h"
 #include <Eigen/Core>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <cassert>
 #include <optional>
 

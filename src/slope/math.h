@@ -8,7 +8,7 @@
 
 #include "slope/normalize.h"
 #include <Eigen/Core>
-#include <Eigen/Sparse>
+#include <Eigen/SparseCore>
 #include <numeric>
 #include <vector>
 
