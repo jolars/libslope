@@ -132,8 +132,7 @@ softmax(const Eigen::MatrixXd& x);
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param center_jit Flag indicating whether we are centering just-in-time
- * @param scale_jit Flag indicating whether we are scaling just-in-time
+ * @param jit_normalization Type of JIT normalization.
  * @return The computed gradient vector.
  */
 template<typename T>
