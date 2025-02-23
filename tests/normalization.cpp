@@ -291,55 +291,56 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
     REQUIRE_THROWS_AS(model.path(x_sparse, y), std::invalid_argument);
   }
+}
 
-  SECTION("Loop over normalization types")
-  {
-    slope::Slope model;
+TEST_CASE("Normalization loop", "[normalization]")
+{
+  slope::Slope model;
 
-    model.setObjective("gaussian");
-    model.setDiagnostics(true);
+  model.setObjective("gaussian");
+  model.setDiagnostics(true);
 
-    Eigen::MatrixXd x(3, 2);
-    Eigen::Vector2d beta;
-    Eigen::VectorXd y(3);
+  Eigen::MatrixXd x(3, 2);
+  Eigen::Vector2d beta;
+  Eigen::VectorXd y(3);
 
-    // clang-format off
+  // clang-format off
     x << 1.1, 2.3,
          0.2, 1.5,
          0.5, 0.2;
-    // clang-format on
-    beta << 1, 2;
+  // clang-format on
+  beta << 1, 2;
 
-    y = x * beta;
+  y = x * beta;
 
-    std::vector<std::string> centering_types = { "none", "mean", "min" };
-    std::vector<std::string> scaling_types = { "none", "sd",      "l1",
-                                               "l2",   "max_abs", "range" };
+  std::vector<std::string> centering_types = { "mean", "none", "min" };
+  std::vector<std::string> scaling_types = { "none", "sd",      "l1",
+                                             "l2",   "max_abs", "range" };
 
-    for (const auto& centering_type : centering_types) {
-      for (const auto& scaling_type : scaling_types) {
-        model.setCentering(centering_type);
-        model.setScaling(scaling_type);
+  for (const auto& centering_type : centering_types) {
+    for (const auto& scaling_type : scaling_types) {
+      model.setCentering(centering_type);
+      model.setScaling(scaling_type);
 
-        // clang-format off
+      // clang-format off
         x << 1.1, 2.3,
              0.2, 1.5,
              0.5, 0.2;
-        // clang-format on
+      // clang-format on
 
-        model.setModifyX(false);
-        auto fit_mod = model.fit(x, y);
-        double intercept_mod = fit_mod.getIntercepts()[0];
-        Eigen::VectorXd coefs_mod = fit_mod.getCoefs();
+      model.setModifyX(false);
+      auto fit_mod = model.fit(x, y);
+      double intercept_mod = fit_mod.getIntercepts()[0];
+      Eigen::VectorXd coefs_mod = fit_mod.getCoefs();
 
-        model.setModifyX(true);
-        auto fit_nomod = model.fit(x, y);
-        Eigen::VectorXd coefs_nomod = fit_nomod.getCoefs();
-        double intercept_nomod = fit_mod.getIntercepts()[0];
+      model.setModifyX(true);
+      auto fit_nomod = model.fit(x, y);
+      Eigen::VectorXd coefs_nomod = fit_nomod.getCoefs();
+      double intercept_nomod = fit_mod.getIntercepts()[0];
 
-        REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_nomod, 1e-4));
-        REQUIRE_THAT(intercept_mod, WithinAbs(intercept_nomod, 1e-4));
-      }
+      REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_nomod, 1e-4));
+      REQUIRE_THAT(intercept_mod,
+                   Catch::Matchers::WithinAbs(intercept_nomod, 1e-4));
     }
   }
 }
