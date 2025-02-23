@@ -6,6 +6,7 @@
 #pragma once
 
 #include "slope/clusters.h"
+#include "slope/normalize.h"
 #include "slope/objectives/objective.h"
 #include "slope/sorted_l1_norm.h"
 #include <Eigen/Core>
@@ -30,13 +31,13 @@ class SolverBase
 public:
   SolverBase(double tol,
              int max_it,
-             bool normalize_jit,
+             JitNormalization jit_normalization,
              bool intercept,
              bool update_clusters,
              int pgd_freq)
     : tol(tol)
     , max_it(max_it)
-    , normalize_jit(normalize_jit)
+    , jit_normalization(jit_normalization)
     , intercept(intercept)
     , update_clusters(update_clusters)
     , pgd_freq(pgd_freq)
@@ -77,7 +78,7 @@ public:
 protected:
   double tol;
   int max_it;
-  bool normalize_jit;
+  JitNormalization jit_normalization;
   bool intercept;
   bool update_clusters;
   int pgd_freq;

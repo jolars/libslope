@@ -1,3 +1,4 @@
+#include "../normalize.h"
 #include "solver.h"
 #include <memory>
 #include <string>
@@ -16,7 +17,7 @@ namespace slope {
  * "poisson", "multinomial")
  * @param tol Convergence tolerance for the solver
  * @param max_it_inner Maximum number of inner iterations
- * @param normalize_jit Whether we are normalizing just-in-time.
+ * @param jit_normalization Type of JIT normalization
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
  * optimization
@@ -30,7 +31,7 @@ setupSolver(const std::string& solver_type,
             const std::string& objective,
             double tol,
             int max_it_inner,
-            bool normalize_jit,
+            JitNormalization jit_normalization,
             bool intercept,
             bool update_clusters,
             int pgd_freq);

@@ -52,12 +52,12 @@ Slope::path(T& x,
     throw std::invalid_argument("x and y_in must have the same number of rows");
   }
 
-  bool normalize_jit = normalize(x,
-                                 this->x_centers,
-                                 this->x_scales,
-                                 this->centering_type,
-                                 this->scaling_type,
-                                 this->modify_x);
+  auto jit_normalization = normalize(x,
+                                     this->x_centers,
+                                     this->x_scales,
+                                     this->centering_type,
+                                     this->scaling_type,
+                                     this->modify_x);
 
   std::vector<int> full_set(p);
   std::iota(full_set.begin(), full_set.end(), 0);
@@ -111,7 +111,7 @@ Slope::path(T& x,
                             this->objective,
                             this->tol,
                             this->max_it_inner,
-                            normalize_jit,
+                            jit_normalization,
                             this->intercept,
                             this->update_clusters,
                             this->pgd_freq);
@@ -123,7 +123,7 @@ Slope::path(T& x,
                  this->x_centers,
                  this->x_scales,
                  Eigen::VectorXd::Ones(n),
-                 normalize_jit);
+                 jit_normalization);
 
   int alpha_max_ind = whichMax(gradient.reshaped().cwiseAbs());
   alpha_max_ind = alpha_max_ind % p;
@@ -178,7 +178,7 @@ Slope::path(T& x,
                      this->x_centers,
                      this->x_scales,
                      Eigen::VectorXd::Ones(n),
-                     normalize_jit);
+                     jit_normalization);
 
       previous_set = previouslyActiveSet(beta);
       strong_set = strongSet(gradient, lambda_curr, lambda_prev);
@@ -199,7 +199,7 @@ Slope::path(T& x,
                      this->x_centers,
                      this->x_scales,
                      Eigen::VectorXd::Ones(n),
-                     normalize_jit);
+                     jit_normalization);
 
       double primal = objective->loss(eta, y) +
                       sl1_norm.eval(beta(working_set, Eigen::all).reshaped(),
@@ -223,7 +223,7 @@ Slope::path(T& x,
                        working_set,
                        this->x_centers,
                        this->x_scales,
-                       normalize_jit);
+                       jit_normalization);
       }
 
       // Common scaling operation
@@ -255,7 +255,7 @@ Slope::path(T& x,
                          this->x_centers,
                          this->x_scales,
                          Eigen::VectorXd::Ones(n),
-                         normalize_jit);
+                         jit_normalization);
 
           auto violations = setDiff(
             kktCheck(gradient, beta, lambda_curr, strong_set), working_set);
@@ -268,7 +268,7 @@ Slope::path(T& x,
                            this->x_centers,
                            this->x_scales,
                            Eigen::VectorXd::Ones(n),
-                           normalize_jit);
+                           jit_normalization);
 
             violations = setDiff(
               kktCheck(gradient, beta, lambda_curr, full_set), working_set);

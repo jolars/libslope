@@ -41,13 +41,13 @@ public:
    */
   Hybrid(double tol,
          int max_it,
-         bool normalize_jit,
+         JitNormalization jit_normalization,
          bool intercept,
          bool update_clusters,
          int pgd_freq)
     : SolverBase(tol,
                  max_it,
-                 normalize_jit,
+                 jit_normalization,
                  intercept,
                  update_clusters,
                  pgd_freq)
@@ -142,7 +142,7 @@ private:
                        x_centers,
                        x_scales,
                        w,
-                       this->normalize_jit);
+                       this->jit_normalization);
 
         VectorXd theta = residual;
 
@@ -159,7 +159,7 @@ private:
                          working_set,
                          x_centers,
                          x_scales,
-                         normalize_jit);
+                         jit_normalization);
         }
 
         // Obtain a feasible dual point by dual scaling
@@ -198,7 +198,7 @@ private:
                                 x_scales,
                                 g,
                                 this->intercept,
-                                this->normalize_jit,
+                                this->jit_normalization,
                                 this->pgd_learning_rate_decr);
 
         // TODO: We might be able to speed up cluster updating since we know
@@ -215,7 +215,7 @@ private:
                           x_centers,
                           x_scales,
                           this->intercept,
-                          this->normalize_jit,
+                          this->jit_normalization,
                           this->update_clusters);
       }
     }

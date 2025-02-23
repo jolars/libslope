@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "slope/normalize.h"
 #include <Eigen/Core>
 #include <Eigen/Sparse>
 #include <numeric>
@@ -131,7 +132,8 @@ softmax(const Eigen::MatrixXd& x);
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param normalize_jit Flag indicating whether we are normaliziing just-in-time
+ * @param center_jit Flag indicating whether we are centering just-in-time
+ * @param scale_jit Flag indicating whether we are scaling just-in-time
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -142,7 +144,7 @@ linearPredictor(const T& x,
                 const Eigen::MatrixXd& beta,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
-                const bool normalize_jit,
+                const JitNormalization jit_normalization,
                 const bool intercept)
 {
   int n = x.rows();
@@ -150,20 +152,44 @@ linearPredictor(const T& x,
 
   Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(n, m);
 
-  if (normalize_jit) {
-    for (int k = 0; k < m; ++k) {
-      for (const auto& j : active_set) {
-        eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
-        eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
-      }
-    }
-  } else {
-    for (int k = 0; k < m; ++k) {
-      for (const auto& j : active_set) {
-        eta.col(k) += x.col(j) * beta(j, k);
+  for (int k = 0; k < m; ++k) {
+    for (const auto& j : active_set) {
+      switch (jit_normalization) {
+        case JitNormalization::Both:
+          eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
+          eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
+          break;
+
+        case JitNormalization::Center:
+          eta.col(k) += x.col(j) * beta(j, k);
+          eta.col(k).array() -= beta(j, k) * x_centers(j);
+          break;
+
+        case JitNormalization::Scale:
+          eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
+          break;
+
+        case JitNormalization::None:
+          eta.col(k) += x.col(j) * beta(j, k);
+          break;
       }
     }
   }
+
+  // if (normalize_jit) {
+  //   for (int k = 0; k < m; ++k) {
+  //     for (const auto& j : active_set) {
+  //       eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
+  //       eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
+  //     }
+  //   }
+  // } else {
+  //   for (int k = 0; k < m; ++k) {
+  //     for (const auto& j : active_set) {
+  //       eta.col(k) += x.col(j) * beta(j, k);
+  //     }
+  //   }
+  // }
 
   if (intercept) {
     eta.rowwise() += beta0.transpose();
@@ -180,7 +206,8 @@ linearPredictor(const T& x,
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param normalize_jit Flag indicating whether we are normalizing just-in-time.
+ * @param jit_normalization Type of JIT normalization
+ * just-in-time.
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -192,7 +219,7 @@ updateGradient(Eigen::MatrixXd& gradient,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
                const Eigen::VectorXd& w,
-               const bool normalize_jit)
+               const JitNormalization jit_normalization)
 {
   const int n = x.rows();
   const int p = x.cols();
@@ -202,25 +229,31 @@ updateGradient(Eigen::MatrixXd& gradient,
          "Gradient matrix has incorrect dimensions");
 
   Eigen::MatrixXd weighted_residual(n, m);
+  Eigen::ArrayXd wr_sums(m);
 
   for (int k = 0; k < m; ++k) {
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
-  }
+    double wr_sum = weighted_residual.col(k).sum();
 
-  if (normalize_jit) {
-    for (int k = 0; k < m; ++k) {
-      double wr_sum = weighted_residual.col(k).sum();
-
-      for (const auto& j : active_set) {
-        gradient(j, k) =
-          (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
-          (x_scales(j) * n);
-      }
-    }
-  } else {
-    for (int k = 0; k < m; ++k) {
-      for (const auto& j : active_set) {
-        gradient(j, k) = x.col(j).dot(weighted_residual.col(k)) / n;
+    for (const auto& j : active_set) {
+      switch (jit_normalization) {
+        case JitNormalization::Both:
+          gradient(j, k) =
+            (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
+            (x_scales(j) * n);
+          break;
+        case JitNormalization::Center:
+          gradient(j, k) =
+            (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
+            n;
+          break;
+        case JitNormalization::Scale:
+          gradient(j, k) =
+            x.col(j).dot(weighted_residual.col(k)) / (x_scales(j) * n);
+          break;
+        case JitNormalization::None:
+          gradient(j, k) = x.col(j).dot(weighted_residual.col(k)) / n;
+          break;
       }
     }
   }
@@ -234,7 +267,8 @@ updateGradient(Eigen::MatrixXd& gradient,
  * @param residual The residual vector.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
- * @param normalize_jit Flag indicating whether we are normalizing just-in-time.
+ * @param jit_normalization Type of JIT normalization
+ * just-in-time.
  * @return The computed gradient vector.
  */
 template<typename T>
@@ -245,7 +279,7 @@ offsetGradient(Eigen::MatrixXd& gradient,
                const std::vector<int>& active_set,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
-               const bool normalize_jit)
+               const JitNormalization jit_normalization)
 {
   const int n = x.rows();
   const int p = x.cols();
@@ -254,20 +288,22 @@ offsetGradient(Eigen::MatrixXd& gradient,
   assert(gradient.rows() == p && gradient.cols() == m &&
          "Gradient matrix has incorrect dimensions");
 
-  if (normalize_jit) {
-    // This is not necessary if x_centers are already the means, but
-    // it is included in case later on we want to use something
-    // other than means for the centers.
-    for (int k = 0; k < m; ++k) {
-      for (const auto& j : active_set) {
-        gradient(j, k) -=
-          offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
-      }
-    }
-  } else {
-    for (int k = 0; k < m; ++k) {
-      for (const auto& j : active_set) {
-        gradient(j, k) -= offset(k) * x.col(j).sum() / n;
+  for (int k = 0; k < m; ++k) {
+    for (const auto& j : active_set) {
+      switch (jit_normalization) {
+        case JitNormalization::Both:
+          gradient(j, k) -=
+            offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+          break;
+        case JitNormalization::Center:
+          gradient(j, k) -= offset(k) * (x.col(j).sum() / n - x_centers(j));
+          break;
+        case JitNormalization::Scale:
+          gradient(j, k) -= offset(k) * x.col(j).sum() / (n * x_scales(j));
+          break;
+        case JitNormalization::None:
+          gradient(j, k) -= offset(k) * x.col(j).sum() / n;
+          break;
       }
     }
   }

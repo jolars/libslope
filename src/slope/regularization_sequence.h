@@ -49,7 +49,6 @@ lambdaSequence(const int p,
  * @param alpha_min_ratio Ratio of minimum to maximum alpha (if < 0, defaults
  * based on n > p)
  * @param intercept Whether to fit an intercept
- * @param normalize_jit Whether to normalize features just-in-time
  * @return Eigen::ArrayXd containing the sequence of regularization parameters
  *         from strongest (alpha_max) to weakest (alpha_max * alpha_min_ratio)
  */

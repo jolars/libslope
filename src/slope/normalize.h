@@ -10,6 +10,17 @@
 namespace slope {
 
 /**
+ * @brief Enums to control predictor standardization behavior
+ */
+enum class JitNormalization
+{
+  None = 0,   ///< No JIT normalization
+  Center = 1, ///< Center JIT
+  Scale = 2,  ///< Scale JIT
+  Both = 3    ///< Both
+};
+
+/**
  * @brief Computes the L1 (Manhattan) norms for each column of a matrix
  *
  * @tparam T Matrix type (must support cols(), col() operations, compatible with
@@ -333,7 +344,7 @@ computeScales(Eigen::VectorXd& x_scales, const T& x, const std::string& type)
  *
  * @return true if normalization succeeds, false otherwise.
  */
-bool
+JitNormalization
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
@@ -362,7 +373,7 @@ normalize(Eigen::MatrixXd& x,
  *
  * @return true if normalization succeeds, false otherwise.
  */
-bool
+JitNormalization
 normalize(Eigen::SparseMatrix<double>& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,

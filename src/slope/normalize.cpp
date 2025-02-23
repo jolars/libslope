@@ -126,7 +126,7 @@ mins(const Eigen::MatrixXd& x)
   return x.colwise().minCoeff();
 }
 
-bool
+JitNormalization
 normalize(Eigen::MatrixXd& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
@@ -141,11 +141,22 @@ normalize(Eigen::MatrixXd& x,
 
   bool center = centering_type != "none";
   bool scale = scaling_type != "none";
-  bool normalize = center || scale;
+  bool center_jit = center && !modify_x;
+  bool scale_jit = center && !modify_x;
 
-  bool normalize_jit = normalize && !modify_x;
+  JitNormalization jit_normalization;
 
-  if (modify_x && normalize) {
+  if (center_jit && scale_jit) {
+    jit_normalization = JitNormalization::Both;
+  } else if (center_jit) {
+    jit_normalization = JitNormalization::Center;
+  } else if (scale_jit) {
+    jit_normalization = JitNormalization::Scale;
+  } else {
+    jit_normalization = JitNormalization::None;
+  }
+
+  if (modify_x && (center || scale)) {
     for (int j = 0; j < p; ++j) {
       if (center) {
         x.col(j).array() -= x_centers(j);
@@ -156,35 +167,46 @@ normalize(Eigen::MatrixXd& x,
     }
   }
 
-  return normalize_jit;
+  return jit_normalization;
 }
 
-bool
+JitNormalization
 normalize(Eigen::SparseMatrix<double>& x,
           Eigen::VectorXd& x_centers,
           Eigen::VectorXd& x_scales,
           const std::string& centering_type,
           const std::string& scaling_type,
-          const bool)
+          const bool modify_x)
 {
   computeCenters(x_centers, x, centering_type);
   computeScales(x_scales, x, scaling_type);
 
-  // TODO: Actually allow normalization in place for sparse matrices
-  // Maybe we need to use separate scale_jit and center_jit, which we probably
-  // need for the case when the user supplies only one or the other anyway. bool
-  // normalize_jit = type != "none" && !modify_x;
-  bool normalize_jit = (centering_type != "none") || (scaling_type != "none");
+  bool center = centering_type != "none";
+  bool scale = scaling_type != "none";
+  bool center_jit = center;
+  bool scale_jit = scale && !modify_x;
 
-  // if (modify_x) {
-  //   for (int j = 0; j < p; ++j) {
+  JitNormalization jit_normalization;
+
+  if (center_jit && scale_jit) {
+    jit_normalization = JitNormalization::Both;
+  } else if (center_jit) {
+    jit_normalization = JitNormalization::Center;
+  } else if (scale_jit) {
+    jit_normalization = JitNormalization::Scale;
+  } else {
+    jit_normalization = JitNormalization::None;
+  }
+
+  // if (modify_x && scaling_type != "none") {
+  //   for (int j = 0; j < x.cols(); ++j) {
   //     for (Eigen::SparseMatrix<double>::InnerIterator it(x, j); it; ++it) {
   //       it.valueRef() = it.value() / x_scales(j);
   //     }
   //   }
   // }
 
-  return normalize_jit;
+  return jit_normalization;
 }
 
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>

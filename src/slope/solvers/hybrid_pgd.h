@@ -7,6 +7,7 @@
 
 #include "../sorted_l1_norm.h"
 #include "math.h"
+#include "slope/normalize.h"
 #include <Eigen/Dense>
 
 namespace slope {
@@ -34,7 +35,7 @@ namespace solvers {
  * @param x_scales The scale values of the input data.
  * @param g_old The previous value of the objective function.
  * @param intercept Flag indicating whether to include an intercept term.
- * @param normalize_jit Flag indicating wheter we are normalizing just-in-time.
+ * @param jit_normalization Type of JIT normalization
  * @param learning_rate_decr The learning rate decrement factor.
  *
  * @see SortedL1Norm
@@ -56,7 +57,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                         const Eigen::VectorXd& x_scales,
                         const double g_old,
                         const bool intercept,
-                        const bool normalize_jit,
+                        const JitNormalization jit_normalization,
                         const double learning_rate_decr)
 {
   const int n = x.rows();
@@ -84,7 +85,7 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
                                beta,
                                x_centers,
                                x_scales,
-                               normalize_jit,
+                               jit_normalization,
                                intercept) -
                z;
 

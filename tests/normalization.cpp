@@ -110,6 +110,8 @@ TEST_CASE("Check that in-place standardization works",
   Eigen::MatrixXd gradient_dense(3, 1);
   Eigen::MatrixXd gradient_sparse = gradient_dense;
 
+  slope::JitNormalization jit_normalization = slope::JitNormalization::Both;
+
   slope::updateGradient(gradient_dense,
                         x_dense,
                         residual_dense,
@@ -117,7 +119,7 @@ TEST_CASE("Check that in-place standardization works",
                         w,
                         x_centers_dense,
                         x_scales_dense,
-                        true);
+                        jit_normalization);
   slope::updateGradient(gradient_sparse,
                         x_sparse,
                         residual_sparse,
@@ -125,7 +127,7 @@ TEST_CASE("Check that in-place standardization works",
                         w,
                         x_centers_sparse,
                         x_scales_sparse,
-                        true);
+                        jit_normalization);
 
   REQUIRE_THAT(gradient_dense.reshaped(),
                VectorApproxEqual(gradient_sparse.reshaped()));
@@ -191,10 +193,22 @@ TEST_CASE("JIT standardization and modify-X standardization",
     Eigen::MatrixXd gradient_jit = gradient;
     Eigen::MatrixXd gradient_sparse_jit = gradient;
 
-    slope::updateGradient(
-      gradient, x, residual, active_set, x_centers, x_scales, w, false);
-    slope::updateGradient(
-      gradient_jit, x_copy, residual, active_set, x_centers, x_scales, w, true);
+    slope::updateGradient(gradient,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+    slope::updateGradient(gradient_jit,
+                          x_copy,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
     slope::updateGradient(gradient_sparse_jit,
                           x_sparse,
                           residual,
@@ -202,7 +216,7 @@ TEST_CASE("JIT standardization and modify-X standardization",
                           x_centers,
                           x_scales,
                           w,
-                          true);
+                          slope::JitNormalization::Both);
 
     REQUIRE_THAT(gradient_jit.reshaped(),
                  VectorApproxEqual(gradient.reshaped(), 1e-6));
@@ -280,6 +294,24 @@ TEST_CASE("JIT standardization and modify-X standardization",
 
   SECTION("Loop over normalization types")
   {
+    slope::Slope model;
+
+    model.setObjective("gaussian");
+    model.setDiagnostics(true);
+
+    Eigen::MatrixXd x(3, 2);
+    Eigen::Vector2d beta;
+    Eigen::VectorXd y(3);
+
+    // clang-format off
+    x << 1.1, 2.3,
+         0.2, 1.5,
+         0.5, 0.2;
+    // clang-format on
+    beta << 1, 2;
+
+    y = x * beta;
+
     std::vector<std::string> centering_types = { "none", "mean", "min" };
     std::vector<std::string> scaling_types = { "none", "sd",      "l1",
                                                "l2",   "max_abs", "range" };

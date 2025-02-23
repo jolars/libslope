@@ -30,14 +30,14 @@ class PGD : public SolverBase
 public:
   PGD(double tol,
       int max_it,
-      bool normalize_jit,
+      JitNormalization jit_normalization,
       bool intercept,
       bool update_clusters,
       int pgd_freq,
       const std::string& update_type)
     : SolverBase(tol,
                  max_it,
-                 normalize_jit,
+                 jit_normalization,
                  intercept,
                  update_clusters,
                  pgd_freq)
@@ -152,7 +152,7 @@ private:
                             beta,
                             x_centers,
                             x_scales,
-                            normalize_jit,
+                            jit_normalization,
                             intercept);
 
       double g = objective->loss(eta, y);
@@ -177,7 +177,7 @@ private:
                             beta,
                             x_centers,
                             x_scales,
-                            normalize_jit,
+                            jit_normalization,
                             intercept);
     }
   }

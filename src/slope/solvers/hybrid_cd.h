@@ -23,25 +23,60 @@ computeGradientAndHessian(const T& x,
                           const Eigen::VectorXd& residual,
                           const Eigen::VectorXd& x_centers,
                           const Eigen::VectorXd& x_scales,
-                          double s,
-                          bool normalize_jit,
-                          int n)
+                          const double s,
+                          const JitNormalization jit_normalization,
+                          const int n)
 {
   double gradient, hessian;
 
-  if (normalize_jit) {
-    gradient = s *
-               (x.col(k).cwiseProduct(w).dot(residual) -
-                w.dot(residual) * x_centers(k)) /
-               (n * x_scales(k));
+  // if (normalize_jit) {
+  //   gradient = s *
+  //              (x.col(k).cwiseProduct(w).dot(residual) -
+  //               w.dot(residual) * x_centers(k)) /
+  //              (n * x_scales(k));
+  //
+  //   hessian =
+  //     (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
+  //      std::pow(x_centers(k), 2) * w.sum()) /
+  //     (std::pow(x_scales(k), 2) * n);
+  // } else {
+  //   gradient = s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
+  //   hessian = x.col(k).cwiseAbs2().dot(w) / n;
+  // }
 
-    hessian =
-      (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
-       std::pow(x_centers(k), 2) * w.sum()) /
-      (std::pow(x_scales(k), 2) * n);
-  } else {
-    gradient = s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
-    hessian = x.col(k).cwiseAbs2().dot(w) / n;
+  switch (jit_normalization) {
+    case JitNormalization::Both:
+      gradient = s *
+                 (x.col(k).cwiseProduct(w).dot(residual) -
+                  w.dot(residual) * x_centers(k)) /
+                 (n * x_scales(k));
+      hessian =
+        (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
+         std::pow(x_centers(k), 2) * w.sum()) /
+        (std::pow(x_scales(k), 2) * n);
+      break;
+
+    case JitNormalization::Center:
+      gradient = s *
+                 (x.col(k).cwiseProduct(w).dot(residual) -
+                  w.dot(residual) * x_centers(k)) /
+                 n;
+      hessian =
+        (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
+         std::pow(x_centers(k), 2) * w.sum()) /
+        n;
+      break;
+
+    case JitNormalization::Scale:
+      gradient =
+        s * (x.col(k).cwiseProduct(w).dot(residual)) / (n * x_scales(k));
+      hessian = x.col(k).cwiseAbs2().dot(w) / (std::pow(x_scales(k), 2) * n);
+      break;
+
+    case JitNormalization::None:
+      gradient = s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
+      hessian = x.col(k).cwiseAbs2().dot(w) / n;
+      break;
   }
 
   return { gradient, hessian };
@@ -65,8 +100,7 @@ computeGradientAndHessian(const T& x,
  * @param x_centers The center values of the data matrix columns
  * @param x_scales The scale values of the data matrix columns
  * @param intercept Shuold an intervept be fit?
- * @param normalize_jit Flag indicating whether we are standardizing `x`
- *   just-in-time.
+ * @param jit_normalization Type o fJIT normalization.
  * @param update_clusters Flag indicating whether to update the cluster
  * information
  *
@@ -85,7 +119,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const Eigen::VectorXd& x_centers,
                   const Eigen::VectorXd& x_scales,
                   const bool intercept,
-                  const bool normalize_jit,
+                  const JitNormalization jit_normalization,
                   const bool update_clusters)
 {
   using namespace Eigen;
@@ -115,7 +149,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
       s.emplace_back(s_k);
 
       std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
-        x, k, w, residual, x_centers, x_scales, s_k, normalize_jit, n);
+        x, k, w, residual, x_centers, x_scales, s_k, jit_normalization, n);
     } else {
       // There's no reasonable just-in-time standardization approach for sparse
       // design matrices when there are clusters in the data, so we need to
@@ -127,11 +161,32 @@ coordinateDescent(Eigen::VectorXd& beta0,
         double s_k = sign(beta(k, 0));
         s.emplace_back(s_k);
 
-        if (normalize_jit) {
-          x_s += x.col(k) * (s_k / x_scales(k));
-          x_s.array() -= x_centers(k) * s_k / x_scales(k);
-        } else {
-          x_s += x.col(k) * s_k;
+        // if (normalize_jit) {
+        //   x_s += x.col(k) * (s_k / x_scales(k));
+        //   x_s.array() -= x_centers(k) * s_k / x_scales(k);
+        // } else {
+        //   x_s += x.col(k) * s_k;
+        // }
+        //
+
+        switch (jit_normalization) {
+          case JitNormalization::Both:
+            x_s += x.col(k) * (s_k / x_scales(k));
+            x_s.array() -= x_centers(k) * s_k / x_scales(k);
+            break;
+
+          case JitNormalization::Center:
+            x_s += x.col(k) * s_k;
+            x_s.array() -= x_centers(k) * s_k;
+            break;
+
+          case JitNormalization::Scale:
+            x_s += x.col(k) * (s_k / x_scales(k));
+            break;
+
+          case JitNormalization::None:
+            x_s += x.col(k) * s_k;
+            break;
         }
       }
 
@@ -154,12 +209,34 @@ coordinateDescent(Eigen::VectorXd& beta0,
       if (cluster_size == 1) {
         int k = *clusters.cbegin(j);
 
-        if (normalize_jit) {
-          residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
-          residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
-        } else {
-          residual -= x.col(k) * (s[0] * c_diff);
+        double x_scale = 1.0;
+
+        switch (jit_normalization) {
+          case JitNormalization::Both:
+            residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
+            residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
+            break;
+
+          case JitNormalization::Center:
+            residual -= x.col(k) * (s[0] * c_diff / x_scale);
+            residual.array() += x_centers(k) * s[0] * c_diff / x_scale;
+            break;
+
+          case JitNormalization::Scale:
+            residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
+            break;
+
+          case JitNormalization::None:
+            residual -= x.col(k) * (s[0] * c_diff / x_scale);
+            break;
         }
+
+        // if (normalize_jit) {
+        //   residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
+        //   residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
+        // } else {
+        //   residual -= x.col(k) * (s[0] * c_diff);
+        // }
       } else {
         residual -= x_s * c_diff;
       }
