@@ -30,21 +30,6 @@ computeGradientAndHessian(const T& x,
   double gradient = 0.0;
   double hessian = 0.0;
 
-  // if (normalize_jit) {
-  //   gradient = s *
-  //              (x.col(k).cwiseProduct(w).dot(residual) -
-  //               w.dot(residual) * x_centers(k)) /
-  //              (n * x_scales(k));
-  //
-  //   hessian =
-  //     (x.col(k).cwiseAbs2().dot(w) - 2 * x_centers(k) * x.col(k).dot(w) +
-  //      std::pow(x_centers(k), 2) * w.sum()) /
-  //     (std::pow(x_scales(k), 2) * n);
-  // } else {
-  //   gradient = s * (x.col(k).cwiseProduct(w).dot(residual)) / n;
-  //   hessian = x.col(k).cwiseAbs2().dot(w) / n;
-  // }
-
   switch (jit_normalization) {
     case JitNormalization::Both:
       gradient = s *
@@ -162,14 +147,6 @@ coordinateDescent(Eigen::VectorXd& beta0,
         double s_k = sign(beta(k, 0));
         s.emplace_back(s_k);
 
-        // if (normalize_jit) {
-        //   x_s += x.col(k) * (s_k / x_scales(k));
-        //   x_s.array() -= x_centers(k) * s_k / x_scales(k);
-        // } else {
-        //   x_s += x.col(k) * s_k;
-        // }
-        //
-
         switch (jit_normalization) {
           case JitNormalization::Both:
             x_s += x.col(k) * (s_k / x_scales(k));
@@ -231,13 +208,6 @@ coordinateDescent(Eigen::VectorXd& beta0,
             residual -= x.col(k) * (s[0] * c_diff / x_scale);
             break;
         }
-
-        // if (normalize_jit) {
-        //   residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
-        //   residual.array() += x_centers(k) * s[0] * c_diff / x_scales(k);
-        // } else {
-        //   residual -= x.col(k) * (s[0] * c_diff);
-        // }
       } else {
         residual -= x_s * c_diff;
       }
