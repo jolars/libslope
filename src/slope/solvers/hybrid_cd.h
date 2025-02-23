@@ -27,7 +27,8 @@ computeGradientAndHessian(const T& x,
                           const JitNormalization jit_normalization,
                           const int n)
 {
-  double gradient, hessian;
+  double gradient = 0.0;
+  double hessian = 0.0;
 
   // if (normalize_jit) {
   //   gradient = s *
