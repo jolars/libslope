@@ -6,6 +6,7 @@ project(slope LANGUAGES CXX VERSION ${project_version})
 
 option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_COVERAGE "Generate coverage report" OFF)
+option(DAP_DEBUG "Interactive debugging" OFF)
 
 include(CTest)
 
@@ -13,6 +14,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(DAP_DEBUG)
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+endif()
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
@@ -42,11 +47,13 @@ if(BUILD_TESTING)
     tests/gaussian.cpp
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
+    tests/load_data.cpp
     tests/multinomial.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/prox.cpp
     tests/qnorm.cpp
+    tests/real_data.cpp
     tests/screening.cpp
     tests/sparse.cpp
     tests/normalization.cpp
