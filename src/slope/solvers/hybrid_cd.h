@@ -219,8 +219,6 @@ coordinateDescent(Eigen::VectorXd& beta0,
       if (cluster_size == 1) {
         int k = *clusters.cbegin(j);
 
-        double x_scale = 1.0;
-
         switch (jit_normalization) {
           case JitNormalization::Both:
             residual -= x.col(k) * (s[0] * c_diff / x_scales(k));
@@ -228,8 +226,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
             break;
 
           case JitNormalization::Center:
-            residual -= x.col(k) * (s[0] * c_diff / x_scale);
-            residual.array() += x_centers(k) * s[0] * c_diff / x_scale;
+            residual -= x.col(k) * (s[0] * c_diff);
+            residual.array() += x_centers(k) * s[0] * c_diff;
             break;
 
           case JitNormalization::Scale:
@@ -237,7 +235,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
             break;
 
           case JitNormalization::None:
-            residual -= x.col(k) * (s[0] * c_diff / x_scale);
+            residual -= x.col(k) * (s[0] * c_diff);
             break;
         }
       } else {

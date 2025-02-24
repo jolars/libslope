@@ -8,11 +8,22 @@
 #include <slope/slope.h>
 #include <unistd.h>
 
-TEST_CASE("Abalone dataset", "[realdata][poisson]")
+TEST_CASE("Abalone dataset", "[realdata][poisson][gaussian]")
 {
   auto [x, y] = loadData("tests/data/abalone.csv");
 
   slope::Slope model;
-  model.setLoss("poisson");
-  model.fit(x, y);
+
+  for (const std::string& loss : { "poisson", "gaussian" }) {
+    DYNAMIC_SECTION("Loss: " << loss)
+    {
+      model.setLoss(loss);
+
+      auto solver = loss == "poisson" ? "fista" : "hybrid";
+
+      model.setSolver(solver);
+
+      REQUIRE_NOTHROW(model.path(x, y));
+    }
+  }
 }
