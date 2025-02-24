@@ -1,11 +1,13 @@
 #include "poisson.h"
+#include "../math.h"
 
 namespace slope {
 
 double
 Poisson::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return -(y.array() * eta.array() - eta.array().exp()).mean();
+  return -(y.array() * eta.array() - eta.array().exp() - logFactorial(y))
+            .mean();
 }
 
 double
@@ -18,7 +20,7 @@ Poisson::dual(const Eigen::MatrixXd& theta,
   assert((e >= 0).all() &&
          "Dual function is not defined for negative residuals");
 
-  return (e * (1.0 - e.log())).mean();
+  return (e * (1.0 - e.log()) + logFactorial(y)).mean();
 }
 
 Eigen::MatrixXd
