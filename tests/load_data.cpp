@@ -1,12 +1,36 @@
 #include "load_data.hpp"
+#include <filesystem>
 #include <fstream>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
-std::pair<Eigen::MatrixXd, Eigen::VectorXd>
-load_dataset(const std::string& filename)
+std::string
+findProjectRoot()
 {
-  std::ifstream file(filename);
+  std::filesystem::path current_path = std::filesystem::current_path();
+  while (!current_path.empty()) {
+    // Check for marker files that indicate project root
+    if (std::filesystem::exists(current_path / ".git")) {
+      return current_path.string();
+    }
+    current_path = current_path.parent_path();
+  }
+  throw std::runtime_error("Could not find project root directory");
+}
+
+std::string
+getProjectRelpath(const std::string& relative_path)
+{
+  std::filesystem::path project_root = findProjectRoot();
+  return (project_root / relative_path).string();
+}
+
+std::pair<Eigen::MatrixXd, Eigen::VectorXd>
+loadData(const std::string& filename)
+{
+  auto file_path = getProjectRelpath(filename);
+  std::ifstream file(file_path);
   if (!file.is_open()) {
     throw std::runtime_error("Could not open file: " + filename);
   }
