@@ -109,22 +109,36 @@ private:
     using Eigen::VectorXd;
 
     beta_old = beta(working_set, all);
+    Eigen::VectorXd beta0_old = beta0;
 
     double g_old = loss->loss(eta, y);
     double t_old = t;
 
     Eigen::MatrixXd beta_diff(beta_old.rows(), beta_old.cols());
 
+    Eigen::MatrixXd residual = loss->residual(eta, y);
+    Eigen::VectorXd intercept_grad = residual.colwise().mean();
+
     while (true) {
+      if (intercept) {
+        beta0 = beta0_old - this->learning_rate * intercept_grad;
+      }
       beta(working_set, all) = penalty.prox(
         beta_old - this->learning_rate * gradient(working_set, all),
         this->learning_rate * lambda.head(beta_old.size()));
 
-      if (intercept) {
-        loss->updateIntercept(beta0, eta, y);
-      }
-
       beta_diff = beta(working_set, all) - beta_old;
+      double beta_diff_norm =
+        beta_diff.reshaped().dot(gradient(working_set, all).reshaped()) +
+        (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
+
+      if (intercept) {
+        Eigen::VectorXd beta0_diff = beta0 - beta0_old;
+
+        beta_diff_norm +=
+          intercept_grad.dot(beta0_diff) +
+          (1.0 / (2 * this->learning_rate)) * beta0_diff.squaredNorm();
+      }
 
       eta = linearPredictor(x,
                             working_set,
@@ -136,10 +150,7 @@ private:
                             intercept);
 
       double g = loss->loss(eta, y);
-      double q =
-        g_old +
-        beta_diff.reshaped().dot(gradient(working_set, all).reshaped()) +
-        (1.0 / (2 * this->learning_rate)) * beta_diff.reshaped().squaredNorm();
+      double q = g_old + beta_diff_norm;
 
       if (q >= g * (1 - 1e-12)) {
         this->learning_rate *= 1.1;
