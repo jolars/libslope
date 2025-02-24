@@ -1,4 +1,5 @@
 #include "../src/slope/slope.h"
+#include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -110,4 +111,27 @@ TEST_CASE("Binomial, simple fixed design", "[binomial]")
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_hybrid, WithinAbs(intercept_target, 1e-4));
   }
+}
+
+TEST_CASE("Binomial path", "[binomial]")
+{
+
+  slope::Slope model;
+  model.setLoss("binomial");
+
+  auto data = generateData(400, 50, "binomial", 1, 0.4, 0.5, 93);
+
+  model.setMaxIt(1e6);
+  model.setTol(1e-4);
+  model.setSolver("pgd");
+  auto fit = model.path(data.x, data.y);
+
+  auto null_deviance = fit.getNullDeviance();
+  auto deviances = fit.getDeviance();
+
+  REQUIRE(null_deviance >= 0);
+  REQUIRE(deviances.size() > 10);
+  REQUIRE(deviances.size() < 100);
+  REQUIRE(deviances.back() > 0);
+  REQUIRE_THAT(deviances, VectorMonotonic(false, true));
 }
