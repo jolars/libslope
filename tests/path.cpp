@@ -32,7 +32,7 @@ TEST_CASE("Path fitting", "[path][gaussian][alpha]")
     lambda << 1.959964, 1.644854;
 
     slope::Slope model;
-    model.setObjective("gaussian");
+    model.setLoss("gaussian");
 
     auto fit = model.path(x, y, alpha, lambda);
 

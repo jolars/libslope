@@ -8,8 +8,8 @@
 #include "../sorted_l1_norm.h"
 #include "math.h"
 #include "slope/clusters.h"
+#include "slope/losses/loss.h"
 #include "slope/math.h"
-#include "slope/objectives/objective.h"
 #include "solver.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
@@ -64,7 +64,7 @@ public:
            Eigen::MatrixXd& eta,
            Clusters& clusters,
            const Eigen::ArrayXd& lambda,
-           const std::unique_ptr<Objective>& objective,
+           const std::unique_ptr<Loss>& loss,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
            const std::vector<int>& working_set,
@@ -79,7 +79,7 @@ public:
            Eigen::MatrixXd& eta,
            Clusters& clusters,
            const Eigen::ArrayXd& lambda,
-           const std::unique_ptr<Objective>& objective,
+           const std::unique_ptr<Loss>& loss,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
            const std::vector<int>& working_set,
@@ -95,7 +95,7 @@ private:
                Eigen::MatrixXd& eta,
                Clusters&,
                const Eigen::ArrayXd& lambda,
-               const std::unique_ptr<Objective>& objective,
+               const std::unique_ptr<Loss>& loss,
                const SortedL1Norm& penalty,
                Eigen::MatrixXd& gradient,
                const std::vector<int>& working_set,
@@ -110,7 +110,7 @@ private:
 
     beta_old = beta(working_set, all);
 
-    double g_old = objective->loss(eta, y);
+    double g_old = loss->loss(eta, y);
     double t_old = t;
 
     Eigen::MatrixXd beta_diff(beta_old.rows(), beta_old.cols());
@@ -121,7 +121,7 @@ private:
         this->learning_rate * lambda.head(beta_old.size()));
 
       if (intercept) {
-        objective->updateIntercept(beta0, eta, y);
+        loss->updateIntercept(beta0, eta, y);
       }
 
       beta_diff = beta(working_set, all) - beta_old;
@@ -135,7 +135,7 @@ private:
                             jit_normalization,
                             intercept);
 
-      double g = objective->loss(eta, y);
+      double g = loss->loss(eta, y);
       double q =
         g_old +
         beta_diff.reshaped().dot(gradient(working_set, all).reshaped()) +

@@ -1,32 +1,32 @@
 /**
  * @file
- * @brief Poisson objective function implementation for SLOPE algorithm
+ * @brief Poisson loss function implementation for SLOPE algorithm
  * @details This file contains the Gaussian class which implements a Poisson
- * objective function used in the SLOPE (Sorted L-One Penalized Estimation)
+ * loss function used in the SLOPE (Sorted L-One Penalized Estimation)
  * algorithm.
  */
 
 #pragma once
 
-#include "objective.h"
+#include "loss.h"
 
 namespace slope {
 /**
  * @class Poisson
- * @brief The Poisson class represents a Poisson regression objective function.
- * @details The Poisson regression objective function is used for modeling count
+ * @brief The Poisson class represents a Poisson regression loss function.
+ * @details The Poisson regression loss function is used for modeling count
  * data. It assumes the response variable follows a Poisson distribution. The
  * log-likelihood for a single observation is:
  * \f[ \ell(y_i|\eta_i) = y_i\eta_i - e^{\eta_i} - \log(y_i!) \f]
  * where \f$\eta_i\f$ is the linear predictor and \f$y_i\f$ is the observed
  * count.
  */
-class Poisson : public Objective
+class Poisson : public Loss
 {
 
 public:
   explicit Poisson()
-    : Objective(std::numeric_limits<double>::infinity())
+    : Loss(std::numeric_limits<double>::infinity())
   {
   }
 

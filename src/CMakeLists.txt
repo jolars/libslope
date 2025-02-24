@@ -4,11 +4,11 @@ add_library(
   slope/kkt_check.cpp
   slope/math.cpp
   slope/normalize.cpp
-  slope/objectives/binomial.cpp
-  slope/objectives/gaussian.cpp
-  slope/objectives/multinomial.cpp
-  slope/objectives/poisson.cpp
-  slope/objectives/setup_objective.cpp
+  slope/losses/binomial.cpp
+  slope/losses/gaussian.cpp
+  slope/losses/multinomial.cpp
+  slope/losses/poisson.cpp
+  slope/losses/setup_loss.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
   slope/screening.cpp

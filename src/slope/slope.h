@@ -52,7 +52,7 @@ public:
     , lambda_type("bh")
     , centering_type("mean")
     , scaling_type("sd")
-    , objective("gaussian")
+    , loss_type("gaussian")
     , screening_type("strong")
     , solver_type("auto")
   {
@@ -64,7 +64,7 @@ public:
    * @param solver One of "auto", "pgd", "fista", or "hybrid". In the first case
    * (the default), the solver is automatically selected based on availability
    * of the hybrid solver, which currently means that the hybrid solver is used
-   * everywhere except for the multinomial objective.
+   * everywhere except for the multinomial loss.
    */
   void setSolver(const std::string& solver);
 
@@ -175,16 +175,16 @@ public:
   void setLambdaType(const std::string& lambda_type);
 
   /**
-   * @brief Sets the objective function type.
+   * @brief Sets the loss function type.
    *
-   * @param objective The type of objective function to use. Supported values
+   * @param loss_type The type of loss function to use. Supported values
    * are:
    *                 - "gaussian": Gaussian regression
    *                 - "binomial": Logistic regression
    *                 - "poisson": Poisson regression
    *                 - "multinomial": Multinomial logistic regression
    */
-  void setObjective(const std::string& objective);
+  void setLoss(const std::string& loss_type);
 
   /**
    * @brief Sets the type of feature screening used, which discards predictors
@@ -327,7 +327,7 @@ private:
   std::string lambda_type;
   std::string centering_type;
   std::string scaling_type;
-  std::string objective;
+  std::string loss_type;
   std::string screening_type;
   std::string solver_type;
 

@@ -1,34 +1,34 @@
 /**
  * @file
- * @brief Gaussian objective function implementation for SLOPE algorithm
+ * @brief Gaussian loss function implementation for SLOPE algorithm
  * @details This file contains the Gaussian class which implements a Gaussian
- * objective function used in the SLOPE (Sorted L-One Penalized Estimation)
- * algorithm. The Gaussian objective function is particularly useful for
+ * loss function used in the SLOPE (Sorted L-One Penalized Estimation)
+ * algorithm. The Gaussian loss function is particularly useful for
  * regression problems with normally distributed errors.
  */
 
 #pragma once
 
-#include "objective.h"
+#include "loss.h"
 
 namespace slope {
 
 /**
  * @class Gaussian
- * @brief Implementation of the Gaussian objective function
+ * @brief Implementation of the Gaussian loss function
  * @details The Gaussian class provides methods for computing loss, dual
  * function, residuals, and weight updates for the Gaussian case in the SLOPE
  * algorithm. It is particularly suited for regression problems where the error
  * terms are assumed to follow a normal distribution.
  *
- * @note This class inherits from the base Objective class and implements
+ * @note This class inherits from the base Loss class and implements
  * all required virtual functions.
  */
-class Gaussian : public Objective
+class Gaussian : public Loss
 {
 public:
   explicit Gaussian()
-    : Objective(1.00)
+    : Loss(1.00)
   {
   }
   /**
@@ -46,7 +46,7 @@ public:
   double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
-   * @brief Computes the dual function for the Gaussian objective
+   * @brief Computes the dual function for the Gaussian loss
    * @details Calculates the Fenchel conjugate of the Gaussian loss function
    *
    * @param theta Dual variables vector (n x 1)

@@ -133,7 +133,7 @@ TEST_CASE("Gaussian, various models", "[gaussian]")
   slope::Slope model;
 
   model.setTol(1e-8);
-  model.setObjective("gaussian");
+  model.setLoss("gaussian");
   model.setDiagnostics(true);
 
   SECTION("No intercept, no standardization")

@@ -13,7 +13,7 @@ namespace slope {
  * with various configurations possible.
  *
  * @param solver_type Type of solver to use (e.g., "pgd", "admm")
- * @param objective Type of objective function ("gaussian", "binomial",
+ * @param loss Type of loss function ("gaussian", "binomial",
  * "poisson", "multinomial")
  * @param tol Convergence tolerance for the solver
  * @param max_it_inner Maximum number of inner iterations
@@ -28,7 +28,7 @@ namespace slope {
  */
 std::unique_ptr<solvers::SolverBase>
 setupSolver(const std::string& solver_type,
-            const std::string& objective,
+            const std::string& loss,
             double tol,
             int max_it_inner,
             JitNormalization jit_normalization,

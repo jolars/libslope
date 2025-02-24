@@ -2,10 +2,10 @@
 #include "clusters.h"
 #include "constants.h"
 #include "kkt_check.h"
+#include "losses/loss.h"
+#include "losses/setup_loss.h"
 #include "math.h"
 #include "normalize.h"
-#include "objectives/objective.h"
-#include "objectives/setup_objective.h"
 #include "regularization_sequence.h"
 #include "screening.h"
 #include "solvers/setup_solver.h"
@@ -47,9 +47,9 @@ Slope::path(T& x,
   std::vector<int> full_set(p);
   std::iota(full_set.begin(), full_set.end(), 0);
 
-  std::unique_ptr<Objective> objective = setupObjective(this->objective);
+  std::unique_ptr<Loss> loss = setupLoss(this->loss_type);
 
-  MatrixXd y = objective->preprocessResponse(y_in);
+  MatrixXd y = loss->preprocessResponse(y_in);
 
   const int m = y.cols();
 
@@ -57,7 +57,7 @@ Slope::path(T& x,
   MatrixXd beta = MatrixXd::Zero(p, m);
 
   MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
-  MatrixXd residual = objective->residual(eta, y);
+  MatrixXd residual = loss->residual(eta, y);
   MatrixXd gradient(p, m);
 
   // Path data
@@ -93,7 +93,7 @@ Slope::path(T& x,
 
   // TODO: Make this part of the slope class
   auto solver = setupSolver(this->solver_type,
-                            this->objective,
+                            this->loss_type,
                             this->tol,
                             this->max_it_inner,
                             jit_normalization,
@@ -133,7 +133,7 @@ Slope::path(T& x,
 
   // Path variables
   std::vector<double> duals, primals, time;
-  double null_deviance = objective->nullDeviance(y, intercept);
+  double null_deviance = loss->nullDeviance(y, intercept);
 
   Timer timer;
 
@@ -176,7 +176,7 @@ Slope::path(T& x,
       assert(it < this->max_it - 1 && "Exceeded maximum number of iterations");
 
       // Compute primal, dual, and gap
-      residual = objective->residual(eta, y);
+      residual = loss->residual(eta, y);
       updateGradient(gradient,
                      x,
                      residual,
@@ -186,7 +186,7 @@ Slope::path(T& x,
                      Eigen::VectorXd::Ones(n),
                      jit_normalization);
 
-      double primal = objective->loss(eta, y) +
+      double primal = loss->loss(eta, y) +
                       sl1_norm.eval(beta(working_set, Eigen::all).reshaped(),
                                     lambda_curr.head(working_set.size() * m));
 
@@ -217,7 +217,7 @@ Slope::path(T& x,
                           lambda_curr.head(working_set.size() * m));
       theta.array() /= std::max(1.0, dual_norm);
 
-      double dual = objective->dual(theta, y, Eigen::VectorXd::Ones(n));
+      double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));
 
       if (collect_diagnostics) {
         primals.emplace_back(primal);
@@ -275,7 +275,7 @@ Slope::path(T& x,
                   eta,
                   clusters,
                   lambda_curr,
-                  objective,
+                  loss,
                   sl1_norm,
                   gradient,
                   working_set,
@@ -299,7 +299,7 @@ Slope::path(T& x,
     alpha_prev = alpha_curr;
 
     // Compute early stopping criteria
-    double dev = objective->deviance(eta, y);
+    double dev = loss->deviance(eta, y);
     double dev_ratio = 1.0 - dev / null_deviance;
     double dev_change =
       deviances.empty() ? 1.0 : (deviances.back() - dev) / deviances.back();
@@ -507,12 +507,12 @@ Slope::setLambdaType(const std::string& lambda_type)
 }
 
 void
-Slope::setObjective(const std::string& objective)
+Slope::setLoss(const std::string& loss_type)
 {
-  validateOption(objective,
+  validateOption(loss_type,
                  { "gaussian", "binomial", "poisson", "multinomial" },
-                 "objective");
-  this->objective = objective;
+                 "loss_type");
+  this->loss_type = loss_type;
 }
 
 void

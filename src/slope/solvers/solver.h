@@ -6,8 +6,8 @@
 #pragma once
 
 #include "slope/clusters.h"
+#include "slope/losses/loss.h"
 #include "slope/normalize.h"
-#include "slope/objectives/objective.h"
 #include "slope/sorted_l1_norm.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -70,9 +70,9 @@ public:
    * @param eta Linear predictor matrix (n samples x m responses)
    * @param clusters Coefficient clustering structure
    * @param lambda Vector of regularization parameters
-   * @param objective Pointer to objective function object
+   * @param loss Pointer to loss function object
    * @param penalty Sorted L1 norm object for proximal operations
-   * @param gradient Gradient matrix for objective function
+   * @param gradient Gradient matrix for loss function
    * @param working_set Vector of indices for active predictors
    * @param x Input feature matrix (n samples x p predictors)
    * @param x_centers Vector of feature means for centering
@@ -84,7 +84,7 @@ public:
                    Eigen::MatrixXd& eta,
                    Clusters& clusters,
                    const Eigen::ArrayXd& lambda,
-                   const std::unique_ptr<Objective>& objective,
+                   const std::unique_ptr<Loss>& loss,
                    SortedL1Norm& penalty,
                    Eigen::MatrixXd& gradient,
                    const std::vector<int>& working_set,
@@ -101,9 +101,9 @@ public:
    * @param eta Linear predictor matrix (n samples x m responses)
    * @param clusters Coefficient clustering structure
    * @param lambda Vector of regularization parameters
-   * @param objective Pointer to objective function object
+   * @param loss Pointer to loss function object
    * @param penalty Sorted L1 norm object for proximal operations
-   * @param gradient Gradient matrix for objective function
+   * @param gradient Gradient matrix for loss function
    * @param working_set Vector of indices for active predictors
    * @param x Input feature matrix (n samples x p predictors)
    * @param x_centers Vector of feature means for centering
@@ -115,7 +115,7 @@ public:
                    Eigen::MatrixXd& eta,
                    Clusters& clusters,
                    const Eigen::ArrayXd& lambda,
-                   const std::unique_ptr<Objective>& objective,
+                   const std::unique_ptr<Loss>& loss,
                    SortedL1Norm& penalty,
                    Eigen::MatrixXd& gradient,
                    const std::vector<int>& working_set,

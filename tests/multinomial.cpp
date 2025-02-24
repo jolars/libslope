@@ -42,7 +42,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
   slope::Slope model;
 
-  model.setObjective("multinomial");
+  model.setLoss("multinomial");
   model.setSolver("pgd");
   model.setMaxIt(1000);
   model.setTol(1e-6);

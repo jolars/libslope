@@ -27,7 +27,7 @@ using ArrayXXb = Eigen::Array<bool, Eigen::Dynamic, Eigen::Dynamic>;
 /**
  * @brief Checks KKT conditions for SLOPE optimization
  *
- * @param gradient The gradient of the objective function
+ * @param gradient The gradient of the loss function
  * @param beta The current coefficient matrix
  * @param lambda Vector of regularization parameters
  * @param strong_set Vector of indices in the strong set

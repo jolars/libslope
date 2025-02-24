@@ -10,7 +10,7 @@
 #include "hybrid_pgd.h"
 #include "slope/clusters.h"
 #include "slope/constants.h"
-#include "slope/objectives/objective.h"
+#include "slope/losses/loss.h"
 #include "slope/sorted_l1_norm.h"
 #include "solver.h"
 #include <memory>
@@ -64,7 +64,7 @@ public:
            Eigen::MatrixXd& eta,
            Clusters& clusters,
            const Eigen::ArrayXd& lambda,
-           const std::unique_ptr<Objective>& objective,
+           const std::unique_ptr<Loss>& loss,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
            const std::vector<int>& working_set,
@@ -79,7 +79,7 @@ public:
            Eigen::MatrixXd& eta,
            Clusters& clusters,
            const Eigen::ArrayXd& lambda,
-           const std::unique_ptr<Objective>& objective,
+           const std::unique_ptr<Loss>& loss,
            SortedL1Norm& penalty,
            Eigen::MatrixXd& gradient,
            const std::vector<int>& working_set,
@@ -97,7 +97,7 @@ private:
    * @param beta Coefficient matrix
    * @param eta Linear predictor
    * @param clusters Coefficient clustering information
-   * @param objective Pointer to the objective function
+   * @param loss Pointer to the loss function
    * @param penalty SLOPE penalty object
    * @param x Design matrix
    * @param x_centers Feature centers for standardization
@@ -110,7 +110,7 @@ private:
                Eigen::MatrixXd& eta,
                Clusters& clusters,
                const Eigen::ArrayXd& lambda,
-               const std::unique_ptr<Objective>& objective,
+               const std::unique_ptr<Loss>& loss,
                const SortedL1Norm& penalty,
                Eigen::MatrixXd& gradient_in,
                const std::vector<int>& working_set,
@@ -126,7 +126,7 @@ private:
 
     VectorXd w = VectorXd::Ones(n);
     VectorXd z = y;
-    objective->updateWeightsAndWorkingResponse(w, z, eta, y);
+    loss->updateWeightsAndWorkingResponse(w, z, eta, y);
     VectorXd w_sqrt = w.cwiseSqrt();
 
     VectorXd residual = eta - z;

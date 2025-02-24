@@ -34,7 +34,7 @@ namespace solvers {
  * @param n Number of samples
  *
  * @return std::pair<double, double> containing:
- *         - first: gradient of the objective function
+ *         - first: gradient of the loss function
  *         - second: diagonal Hessian element
  *
  * The function handles four different normalization cases:

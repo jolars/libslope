@@ -1,4 +1,4 @@
-#include "setup_objective.h"
+#include "setup_loss.h"
 #include "binomial.h"
 #include "gaussian.h"
 #include "multinomial.h"
@@ -6,8 +6,8 @@
 
 namespace slope {
 
-std::unique_ptr<Objective>
-setupObjective(const std::string family)
+std::unique_ptr<Loss>
+setupLoss(const std::string family)
 {
   if (family == "binomial")
     return std::make_unique<Binomial>();

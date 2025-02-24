@@ -1,7 +1,7 @@
 /**
  * @file
  * @brief The declartion of the Objctive class and its subclasses, which
- * represent the data-fitting part of the composite objective function.
+ * represent the data-fitting part of the composite loss function.
  */
 
 #pragma once
@@ -11,19 +11,19 @@
 namespace slope {
 
 /**
- * Objective function interface
+ * Loss function interface
  *
- * This class defines the interface for an objective function, which is used in
- * optimization algorithms. The objective function calculates the loss, dual,
+ * This class defines the interface for an loss function, which is used in
+ * optimization algorithms. The loss function calculates the loss, dual,
  * residual, and updates the weights and working response.
  */
-class Objective
+class Loss
 {
 public:
   /**
-   * @brief Destructor for the Objective class.
+   * @brief Destructor for the Loss class.
    */
-  virtual ~Objective() = default;
+  virtual ~Loss() = default;
 
   /**
    * @brief Calculates the loss function
@@ -38,7 +38,7 @@ public:
   virtual double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y) = 0;
 
   /**
-   * @brief Calculates the dual objective
+   * @brief Calculates the dual loss
    *
    * This function calculates the dual function given the estimated parameters
    * (theta) and the true values (y).
@@ -146,13 +146,13 @@ public:
 
 protected:
   /**
-   * @brief Constructs an Objective with specified Lipschitz constant
-   * @param lipschitz_constant The Lipschitz constant for the objective function
+   * @brief Constructs an loss function with specified Lipschitz constant
+   * @param lipschitz_constant The Lipschitz constant for the loss function
    *
    * The Lipschitz constant is used to ensure convergence in gradient-based
    * optimization by bounding the rate of change of the gradient.
    */
-  explicit Objective(double lipschitz_constant)
+  explicit Loss(double lipschitz_constant)
     : lipschitz_constant(lipschitz_constant)
   {
   }

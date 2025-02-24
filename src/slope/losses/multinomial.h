@@ -1,29 +1,29 @@
 #pragma once
 
-#include "objective.h"
+#include "loss.h"
 
 namespace slope {
 /**
  * @class Multinomial
  * @brief The Multinomial class represents a multinomial logistic regression
- * objective function.
- * @details The multinomial objective function is used for multi-class
+ * loss function.
+ * @details The multinomial loss function is used for multi-class
  * classification problems. It calculates the loss, dual, residual, and updates
  * weights and working response. Assumes the response y is a one-hot encoded
  * matrix where each row sums to 1.
  */
-class Multinomial : public Objective
+class Multinomial : public Loss
 {
 private:
   double p_min = 1e-9; /**< The minimum probability value. */
 
 public:
   explicit Multinomial()
-    : Objective(1.0)
+    : Loss(1.0)
   {
   }
   /**
-   * @brief Calculates the loss for the multinomial objective function.
+   * @brief Calculates the loss for the multinomial loss function.
    * @param eta The predicted values (n x k matrix of linear predictors).
    * @param y The true labels (n x k matrix of one-hot encoded class
    * memberships).
@@ -32,7 +32,7 @@ public:
   double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
-   * @brief Calculates the dual for the multinomial objective function.
+   * @brief Calculates the dual for the multinomial loss function.
    * @param theta The dual variables (n x k matrix).
    * @param y The true labels (n x k matrix of one-hot encoded class
    * memberships).
@@ -44,7 +44,7 @@ public:
               const Eigen::VectorXd& w);
 
   /**
-   * @brief Calculates the residual for the multinomial objective function.
+   * @brief Calculates the residual for the multinomial loss function.
    * @param eta The predicted values (n x k matrix of linear predictors).
    * @param y The true labels (n x k matrix of one-hot encoded class
    * memberships).
@@ -62,9 +62,9 @@ public:
 
   /**
    * @brief Updates the weights and working response for the multinomial
-   * objective function. Currently not implemented since there is
+   * loss function. Currently not implemented since there is
    * no coordinate descent solver for the multinomial logistic regression
-   * objective.
+   * loss.
    * @param w The weights vector.
    * @param z The working response vector.
    * @param eta The predicted values (n x k matrix of linear predictors).

@@ -7,7 +7,7 @@
 #include "../sorted_l1_norm.h"
 #include "math.h"
 #include "slope/clusters.h"
-#include "slope/objectives/objective.h"
+#include "slope/losses/loss.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <memory>
@@ -22,7 +22,7 @@ PGD::run(Eigen::VectorXd& beta0,
          Eigen::MatrixXd& eta,
          Clusters& clusters,
          const Eigen::ArrayXd& lambda,
-         const std::unique_ptr<Objective>& objective,
+         const std::unique_ptr<Loss>& loss,
          SortedL1Norm& penalty,
          Eigen::MatrixXd& gradient,
          const std::vector<int>& active_set,
@@ -36,7 +36,7 @@ PGD::run(Eigen::VectorXd& beta0,
           eta,
           clusters,
           lambda,
-          objective,
+          loss,
           penalty,
           gradient,
           active_set,
@@ -53,7 +53,7 @@ PGD::run(Eigen::VectorXd& beta0,
          Eigen::MatrixXd& eta,
          Clusters& clusters,
          const Eigen::ArrayXd& lambda,
-         const std::unique_ptr<Objective>& objective,
+         const std::unique_ptr<Loss>& loss,
          SortedL1Norm& penalty,
          Eigen::MatrixXd& gradient,
          const std::vector<int>& active_set,
@@ -67,7 +67,7 @@ PGD::run(Eigen::VectorXd& beta0,
           eta,
           clusters,
           lambda,
-          objective,
+          loss,
           penalty,
           gradient,
           active_set,

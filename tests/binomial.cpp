@@ -50,7 +50,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial]")
   slope::Slope model;
 
   model.setTol(1e-7);
-  model.setObjective("binomial");
+  model.setLoss("binomial");
   model.setDiagnostics(true);
 
   slope::SlopeFit fit;

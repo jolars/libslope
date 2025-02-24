@@ -16,7 +16,7 @@ TEST_CASE("Assertions", "[assertions]")
 
   SECTION("Invalid family")
   {
-    REQUIRE_THROWS(model.setObjective("ols"));
+    REQUIRE_THROWS(model.setLoss("ols"));
   }
 
   SECTION("Invalid X, y dimensions")
@@ -48,7 +48,7 @@ TEST_CASE("Assertions", "[assertions]")
   SECTION("Invalid solver combinations")
   {
     model.setSolver("hybrid");
-    model.setObjective("multinomial");
+    model.setLoss("multinomial");
     y << 1, 0, 1, 2, 1, 0, 2, 0, 3, 0;
     REQUIRE_THROWS_AS(model.fit(x, y), std::invalid_argument);
   }

@@ -13,6 +13,6 @@ TEST_CASE("Abalone dataset", "[realdata][poisson]")
   auto [x, y] = load_dataset("../tests/data/abalone.csv");
 
   slope::Slope model;
-  model.setObjective("poisson");
+  model.setLoss("poisson");
   model.fit(x, y);
 }

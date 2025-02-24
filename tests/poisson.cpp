@@ -39,7 +39,7 @@ TEST_CASE("Poisson, models", "[poisson]")
 
   model.setTol(1e-7);
   model.setMaxIt(1e4);
-  model.setObjective("poisson");
+  model.setLoss("poisson");
   model.setDiagnostics(true);
 
   Eigen::Vector3d coefs_ref;

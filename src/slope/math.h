@@ -125,7 +125,7 @@ Eigen::MatrixXd
 softmax(const Eigen::MatrixXd& x);
 
 /**
- * Computes the gradient of the objective with respect to \f(\beta\f).
+ * Computes the gradient of the loss with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
  * @param x The input matrix.
@@ -201,7 +201,7 @@ linearPredictor(const T& x,
 }
 
 /**
- * Computes the gradient of the objective with respect to \f(\beta\f).
+ * Computes the gradient of the loss with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
  * @param gradient The gradient vector.
@@ -264,7 +264,7 @@ updateGradient(Eigen::MatrixXd& gradient,
 }
 
 /**
- * Computes the gradient of the objective with respect to \f(\beta\f).
+ * Computes the gradient of the loss with respect to \f(\beta\f).
  *
  * @tparam T The type of the input matrix.
  * @param gradient The residual vector.

@@ -35,7 +35,7 @@ namespace solvers {
  * @param sl1_norm The sorted L1 norm object.
  * @param x_centers The center values of the input data.
  * @param x_scales The scale values of the input data.
- * @param g_old The previous value of the objective function.
+ * @param g_old The previous value of the loss function.
  * @param intercept Flag indicating whether to include an intercept term.
  * @param jit_normalization Type of JIT normalization
  * @param learning_rate_decr The learning rate decrement factor.

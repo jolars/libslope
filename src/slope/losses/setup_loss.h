@@ -1,15 +1,15 @@
 #pragma once
 
-#include "objective.h"
+#include "loss.h"
 #include <memory>
 
 namespace slope {
 
 /**
- * @brief Factory function to create the appropriate objective function based on
+ * @brief Factory function to create the appropriate loss function based on
  * the distribution family.
  *
- * @details This function creates and returns an objective function object based
+ * @details This function creates and returns an loss function object based
  * on the specified statistical distribution family. The supported families are:
  * - "binomial": For binary classification problems (logistic regression)
  * - "poisson": For count data modeling (Poisson regression)
@@ -19,10 +19,10 @@ namespace slope {
  *
  * @param family A string specifying the distribution family ("binomial",
  * "poisson", "multinomial", or "gaussian")
- * @return std::unique_ptr<Objective> A unique pointer to the appropriate
- * objective function object
+ * @return std::unique_ptr<Loss> A unique pointer to the appropriate
+ * loss function object
  */
-std::unique_ptr<Objective>
-setupObjective(const std::string family);
+std::unique_ptr<Loss>
+setupLoss(const std::string family);
 
 }

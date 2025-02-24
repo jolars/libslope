@@ -8,7 +8,7 @@ namespace slope {
 
 std::unique_ptr<solvers::SolverBase>
 setupSolver(const std::string& solver_type,
-            const std::string& objective,
+            const std::string& loss,
             double tol,
             int max_it_inner,
             JitNormalization jit_normalization,
@@ -20,12 +20,12 @@ setupSolver(const std::string& solver_type,
 
   if (solver_type == "auto") {
     // TODO: Make this more sophisticated, e.g. define in solver class
-    // and check if compatible with objective.
-    solver_choice = objective == "multinomial" ? "fista" : "hybrid";
+    // and check if compatible with the loss function.
+    solver_choice = loss == "multinomial" ? "fista" : "hybrid";
   }
 
-  if (objective == "multinomial" && solver_choice == "hybrid") {
-    throw std::invalid_argument("multinomial objective is currently not "
+  if (loss == "multinomial" && solver_choice == "hybrid") {
+    throw std::invalid_argument("multinomial loss is currently not "
                                 "supported with the hybrid solver");
   }
 

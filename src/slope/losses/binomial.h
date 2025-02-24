@@ -1,28 +1,28 @@
 #pragma once
 
-#include "objective.h"
+#include "loss.h"
 
 namespace slope {
 /**
  * @class Binomial
- * @brief The Binomial class represents a binomial objective function.
- * @details The binomial objective function is used for binary classification
+ * @brief The Binomial class represents a binomial loss function.
+ * @details The binomial loss function is used for binary classification
  * problems. It calculates the loss, dual, residual, and updates weights and
  * working response.
  */
-class Binomial : public Objective
+class Binomial : public Loss
 {
 private:
   double p_min = 1e-9; /**< The minimum probability value. */
 
 public:
   explicit Binomial()
-    : Objective(0.25)
+    : Loss(0.25)
   {
   }
 
   /**
-   * @brief Calculates the loss for the binomial objective function.
+   * @brief Calculates the loss for the binomial loss function.
    * @param eta The predicted values.
    * @param y The true labels.
    * @return The loss value.
@@ -30,7 +30,7 @@ public:
   double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
-   * @brief Calculates the dual for the binomial objective function.
+   * @brief Calculates the dual for the binomial loss function.
    * @param theta The dual variables.
    * @param y The true labels.
    * @param w Weights
@@ -41,7 +41,7 @@ public:
               const Eigen::VectorXd& w);
 
   /**
-   * @brief Calculates the residual for the binomial objective function.
+   * @brief Calculates the residual for the binomial loss function.
    * @param eta The predicted values.
    * @param y The true labels.
    * @return The residual vector.
@@ -59,7 +59,7 @@ public:
   Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y);
 
   /**
-   * @brief Updates the weights and working response for the binomial objective
+   * @brief Updates the weights and working response for the binomial loss
    * function.
    * @param w The weights.
    * @param z The working response.
