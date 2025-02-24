@@ -248,14 +248,6 @@ coordinateDescent(Eigen::VectorXd& beta0,
     } else {
       clusters.setCoeff(j, std::abs(c_tilde));
     }
-
-    if (intercept) {
-      // TODO: Consider whether this should only be done once per loop instead
-      // of after each coordinate update
-      double beta0_update = residual.dot(w) / n;
-      residual.array() -= beta0_update;
-      beta0(0) -= beta0_update;
-    }
   }
 }
 

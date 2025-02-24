@@ -222,6 +222,13 @@ private:
                           this->jit_normalization,
                           this->update_clusters);
       }
+
+      // Update intercept term
+      if (intercept) {
+        double intercept_update = residual.dot(w) / n;
+        beta0(0) -= intercept_update;
+        residual.array() -= intercept_update;
+      }
     }
 
     // The residual is kept up to date, but not eta. So we need to compute

@@ -76,11 +76,6 @@ proximalGradientDescent(Eigen::VectorXd& beta0,
 
     Eigen::VectorXd beta_diff = beta(working_set, 0) - beta_old;
 
-    if (intercept) {
-      double intercept_update = residual.dot(w) / n;
-      beta0(0) -= intercept_update;
-    }
-
     residual = linearPredictor(x,
                                working_set,
                                beta0,
