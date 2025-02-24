@@ -163,7 +163,7 @@ public:
    * the inverse of that actually). A value of 1 means that the algorithm only
    * runs proximal gradient descent steps.
    */
-  void setPgdFreq(int pgd_freq);
+  void setHybridPgdFreq(int pgd_freq);
 
   /**
    * @brief Sets the lambda type for regularization weights.

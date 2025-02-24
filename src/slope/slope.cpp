@@ -489,7 +489,7 @@ Slope::setPathLength(int path_length)
 }
 
 void
-Slope::setPgdFreq(int pgd_freq)
+Slope::setHybridPgdFreq(int pgd_freq)
 {
   if (pgd_freq < 1) {
     throw std::invalid_argument("pgd_freq must be > 1");
