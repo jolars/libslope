@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/jolars/libslope/compare/v0.16.0...v0.16.1) (2025-02-24)
+
+
+### Bug Fixes
+
+* add log(y!) to poisson primal and duals ([e4be976](https://github.com/jolars/libslope/commit/e4be9763a39876e74ed4b4d10a7067b17bdcfc44))
+
 ## [0.16.0](https://github.com/jolars/libslope/compare/v0.15.2...v0.16.0) (2025-02-24)
 
 
