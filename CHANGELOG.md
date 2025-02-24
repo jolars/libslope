@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.2](https://github.com/jolars/libslope/compare/v0.15.1...v0.15.2) (2025-02-24)
+
+
+### Bug Fixes
+
+* fix intercept update in hybrid pgd method ([f91313a](https://github.com/jolars/libslope/commit/f91313a9e1b7d55adc249c01dbaf315aef4a6047))
+
 ## [0.15.1](https://github.com/jolars/libslope/compare/v0.15.0...v0.15.1) (2025-02-23)
 
 
