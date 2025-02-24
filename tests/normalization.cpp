@@ -325,13 +325,15 @@ TEST_CASE("Normalization, loop combinations", "[normalization]")
              0.5, 0.2;
       // clang-format on
 
+      double alpha = 1e-5;
+
       model.setModifyX(false);
-      auto fit_mod = model.fit(x, y);
+      auto fit_mod = model.fit(x, y, alpha);
       double intercept_mod = fit_mod.getIntercepts()[0];
       Eigen::VectorXd coefs_mod = fit_mod.getCoefs();
 
       model.setModifyX(true);
-      auto fit_nomod = model.fit(x, y);
+      auto fit_nomod = model.fit(x, y, alpha);
       Eigen::VectorXd coefs_nomod = fit_nomod.getCoefs();
       double intercept_nomod = fit_mod.getIntercepts()[0];
 
