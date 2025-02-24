@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.16.0](https://github.com/jolars/libslope/compare/v0.15.2...v0.16.0) (2025-02-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename objective to loss
+* rename `setPgdFreq()` to `setHybridPgdFreq()`
+
+### Features
+
+* rename `setPgdFreq()` to `setHybridPgdFreq()` ([e9bec62](https://github.com/jolars/libslope/commit/e9bec623f5db26eae7fd962e94803811f0d0be4c))
+* rename objective to loss ([7baa508](https://github.com/jolars/libslope/commit/7baa508e42b27423f3f4f250709e38a47aac0fd7))
+
+
+### Reverts
+
+* "fix: fix intercept update in hybrid pgd method" ([8d7af13](https://github.com/jolars/libslope/commit/8d7af1317dad4a87bf8fb4955f932242b0bd5376))
+
 ## [0.15.2](https://github.com/jolars/libslope/compare/v0.15.1...v0.15.2) (2025-02-24)
 
 
