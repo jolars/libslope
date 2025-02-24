@@ -1,3 +1,4 @@
+#include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -202,4 +203,19 @@ TEST_CASE("Poisson, models", "[poisson]")
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coefs_ref, 1e-4));
     REQUIRE_THAT(intercept_pgd, WithinRel(-0.39652440, 1e-4));
   }
+}
+
+TEST_CASE("Poisson abalone data", "[poisson][realdata]")
+{
+  auto [x, y] = loadData("tests/data/abalone.csv");
+
+  slope::Slope model;
+
+  model.setLoss("poisson");
+  model.setSolver("pgd");
+
+  auto path = model.path(x, y);
+
+  REQUIRE(path.getDeviance().back() > 0);
+  REQUIRE(path.getDeviance().size() > 5);
 }
