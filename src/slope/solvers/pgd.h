@@ -33,17 +33,13 @@ public:
    * @param tol Convergence tolerance threshold
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
-   * @param update_clusters If true, updates clusters during optimization
-   * @param cd_iterations Frequency of proximal gradient descent updates
    * @param update_type Type of update strategy to use
    */
   PGD(double tol,
       JitNormalization jit_normalization,
       bool intercept,
-      bool update_clusters,
-      int cd_iterations,
       const std::string& update_type)
-    : SolverBase(tol, jit_normalization, intercept, update_clusters, cd_iterations)
+    : SolverBase(tol, jit_normalization, intercept)
     , learning_rate(1.0)
     , learning_rate_decr(0.5)
     , update_type{ update_type }

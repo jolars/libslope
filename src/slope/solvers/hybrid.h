@@ -30,8 +30,8 @@ namespace solvers {
  *   can only merge, not split, clusters.
  * cases
  *
- * The switching between methods is controlled by the cd_iterations parameter, which
- * determines how often PGD steps are taken versus CD steps.
+ * The switching between methods is controlled by the cd_iterations parameter,
+ * which determines how often PGD steps are taken versus CD steps.
  */
 class Hybrid : public SolverBase
 {
@@ -49,7 +49,9 @@ public:
          bool intercept,
          bool update_clusters,
          int cd_iterations)
-    : SolverBase(tol, jit_normalization, intercept, update_clusters, cd_iterations)
+    : SolverBase(tol, jit_normalization, intercept)
+    , update_clusters(update_clusters)
+    , cd_iterations(cd_iterations)
   {
   }
 
@@ -119,8 +121,7 @@ private:
 
     const int n = x.rows();
 
-    solvers::PGD pgd_solver(
-      tol, jit_normalization, intercept, update_clusters, 10, "pgd");
+    solvers::PGD pgd_solver(tol, jit_normalization, intercept, "pgd");
 
     // Run proximal gradient descent
     pgd_solver.run(beta0,
@@ -170,6 +171,8 @@ private:
     1.0; ///< Learning rate for proximal gradient descent steps
   double pgd_learning_rate_decr =
     0.5; ///< Learning rate decrease factor on failed PGD steps
+  bool update_clusters = false; ///< If true, updates clusters during CD steps
+  int cd_iterations = 10;       ///< Number of CD iterations per hybrid step
 };
 
 } // namespace solvers

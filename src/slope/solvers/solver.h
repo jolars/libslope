@@ -38,21 +38,11 @@ public:
    * @param jit_normalization Type of just-in-time normalization to apply (None,
    * Center, Scale, or Both)
    * @param intercept Whether to fit an intercept term
-   * @param update_clusters Whether to update coefficient clusters during
-   * optimization
-   * @param cd_iterations Frequency of proximal gradient descent updates (0 for
-   * coordinate descent only)
    */
-  SolverBase(double tol,
-             JitNormalization jit_normalization,
-             bool intercept,
-             bool update_clusters,
-             int cd_iterations)
+  SolverBase(double tol, JitNormalization jit_normalization, bool intercept)
     : tol(tol)
     , jit_normalization(jit_normalization)
     , intercept(intercept)
-    , update_clusters(update_clusters)
-    , cd_iterations(cd_iterations)
   {
   }
 
@@ -125,8 +115,6 @@ protected:
   double tol;                         ///< Convergence tolerance threshold
   JitNormalization jit_normalization; ///< JIT feature normalization strategy
   bool intercept;                     ///< If true, fits intercept term
-  bool update_clusters; ///< If true, updates clusters during optimization
-  int cd_iterations;    ///< Iterations of CD
 };
 
 } // namespace solvers

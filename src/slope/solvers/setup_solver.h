@@ -19,8 +19,9 @@ namespace slope {
  * @param jit_normalization Type of JIT normalization
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
- * optimization
- * @param cd_iterations Frequency of proximal gradient descent updates
+ * optimization (Hybrid solver)
+ * @param cd_iterations Frequency of proximal gradient descent updates (Hybrid
+ * solver)
  *
  * @return std::unique_ptr<solvers::SolverBase> A unique pointer to the
  * configured solver

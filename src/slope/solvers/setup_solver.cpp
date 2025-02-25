@@ -30,10 +30,10 @@ setupSolver(const std::string& solver_type,
 
   if (solver_choice == "pgd") {
     return std::make_unique<solvers::PGD>(
-      tol, jit_normalization, intercept, update_clusters, cd_iterations, "pgd");
+      tol, jit_normalization, intercept, "pgd");
   } else if (solver_choice == "fista") {
     return std::make_unique<solvers::PGD>(
-      tol, jit_normalization, intercept, update_clusters, cd_iterations, "fista");
+      tol, jit_normalization, intercept, "fista");
   } else if (solver_choice == "hybrid") {
     return std::make_unique<solvers::Hybrid>(
       tol, jit_normalization, intercept, update_clusters, cd_iterations);
