@@ -13,8 +13,6 @@ namespace slope {
  * with various configurations possible.
  *
  * @param solver_type Type of solver to use (e.g., "pgd", "admm")
- * @param loss Type of loss function ("quadratic", "logistic",
- * "poisson", "multinomial")
  * @param tol Convergence tolerance for the solver
  * @param jit_normalization Type of JIT normalization
  * @param intercept Whether to fit an intercept term
@@ -29,7 +27,6 @@ namespace slope {
 std::unique_ptr<solvers::SolverBase>
 setupSolver(const std::string& solver_type,
             const std::string& loss,
-            double tol,
             JitNormalization jit_normalization,
             bool intercept,
             bool update_clusters,

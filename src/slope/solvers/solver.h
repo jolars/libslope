@@ -34,14 +34,12 @@ public:
   /**
    * @brief Constructs a base solver for SLOPE optimization
    *
-   * @param tol Convergence tolerance for the optimization
    * @param jit_normalization Type of just-in-time normalization to apply (None,
    * Center, Scale, or Both)
    * @param intercept Whether to fit an intercept term
    */
-  SolverBase(double tol, JitNormalization jit_normalization, bool intercept)
-    : tol(tol)
-    , jit_normalization(jit_normalization)
+  SolverBase(JitNormalization jit_normalization, bool intercept)
+    : jit_normalization(jit_normalization)
     , intercept(intercept)
   {
   }
@@ -112,7 +110,6 @@ public:
                    const Eigen::MatrixXd& y) = 0;
 
 protected:
-  double tol;                         ///< Convergence tolerance threshold
   JitNormalization jit_normalization; ///< JIT feature normalization strategy
   bool intercept;                     ///< If true, fits intercept term
 };

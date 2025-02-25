@@ -38,18 +38,16 @@ class Hybrid : public SolverBase
 public:
   /**
    * @brief Constructs Hybrid solver for SLOPE optimization
-   * @param tol Convergence tolerance threshold
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
    * @param update_clusters If true, updates clusters during optimization
    * @param cd_iterations Frequency of proximal gradient descent updates
    */
-  Hybrid(double tol,
-         JitNormalization jit_normalization,
+  Hybrid(JitNormalization jit_normalization,
          bool intercept,
          bool update_clusters,
          int cd_iterations)
-    : SolverBase(tol, jit_normalization, intercept)
+    : SolverBase(jit_normalization, intercept)
     , update_clusters(update_clusters)
     , cd_iterations(cd_iterations)
   {
@@ -121,7 +119,7 @@ private:
 
     const int n = x.rows();
 
-    solvers::PGD pgd_solver(tol, jit_normalization, intercept, "pgd");
+    solvers::PGD pgd_solver(jit_normalization, intercept, "pgd");
 
     // Run proximal gradient descent
     pgd_solver.run(beta0,

@@ -94,7 +94,6 @@ Slope::path(T& x,
   // TODO: Make this part of the slope class
   auto solver = setupSolver(this->solver_type,
                             this->loss_type,
-                            this->tol,
                             jit_normalization,
                             this->intercept,
                             this->update_clusters,
