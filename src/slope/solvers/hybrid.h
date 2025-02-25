@@ -7,10 +7,8 @@
 #pragma once
 
 #include "hybrid_cd.h"
-#include "hybrid_pgd.h"
 #include "pgd.h"
 #include "slope/clusters.h"
-#include "slope/constants.h"
 #include "slope/losses/loss.h"
 #include "slope/sorted_l1_norm.h"
 #include "solver.h"
@@ -38,24 +36,17 @@ public:
   /**
    * @brief Constructs Hybrid solver for SLOPE optimization
    * @param tol Convergence tolerance threshold
-   * @param max_it Maximum number of iterations
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
    * @param update_clusters If true, updates clusters during optimization
    * @param pgd_freq Frequency of proximal gradient descent updates
    */
   Hybrid(double tol,
-         int max_it,
          JitNormalization jit_normalization,
          bool intercept,
          bool update_clusters,
          int pgd_freq)
-    : SolverBase(tol,
-                 max_it,
-                 jit_normalization,
-                 intercept,
-                 update_clusters,
-                 pgd_freq)
+    : SolverBase(tol, jit_normalization, intercept, update_clusters, pgd_freq)
   {
   }
 
@@ -125,13 +116,8 @@ private:
 
     const int n = x.rows();
 
-    solvers::PGD pgd_solver(tol,
-                            max_it_inner,
-                            jit_normalization,
-                            intercept,
-                            update_clusters,
-                            10,
-                            "pgd");
+    solvers::PGD pgd_solver(
+      tol, jit_normalization, intercept, update_clusters, 10, "pgd");
 
     // Run proximal gradient descent
     pgd_solver.run(beta0,
@@ -180,8 +166,7 @@ private:
   double pgd_learning_rate =
     1.0; ///< Learning rate for proximal gradient descent steps
   double pgd_learning_rate_decr =
-    0.5;                 ///< Learning rate decrease factor on failed PGD steps
-  int max_it_inner = 10; ///< Maximum number of inner iterations
+    0.5; ///< Learning rate decrease factor on failed PGD steps
 };
 
 } // namespace solvers

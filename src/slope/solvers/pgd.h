@@ -31,7 +31,6 @@ public:
   /**
    * @brief Constructs Proximal Gradient Descent solver for SLOPE optimization
    * @param tol Convergence tolerance threshold
-   * @param max_it Maximum number of iterations
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
    * @param update_clusters If true, updates clusters during optimization
@@ -39,18 +38,12 @@ public:
    * @param update_type Type of update strategy to use
    */
   PGD(double tol,
-      int max_it,
       JitNormalization jit_normalization,
       bool intercept,
       bool update_clusters,
       int pgd_freq,
       const std::string& update_type)
-    : SolverBase(tol,
-                 max_it,
-                 jit_normalization,
-                 intercept,
-                 update_clusters,
-                 pgd_freq)
+    : SolverBase(tol, jit_normalization, intercept, update_clusters, pgd_freq)
     , learning_rate(1.0)
     , learning_rate_decr(0.5)
     , update_type{ update_type }

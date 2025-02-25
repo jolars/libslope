@@ -35,7 +35,6 @@ public:
    * @brief Constructs a base solver for SLOPE optimization
    *
    * @param tol Convergence tolerance for the optimization
-   * @param max_it Maximum number of iterations allowed
    * @param jit_normalization Type of just-in-time normalization to apply (None,
    * Center, Scale, or Both)
    * @param intercept Whether to fit an intercept term
@@ -45,13 +44,11 @@ public:
    * coordinate descent only)
    */
   SolverBase(double tol,
-             int max_it,
              JitNormalization jit_normalization,
              bool intercept,
              bool update_clusters,
              int pgd_freq)
     : tol(tol)
-    , max_it(max_it)
     , jit_normalization(jit_normalization)
     , intercept(intercept)
     , update_clusters(update_clusters)
@@ -126,7 +123,6 @@ public:
 
 protected:
   double tol;                         ///< Convergence tolerance threshold
-  int max_it;                         ///< Maximum iterations
   JitNormalization jit_normalization; ///< JIT feature normalization strategy
   bool intercept;                     ///< If true, fits intercept term
   bool update_clusters; ///< If true, updates clusters during optimization

@@ -10,7 +10,6 @@ std::unique_ptr<solvers::SolverBase>
 setupSolver(const std::string& solver_type,
             const std::string& loss,
             double tol,
-            int max_it_inner,
             JitNormalization jit_normalization,
             bool intercept,
             bool update_clusters,
@@ -30,28 +29,14 @@ setupSolver(const std::string& solver_type,
   }
 
   if (solver_choice == "pgd") {
-    return std::make_unique<solvers::PGD>(tol,
-                                          max_it_inner,
-                                          jit_normalization,
-                                          intercept,
-                                          update_clusters,
-                                          pgd_freq,
-                                          "pgd");
+    return std::make_unique<solvers::PGD>(
+      tol, jit_normalization, intercept, update_clusters, pgd_freq, "pgd");
   } else if (solver_choice == "fista") {
-    return std::make_unique<solvers::PGD>(tol,
-                                          max_it_inner,
-                                          jit_normalization,
-                                          intercept,
-                                          update_clusters,
-                                          pgd_freq,
-                                          "fista");
+    return std::make_unique<solvers::PGD>(
+      tol, jit_normalization, intercept, update_clusters, pgd_freq, "fista");
   } else if (solver_choice == "hybrid") {
-    return std::make_unique<solvers::Hybrid>(tol,
-                                             max_it_inner,
-                                             jit_normalization,
-                                             intercept,
-                                             update_clusters,
-                                             pgd_freq);
+    return std::make_unique<solvers::Hybrid>(
+      tol, jit_normalization, intercept, update_clusters, pgd_freq);
   } else {
     throw std::invalid_argument("solver type not recognized");
   }
