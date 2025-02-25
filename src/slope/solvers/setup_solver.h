@@ -20,7 +20,7 @@ namespace slope {
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
  * optimization
- * @param pgd_freq Frequency of proximal gradient descent updates
+ * @param cd_iterations Frequency of proximal gradient descent updates
  *
  * @return std::unique_ptr<solvers::SolverBase> A unique pointer to the
  * configured solver
@@ -32,6 +32,6 @@ setupSolver(const std::string& solver_type,
             JitNormalization jit_normalization,
             bool intercept,
             bool update_clusters,
-            int pgd_freq);
+            int cd_iterations);
 
 } // namespace slope

@@ -98,7 +98,7 @@ Slope::path(T& x,
                             jit_normalization,
                             this->intercept,
                             this->update_clusters,
-                            this->pgd_freq);
+                            this->cd_iterations);
 
   updateGradient(gradient,
                  x,
@@ -479,12 +479,12 @@ Slope::setPathLength(int path_length)
 }
 
 void
-Slope::setHybridPgdFreq(int pgd_freq)
+Slope::setHybridCdIterations(int cd_iterations)
 {
-  if (pgd_freq < 0) {
-    throw std::invalid_argument("pgd_freq must be >= 0");
+  if (cd_iterations < 0) {
+    throw std::invalid_argument("cd_iterations must be >= 0");
   }
-  this->pgd_freq = pgd_freq;
+  this->cd_iterations = cd_iterations;
 }
 
 void

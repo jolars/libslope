@@ -13,7 +13,7 @@ setupSolver(const std::string& solver_type,
             JitNormalization jit_normalization,
             bool intercept,
             bool update_clusters,
-            int pgd_freq)
+            int cd_iterations)
 {
   std::string solver_choice = solver_type;
 
@@ -30,13 +30,13 @@ setupSolver(const std::string& solver_type,
 
   if (solver_choice == "pgd") {
     return std::make_unique<solvers::PGD>(
-      tol, jit_normalization, intercept, update_clusters, pgd_freq, "pgd");
+      tol, jit_normalization, intercept, update_clusters, cd_iterations, "pgd");
   } else if (solver_choice == "fista") {
     return std::make_unique<solvers::PGD>(
-      tol, jit_normalization, intercept, update_clusters, pgd_freq, "fista");
+      tol, jit_normalization, intercept, update_clusters, cd_iterations, "fista");
   } else if (solver_choice == "hybrid") {
     return std::make_unique<solvers::Hybrid>(
-      tol, jit_normalization, intercept, update_clusters, pgd_freq);
+      tol, jit_normalization, intercept, update_clusters, cd_iterations);
   } else {
     throw std::invalid_argument("solver type not recognized");
   }

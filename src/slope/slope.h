@@ -46,7 +46,7 @@ public:
     , tol(1e-4)
     , max_it(1e4)
     , path_length(100)
-    , pgd_freq(10)
+    , cd_iterations(10)
     , max_clusters(std::optional<int>())
     , lambda_type("bh")
     , centering_type("mean")
@@ -150,11 +150,11 @@ public:
   /**
    * @brief Sets the frequence of proximal gradient descent steps.
    *
-   * @param pgd_freq The frequency of the proximal gradient descent steps (or
-   * the inverse of that actually). A value of 1 means that the algorithm only
-   * runs proximal gradient descent steps.
+   * @param cd_iterations Number of inner coordinate descent iterations to
+   * perform in each iteration of the hybrid solver. If set to 0, the solver
+   * will resolve into pure PGD.
    */
-  void setHybridPgdFreq(int pgd_freq);
+  void setHybridCdIterations(int cd_iterations);
 
   /**
    * @brief Sets the lambda type for regularization weights.
@@ -312,7 +312,7 @@ private:
   double tol;
   int max_it;
   int path_length;
-  int pgd_freq;
+  int cd_iterations;
   std::optional<int> max_clusters;
   std::string lambda_type;
   std::string centering_type;

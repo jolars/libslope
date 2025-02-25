@@ -40,19 +40,19 @@ public:
    * @param intercept Whether to fit an intercept term
    * @param update_clusters Whether to update coefficient clusters during
    * optimization
-   * @param pgd_freq Frequency of proximal gradient descent updates (0 for
+   * @param cd_iterations Frequency of proximal gradient descent updates (0 for
    * coordinate descent only)
    */
   SolverBase(double tol,
              JitNormalization jit_normalization,
              bool intercept,
              bool update_clusters,
-             int pgd_freq)
+             int cd_iterations)
     : tol(tol)
     , jit_normalization(jit_normalization)
     , intercept(intercept)
     , update_clusters(update_clusters)
-    , pgd_freq(pgd_freq)
+    , cd_iterations(cd_iterations)
   {
   }
 
@@ -126,7 +126,7 @@ protected:
   JitNormalization jit_normalization; ///< JIT feature normalization strategy
   bool intercept;                     ///< If true, fits intercept term
   bool update_clusters; ///< If true, updates clusters during optimization
-  int pgd_freq;         ///< Proximal gradient descent update frequency
+  int cd_iterations;    ///< Iterations of CD
 };
 
 } // namespace solvers

@@ -30,7 +30,7 @@ namespace solvers {
  *   can only merge, not split, clusters.
  * cases
  *
- * The switching between methods is controlled by the pgd_freq parameter, which
+ * The switching between methods is controlled by the cd_iterations parameter, which
  * determines how often PGD steps are taken versus CD steps.
  */
 class Hybrid : public SolverBase
@@ -42,14 +42,14 @@ public:
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
    * @param update_clusters If true, updates clusters during optimization
-   * @param pgd_freq Frequency of proximal gradient descent updates
+   * @param cd_iterations Frequency of proximal gradient descent updates
    */
   Hybrid(double tol,
          JitNormalization jit_normalization,
          bool intercept,
          bool update_clusters,
-         int pgd_freq)
-    : SolverBase(tol, jit_normalization, intercept, update_clusters, pgd_freq)
+         int cd_iterations)
+    : SolverBase(tol, jit_normalization, intercept, update_clusters, cd_iterations)
   {
   }
 
@@ -145,7 +145,7 @@ private:
 
     VectorXd residual = eta - z;
 
-    for (int it = 0; it < this->pgd_freq; ++it) {
+    for (int it = 0; it < this->cd_iterations; ++it) {
       coordinateDescent(beta0,
                         beta,
                         residual,
