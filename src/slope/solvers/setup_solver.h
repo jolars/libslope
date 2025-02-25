@@ -13,7 +13,7 @@ namespace slope {
  * with various configurations possible.
  *
  * @param solver_type Type of solver to use (e.g., "pgd", "admm")
- * @param loss Type of loss function ("gaussian", "binomial",
+ * @param loss Type of loss function ("quadratic", "logistic",
  * "poisson", "multinomial")
  * @param tol Convergence tolerance for the solver
  * @param jit_normalization Type of JIT normalization

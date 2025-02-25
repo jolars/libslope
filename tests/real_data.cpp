@@ -8,13 +8,13 @@
 #include <slope/slope.h>
 #include <unistd.h>
 
-TEST_CASE("Abalone dataset", "[realdata][poisson][gaussian]")
+TEST_CASE("Abalone dataset", "[realdata][poisson][quadratic]")
 {
   auto [x, y] = loadData("tests/data/abalone.csv");
 
   slope::Slope model;
 
-  for (const std::string& loss : { "poisson", "gaussian" }) {
+  for (const std::string& loss : { "poisson", "quadratic" }) {
     DYNAMIC_SECTION("Loss: " << loss)
     {
       model.setLoss(loss);

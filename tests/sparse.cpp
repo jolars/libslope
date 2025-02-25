@@ -5,7 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 
-TEST_CASE("Sparse and dense methods agree", "[gaussian][sparse]")
+TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
 {
   using namespace Catch::Matchers;
 

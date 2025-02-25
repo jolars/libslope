@@ -5,7 +5,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Guassian, simple design", "[gaussian]")
+TEST_CASE("Guassian, simple design", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
@@ -46,7 +46,7 @@ TEST_CASE("Guassian, simple design", "[gaussian]")
   REQUIRE(gap <= (primal + 1e-10) * 1e-4);
 }
 
-TEST_CASE("Gaussian, X is identity", "[gaussian]")
+TEST_CASE("Quadratic, X is identity", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
@@ -75,7 +75,7 @@ TEST_CASE("Gaussian, X is identity", "[gaussian]")
   REQUIRE(gap < primal * 1e-4);
 }
 
-TEST_CASE("Gaussian, automatic lambda and alpha", "[gaussian]")
+TEST_CASE("Quadratic, automatic lambda and alpha", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
@@ -93,7 +93,7 @@ TEST_CASE("Gaussian, automatic lambda and alpha", "[gaussian]")
   REQUIRE_NOTHROW(model.path(x, y));
 }
 
-TEST_CASE("Gaussian, various models", "[gaussian]")
+TEST_CASE("Quadratic, various models", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
@@ -133,7 +133,7 @@ TEST_CASE("Gaussian, various models", "[gaussian]")
   slope::Slope model;
 
   model.setTol(1e-8);
-  model.setLoss("gaussian");
+  model.setLoss("quadratic");
   model.setDiagnostics(true);
 
   SECTION("No intercept, no standardization")

@@ -12,8 +12,8 @@ Poisson::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 
 double
 Poisson::dual(const Eigen::MatrixXd& theta,
-              const Eigen::MatrixXd& y,
-              const Eigen::VectorXd&)
+                  const Eigen::MatrixXd& y,
+                  const Eigen::VectorXd&)
 {
   const Eigen::ArrayXd e = theta + y;
 
@@ -32,9 +32,9 @@ Poisson::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 
 void
 Poisson::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                         Eigen::VectorXd& z,
-                                         const Eigen::VectorXd& eta,
-                                         const Eigen::VectorXd& y)
+                                             Eigen::VectorXd& z,
+                                             const Eigen::VectorXd& eta,
+                                             const Eigen::VectorXd& y)
 {
   w = eta.array().exp();
   z = eta.array() - 1.0 + y.array() / w.array();
@@ -52,8 +52,8 @@ Poisson::preprocessResponse(const Eigen::MatrixXd& y)
 
 void
 Poisson::updateIntercept(Eigen::VectorXd& beta0,
-                         const Eigen::MatrixXd& eta,
-                         const Eigen::MatrixXd& y)
+                             const Eigen::MatrixXd& eta,
+                             const Eigen::MatrixXd& y)
 {
   Eigen::VectorXd residual = this->residual(eta, y);
   double grad = residual.mean();

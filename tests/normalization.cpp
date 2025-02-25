@@ -173,7 +173,7 @@ TEST_CASE("Normalization, JIT modify-X", "[normalization]")
   slope::Slope model;
 
   model.setTol(1e-4);
-  model.setLoss("gaussian");
+  model.setLoss("quadratic");
   model.setNormalization("standardization");
   model.setModifyX(true);
   model.setIntercept(false);
@@ -294,7 +294,7 @@ TEST_CASE("Normalization, loop combinations", "[normalization]")
 {
   slope::Slope model;
 
-  model.setLoss("gaussian");
+  model.setLoss("quadratic");
   model.setDiagnostics(true);
 
   Eigen::MatrixXd x(3, 2);

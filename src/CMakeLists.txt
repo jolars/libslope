@@ -4,8 +4,8 @@ add_library(
   slope/kkt_check.cpp
   slope/math.cpp
   slope/normalize.cpp
-  slope/losses/binomial.cpp
-  slope/losses/gaussian.cpp
+  slope/losses/logistic.cpp
+  slope/losses/quadratic.cpp
   slope/losses/multinomial.cpp
   slope/losses/poisson.cpp
   slope/losses/setup_loss.cpp

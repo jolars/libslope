@@ -1,11 +1,11 @@
-#include "binomial.h"
+#include "logistic.h"
 #include "../constants.h"
 #include "../math.h"
 
 namespace slope {
 
 double
-Binomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
+Logistic::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
   double loss =
     eta.array().exp().log1p().sum() - y.reshaped().dot(eta.reshaped());
@@ -13,9 +13,9 @@ Binomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 }
 
 double
-Binomial::dual(const Eigen::MatrixXd& theta,
-               const Eigen::MatrixXd& y,
-               const Eigen::VectorXd&)
+Logistic::dual(const Eigen::MatrixXd& theta,
+                   const Eigen::MatrixXd& y,
+                   const Eigen::VectorXd&)
 {
   using Eigen::log;
 
@@ -26,13 +26,13 @@ Binomial::dual(const Eigen::MatrixXd& theta,
 }
 
 Eigen::MatrixXd
-Binomial::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
+Logistic::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
   return 1.0 / (1.0 + (-eta).array().exp()) - y.array();
 }
 
 Eigen::MatrixXd
-Binomial::preprocessResponse(const Eigen::MatrixXd& y)
+Logistic::preprocessResponse(const Eigen::MatrixXd& y)
 {
   // Check if the response is in {0, 1} and convert it otherwise
   Eigen::MatrixXd y_clamped = y.array().min(1.0).max(0.0);
@@ -46,10 +46,10 @@ Binomial::preprocessResponse(const Eigen::MatrixXd& y)
 }
 
 void
-Binomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                          Eigen::VectorXd& z,
-                                          const Eigen::VectorXd& eta,
-                                          const Eigen::VectorXd& y)
+Logistic::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
+                                              Eigen::VectorXd& z,
+                                              const Eigen::VectorXd& eta,
+                                              const Eigen::VectorXd& y)
 {
   Eigen::ArrayXd pr =
     (1.0 / (1.0 + (-eta.array()).exp())).min(1.0 - p_min).max(p_min);
@@ -58,7 +58,7 @@ Binomial::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
 }
 
 Eigen::MatrixXd
-Binomial::link(const Eigen::MatrixXd& eta)
+Logistic::link(const Eigen::MatrixXd& eta)
 {
   return eta.unaryExpr([](const double& x) {
     return logit(std::clamp(x, constants::P_MIN, constants::P_MAX));

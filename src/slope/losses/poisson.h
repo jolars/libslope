@@ -1,8 +1,8 @@
 /**
  * @file
  * @brief Poisson loss function implementation for SLOPE algorithm
- * @details This file contains the Gaussian class which implements a Poisson
- * loss function used in the SLOPE (Sorted L-One Penalized Estimation)
+ * @details This file contains the Poisson class which implements a
+ * Poisson loss function used in the SLOPE (Sorted L-One Penalized Estimation)
  * algorithm.
  */
 
@@ -87,8 +87,8 @@ public:
 
   /**
    * @brief Updates the intercept with a
-   * gradient descent update. Unlike the Gaussian and Binomial cases, the
-   * Poisson regression intercept update is not quite as simple since the
+   * gradient descent update. Unlike the Quadratic and Logistic cases,
+   * the Poisson regression intercept update is not quite as simple since the
    * gradient is not Lipschitz continuous. Instead we use
    * a backtracking line search here.
    * @param beta0 The current intercept

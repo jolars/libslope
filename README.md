@@ -11,14 +11,14 @@ entirely through C++.
 ## Getting Started
 
 First, we define our model. Let's use logistic regression, by setting the
-loss to `"binomial"`.
+loss to `"logistic"`.
 
 ```cpp
 #include "slope.h"
 
 Slope::Model model;
 
-model.setLoss("binomial");
+model.setLoss("logistic");
 ```
 
 Next, we set the data matrix `x` and the response vector `y`. Here we use some

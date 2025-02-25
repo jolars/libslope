@@ -57,13 +57,13 @@ generateData(int n,
 
   // 3. Generate response y depending on model type.
   // Pre-calculate linear predictor if applicable.
-  if (type == "gaussian") {
-    // Gaussian: y = x*beta + noise, with noise ~ N(0,1)
+  if (type == "quadratic") {
+    // Quadratic: y = x*beta + noise, with noise ~ N(0,1)
     data.y = Eigen::VectorXd(n);
     for (int i = 0; i < n; ++i)
       data.y(i) = eta(i) + norm(rng); // noise added
-  } else if (type == "binomial") {
-    // Binomial: logistic regression, probability = logistic(x*beta) and y ~
+  } else if (type == "logistic") {
+    // Logistic: logistic regression, probability = logistic(x*beta) and y ~
     // Bernoulli(prob)
     data.y = Eigen::VectorXd(n);
     std::uniform_real_distribution<double> unif(0.0, 1.0);

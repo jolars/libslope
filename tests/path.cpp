@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
 
-TEST_CASE("Path fitting", "[path][gaussian][alpha]")
+TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 {
   using namespace Catch::Matchers;
 
@@ -32,7 +32,7 @@ TEST_CASE("Path fitting", "[path][gaussian][alpha]")
     lambda << 1.959964, 1.644854;
 
     slope::Slope model;
-    model.setLoss("gaussian");
+    model.setLoss("quadratic");
 
     auto fit = model.path(x, y, alpha, lambda);
 

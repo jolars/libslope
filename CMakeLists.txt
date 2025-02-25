@@ -42,21 +42,20 @@ if(BUILD_TESTING)
   add_executable(
     tests
     tests/assertions.cpp
-    tests/binomial.cpp
-    tests/binomial.cpp
-    tests/gaussian.cpp
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
+    tests/logistic.cpp
     tests/multinomial.cpp
+    tests/normalization.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/prox.cpp
     tests/qnorm.cpp
+    tests/quadratic.cpp
     tests/real_data.cpp
     tests/screening.cpp
     tests/sparse.cpp
-    tests/normalization.cpp
   )
   target_link_libraries(
     tests

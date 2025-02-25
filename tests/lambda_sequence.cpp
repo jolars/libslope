@@ -32,7 +32,7 @@ TEST_CASE("Test that regularization sequence generation works",
     REQUIRE_THAT(lambda2, VectorApproxEqual(lambda2_expected, 1e-6));
   }
 
-  SECTION("Gaussian sequence")
+  SECTION("Quadratic sequence")
   {
 
     Eigen::ArrayXd l1 = slope::lambdaSequence(p, q, "gaussian", n);

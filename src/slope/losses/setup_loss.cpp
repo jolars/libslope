@@ -1,23 +1,23 @@
 #include "setup_loss.h"
-#include "binomial.h"
-#include "gaussian.h"
+#include "logistic.h"
 #include "multinomial.h"
 #include "poisson.h"
+#include "quadratic.h"
 
 namespace slope {
 
 std::unique_ptr<Loss>
-setupLoss(const std::string family)
+setupLoss(const std::string& loss)
 {
-  if (family == "binomial")
-    return std::make_unique<Binomial>();
-  else if (family == "poisson")
+  if (loss == "logistic")
+    return std::make_unique<Logistic>();
+  else if (loss == "poisson")
     return std::make_unique<Poisson>();
-  else if (family == "multinomial")
+  else if (loss == "multinomial")
     return std::make_unique<Multinomial>();
 
-  // else Gaussian
-  return std::make_unique<Gaussian>();
+  // else Quadratic
+  return std::make_unique<Quadratic>();
 }
 
 }

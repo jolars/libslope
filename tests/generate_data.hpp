@@ -14,7 +14,7 @@ struct SimulatedData
 SimulatedData
 generateData(int n = 200,
              int p = 20,
-             const std::string& type = "gaussian",
+             const std::string& type = "quadratic",
              int m = 1,
              double x_sparsity = 0.3,
              double coef_sparsity = 0.2,

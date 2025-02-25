@@ -4,25 +4,25 @@
 
 namespace slope {
 /**
- * @class Binomial
- * @brief The Binomial class represents a binomial loss function.
- * @details The binomial loss function is used for binary classification
+ * @class Logistic
+ * @brief The Logistic class represents a logistic loss function.
+ * @details The logistic loss function is used for binary classification
  * problems. It calculates the loss, dual, residual, and updates weights and
  * working response.
  */
-class Binomial : public Loss
+class Logistic : public Loss
 {
 private:
   double p_min = 1e-9; /**< The minimum probability value. */
 
 public:
-  explicit Binomial()
+  explicit Logistic()
     : Loss(0.25)
   {
   }
 
   /**
-   * @brief Calculates the loss for the binomial loss function.
+   * @brief Calculates the loss for the logistic loss function.
    * @param eta The predicted values.
    * @param y The true labels.
    * @return The loss value.
@@ -30,7 +30,7 @@ public:
   double loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y);
 
   /**
-   * @brief Calculates the dual for the binomial loss function.
+   * @brief Calculates the dual for the logistic loss function.
    * @param theta The dual variables.
    * @param y The true labels.
    * @param w Weights
@@ -41,7 +41,7 @@ public:
               const Eigen::VectorXd& w);
 
   /**
-   * @brief Calculates the residual for the binomial loss function.
+   * @brief Calculates the residual for the logistic loss function.
    * @param eta The predicted values.
    * @param y The true labels.
    * @return The residual vector.
@@ -50,7 +50,7 @@ public:
                            const Eigen::MatrixXd& y);
 
   /**
-   * @brief Preprocesses the response for the Gaussian model
+   * @brief Preprocesses the response for the quadratic model
    * @details Checks if the response is in {0, 1} and converts it otherwise
    *
    * @param y Response vector (in {0,1})
@@ -59,7 +59,7 @@ public:
   Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y);
 
   /**
-   * @brief Updates the weights and working response for the binomial loss
+   * @brief Updates the weights and working response for the logistic loss
    * function.
    * @param w The weights.
    * @param z The working response.

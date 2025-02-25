@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE("Binomial, simple fixed design", "[binomial]")
+TEST_CASE("Logistic, simple fixed design", "[logistic]")
 {
   using namespace Catch::Matchers;
 
@@ -51,7 +51,7 @@ TEST_CASE("Binomial, simple fixed design", "[binomial]")
   slope::Slope model;
 
   model.setTol(1e-7);
-  model.setLoss("binomial");
+  model.setLoss("logistic");
   model.setDiagnostics(true);
 
   slope::SlopeFit fit;
@@ -113,13 +113,13 @@ TEST_CASE("Binomial, simple fixed design", "[binomial]")
   }
 }
 
-TEST_CASE("Binomial path", "[binomial]")
+TEST_CASE("Logistic path", "[logistic]")
 {
 
   slope::Slope model;
-  model.setLoss("binomial");
+  model.setLoss("logistic");
 
-  auto data = generateData(400, 50, "binomial", 1, 0.4, 0.5, 93);
+  auto data = generateData(400, 50, "logistic", 1, 0.4, 0.5, 93);
 
   model.setMaxIt(1e6);
   model.setTol(1e-4);

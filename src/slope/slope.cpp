@@ -500,7 +500,7 @@ void
 Slope::setLoss(const std::string& loss_type)
 {
   validateOption(loss_type,
-                 { "gaussian", "binomial", "poisson", "multinomial" },
+                 { "quadratic", "logistic", "poisson", "multinomial" },
                  "loss_type");
   this->loss_type = loss_type;
 }

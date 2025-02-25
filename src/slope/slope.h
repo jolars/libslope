@@ -21,7 +21,7 @@ namespace slope {
  * Class representing SLOPE (Sorted L-One Penalized Estimation) optimization.
  *
  * This class implements the SLOPE algorithm for regularized regression
- * problems. It supports different loss functions (gaussian, binomial, poisson)
+ * problems. It supports different loss functions (quadratic, logistic, poisson)
  * and provides functionality for fitting models with sorted L1 regularization
  * along a path of regularization parameters.
  */
@@ -51,7 +51,7 @@ public:
     , lambda_type("bh")
     , centering_type("mean")
     , scaling_type("sd")
-    , loss_type("gaussian")
+    , loss_type("quadratic")
     , screening_type("strong")
     , solver_type("auto")
   {
@@ -160,7 +160,7 @@ public:
    * @brief Sets the lambda type for regularization weights.
    *
    * @param lambda_type The method used to compute regularization weights.
-   * Currently "bh" (Benjamini-Hochberg), "gaussian", "oscar", and "lasso" are
+   * Currently "bh" (Benjamini-Hochberg), "quadratic", "oscar", and "lasso" are
    * supported.
    */
   void setLambdaType(const std::string& lambda_type);
@@ -170,8 +170,8 @@ public:
    *
    * @param loss_type The type of loss function to use. Supported values
    * are:
-   *                 - "gaussian": Gaussian regression
-   *                 - "binomial": Logistic regression
+   *                 - "quadratic": Quadratic regression
+   *                 - "logistic": Logistic regression
    *                 - "poisson": Poisson regression
    *                 - "multinomial": Multinomial logistic regression
    */
