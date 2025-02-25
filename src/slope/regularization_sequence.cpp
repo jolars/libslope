@@ -49,10 +49,10 @@ lambdaSequence(const int p,
       }
     }
   } else if (type == "oscar") {
-    if (theta1 <= 0) {
+    if (theta1 < 0) {
       throw std::invalid_argument("theta1 must be non-negative");
     }
-    if (theta2 <= 0) {
+    if (theta2 < 0) {
       throw std::invalid_argument("theta2 must be non-negative");
     }
     lambda = theta1 + theta2 * (p - Eigen::ArrayXd::LinSpaced(p, 1, p));
