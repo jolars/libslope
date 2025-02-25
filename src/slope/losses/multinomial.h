@@ -14,9 +14,6 @@ namespace slope {
  */
 class Multinomial : public Loss
 {
-private:
-  double p_min = 1e-9; /**< The minimum probability value. */
-
 public:
   explicit Multinomial()
     : Loss(1.0)

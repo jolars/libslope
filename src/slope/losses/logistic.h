@@ -12,9 +12,6 @@ namespace slope {
  */
 class Logistic : public Loss
 {
-private:
-  double p_min = 1e-9; /**< The minimum probability value. */
-
 public:
   explicit Logistic()
     : Loss(0.25)

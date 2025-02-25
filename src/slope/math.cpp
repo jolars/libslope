@@ -1,13 +1,11 @@
 #include "math.h"
+#include "constants.h"
 
 namespace slope {
 
 Eigen::VectorXd
 logSumExp(const Eigen::MatrixXd& a)
 {
-  // p_min prevents taking log(0) by ensuring a lower bound.
-  const double p_min = 1e-9;
-
   // For numerical stability subtract each row's maximum.
   Eigen::VectorXd max_vals = a.rowwise().maxCoeff();
 
@@ -16,7 +14,7 @@ logSumExp(const Eigen::MatrixXd& a)
     (a.colwise() - max_vals).array().exp().rowwise().sum();
 
   // Return the stabilized log-sum-exp, ensuring the sum is at least p_min.
-  return max_vals.array() + sum_exp.max(p_min).log();
+  return max_vals.array() + sum_exp.max(constants::P_MIN).log();
 }
 
 Eigen::MatrixXd

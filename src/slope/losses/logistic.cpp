@@ -14,13 +14,14 @@ Logistic::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 
 double
 Logistic::dual(const Eigen::MatrixXd& theta,
-                   const Eigen::MatrixXd& y,
-                   const Eigen::VectorXd&)
+               const Eigen::MatrixXd& y,
+               const Eigen::VectorXd&)
 {
   using Eigen::log;
 
   // Clamp probabilities to [p_min, 1-p_min]
-  Eigen::ArrayXd pr = (theta + y).array().min(1.0 - p_min).max(p_min);
+  Eigen::ArrayXd pr =
+    (theta + y).array().min(constants::P_MAX).max(constants::P_MIN);
 
   return -(pr * log(pr) + (1.0 - pr) * log(1.0 - pr)).mean();
 }
@@ -47,12 +48,13 @@ Logistic::preprocessResponse(const Eigen::MatrixXd& y)
 
 void
 Logistic::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                              Eigen::VectorXd& z,
-                                              const Eigen::VectorXd& eta,
-                                              const Eigen::VectorXd& y)
+                                          Eigen::VectorXd& z,
+                                          const Eigen::VectorXd& eta,
+                                          const Eigen::VectorXd& y)
 {
-  Eigen::ArrayXd pr =
-    (1.0 / (1.0 + (-eta.array()).exp())).min(1.0 - p_min).max(p_min);
+  Eigen::ArrayXd pr = (1.0 / (1.0 + (-eta.array()).exp()))
+                        .min(constants::P_MAX)
+                        .max(constants::P_MIN);
   w = pr * (1.0 - pr);
   z = eta.array() + (y.array() - pr) / w.array();
 }
