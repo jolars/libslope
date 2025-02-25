@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.17.0](https://github.com/jolars/libslope/compare/v0.16.0...v0.17.0) (2025-02-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* rename `setHybridPgdFreq()` to `setHybridCdIterations()`
+* rename `setmaxIt()` to `setMaxIterations()`
+* rename loss function
+* remove `setMaxItInner()`
+
+### Features
+
+* remove `setMaxItInner()` ([3538cd1](https://github.com/jolars/libslope/commit/3538cd1d64f3f438be33693d276a16aceeaa0495))
+* rename `setHybridPgdFreq()` to `setHybridCdIterations()` ([3c391c1](https://github.com/jolars/libslope/commit/3c391c1ae98228a2c1e89808bcc17b651a991914))
+* rename `setmaxIt()` to `setMaxIterations()` ([5d66dde](https://github.com/jolars/libslope/commit/5d66dde5d2612259a06fffdb093a594aca9dd38b))
+* rename loss function ([7d5bfce](https://github.com/jolars/libslope/commit/7d5bfceb5ed6eed8c86f62d55fd07f4604962201))
+
+
+### Bug Fixes
+
+* add log(y!) to poisson primal and duals ([e4be976](https://github.com/jolars/libslope/commit/e4be9763a39876e74ed4b4d10a7067b17bdcfc44))
+
 ## [0.16.0](https://github.com/jolars/libslope/compare/v0.15.2...v0.16.0) (2025-02-24)
 
 
