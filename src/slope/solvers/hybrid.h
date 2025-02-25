@@ -8,6 +8,7 @@
 
 #include "hybrid_cd.h"
 #include "hybrid_pgd.h"
+#include "pgd.h"
 #include "slope/clusters.h"
 #include "slope/constants.h"
 #include "slope/losses/loss.h"
@@ -124,111 +125,50 @@ private:
 
     const int n = x.rows();
 
+    solvers::PGD pgd_solver(tol,
+                            max_it_inner,
+                            jit_normalization,
+                            intercept,
+                            update_clusters,
+                            10,
+                            "pgd");
+
+    // Run proximal gradient descent
+    pgd_solver.run(beta0,
+                   beta,
+                   eta,
+                   clusters,
+                   lambda,
+                   loss,
+                   penalty,
+                   gradient_in,
+                   working_set,
+                   x,
+                   x_centers,
+                   x_scales,
+                   y);
+
+    clusters.update(beta);
+
     VectorXd w = VectorXd::Ones(n);
     VectorXd z = y;
     loss->updateWeightsAndWorkingResponse(w, z, eta, y);
-    VectorXd w_sqrt = w.cwiseSqrt();
 
     VectorXd residual = eta - z;
-    MatrixXd gradient = gradient_in;
 
-    for (int it = 0; it < this->max_it_inner; ++it) {
-      if (it % this->pgd_freq == 0) {
-        double g = residual.cwiseAbs2().dot(w) / (2.0 * n);
-        double h = penalty.eval(beta(working_set, Eigen::all).reshaped(),
-                                lambda.head(working_set.size()));
-        double primal_inner = g + h;
-
-        updateGradient(gradient,
-                       x,
-                       residual,
-                       working_set,
-                       x_centers,
-                       x_scales,
-                       w,
-                       this->jit_normalization);
-
-        VectorXd theta = residual;
-
-        // First compute gradient with potential offset for intercept case
-        MatrixXd dual_gradient = gradient;
-        if (this->intercept) {
-          Eigen::VectorXd theta_mean(1);
-          theta_mean(0) = theta.mean();
-          theta.array() -= theta_mean(0);
-
-          offsetGradient(dual_gradient,
-                         x,
-                         theta_mean,
-                         working_set,
-                         x_centers,
-                         x_scales,
-                         jit_normalization);
-        }
-
-        // Obtain a feasible dual point by dual scaling
-        double dual_norm =
-          penalty.dualNorm(dual_gradient(working_set, Eigen::all).reshaped(),
-                           lambda.head(working_set.size()));
-        theta.array() /= std::max(1.0, dual_norm);
-
-        double dual_inner = ((-theta).cwiseProduct(w).dot(z) -
-                             0.5 * theta.cwiseAbs2().cwiseProduct(w).sum()) /
-                            n;
-
-        double dual_gap_inner = primal_inner - dual_inner;
-
-        assert(dual_gap_inner > -1e-5 && "Inner dual gap should be positive");
-
-        double tol_inner =
-          (std::abs(primal_inner) + constants::EPSILON) * this->tol;
-
-        if (std::max(dual_gap_inner, 0.0) <= tol_inner) {
-          break;
-        }
-
-        proximalGradientDescent(beta0,
-                                beta,
-                                residual,
-                                this->pgd_learning_rate,
-                                lambda,
-                                gradient,
-                                working_set,
-                                x,
-                                w,
-                                z,
-                                penalty,
-                                x_centers,
-                                x_scales,
-                                g,
-                                this->intercept,
-                                this->jit_normalization,
-                                this->pgd_learning_rate_decr);
-
-        // TODO: We might be able to speed up cluster updating since we know
-        // betas outside the active set cannot have changed
-        clusters.update(beta);
-      } else {
-        coordinateDescent(beta0,
-                          beta,
-                          residual,
-                          clusters,
-                          lambda,
-                          x,
-                          w,
-                          x_centers,
-                          x_scales,
-                          this->intercept,
-                          this->jit_normalization,
-                          this->update_clusters);
-      }
-
-      // Update intercept term
-      if (intercept) {
-        double intercept_update = residual.dot(w) / n;
-        beta0(0) -= intercept_update;
-        residual.array() -= intercept_update;
-      }
+    for (int it = 0; it < this->pgd_freq; ++it) {
+      coordinateDescent(beta0,
+                        beta,
+                        residual,
+                        clusters,
+                        lambda,
+                        x,
+                        w,
+                        x_centers,
+                        x_scales,
+                        this->intercept,
+                        this->jit_normalization,
+                        this->update_clusters);
     }
 
     // The residual is kept up to date, but not eta. So we need to compute
@@ -240,8 +180,8 @@ private:
   double pgd_learning_rate =
     1.0; ///< Learning rate for proximal gradient descent steps
   double pgd_learning_rate_decr =
-    0.5; ///< Learning rate decrease factor on failed PGD steps
-  int max_it_inner = 10000; ///< Maximum number of inner iterations
+    0.5;                 ///< Learning rate decrease factor on failed PGD steps
+  int max_it_inner = 10; ///< Maximum number of inner iterations
 };
 
 } // namespace solvers
