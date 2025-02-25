@@ -471,15 +471,6 @@ Slope::setMaxIt(int max_it)
 }
 
 void
-Slope::setMaxItInner(int max_it_inner)
-{
-  if (max_it_inner < 1) {
-    throw std::invalid_argument("max_it_inner must be >= 1");
-  }
-  this->max_it_inner = max_it_inner;
-}
-
-void
 Slope::setPathLength(int path_length)
 {
   if (path_length < 1) {

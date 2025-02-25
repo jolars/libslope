@@ -35,7 +35,6 @@ TEST_CASE("Assertions", "[assertions]")
   SECTION("Invalid max iterations")
   {
     REQUIRE_THROWS(model.setMaxIt(0));
-    REQUIRE_THROWS(model.setMaxItInner(-1));
   }
 
   SECTION("Invalid early stopping criteria")

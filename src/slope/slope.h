@@ -45,7 +45,6 @@ public:
     , q(0.1)
     , tol(1e-4)
     , max_it(1e4)
-    , max_it_inner(1e6)
     , path_length(100)
     , pgd_freq(10)
     , max_clusters(std::optional<int>())
@@ -140,14 +139,6 @@ public:
    * the solver.
    */
   void setMaxIt(int max_it);
-
-  /**
-   * @brief Sets the maximum number of inner iterations.
-   *
-   * @param max_it_inner Sets the maximum number of inner iterations for solvers
-   * that use an inner loop. Must be positive.
-   */
-  void setMaxItInner(int max_it_inner);
 
   /**
    * @brief Sets the path length.
@@ -320,7 +311,6 @@ private:
   double theta2;
   double tol;
   int max_it;
-  int max_it_inner;
   int path_length;
   int pgd_freq;
   std::optional<int> max_clusters;
