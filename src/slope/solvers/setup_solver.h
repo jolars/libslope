@@ -13,7 +13,6 @@ namespace slope {
  * with various configurations possible.
  *
  * @param solver_type Type of solver to use (e.g., "pgd", "admm")
- * @param tol Convergence tolerance for the solver
  * @param jit_normalization Type of JIT normalization
  * @param intercept Whether to fit an intercept term
  * @param update_clusters Whether to update cluster assignments during
