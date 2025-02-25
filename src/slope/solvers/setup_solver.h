@@ -23,6 +23,11 @@ namespace slope {
  *
  * @return std::unique_ptr<solvers::SolverBase> A unique pointer to the
  * configured solver
+ * @see Loss
+ * @see JitNormalization
+ * @see solvers::SolverBase
+ * @see solvers::PGD
+ * @see solvers::Hybrid
  */
 std::unique_ptr<solvers::SolverBase>
 setupSolver(const std::string& solver_type,
