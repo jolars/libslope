@@ -21,10 +21,13 @@ namespace solvers {
  * @brief Hybrid CD-PGD solver for SLOPE
  *
  * This solver alternates between coordinate descent (CD) and proximal gradient
- * descent (PGD) steps to solve the SLOPE optimization problem. The hybrid
- * approach aims to combine the benefits of both methods:
- * - CD: Efficient updates for sparse solutions
- * - PGD: Better handling of correlated features and faster convergence in some
+ * descent (PGD) steps to solve the SLOPE optimization problem. Because
+ * the SLOPE problem is non-separable, CD steps do not work out-of-the-box.
+ * In particular, they cannot be used to split he clusters (or would need
+ * to be augmented with additional steps). Instead, we use a hybrid method:
+ * - PGD: Splits (or merges) clusters
+ * - CD: Coordinate descent over the clusters, with good performance but
+ *   can only merge, not split, clusters.
  * cases
  *
  * The switching between methods is controlled by the pgd_freq parameter, which
