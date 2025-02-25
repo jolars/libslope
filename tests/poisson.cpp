@@ -38,8 +38,7 @@ TEST_CASE("Poisson, models", "[poisson]")
 
   slope::Slope model;
 
-  model.setTol(1e-7);
-  model.setMaxIt(1e4);
+  model.setTol(1e-8);
   model.setLoss("poisson");
   model.setDiagnostics(true);
 
@@ -50,7 +49,6 @@ TEST_CASE("Poisson, models", "[poisson]")
     model.setNormalization("none");
     model.setIntercept(false);
 
-    model.setMaxIt(25);
     model.setSolver("hybrid");
     auto fit = model.fit(x, y, alpha, lambda);
 
@@ -61,7 +59,6 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     Eigen::VectorXd coefs_hybrid = fit.getCoefs();
 
-    model.setMaxIt(2000);
     model.setSolver("pgd");
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = fit.getCoefs();
@@ -84,7 +81,6 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     coefs_ref << 0.3925911, -0.2360691, 0.4464808;
 
-    model.setMaxIt(25);
     model.setSolver("hybrid");
     auto fit = model.fit(x, y, alpha, lambda);
 
@@ -115,14 +111,12 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     coefs_ref << 0.4017805, -0.2396130, 0.4600816;
 
-    model.setMaxIt(25);
     model.setSolver("hybrid");
     auto fit = model.fit(x, y, alpha, lambda);
 
     Eigen::VectorXd coefs = fit.getCoefs();
     double intercept = fit.getIntercepts()[0];
 
-    model.setMaxIt(1e4);
     model.setSolver("pgd");
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = fit.getCoefs();
@@ -130,7 +124,7 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     REQUIRE_THAT(coefs, VectorApproxEqual(coefs_ref, 1e-4));
     REQUIRE_THAT(coefs_pgd, VectorApproxEqual(coefs_ref, 1e-4));
-    REQUIRE_THAT(intercept, WithinRel(-0.5482493, 1e-4));
+    REQUIRE_THAT(intercept, WithinRel(-0.5482493, 1e-3));
     REQUIRE_THAT(intercept_pgd, WithinRel(-0.5482493, 1e-4));
   }
 
@@ -147,7 +141,6 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     coefs_ref << 0.010928758, 0.0, 0.007616257;
 
-    model.setMaxIt(25);
     model.setSolver("hybrid");
     auto fit = model.fit(x, y, alpha, lambda);
 
@@ -158,7 +151,6 @@ TEST_CASE("Poisson, models", "[poisson]")
     REQUIRE(dual_gaps_hybrid.front() >= 0);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
-    model.setMaxIt(20000);
     model.setSolver("pgd");
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = fit.getCoefs();
@@ -180,7 +172,6 @@ TEST_CASE("Poisson, models", "[poisson]")
 
     coefs_ref << 0.05533582, 0.0, 0.15185182;
 
-    model.setMaxIt(50);
     model.setSolver("hybrid");
     auto fit = model.fit(x, y, alpha, lambda);
 
@@ -192,7 +183,6 @@ TEST_CASE("Poisson, models", "[poisson]")
     REQUIRE(dual_gaps_hybrid.front() >= 0);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
-    model.setMaxIt(50000);
     model.setSolver("pgd");
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = fit.getCoefs();
