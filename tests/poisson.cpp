@@ -92,7 +92,7 @@ TEST_CASE("Poisson, models", "[poisson]")
     REQUIRE(dual_gaps_hybrid.front() >= 0);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
-    model.setMaxIt(1e4);
+    model.setMaxIterations(1e4);
     model.setSolver("pgd");
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_pgd = fit.getCoefs();

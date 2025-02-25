@@ -209,7 +209,7 @@ TEST_CASE("Quadratic, various models", "[quadratic]")
   {
     model.setNormalization("none");
     model.setIntercept(true);
-    model.setMaxIt(1e5);
+    model.setMaxIterations(1e5);
 
     coef_target << 0.68614138, -0.68614138, 0.00000000;
 

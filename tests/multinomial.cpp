@@ -44,7 +44,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
   model.setLoss("multinomial");
   model.setSolver("pgd");
-  model.setMaxIt(1000);
+  model.setMaxIterations(1000);
   model.setTol(1e-6);
 
   SECTION("No intercept")

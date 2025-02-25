@@ -95,7 +95,7 @@ TEST_CASE("Logistic, simple fixed design", "[logistic]")
     double intercept_target = 0.3184528;
 
     model.setSolver("pgd");
-    model.setMaxIt(1e7);
+    model.setMaxIterations(1e7);
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coef_pgd = fit.getCoefs();
     double intercept_pgd = fit.getIntercepts()[0];
@@ -121,7 +121,7 @@ TEST_CASE("Logistic path", "[logistic]")
 
   auto data = generateData(400, 50, "logistic", 1, 0.4, 0.5, 93);
 
-  model.setMaxIt(1e6);
+  model.setMaxIterations(1e6);
   model.setTol(1e-4);
   model.setSolver("pgd");
   auto fit = model.path(data.x, data.y);

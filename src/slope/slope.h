@@ -138,7 +138,7 @@ public:
    * be positive. If negative (the default), then the value will be decided by
    * the solver.
    */
-  void setMaxIt(int max_it);
+  void setMaxIterations(int max_it);
 
   /**
    * @brief Sets the path length.
