@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/jolars/libslope/compare/v0.17.0...v0.17.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* allow oscar parameters that are 0 ([1627a1e](https://github.com/jolars/libslope/commit/1627a1ea700aa9a155892d45e2992437da9c2070))
+
 ## [0.17.0](https://github.com/jolars/libslope/compare/v0.16.0...v0.17.0) (2025-02-25)
 
 
