@@ -249,6 +249,12 @@ coordinateDescent(Eigen::VectorXd& beta0,
       clusters.setCoeff(j, std::abs(c_tilde));
     }
   }
+
+  if (intercept) {
+    double beta0_update = residual.dot(w) / n;
+    residual.array() -= beta0_update;
+    beta0(0) -= beta0_update;
+  }
 }
 
 } // namespace solvers
