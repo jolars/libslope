@@ -57,6 +57,12 @@ Slope::path(T& x,
   MatrixXd beta = MatrixXd::Zero(p, m);
 
   MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
+
+  if (this->intercept) {
+    beta0 = loss->link(y.colwise().mean()).transpose();
+    eta.rowwise() = beta0.reshaped().transpose();
+  }
+
   MatrixXd residual = loss->residual(eta, y);
   MatrixXd gradient(p, m);
 
@@ -132,6 +138,7 @@ Slope::path(T& x,
   // Path variables
   std::vector<double> duals, primals, time;
   double null_deviance = loss->nullDeviance(y, intercept);
+  double null_primal = loss->loss(eta, y);
 
   Timer timer;
 
