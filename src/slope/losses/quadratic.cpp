@@ -10,8 +10,8 @@ Quadratic::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 
 double
 Quadratic::dual(const Eigen::MatrixXd& theta,
-                    const Eigen::MatrixXd& y,
-                    const Eigen::VectorXd&)
+                const Eigen::MatrixXd& y,
+                const Eigen::VectorXd&)
 {
   const int n = y.rows();
 
@@ -32,9 +32,9 @@ Quadratic::preprocessResponse(const Eigen::MatrixXd& y)
 
 void
 Quadratic::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                               Eigen::VectorXd& z,
-                                               const Eigen::VectorXd&,
-                                               const Eigen::VectorXd& y)
+                                           Eigen::VectorXd& z,
+                                           const Eigen::VectorXd&,
+                                           const Eigen::VectorXd& y)
 {
   w.setOnes();
   z = y;
