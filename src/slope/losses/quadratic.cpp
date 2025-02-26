@@ -41,9 +41,9 @@ Quadratic::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
 }
 
 Eigen::MatrixXd
-Quadratic::link(const Eigen::MatrixXd& eta)
+Quadratic::link(const Eigen::MatrixXd& mu)
 {
-  return eta;
+  return mu;
 }
 
 // double

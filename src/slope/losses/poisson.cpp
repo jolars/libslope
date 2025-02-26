@@ -63,9 +63,9 @@ Poisson::updateIntercept(Eigen::VectorXd& beta0,
 }
 
 Eigen::MatrixXd
-Poisson::link(const Eigen::MatrixXd& eta)
+Poisson::link(const Eigen::MatrixXd& mu)
 {
-  return eta.array().log();
+  return mu.array().log();
 }
 
 } // namespace slope

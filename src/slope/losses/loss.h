@@ -106,10 +106,10 @@ public:
 
   /**
    * @brief The link function
-   * @param eta Linear predictor.
-   * @return The result of applyin the link function.
+   * @param mu Mean.
+   * @return The result of applying the link function.
    */
-  virtual Eigen::MatrixXd link(const Eigen::MatrixXd& eta) = 0;
+  virtual Eigen::MatrixXd link(const Eigen::MatrixXd& mu) = 0;
 
   /**
    * @brief Computes deviance, which is just twice the loss function
@@ -143,6 +143,13 @@ public:
 
     return deviance(eta, y);
   }
+
+  /**
+   * @brief Computes null deviance.
+   * @param beta The response matrix.
+   * @param intercept Whether an intercept should be fit.
+   */
+  virtual void adjustResponse(Eigen::MatrixXd&) {}
 
 protected:
   /**

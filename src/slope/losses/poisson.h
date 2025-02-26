@@ -101,10 +101,10 @@ public:
 
   /**
    * @brief The link function
-   * @param eta Linear predictor.
+   * @param mu Mean.
    * @return The result of applying the link function.
    */
-  Eigen::MatrixXd link(const Eigen::MatrixXd& eta) override;
+  Eigen::MatrixXd link(const Eigen::MatrixXd& mu) override;
 };
 
 } // namespace slope

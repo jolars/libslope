@@ -104,9 +104,9 @@ public:
   /**
    * @brief The link function
    * @param eta Linear predictor.
-   * @return The result of applyin the link function.
+   * @return The result of applying the link function.
    */
-  Eigen::MatrixXd link(const Eigen::MatrixXd& eta);
+  Eigen::MatrixXd link(const Eigen::MatrixXd& mu);
 };
 
 } // namespace slope

@@ -60,9 +60,9 @@ Logistic::updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
 }
 
 Eigen::MatrixXd
-Logistic::link(const Eigen::MatrixXd& eta)
+Logistic::link(const Eigen::MatrixXd& mu)
 {
-  return eta.unaryExpr([](const double& x) {
+  return mu.unaryExpr([](const double& x) {
     return logit(std::clamp(x, constants::P_MIN, constants::P_MAX));
   });
 }

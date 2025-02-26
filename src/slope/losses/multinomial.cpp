@@ -75,9 +75,9 @@ Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd&,
 }
 
 Eigen::MatrixXd
-Multinomial::link(const Eigen::MatrixXd& eta)
+Multinomial::link(const Eigen::MatrixXd& mu)
 {
-  return eta.unaryExpr([](const double& x) {
+  return mu.unaryExpr([](const double& x) {
     return logit(std::clamp(x, constants::P_MIN, constants::P_MAX));
   });
 }
