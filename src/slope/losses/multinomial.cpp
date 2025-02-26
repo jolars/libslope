@@ -70,8 +70,7 @@ Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd&,
                                              const Eigen::VectorXd&,
                                              const Eigen::VectorXd&)
 {
-  // Not implemented
-  // TODO: Create not-implmented error, maybe as part of parent class.
+  throw std::runtime_error("Multinomial loss does not currently support IRLS");
 }
 
 Eigen::MatrixXd
