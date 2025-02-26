@@ -237,4 +237,22 @@ TEST_CASE("Quadratic, various models", "[quadratic]")
     REQUIRE(passes > 0);
     REQUIRE(passes < 1e5);
   }
+
+  SECTION("mtcars data")
+  {
+    Eigen::MatrixXd x(32, 1);
+    Eigen::MatrixXd y(32, 1);
+
+    x << 21.0, 21.0, 22.8, 21.4, 18.7, 18.1, 14.3, 24.4, 22.8, 19.2, 17.8, 16.4,
+      17.3, 15.2, 10.4, 10.4, 14.7, 32.4, 30.4, 33.9, 21.5, 15.5, 15.2, 13.3,
+      19.2, 27.3, 26.0, 30.4, 15.8, 19.7, 15.0, 21.4;
+    y << 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+      0, 1, 0, 1, 0, 0, 0, 1;
+
+    slope::Slope model;
+
+    model.setPathLength(1);
+
+    REQUIRE_NOTHROW(model.path(x, y));
+  }
 }
