@@ -20,18 +20,10 @@ logSumExp(const Eigen::MatrixXd& a)
 Eigen::MatrixXd
 softmax(const Eigen::MatrixXd& a)
 {
-  int m = a.cols();
-
-  Eigen::VectorXd max_vals = a.rowwise().maxCoeff();
-
-  Eigen::MatrixXd out = (a.colwise() - max_vals).array().exp();
-  Eigen::ArrayXd row_sums = out.rowwise().sum();
-
-  for (int k = 0; k < m; ++k) {
-    out.col(k).array() /= row_sums;
-  }
-
-  return out;
+  Eigen::VectorXd shift = a.rowwise().maxCoeff();
+  Eigen::MatrixXd exp_a = (a.colwise() - shift).array().exp();
+  Eigen::ArrayXd row_sums = exp_a.rowwise().sum();
+  return exp_a.array().colwise() / row_sums;
 }
 
 std::vector<int>
