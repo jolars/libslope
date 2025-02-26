@@ -1,4 +1,5 @@
 #include "generate_data.hpp"
+#include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -93,4 +94,18 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     REQUIRE(deviances.size() < 100);
     REQUIRE_THAT(deviances, VectorMonotonic(false, true));
   }
+}
+
+TEST_CASE("Multinomial wine data", "[multinomial]")
+{
+  auto [x, y] = loadData("tests/data/wine.csv");
+
+  slope::Slope model;
+
+  model.setLoss("multinomial");
+
+  auto path = model.path(x, y);
+
+  REQUIRE(path.getDeviance().back() > 0);
+  REQUIRE(path.getDeviance().size() > 5);
 }
