@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.2](https://github.com/jolars/libslope/compare/v0.17.1...v0.17.2) (2025-02-26)
+
+
+### Performance Improvements
+
+* start the fit with the intercept completely fit ([122b41e](https://github.com/jolars/libslope/commit/122b41ec73a65acfb1dc7b7999956e61e531fcbe))
+* use `colwise()` in softmax ([f108172](https://github.com/jolars/libslope/commit/f108172afeed7a60152ed50c016b328d4b681e03))
+
 ## [0.17.1](https://github.com/jolars/libslope/compare/v0.17.0...v0.17.1) (2025-02-25)
 
 
