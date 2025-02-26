@@ -25,7 +25,7 @@ Multinomial::dual(const Eigen::MatrixXd& theta,
 {
   const Eigen::MatrixXd r = theta + y;
 
-  return -(r.array() * r.array().max(1e-9).log()).sum() / y.rows();
+  return -(r.array() * r.array().max(constants::P_MIN).log()).sum() / y.rows();
 }
 
 Eigen::MatrixXd
