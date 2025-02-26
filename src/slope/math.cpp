@@ -6,14 +6,10 @@ namespace slope {
 Eigen::VectorXd
 logSumExp(const Eigen::MatrixXd& a)
 {
-  // For numerical stability subtract each row's maximum.
   Eigen::VectorXd max_vals = a.rowwise().maxCoeff();
-
-  // Compute the sum of exponentials of the shifted values.
   Eigen::ArrayXd sum_exp =
     (a.colwise() - max_vals).array().exp().rowwise().sum();
 
-  // Return the stabilized log-sum-exp, ensuring the sum is at least p_min.
   return max_vals.array() + sum_exp.max(constants::P_MIN).log();
 }
 
