@@ -202,21 +202,6 @@ linearPredictor(const T& x,
     }
   }
 
-  // if (normalize_jit) {
-  //   for (int k = 0; k < m; ++k) {
-  //     for (const auto& j : active_set) {
-  //       eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
-  //       eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
-  //     }
-  //   }
-  // } else {
-  //   for (int k = 0; k < m; ++k) {
-  //     for (const auto& j : active_set) {
-  //       eta.col(k) += x.col(j) * beta(j, k);
-  //     }
-  //   }
-  // }
-
   if (intercept) {
     eta.rowwise() += beta0.transpose();
   }
