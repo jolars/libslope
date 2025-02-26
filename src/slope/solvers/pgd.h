@@ -95,7 +95,7 @@ private:
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
-    beta_old = beta(working_set, all);
+    Eigen::MatrixXd beta_old = beta(working_set, all);
     Eigen::VectorXd beta0_old = beta0;
 
     double g_old = loss->loss(eta, y);
@@ -148,8 +148,16 @@ private:
     }
 
     if (update_type == "fista") {
+      if (beta_prev.size() == 0) {
+        beta_prev = beta;
+      }
+
       this->t = 0.5 * (1.0 + std::sqrt(1.0 + 4.0 * t_old * t_old));
-      beta(working_set, all) += beta_diff * (t_old - 1.0) / this->t;
+      beta_prev(working_set, all) = beta(working_set, all);
+      beta(working_set, all) +=
+        (beta(working_set, all) - beta_prev(working_set, all)) * (t_old - 1.0) /
+        this->t;
+
       eta = linearPredictor(x,
                             working_set,
                             beta0,
@@ -165,7 +173,7 @@ private:
   double learning_rate_decr; ///< Learning rate decrease factor for line search
   std::string update_type;   ///< Update type for PGD
   double t;                  ///< FISTA step size
-  Eigen::MatrixXd beta_old;  ///< Old beta values
+  Eigen::MatrixXd beta_prev; ///< Old beta values
 };
 
 } // namespace solvers
