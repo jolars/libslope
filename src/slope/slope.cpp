@@ -138,7 +138,6 @@ Slope::path(T& x,
   // Path variables
   std::vector<double> duals, primals, time;
   double null_deviance = loss->nullDeviance(y, intercept);
-  double null_primal = loss->loss(eta, y);
 
   Timer timer;
 
