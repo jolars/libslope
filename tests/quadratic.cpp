@@ -1,9 +1,11 @@
+#include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
+#include <slope/threads.h>
 
 TEST_CASE("Guassian, simple design", "[quadratic]")
 {
@@ -255,4 +257,24 @@ TEST_CASE("Quadratic, various models", "[quadratic]")
 
     REQUIRE_NOTHROW(model.path(x, y));
   }
+}
+
+TEST_CASE("Guassian parallel", "[quadratic]")
+{
+  using namespace Catch::Matchers;
+
+  auto data = generateData(1000, 20);
+
+  slope::Slope model;
+
+  slope::Threads::set(1);
+  auto fit_par = model.fit(data.x, data.y);
+
+  slope::Threads::set(2);
+  auto fit_seq = model.fit(data.x, data.y);
+
+  Eigen::VectorXd coefs_par = fit_par.getCoefs();
+  Eigen::VectorXd coefs_seq = fit_seq.getCoefs();
+
+  REQUIRE_THAT(coefs_par, VectorApproxEqual(coefs_seq));
 }

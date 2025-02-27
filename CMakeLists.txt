@@ -42,6 +42,7 @@ if(BUILD_TESTING)
   add_executable(
     tests
     tests/assertions.cpp
+    tests/benchmarks.cpp
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
