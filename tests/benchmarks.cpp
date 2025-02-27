@@ -77,3 +77,29 @@ TEST_CASE("Path screening benchmarks", "[!benchmark]")
     model.path(data.x, data.y);
   };
 }
+
+TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
+{
+  const int p = 1000;
+  const int n = 100;
+
+  auto data = generateData(n, p, "quadratic", 1, 1, 0.01);
+
+  slope::Slope model;
+
+  model.setSolver("fista");
+
+  double alpha = 0.1;
+
+  BENCHMARK("Strong rule screening")
+  {
+    model.setScreening("strong");
+    model.fit(data.x, data.y, alpha);
+  };
+
+  BENCHMARK("No screening")
+  {
+    model.setScreening("none");
+    model.fit(data.x, data.y, alpha);
+  };
+}
