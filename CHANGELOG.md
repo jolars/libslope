@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.18.0](https://github.com/jolars/libslope/compare/v0.17.3...v0.18.0) (2025-02-27)
+
+
+### Features
+
+* parallelize gradient computations ([#89](https://github.com/jolars/libslope/issues/89)) ([30aa617](https://github.com/jolars/libslope/commit/30aa617f316adb5f34597e38ea9823a84d9d49e2))
+
+
+### Bug Fixes
+
+* avoid repeating duals, primals, and time ([90dd5bf](https://github.com/jolars/libslope/commit/90dd5bf5c5893a1a246fac48e6663bdcc27acf54))
+* handle `path_length = 1` case ([50e2a3e](https://github.com/jolars/libslope/commit/50e2a3e57d11b62d01582c700f1e56a8fceb004c))
+
 ## [0.17.3](https://github.com/jolars/libslope/compare/v0.17.2...v0.17.3) (2025-02-26)
 
 
