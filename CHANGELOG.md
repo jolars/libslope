@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.19.0](https://github.com/jolars/libslope/compare/v0.18.0...v0.19.0) (2025-02-27)
+
+
+### Features
+
+* check x_scales for zero-variance ([965c007](https://github.com/jolars/libslope/commit/965c007af29074463a664f218dd8a5a9cc2d5888))
+
+
+### Bug Fixes
+
+* move timer into path loop ([95cb6bd](https://github.com/jolars/libslope/commit/95cb6bdbd22de27789cac37d09015e5b2f1d58a4))
+* return correct indices from `kktCheck()` ([c87496d](https://github.com/jolars/libslope/commit/c87496da2b186d7169417ac6841ba13d8bf2aa50))
+
 ## [0.18.0](https://github.com/jolars/libslope/compare/v0.17.3...v0.18.0) (2025-02-27)
 
 
