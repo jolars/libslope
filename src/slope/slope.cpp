@@ -236,7 +236,7 @@ Slope::path(T& x,
 
       double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
 
-      if (std::max(dual_gap, 0.0) <= tol_scaled) {
+      if (dual_gap <= tol_scaled) {
         if (screening_type == "strong") {
           updateGradient(gradient,
                          x,
