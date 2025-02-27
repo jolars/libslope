@@ -136,7 +136,6 @@ Slope::path(T& x,
   }
 
   // Path variables
-  std::vector<double> duals, primals, time;
   double null_deviance = loss->nullDeviance(y, intercept);
 
   Timer timer;
@@ -156,6 +155,8 @@ Slope::path(T& x,
 
     Eigen::ArrayXd lambda_curr = alpha_curr * lambda;
     Eigen::ArrayXd lambda_prev = alpha_prev * lambda;
+
+    std::vector<double> duals, primals, time;
 
     if (screening_type == "strong") {
       // TODO: Only update for inactive set, making sure gradient
