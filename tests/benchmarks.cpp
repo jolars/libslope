@@ -54,25 +54,26 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
   };
 }
 
-TEST_CASE("Screening benchmarks", "[!benchmark]")
+TEST_CASE("Path screening benchmarks", "[!benchmark]")
 {
-  auto data = generateData(100, 10000, "quadratic", 1, 1, 0.01, 315);
+  const int p = 1000;
+  const int n = 100;
+
+  auto data = generateData(n, p, "quadratic", 1, 1, 0.01);
 
   slope::Slope model;
 
-  model.setIntercept(false);
-  auto fit = model.path(data.x, data.y);
-  Eigen::VectorXd coefs = fit.getCoefs().back();
-
-  BENCHMARK("No screening")
-  {
-    model.setScreening("none");
-    model.fit(data.x, data.y);
-  };
+  model.setSolver("fista");
 
   BENCHMARK("Strong rule screening")
   {
     model.setScreening("strong");
-    model.fit(data.x, data.y);
+    model.path(data.x, data.y);
+  };
+
+  BENCHMARK("No screening")
+  {
+    model.setScreening("none");
+    model.path(data.x, data.y);
   };
 }
