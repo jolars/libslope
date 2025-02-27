@@ -177,6 +177,7 @@ Slope::path(T& x,
 
     int it = 0;
     for (; it < this->max_it; ++it) {
+      // TODO: Return a warning code if the solver does not converge
       assert(it < this->max_it - 1 && "Exceeded maximum number of iterations");
 
       // Compute primal, dual, and gap
