@@ -1,6 +1,7 @@
 #include "../src/slope/math.h"
 #include "../src/slope/threads.h"
 #include "generate_data.hpp"
+#include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/benchmark/catch_benchmark.hpp>
@@ -50,5 +51,28 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
                           x_scales,
                           w,
                           jit_normalization);
+  };
+}
+
+TEST_CASE("Screening benchmarks", "[!benchmark]")
+{
+  auto data = generateData(100, 10000, "quadratic", 1, 1, 0.01, 315);
+
+  slope::Slope model;
+
+  model.setIntercept(false);
+  auto fit = model.path(data.x, data.y);
+  Eigen::VectorXd coefs = fit.getCoefs().back();
+
+  BENCHMARK("No screening")
+  {
+    model.setScreening("none");
+    model.fit(data.x, data.y);
+  };
+
+  BENCHMARK("Strong rule screening")
+  {
+    model.setScreening("strong");
+    model.fit(data.x, data.y);
   };
 }

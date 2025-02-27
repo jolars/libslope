@@ -1,6 +1,7 @@
 #include "slope/screening.h"
 #include "generate_data.hpp"
 #include "slope/kkt_check.h"
+#include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/benchmark/catch_benchmark.hpp>
@@ -84,27 +85,4 @@ TEST_CASE("Strong screening rule", "[screening]")
 
     REQUIRE_THAT(coefs, VectorApproxEqual(coefs_screen, 1e-4));
   }
-}
-
-TEST_CASE("Screening benchmarks", "[!benchmark]")
-{
-  auto data = generateData(100, 1000);
-
-  slope::Slope model;
-
-  model.setIntercept(false);
-  auto fit = model.path(data.x, data.y);
-  Eigen::VectorXd coefs = fit.getCoefs().back();
-
-  BENCHMARK("No screening")
-  {
-    model.setScreening("none");
-    model.fit(data.x, data.y);
-  };
-
-  BENCHMARK("Strong rule screening")
-  {
-    model.setScreening("strong");
-    model.fit(data.x, data.y);
-  };
 }
