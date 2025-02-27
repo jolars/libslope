@@ -61,7 +61,7 @@ lambdaSequence(const int p,
   }
 
   assert(lambda.minCoeff() > 0 && "lambda must be positive");
-  assert(!lambda.isNaN().any() && "lambda must be finite");
+  assert(lambda.allFinite() && "lambda must be finite");
   assert(lambda.size() == p && "lambda sequence is of right size");
 
   return lambda;
