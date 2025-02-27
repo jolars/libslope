@@ -7,6 +7,7 @@
 #pragma once
 
 #include "slope/normalize.h"
+#include "threads.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <numeric>
@@ -248,7 +249,11 @@ updateGradient(Eigen::MatrixXd& gradient,
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
     double wr_sum = weighted_residual.col(k).sum();
 
-    for (const auto& j : active_set) {
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(Threads::get())
+#endif
+    for (size_t i = 0; i < active_set.size(); ++i) {
+      const int j = active_set[i];
       switch (jit_normalization) {
         case JitNormalization::Both:
           gradient(j, k) =

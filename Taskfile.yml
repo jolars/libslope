@@ -57,7 +57,6 @@ tasks:
       - ctest --test-dir {{.BUILD_DIR}} --output-on-failure
 
   benchmark:
+    deps: [build]
     cmds:
-      - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DBUILD_TESTING=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release
-      - cmake --build {{.BUILD_DIR}}
       - ./build/tests [!benchmark]

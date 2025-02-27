@@ -1,4 +1,5 @@
 #include "../src/slope/slope.h"
+#include "slope/threads.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -59,5 +60,10 @@ TEST_CASE("Assertions", "[assertions]")
                       std::invalid_argument);
     REQUIRE_THROWS_AS(model.setOscarParameters(1.0, -2.0),
                       std::invalid_argument);
+  }
+
+  SECTION("Threads")
+  {
+    REQUIRE_THROWS_AS(slope::Threads::set(-1), std::invalid_argument);
   }
 }
