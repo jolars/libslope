@@ -14,7 +14,7 @@ TEST_CASE("Abalone dataset", "[realdata][poisson][quadratic]")
 
   slope::Slope model;
 
-  for (const std::string& loss : { "poisson", "quadratic" }) {
+  for (const std::string loss : { "poisson", "quadratic" }) {
     DYNAMIC_SECTION("Loss: " << loss)
     {
       model.setLoss(loss);
