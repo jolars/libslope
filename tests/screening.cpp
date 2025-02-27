@@ -1,5 +1,4 @@
 #include "slope/screening.h"
-#include "../src/slope/slope.h"
 #include "generate_data.hpp"
 #include "slope/kkt_check.h"
 #include "test_helpers.hpp"
