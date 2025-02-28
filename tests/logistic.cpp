@@ -118,16 +118,19 @@ TEST_CASE("Logistic path", "[logistic]")
 
   slope::Slope model;
   model.setLoss("logistic");
+  model.setDiagnostics(true);
 
-  auto data = generateData(400, 50, "logistic", 1, 0.4, 0.5, 93);
+  auto data = generateData(1000, 100, "logistic", 1, 0.4, 0.5, 93);
 
-  model.setMaxIterations(1e6);
-  model.setTol(1e-4);
-  model.setSolver("pgd");
   auto fit = model.path(data.x, data.y);
 
   auto null_deviance = fit.getNullDeviance();
   auto deviances = fit.getDeviance();
+  auto gaps = fit.getGaps();
+
+  for (auto& gap : gaps) {
+    REQUIRE(gap.back() >= 0.0);
+  }
 
   REQUIRE(null_deviance >= 0);
   REQUIRE(deviances.size() > 10);
