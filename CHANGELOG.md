@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.0](https://github.com/jolars/libslope/compare/v0.19.0...v0.20.0) (2025-02-28)
+
+
+### Features
+
+* add `pause()` and `resume()` methods to timer ([67baf5f](https://github.com/jolars/libslope/commit/67baf5f706e9b514e19ffb78ebca3e5c29ac22ac))
+
+
+### Bug Fixes
+
+* compute true dual  when collecting diagnostics ([5adffda](https://github.com/jolars/libslope/commit/5adffda07ec3c6bb1db362a990f3c1cee486ce2a))
+
 ## [0.19.0](https://github.com/jolars/libslope/compare/v0.18.0...v0.19.0) (2025-02-27)
 
 
