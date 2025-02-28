@@ -259,7 +259,7 @@ TEST_CASE("Quadratic, various models", "[quadratic]")
   }
 }
 
-TEST_CASE("Guassian parallel", "[quadratic]")
+TEST_CASE("Gaussian parallel", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
