@@ -56,6 +56,7 @@ if(BUILD_TESTING)
     tests/quadratic.cpp
     tests/real_data.cpp
     tests/screening.cpp
+    tests/utils.cpp
     tests/sparse.cpp
   )
   target_link_libraries(
