@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/jolars/libslope/compare/v0.20.0...v0.20.1) (2025-02-28)
+
+
+### Bug Fixes
+
+* fix FISTA update ([492ee92](https://github.com/jolars/libslope/commit/492ee92b3878e81e79f215f09c662803893615a6))
+
 ## [0.20.0](https://github.com/jolars/libslope/compare/v0.19.0...v0.20.0) (2025-02-28)
 
 
