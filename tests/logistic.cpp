@@ -1,3 +1,4 @@
+#include "slope/losses/logistic.h"
 #include "../src/slope/slope.h"
 #include "generate_data.hpp"
 #include "test_helpers.hpp"
@@ -137,4 +138,30 @@ TEST_CASE("Logistic path", "[logistic]")
   REQUIRE(deviances.size() < 100);
   REQUIRE(deviances.back() > 0);
   REQUIRE_THAT(deviances, VectorMonotonic(false, true));
+}
+
+TEST_CASE("Logistic predictions", "[logistic][predict]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd x(3, 2);
+  Eigen::VectorXd beta(2);
+  Eigen::VectorXd eta(3);
+
+  // clang-format off
+  x << 1.1, 2.3,
+       0.2, 1.5,
+       0.5, 0.2;
+  // clang-format on
+  beta << 1, 2;
+
+  eta = x * beta;
+
+  slope::Logistic loss;
+
+  auto pred = loss.predict(eta);
+
+  std::array<double, 3> expected = { 1, 1, 1 };
+
+  REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
 }

@@ -1,3 +1,4 @@
+#include "slope/losses/poisson.h"
 #include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
@@ -208,4 +209,29 @@ TEST_CASE("Poisson abalone data", "[poisson][realdata]")
 
   REQUIRE(path.getDeviance().back() > 0);
   REQUIRE(path.getDeviance().size() > 5);
+}
+
+TEST_CASE("Poisson predictions", "[poisson][predict]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd x(3, 2);
+  Eigen::VectorXd beta(2);
+  Eigen::VectorXd eta(3);
+
+  // clang-format off
+  x << 1.1, 2.3,
+       0.2, 1.5,
+       0.5, 0.2;
+  // clang-format on
+  beta << 1, 2;
+
+  eta = x * beta;
+
+  slope::Poisson loss;
+
+  auto pred = loss.predict(eta);
+  std::array<double, 3> expected = { 298.867, 24.5325, 2.4596 };
+
+  REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected, 1e-3));
 }
