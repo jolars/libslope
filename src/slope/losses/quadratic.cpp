@@ -46,6 +46,18 @@ Quadratic::link(const Eigen::MatrixXd& mu)
   return mu;
 }
 
+Eigen::MatrixXd
+Quadratic::inverseLink(const Eigen::MatrixXd& eta)
+{
+  return eta;
+}
+
+Eigen::MatrixXd
+Quadratic::predict(const Eigen::MatrixXd& eta)
+{
+  return eta;
+}
+
 // double
 // Quadratic::nullDeviance(const Eigen::MatrixXd& y, const bool intercept)
 // {

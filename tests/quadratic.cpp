@@ -1,3 +1,4 @@
+#include "slope/losses/quadratic.h"
 #include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
@@ -277,4 +278,28 @@ TEST_CASE("Gaussian parallel", "[quadratic]")
   Eigen::VectorXd coefs_seq = fit_seq.getCoefs();
 
   REQUIRE_THAT(coefs_par, VectorApproxEqual(coefs_seq));
+}
+
+TEST_CASE("Gaussian predictions", "[gaussian][predict]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd x(3, 2);
+  Eigen::VectorXd beta(2);
+  Eigen::VectorXd eta(3);
+
+  // clang-format off
+  x << 1.1, 2.3,
+       0.2, 1.5,
+       0.5, 0.2;
+  // clang-format on
+  beta << 1, 2;
+
+  eta = x * beta;
+
+  slope::Quadratic loss;
+
+  auto pred = loss.predict(eta);
+
+  REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(eta));
 }

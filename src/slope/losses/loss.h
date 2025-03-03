@@ -105,11 +105,27 @@ public:
   };
 
   /**
-   * @brief The link function
+   * @brief The link function.
    * @param mu Mean.
-   * @return The result of applying the link function.
+   * @return The result of applying the link function, which depends on
+   *   the loss function used.
    */
   virtual Eigen::MatrixXd link(const Eigen::MatrixXd& mu) = 0;
+
+  /**
+   * @brief The inverse link function, also known as the mean function.
+   * @param eta Mean
+   * @return The result of applying the inverse link function, which depends on
+   *   the loss function used.
+   */
+  virtual Eigen::MatrixXd inverseLink(const Eigen::MatrixXd& eta) = 0;
+
+  /**
+   * @brief Return predicted response
+   * @param eta The linear predictor
+   * @return The predicted response.
+   */
+  virtual Eigen::MatrixXd predict(const Eigen::MatrixXd& eta) = 0;
 
   /**
    * @brief Computes deviance, which is just twice the loss function

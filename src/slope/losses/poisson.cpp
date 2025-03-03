@@ -68,4 +68,16 @@ Poisson::link(const Eigen::MatrixXd& mu)
   return mu.array().log();
 }
 
+Eigen::MatrixXd
+Poisson::inverseLink(const Eigen::MatrixXd& eta)
+{
+  return eta.array().exp();
+}
+
+Eigen::MatrixXd
+Poisson::predict(const Eigen::MatrixXd& eta)
+{
+  return inverseLink(eta);
+}
+
 } // namespace slope

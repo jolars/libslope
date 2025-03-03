@@ -1,3 +1,4 @@
+#include "slope/losses/multinomial.h"
 #include "generate_data.hpp"
 #include "load_data.hpp"
 #include "test_helpers.hpp"
@@ -112,4 +113,44 @@ TEST_CASE("Multinomial wine data", "[multinomial]")
 
   REQUIRE(path.getDeviance().back() > 0);
   REQUIRE(path.getDeviance().size() > 5);
+}
+
+TEST_CASE("Multinomial", "[multinomial][predict]")
+{
+  using namespace Catch::Matchers;
+
+  const int n = 10;
+  int p = 3;
+  int m = 3;
+
+  Eigen::MatrixXd x(n, p);
+  Eigen::MatrixXd beta(p, m);
+  Eigen::MatrixXd eta(n, m);
+
+  // clang-format off
+  x <<  0.288,  -0.0452,  0.880,
+        0.788,   0.576,  -0.305,
+        1.510,   0.390,  -0.621,
+       -2.210,  -1.120,  -0.0449,
+       -0.0162,  0.944,   0.821,
+        0.594,   0.919,   0.782,
+        0.0746, -1.990,   0.620,
+       -0.0561, -0.156,  -1.470,
+       -0.478,   0.418,   1.360,
+       -0.103,   0.388,  -0.0538;
+
+  beta <<  1,   2, -3,
+          -1,   2, -0.5,
+          -0.1, 0,  1.5;
+  // clang-format on
+
+  eta = x * beta;
+
+  slope::Multinomial loss;
+
+  auto pred = loss.predict(eta);
+
+  std::array<double, n> expected = { 1, 1, 1, 2, 1, 1, 0, 0, 2, 1 };
+
+  REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
 }

@@ -81,6 +81,27 @@ Multinomial::link(const Eigen::MatrixXd& mu)
   });
 }
 
+Eigen::MatrixXd
+Multinomial::inverseLink(const Eigen::MatrixXd& eta)
+{
+  return softmax(eta);
+}
+
+Eigen::MatrixXd
+Multinomial::predict(const Eigen::MatrixXd& eta)
+{
+  Eigen::MatrixXd prob = inverseLink(eta);
+
+  // Find the class with the highest probability
+  Eigen::VectorXd out(eta.rows());
+
+  for (int i = 0; i < eta.rows(); i++) {
+    out(i) = whichMax(prob.row(i));
+  }
+
+  return out;
+}
+
 // TODO: Consider adjusting the coefficients somehow.
 
 } // namespace slope
