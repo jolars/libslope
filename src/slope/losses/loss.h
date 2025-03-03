@@ -144,13 +144,6 @@ public:
     return deviance(eta, y);
   }
 
-  /**
-   * @brief Computes null deviance.
-   * @param beta The response matrix.
-   * @param intercept Whether an intercept should be fit.
-   */
-  virtual void adjustResponse(Eigen::MatrixXd&) {}
-
 protected:
   /**
    * @brief Constructs an loss function with specified Lipschitz constant
