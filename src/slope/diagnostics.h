@@ -9,6 +9,28 @@
 
 namespace slope {
 
+/**
+ * @brief Computes the dual objective function value for SLOPE optimization
+ *
+ * @tparam MatrixType The type of the design matrix
+ * @param beta Current coefficient vector
+ * @param residual Residual matrix (y - prediction)
+ * @param loss Pointer to the loss function object
+ * @param sl1_norm Sorted L1 norm object
+ * @param lambda Vector of penalty parameters
+ * @param x Design matrix
+ * @param y Response matrix
+ * @param x_centers Vector of feature means for centering
+ * @param x_scales Vector of feature scales for normalization
+ * @param jit_normalization Just-in-time normalization settings
+ * @param intercept Boolean indicating if intercept is included in the model
+ *
+ * @return double The computed dual objective value
+ *
+ * @details This function computes the dual objective value for the SLOPE
+ * optimization problem. It handles both cases with and without intercept terms,
+ * applying appropriate normalization and gradient computations.
+ */
 template<typename MatrixType>
 double
 computeDual(const Eigen::VectorXd& beta,
