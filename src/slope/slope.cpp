@@ -45,27 +45,27 @@ Slope::path(T& x,
                                      this->scaling_type,
                                      this->modify_x);
 
-  std::vector<int> full_set(p);
-  std::iota(full_set.begin(), full_set.end(), 0);
-
   std::unique_ptr<Loss> loss = setupLoss(this->loss_type);
 
   MatrixXd y = loss->preprocessResponse(y_in);
 
   const int m = y.cols();
 
+  std::vector<int> full_set(p * m);
+  std::iota(full_set.begin(), full_set.end(), 0);
+
   VectorXd beta0 = VectorXd::Zero(m);
-  MatrixXd beta = MatrixXd::Zero(p, m);
+  VectorXd beta = VectorXd::Zero(p * m);
 
   MatrixXd eta = MatrixXd::Zero(n, m); // linear predictor
 
   if (this->intercept) {
     beta0 = loss->link(y.colwise().mean()).transpose();
-    eta.rowwise() = beta0.reshaped().transpose();
+    eta.rowwise() = beta0.transpose();
   }
 
   MatrixXd residual = loss->residual(eta, y);
-  MatrixXd gradient(p, m);
+  VectorXd gradient(beta.size());
 
   // Path data
   std::vector<VectorXd> beta0s;
@@ -83,7 +83,7 @@ Slope::path(T& x,
     lambda = lambdaSequence(
       p * m, this->q, this->lambda_type, n, this->theta1, this->theta2);
   } else {
-    if (lambda.size() != p * m) {
+    if (lambda.size() != beta.size()) {
       throw std::invalid_argument(
         "lambda must be the same length as the number of coefficients");
     }
@@ -115,8 +115,7 @@ Slope::path(T& x,
                  Eigen::VectorXd::Ones(n),
                  jit_normalization);
 
-  int alpha_max_ind = whichMax(gradient.reshaped().cwiseAbs());
-  alpha_max_ind = alpha_max_ind % p;
+  int alpha_max_ind = whichMax(gradient.cwiseAbs());
 
   double alpha_max;
   std::tie(alpha, alpha_max, this->path_length) =
@@ -142,7 +141,7 @@ Slope::path(T& x,
   Timer timer;
 
   // TODO: We should not do this for all solvers.
-  Clusters clusters(beta.reshaped());
+  Clusters clusters(beta);
 
   double alpha_prev = std::max(alpha_max, alpha(0));
 
@@ -192,14 +191,14 @@ Slope::path(T& x,
                      Eigen::VectorXd::Ones(n),
                      jit_normalization);
 
-      double primal = loss->loss(eta, y) +
-                      sl1_norm.eval(beta(working_set, Eigen::all).reshaped(),
-                                    lambda_curr.head(working_set.size() * m));
+      double primal =
+        loss->loss(eta, y) +
+        sl1_norm.eval(beta(working_set), lambda_curr.head(working_set.size()));
 
       MatrixXd theta = residual;
 
       // First compute gradient with potential offset for intercept case
-      MatrixXd dual_gradient = gradient;
+      VectorXd dual_gradient = gradient;
 
       // TODO: Can we avoid this copy? Maybe revert offset afterwards or,
       // alternatively, solve intercept until convergence and then no longer
@@ -218,9 +217,8 @@ Slope::path(T& x,
       }
 
       // Common scaling operation
-      double dual_norm =
-        sl1_norm.dualNorm(dual_gradient(working_set, Eigen::all).reshaped(),
-                          lambda_curr.head(working_set.size() * m));
+      double dual_norm = sl1_norm.dualNorm(
+        dual_gradient(working_set), lambda_curr.head(working_set.size()));
       theta.array() /= std::max(1.0, dual_norm);
 
       double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));
@@ -327,7 +325,7 @@ Slope::path(T& x,
     deviances.emplace_back(dev);
     passes.emplace_back(it);
 
-    clusters.update(beta.reshaped());
+    clusters.update(beta);
 
     if (!user_alpha) {
       if (dev_ratio > dev_ratio_tol || dev_change < dev_change_tol ||

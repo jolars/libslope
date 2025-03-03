@@ -168,38 +168,39 @@ Eigen::MatrixXd
 linearPredictor(const T& x,
                 const std::vector<int>& active_set,
                 const Eigen::VectorXd& beta0,
-                const Eigen::MatrixXd& beta,
+                const Eigen::VectorXd& beta,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
                 const JitNormalization jit_normalization,
                 const bool intercept)
 {
   int n = x.rows();
-  int m = beta.cols();
+  int p = x.cols();
+  int m = beta0.size();
 
   Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(n, m);
 
-  for (int k = 0; k < m; ++k) {
-    for (const auto& j : active_set) {
-      switch (jit_normalization) {
-        case JitNormalization::Both:
-          eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
-          eta.col(k).array() -= beta(j, k) * x_centers(j) / x_scales(j);
-          break;
+  for (const auto& ind : active_set) {
+    auto [k, j] = std::div(ind, p);
 
-        case JitNormalization::Center:
-          eta.col(k) += x.col(j) * beta(j, k);
-          eta.col(k).array() -= beta(j, k) * x_centers(j);
-          break;
+    switch (jit_normalization) {
+      case JitNormalization::Both:
+        eta.col(k) += x.col(j) * beta(ind) / x_scales(j);
+        eta.col(k).array() -= beta(ind) * x_centers(j) / x_scales(j);
+        break;
 
-        case JitNormalization::Scale:
-          eta.col(k) += x.col(j) * beta(j, k) / x_scales(j);
-          break;
+      case JitNormalization::Center:
+        eta.col(k) += x.col(j) * beta(ind);
+        eta.col(k).array() -= beta(ind) * x_centers(j);
+        break;
 
-        case JitNormalization::None:
-          eta.col(k) += x.col(j) * beta(j, k);
-          break;
-      }
+      case JitNormalization::Scale:
+        eta.col(k) += x.col(j) * beta(ind) / x_scales(j);
+        break;
+
+      case JitNormalization::None:
+        eta.col(k) += x.col(j) * beta(ind);
+        break;
     }
   }
 
@@ -216,7 +217,7 @@ linearPredictor(const T& x,
  * @tparam T The type of the input matrix.
  * @param gradient The gradient vector.
  * @param x The input matrix.
- * @param residual The residual vector.
+ * @param residual The residual matrix.
  * @param active_set The indices for the active set.
  * @param x_centers The vector of center values for each column of x.
  * @param x_scales The vector of scale values for each column of x.
@@ -226,7 +227,7 @@ linearPredictor(const T& x,
  */
 template<typename T>
 void
-updateGradient(Eigen::MatrixXd& gradient,
+updateGradient(Eigen::VectorXd& gradient,
                const T& x,
                const Eigen::MatrixXd& residual,
                const std::vector<int>& active_set,
@@ -239,40 +240,45 @@ updateGradient(Eigen::MatrixXd& gradient,
   const int p = x.cols();
   const int m = residual.cols();
 
-  assert(gradient.rows() == p && gradient.cols() == m &&
+  assert(gradient.size() == p * m &&
          "Gradient matrix has incorrect dimensions");
 
   Eigen::MatrixXd weighted_residual(n, m);
   Eigen::ArrayXd wr_sums(m);
 
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(Threads::get())
+#endif
   for (int k = 0; k < m; ++k) {
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
-    double wr_sum = weighted_residual.col(k).sum();
+    wr_sums(k) = weighted_residual.col(k).sum();
+  }
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(Threads::get())
 #endif
-    for (size_t i = 0; i < active_set.size(); ++i) {
-      const int j = active_set[i];
-      switch (jit_normalization) {
-        case JitNormalization::Both:
-          gradient(j, k) =
-            (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
-            (x_scales(j) * n);
-          break;
-        case JitNormalization::Center:
-          gradient(j, k) =
-            (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sum) /
-            n;
-          break;
-        case JitNormalization::Scale:
-          gradient(j, k) =
-            x.col(j).dot(weighted_residual.col(k)) / (x_scales(j) * n);
-          break;
-        case JitNormalization::None:
-          gradient(j, k) = x.col(j).dot(weighted_residual.col(k)) / n;
-          break;
-      }
+  for (size_t i = 0; i < active_set.size(); ++i) {
+    int ind = active_set[i];
+    auto [k, j] = std::div(ind, p);
+
+    switch (jit_normalization) {
+      case JitNormalization::Both:
+        gradient(ind) =
+          (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sums(k)) /
+          (x_scales(j) * n);
+        break;
+      case JitNormalization::Center:
+        gradient(ind) =
+          (x.col(j).dot(weighted_residual.col(k)) - x_centers(j) * wr_sums(k)) /
+          n;
+        break;
+      case JitNormalization::Scale:
+        gradient(ind) =
+          x.col(j).dot(weighted_residual.col(k)) / (x_scales(j) * n);
+        break;
+      case JitNormalization::None:
+        gradient(ind) = x.col(j).dot(weighted_residual.col(k)) / n;
+        break;
     }
   }
 }
@@ -292,7 +298,7 @@ updateGradient(Eigen::MatrixXd& gradient,
  */
 template<typename T>
 void
-offsetGradient(Eigen::MatrixXd& gradient,
+offsetGradient(Eigen::VectorXd& gradient,
                const T& x,
                const Eigen::VectorXd& offset,
                const std::vector<int>& active_set,
@@ -302,28 +308,25 @@ offsetGradient(Eigen::MatrixXd& gradient,
 {
   const int n = x.rows();
   const int p = x.cols();
-  const int m = offset.rows();
 
-  assert(gradient.rows() == p && gradient.cols() == m &&
-         "Gradient matrix has incorrect dimensions");
+  for (size_t i = 0; i < active_set.size(); ++i) {
+    int ind = active_set[i];
+    auto [k, j] = std::div(ind, p);
 
-  for (int k = 0; k < m; ++k) {
-    for (const auto& j : active_set) {
-      switch (jit_normalization) {
-        case JitNormalization::Both:
-          gradient(j, k) -=
-            offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
-          break;
-        case JitNormalization::Center:
-          gradient(j, k) -= offset(k) * (x.col(j).sum() / n - x_centers(j));
-          break;
-        case JitNormalization::Scale:
-          gradient(j, k) -= offset(k) * x.col(j).sum() / (n * x_scales(j));
-          break;
-        case JitNormalization::None:
-          gradient(j, k) -= offset(k) * x.col(j).sum() / n;
-          break;
-      }
+    switch (jit_normalization) {
+      case JitNormalization::Both:
+        gradient(ind) -=
+          offset(k) * (x.col(j).sum() / n - x_centers(j)) / x_scales(j);
+        break;
+      case JitNormalization::Center:
+        gradient(ind) -= offset(k) * (x.col(j).sum() / n - x_centers(j));
+        break;
+      case JitNormalization::Scale:
+        gradient(ind) -= offset(k) * x.col(j).sum() / (n * x_scales(j));
+        break;
+      case JitNormalization::None:
+        gradient(ind) -= offset(k) * x.col(j).sum() / n;
+        break;
     }
   }
 }

@@ -13,9 +13,8 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
 {
   int n = 1000;
   int p = 1000;
-  int m = 1;
 
-  Eigen::MatrixXd gradient(p, m);
+  Eigen::VectorXd gradient(p);
   std::vector<int> active_set(p);
   Eigen::VectorXd x_centers(p);
   Eigen::VectorXd x_scales(p);

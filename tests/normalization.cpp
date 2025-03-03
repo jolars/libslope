@@ -105,8 +105,8 @@ TEST_CASE("Normalization, JIT", "[normalization]")
 
   std::vector<int> active_set = { 0, 1, 2 };
 
-  Eigen::MatrixXd gradient_dense(3, 1);
-  Eigen::MatrixXd gradient_sparse = gradient_dense;
+  Eigen::VectorXd gradient_dense(3);
+  Eigen::VectorXd gradient_sparse = gradient_dense;
 
   slope::JitNormalization jit_normalization = slope::JitNormalization::Both;
 
@@ -127,8 +127,7 @@ TEST_CASE("Normalization, JIT", "[normalization]")
                         x_scales_sparse,
                         jit_normalization);
 
-  REQUIRE_THAT(gradient_dense.reshaped(),
-               VectorApproxEqual(gradient_sparse.reshaped()));
+  REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
 }
 
 TEST_CASE("Normalization, JIT modify-X", "[normalization]")
@@ -186,9 +185,9 @@ TEST_CASE("Normalization, JIT modify-X", "[normalization]")
     Eigen::VectorXd x_scales(p);
     slope::normalize(x, x_centers, x_scales, "mean", "sd", true);
 
-    Eigen::MatrixXd gradient(3, 1);
-    Eigen::MatrixXd gradient_jit = gradient;
-    Eigen::MatrixXd gradient_sparse_jit = gradient;
+    Eigen::VectorXd gradient(3);
+    Eigen::VectorXd gradient_jit = gradient;
+    Eigen::VectorXd gradient_sparse_jit = gradient;
 
     slope::updateGradient(gradient,
                           x,
@@ -215,10 +214,8 @@ TEST_CASE("Normalization, JIT modify-X", "[normalization]")
                           w,
                           slope::JitNormalization::Both);
 
-    REQUIRE_THAT(gradient_jit.reshaped(),
-                 VectorApproxEqual(gradient.reshaped(), 1e-6));
-    REQUIRE_THAT(gradient_sparse_jit.reshaped(),
-                 VectorApproxEqual(gradient.reshaped(), 1e-6));
+    REQUIRE_THAT(gradient_jit, VectorApproxEqual(gradient, 1e-6));
+    REQUIRE_THAT(gradient_sparse_jit, VectorApproxEqual(gradient, 1e-6));
   }
 
   auto fit = model.path(x_copy, y);

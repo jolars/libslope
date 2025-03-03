@@ -11,7 +11,7 @@ namespace slope {
 
 template<typename MatrixType>
 double
-computeDual(const Eigen::MatrixXd& beta,
+computeDual(const Eigen::VectorXd& beta,
             const Eigen::MatrixXd& residual,
             const std::unique_ptr<Loss>& loss,
             const SortedL1Norm& sl1_norm,
@@ -24,12 +24,11 @@ computeDual(const Eigen::MatrixXd& beta,
             const bool intercept)
 {
   int n = x.rows();
-  int p = beta.rows();
-  int m = beta.cols();
+  int pm = beta.size();
 
-  Eigen::MatrixXd gradient(p, m);
+  Eigen::VectorXd gradient(pm);
 
-  std::vector<int> full_set(p);
+  std::vector<int> full_set(pm);
   std::iota(full_set.begin(), full_set.end(), 0);
 
   updateGradient(gradient,
@@ -44,7 +43,7 @@ computeDual(const Eigen::MatrixXd& beta,
   Eigen::MatrixXd theta = residual;
 
   // First compute gradient with potential offset for intercept case
-  Eigen::MatrixXd dual_gradient = gradient;
+  Eigen::VectorXd dual_gradient = gradient;
 
   // TODO: Can we avoid this copy? Maybe revert offset afterwards or,
   // alternatively, solve intercept until convergence and then no longer
@@ -63,7 +62,7 @@ computeDual(const Eigen::MatrixXd& beta,
   }
 
   // Common scaling operation
-  double dual_norm = sl1_norm.dualNorm(dual_gradient.reshaped(), lambda);
+  double dual_norm = sl1_norm.dualNorm(dual_gradient, lambda);
   theta.array() /= std::max(1.0, dual_norm);
 
   double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));

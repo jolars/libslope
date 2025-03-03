@@ -45,8 +45,8 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
   model.setLoss("multinomial");
   model.setSolver("pgd");
-  model.setMaxIterations(1000);
-  model.setTol(1e-6);
+  model.setMaxIterations(2000);
+  model.setTol(1e-8);
 
   SECTION("No intercept")
   {
@@ -58,6 +58,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     // Fit the model
     model.setIntercept(false);
     model.setNormalization("none");
+    // model.setScreening("none");
     model.setDiagnostics(true);
 
     double alpha = 0;
@@ -67,6 +68,9 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
     // Get coefficients
     Eigen::MatrixXd coef = fit.getCoefs();
+
+    REQUIRE(coef.rows() == 2);
+    REQUIRE(coef.cols() == 3);
 
     // Normalize hack to make comparison with glmnet output correct
     coef.row(0).array() -= coef(0, 1);
