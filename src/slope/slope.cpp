@@ -68,14 +68,6 @@ Slope::path(T& x,
   VectorXd gradient(beta.size());
 
   // Path data
-  std::vector<VectorXd> beta0s;
-  std::vector<Eigen::SparseMatrix<double>> betas;
-  std::vector<double> deviances;
-  std::vector<std::vector<double>> primals_path;
-  std::vector<std::vector<double>> duals_path;
-  std::vector<std::vector<double>> time_path;
-  std::vector<int> passes;
-
   bool user_alpha = alpha.size() > 0;
   bool user_lambda = lambda.size() > 0;
 
@@ -137,6 +129,7 @@ Slope::path(T& x,
 
   // Path variables
   double null_deviance = loss->nullDeviance(y, intercept);
+  double dev_prev = loss->deviance(eta, y);
 
   Timer timer;
 
@@ -144,6 +137,8 @@ Slope::path(T& x,
   Clusters clusters(beta);
 
   double alpha_prev = std::max(alpha_max, alpha(0));
+
+  std::vector<SlopeFit> fits;
 
   // Regularization path loop
   for (int path_step = 0; path_step < this->path_length; ++path_step) {
@@ -307,23 +302,28 @@ Slope::path(T& x,
     auto [beta0_out, beta_out] = rescaleCoefficients(
       beta0, beta, this->x_centers, this->x_scales, this->intercept);
 
-    beta0s.emplace_back(beta0_out);
-    betas.emplace_back(beta_out.sparseView());
-
-    primals_path.emplace_back(std::move(primals));
-    duals_path.emplace_back(std::move(duals));
-    time_path.emplace_back(std::move(time));
-
     alpha_prev = alpha_curr;
 
     // Compute early stopping criteria
     double dev = loss->deviance(eta, y);
-    double dev_ratio = 1.0 - dev / null_deviance;
-    double dev_change =
-      deviances.empty() ? 1.0 : (deviances.back() - dev) / deviances.back();
+    double dev_ratio = 1 - dev / null_deviance;
+    double dev_change = path_step == 0 ? 1.0 : 1 - dev / dev_prev;
+    dev_prev = dev;
 
-    deviances.emplace_back(dev);
-    passes.emplace_back(it);
+    SlopeFit fit{ beta0_out,
+                  beta_out.sparseView(),
+                  alpha_curr,
+                  lambda,
+                  dev,
+                  null_deviance,
+                  primals,
+                  duals,
+                  time,
+                  it,
+                  this->centering_type,
+                  this->scaling_type };
+
+    fits.emplace_back(std::move(fit));
 
     clusters.update(beta);
 
@@ -335,10 +335,7 @@ Slope::path(T& x,
     }
   }
 
-  return { beta0s,       betas,      alpha.head(betas.size()),
-           lambda,       deviances,  null_deviance,
-           primals_path, duals_path, time_path,
-           passes };
+  return fits;
 }
 
 template<typename T>
@@ -352,11 +349,7 @@ Slope::fit(T& x,
   alpha_arr(0) = alpha;
   SlopePath res = path(x, y_in, alpha_arr, lambda);
 
-  return { res.getIntercepts().back(), res.getCoefs().back(),
-           res.getAlpha()[0],          res.getLambda(),
-           res.getDeviance().back(),   res.getNullDeviance(),
-           res.getPrimals().back(),    res.getDuals().back(),
-           res.getTime().back(),       res.getPasses().back() };
+  return { res(0) };
 };
 
 void

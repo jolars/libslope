@@ -51,6 +51,7 @@ if(BUILD_TESTING)
     tests/normalization.cpp
     tests/path.cpp
     tests/poisson.cpp
+    tests/predictions.cpp
     tests/prox.cpp
     tests/qnorm.cpp
     tests/quadratic.cpp
