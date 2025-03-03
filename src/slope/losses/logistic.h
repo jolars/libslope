@@ -77,7 +77,7 @@ public:
 
   /**
    * @brief The inverse link function, also known as the mean function.
-   * @param mu Mean
+   * @param eta Mean
    * @return \f$ \frac{1}{1 + \exp(-\eta)} \f$
    */
   Eigen::MatrixXd inverseLink(const Eigen::MatrixXd& eta);
