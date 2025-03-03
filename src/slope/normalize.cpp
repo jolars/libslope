@@ -214,37 +214,40 @@ normalize(Eigen::SparseMatrix<double>& x,
 }
 
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
-rescaleCoefficients(Eigen::VectorXd beta0,
-                    Eigen::MatrixXd beta,
+rescaleCoefficients(const Eigen::VectorXd& beta0,
+                    const Eigen::VectorXd& beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
                     const bool intercept)
 {
-  const int p = beta.rows();
-  const int m = beta.cols();
+  int m = beta0.size();
+  int p = beta.size() / m;
 
   bool centering = x_centers.size() > 0;
   bool scaling = x_scales.size() > 0;
+
+  Eigen::MatrixXd beta0_out = beta0;
+  Eigen::MatrixXd beta_out = beta.reshaped(p, m);
 
   if (centering || scaling) {
     for (int k = 0; k < m; ++k) {
       double x_bar_beta_sum = 0.0;
       for (int j = 0; j < p; ++j) {
         if (scaling) {
-          beta(j, k) /= x_scales(j);
+          beta_out(j, k) /= x_scales(j);
         }
         if (centering) {
-          x_bar_beta_sum += x_centers(j) * beta(j, k);
+          x_bar_beta_sum += x_centers(j) * beta_out(j, k);
         }
       }
 
       if (intercept) {
-        beta0(k) -= x_bar_beta_sum;
+        beta0_out(k) -= x_bar_beta_sum;
       }
     }
   }
 
-  return { beta0, beta };
+  return { beta0_out, beta_out };
 }
 
 } // namespace slope

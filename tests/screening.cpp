@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
+#include <iostream>
 
 TEST_CASE("Strong screening rule", "[screening]")
 {
@@ -20,8 +21,8 @@ TEST_CASE("Strong screening rule", "[screening]")
   Eigen::VectorXd beta(p);
   Eigen::VectorXd beta_hat(p);
   Eigen::MatrixXd x(n, p);
-  Eigen::MatrixXd gradient(p, 1);
-  Eigen::MatrixXd residual(n, 1);
+  Eigen::VectorXd gradient(p);
+  Eigen::VectorXd residual(n);
   Eigen::ArrayXd lambda(p);
 
   // clang-format off
@@ -65,6 +66,11 @@ TEST_CASE("Strong screening rule", "[screening]")
     lambda *= 0.99;
 
     auto strong_set = strongSet(gradient, lambda, lambda_prev);
+
+    for (auto s : strong_set) {
+      std::cout << s << ", ";
+    }
+    std::cout << "\n";
 
     REQUIRE(strong_set.size() == 1);
   }

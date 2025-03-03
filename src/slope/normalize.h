@@ -402,8 +402,8 @@ normalize(Eigen::SparseMatrix<double>& x,
  * @see SlopeParameters
  */
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
-rescaleCoefficients(Eigen::VectorXd beta0,
-                    Eigen::MatrixXd beta,
+rescaleCoefficients(const Eigen::VectorXd& beta0,
+                    const Eigen::VectorXd& beta,
                     const Eigen::VectorXd& x_centers,
                     const Eigen::VectorXd& x_scales,
                     const bool intercept);

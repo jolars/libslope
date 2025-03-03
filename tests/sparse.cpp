@@ -56,6 +56,8 @@ TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
     lambda << 0.5, 0.5, 0.2;
 
     model.setIntercept(false);
+    model.setModifyX(false);
+    // model.setScreening("none");
     model.setNormalization("standardization");
 
     auto fit = model.path(x_sparse, y, alpha, lambda);
