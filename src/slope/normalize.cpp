@@ -188,7 +188,7 @@ normalize(Eigen::SparseMatrix<double>& x,
   bool center = centering_type != "none";
   bool scale = scaling_type != "none";
   bool center_jit = center;
-  bool scale_jit = scale && !modify_x;
+  bool scale_jit = scale;
 
   JitNormalization jit_normalization;
 
