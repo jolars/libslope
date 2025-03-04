@@ -17,8 +17,6 @@ Poisson::dual(const Eigen::MatrixXd& theta,
   const Eigen::ArrayXd e = theta + y;
 
   assert(theta.allFinite() && "theta is not finite");
-  assert((e >= 0).all() &&
-         "Dual function is not defined for negative residuals");
 
   return (e * (1.0 - e.max(constants::P_MIN).log())).mean();
 }

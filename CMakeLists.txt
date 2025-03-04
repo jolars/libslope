@@ -43,6 +43,7 @@ if(BUILD_TESTING)
     tests
     tests/assertions.cpp
     tests/benchmarks.cpp
+    tests/cv.cpp
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
@@ -56,6 +57,7 @@ if(BUILD_TESTING)
     tests/qnorm.cpp
     tests/quadratic.cpp
     tests/real_data.cpp
+    tests/score.cpp
     tests/screening.cpp
     tests/utils.cpp
     tests/sparse.cpp

@@ -566,6 +566,12 @@ Slope::setDiagnostics(const bool collect_diagnostics)
   this->collect_diagnostics = collect_diagnostics;
 }
 
+const std::string&
+Slope::getLossType()
+{
+  return loss_type;
+}
+
 /// @cond
 // Explicit template instantiations
 template SlopePath

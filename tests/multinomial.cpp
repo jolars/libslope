@@ -115,7 +115,7 @@ TEST_CASE("Multinomial wine data", "[multinomial]")
   REQUIRE(path.getDeviance().size() > 5);
 }
 
-TEST_CASE("Multinomial", "[multinomial][predict]")
+TEST_CASE("Multinomial predictions", "[multinomial][predict]")
 {
   using namespace Catch::Matchers;
 
@@ -153,4 +153,40 @@ TEST_CASE("Multinomial", "[multinomial][predict]")
   std::array<double, n> expected = { 1, 1, 1, 2, 1, 1, 0, 0, 2, 1 };
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
+}
+
+TEST_CASE("Multinomial alternative response types", "[multinomial][predict]")
+{
+  using namespace Catch::Matchers;
+  using namespace slope;
+
+  int n = 4;
+  int p = 2;
+  int m = 3;
+
+  Eigen::MatrixXd x(n, p);
+  Eigen::MatrixXd y_mat(n, m);
+  Eigen::VectorXd y_vec(n);
+
+  // clang-format off
+  x <<  1.2, -0.3,
+       -0.5,  0.7,
+        0.8, -1.2,
+        0.3, -0.8;
+  y_mat << 1, 0, 0,
+           0, 0, 1,
+           0, 0, 1,
+           1, 0, 0;
+  y_vec << 0, 2, 2, 0;
+  // clang-format on
+
+  slope::Slope model;
+
+  auto fit1 = model.fit(x, y_mat, 1.0);
+  auto fit2 = model.fit(x, y_vec, 1.0);
+
+  Eigen::MatrixXd coef1 = fit1.getCoefs();
+  Eigen::MatrixXd coef2 = fit2.getCoefs();
+
+  REQUIRE_THAT(coef1.reshaped(), VectorApproxEqual(coef2.reshaped()));
 }

@@ -1,10 +1,13 @@
 #include "slope/losses/poisson.h"
+#include "generate_data.hpp"
 #include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <iostream>
+#include <slope/cv.h>
 #include <slope/slope.h>
 
 TEST_CASE("Poisson, models", "[poisson]")

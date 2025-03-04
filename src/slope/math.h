@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "slope/normalize.h"
+#include "jit_normalization.h"
 #include "threads.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
@@ -350,6 +350,44 @@ whichMax(const T& x)
 }
 
 /**
+ * @brief Returns the index of the minimum element in a container
+ *
+ * @tparam T Container type that supports iterators and std::min_element
+ * @param x Container whose maximum element's index is to be found
+ * @return int Zero-based index position of the maximum element
+ *
+ * Uses std::max_element to find the iterator to the maximum element,
+ * then converts to index position using std::distance.
+ * For containers with multiple maximum elements, returns the first occurrence.
+ */
+template<typename T>
+int
+whichMin(const T& x)
+{
+  return std::distance(x.begin(), std::min_element(x.begin(), x.end()));
+}
+
+/**
+ * @brief Returns the index of the minimum element in a container
+ *
+ * @tparam T Container type that supports iterators and std::min_element
+ * @param x Container whose maximum element's index is to be found
+ * @param comp Comparator that returns true if the first argument is worse
+ * than the second argument
+ * @return int Zero-based index position of the maximum element
+ *
+ * Uses std::max_element to find the iterator to the maximum element,
+ * then converts to index position using std::distance.
+ * For containers with multiple maximum elements, returns the first occurrence.
+ */
+template<typename T, typename Comparator>
+int
+whichBest(const T& x, const Comparator& comp)
+{
+  return std::distance(x.begin(), std::max_element(x.begin(), x.end(), comp));
+}
+
+/**
  * @brief Creates an array of n numbers in geometric progression from start to
  * end.
  *
@@ -365,5 +403,220 @@ whichMax(const T& x)
  */
 Eigen::ArrayXd
 geomSpace(const double start, const double end, const int n);
+
+/**
+ * @brief Computes the L1 (Manhattan) norms for each column of a matrix
+ *
+ * @tparam T Matrix type (must support cols(), col() operations, compatible with
+ * Eigen)
+ * @param x Input matrix whose column L1 norms are to be computed
+ * @return Eigen::VectorXd Vector containing L1 norms of each column
+ *
+ * For each column j in matrix x, computes the L1 norm:
+ * \f[ \|x_j\|_1 = \sum_{i} |x_{ij}| \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+template<typename T>
+Eigen::VectorXd
+l1Norms(const T& x)
+{
+  const int p = x.cols();
+
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    out(j) = x.col(j).cwiseAbs().sum();
+  }
+
+  return out;
+}
+
+/**
+ * @brief Computes the L2 (Euclidean) norms for each column of a sparse matrix
+ *
+ * @param x Input sparse matrix whose column L2 norms are to be computed
+ * @return Eigen::VectorXd Vector containing L2 norms of each column
+ *
+ * For each column j in matrix x, computes the L2 norm:
+ * \f[ \|x_j\|_2 = \sqrt{\sum_{i} x_{ij}^2} \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+l2Norms(const Eigen::SparseMatrix<double>& x);
+
+/**
+ * @brief Computes the L2 (Euclidean) norms for each column of a dense matrix
+ *
+ * @param x Input dense matrix whose column L2 norms are to be computed
+ * @return Eigen::VectorXd Vector containing L2 norms of each column
+ *
+ * For each column j in matrix x, computes the L2 norm:
+ * \f[ \|x_j\|_2 = \sqrt{\sum_{i} x_{ij}^2} \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+l2Norms(const Eigen::MatrixXd& x);
+
+/**
+ * @brief Computes the maximum absolute value for each column of a matrix
+ *
+ * @param x Input matrix to compute column-wise maximum absolute values
+ * @return Eigen::VectorXd Vector containing maximum absolute values for each
+ * column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ \max_{i} |x_{ij}| \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+maxAbs(const Eigen::SparseMatrix<double>& x);
+
+/**
+ * @brief Computes the maximum absolute value for each column of a dense matrix
+ *
+ * @param x Input dense matrix whose column-wise maximum absolute values are to
+ * be computed
+ * @return Eigen::VectorXd Vector containing the maximum absolute value of each
+ * column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ \max_{i} |x_{ij}| \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+maxAbs(const Eigen::MatrixXd& x);
+
+/**
+ * @brief Computes the arithmetic mean for each column of a sparse matrix
+ *
+ * @param x Input sparse matrix whose column means are to be computed
+ * @return Eigen::VectorXd Vector containing the arithmetic mean of each column
+ *
+ * For each column j in matrix x, computes the mean:
+ * \f[ \bar{x}_j = \frac{1}{n}\sum_{i} x_{ij} \f]
+ * where n is the number of rows in the matrix and x_{ij} represents
+ * the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+means(const Eigen::SparseMatrix<double>& x);
+
+/**
+ * @brief Computes the arithmetic mean for each column of a dense matrix
+ *
+ * @param x Input dense matrix whose column means are to be computed
+ * @return Eigen::VectorXd Vector containing the arithmetic mean of each column
+ *
+ * For each column j in matrix x, computes the mean:
+ * \f[ \bar{x}_j = \frac{1}{n}\sum_{i} x_{ij} \f]
+ * where n is the number of rows in the matrix and x_{ij} represents
+ * the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+means(const Eigen::MatrixXd& x);
+
+/**
+ * @brief Computes the standard deviation for each column of a matrix
+ *
+ * @tparam T Matrix type (must support sparse matrix operations)
+ * @param x Input matrix whose column standard deviations are to be computed
+ * @return Eigen::VectorXd Vector containing the standard deviation of each
+ * column
+ *
+ * For each column j in matrix x, computes the standard deviation:
+ * \f[ \sigma_j = \sqrt{\frac{1}{n}\sum_{i} (x_{ij} - \bar{x}_j)^2} \f]
+ * where n is the number of rows, x_{ij} represents the i-th element of the j-th
+ * column, and \f$\bar{x}_j\f$ is the mean of column j.
+ *
+ * This function uses Welford's algorithm.
+ */
+template<typename T>
+Eigen::VectorXd
+stdDevs(const T& x)
+{
+  const int n = x.rows();
+  const int p = x.cols();
+
+  Eigen::VectorXd x_means = means(x);
+  Eigen::VectorXd out(p);
+
+  for (int j = 0; j < p; ++j) {
+    double m2 = 0.0;
+    const double mean = x_means(j);
+
+    // Process non-zero elements
+    for (typename T::InnerIterator it(x, j); it; ++it) {
+      double delta = it.value() - mean;
+      m2 += delta * delta;
+    }
+
+    // Account for zeros
+    int nz_count = x.col(j).nonZeros();
+    if (nz_count < n) {
+      m2 += (n - nz_count) * mean * mean;
+    }
+
+    out(j) = std::sqrt(m2 / n);
+  }
+
+  return out;
+}
+
+/**
+ * @brief Computes the range (max - min) for each column of a matrix
+ *
+ * @param x Input matrix whose column ranges are to be computed
+ * @return Eigen::VectorXd Vector containing the range of each column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ range_j = \max_{i}(x_{ij}) - \min_{i}(x_{ij}) \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+ranges(const Eigen::SparseMatrix<double>& x);
+
+/**
+ * @brief Computes the range (max - min) for each column of a dense matrix
+ *
+ * @param x Input dense matrix whose column ranges are to be computed
+ * @return Eigen::VectorXd Vector containing the range of each column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ range_j = \max_{i}(x_{ij}) - \min_{i}(x_{ij}) \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ *
+ * Uses Eigen's efficient colwise() operations to compute
+ * maximum and minimum values for each column simultaneously.
+ */
+Eigen::VectorXd
+ranges(const Eigen::MatrixXd& x);
+
+/**
+ * @brief Computes the minimum value for each column of a sparse matrix
+ *
+ * @param x Input sparse matrix whose column minimums are to be computed
+ * @return Eigen::VectorXd Vector containing the minimum value of each column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ \min_{i}(x_{ij}) \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ */
+Eigen::VectorXd
+mins(const Eigen::SparseMatrix<double>& x);
+
+/**
+ * @brief Computes the minimum value for each column of a dense matrix
+ *
+ * @param x Input dense matrix whose column minimums are to be computed
+ * @return Eigen::VectorXd Vector containing the minimum value of each column
+ *
+ * For each column j in matrix x, computes:
+ * \f[ \min_{i}(x_{ij}) \f]
+ * where x_{ij} represents the i-th element of the j-th column.
+ *
+ * Uses Eigen's built-in column-wise operations for efficient computation
+ * on dense matrices.
+ */
+Eigen::VectorXd
+mins(const Eigen::MatrixXd& x);
 
 } // namespace slope
