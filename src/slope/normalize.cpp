@@ -78,6 +78,7 @@ normalize(Eigen::SparseMatrix<double>& x,
     jit_normalization = JitNormalization::None;
   }
 
+  // TODO: Implement in-place scaling for sparse matrices.
   // if (modify_x && scaling_type != "none") {
   //   for (int j = 0; j < x.cols(); ++j) {
   //     for (Eigen::SparseMatrix<double>::InnerIterator it(x, j); it; ++it) {
