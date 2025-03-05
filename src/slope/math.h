@@ -106,30 +106,6 @@ clamp(const T& x, const T& lo, const T& hi)
 }
 
 /**
- * Computes the natural logarithm of the factorial for each element in the input
- * array.
- *
- * @tparam T Input array type (must be compatible with Eigen::ArrayXd)
- * @param x Input array of values
- * @return Eigen::ArrayXd Array containing log(x!) for each element in x
- *
- * @note Uses std::lgamma(x + 1) to compute log(x!), which is more numerically
- * stable and can handle non-integer values of x.
- */
-template<typename T>
-Eigen::ArrayXd
-logFactorial(const T& x)
-{
-  Eigen::ArrayXd out(x.size());
-
-  for (int i = 0; i < x.size(); ++i) {
-    out(i) = std::lgamma(x(i) + 1);
-  }
-
-  return out;
-}
-
-/**
  * LogSumExp
  *
  * @param a A matrix
