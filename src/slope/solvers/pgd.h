@@ -108,6 +108,9 @@ private:
     Eigen::VectorXd intercept_grad = residual.colwise().mean();
     Eigen::VectorXd grad_working = gradient(working_set);
 
+    int line_search_iter = 0;
+    const int max_line_search_iter = 100; // maximum iterations before exit
+
     while (true) {
       if (intercept) {
         beta0 = beta0_old - this->learning_rate * intercept_grad;
@@ -142,11 +145,16 @@ private:
       double g = loss->loss(eta, y);
       double q = g_old + beta_diff_norm;
 
-      if (q >= g * (1 - 1e-12)) {
+      if (q >= g * (1 - 1e-12) || this->learning_rate < 1e-12) {
         this->learning_rate *= 1.1;
         break;
       } else {
         this->learning_rate *= this->learning_rate_decr;
+      }
+
+      line_search_iter++;
+      if (line_search_iter >= max_line_search_iter) {
+        break;
       }
     }
 
