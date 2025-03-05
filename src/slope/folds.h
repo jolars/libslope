@@ -1,8 +1,6 @@
-
 #pragma once
 
-#include "slope/utils.h"
-#include <Eigen/src/Core/Matrix.h>
+#include <Eigen/Core>
 #include <cstdint>
 #include <vector>
 
@@ -26,23 +24,10 @@ public:
   }
 
   // Get test indices for a specific fold
-  const std::vector<int>& getTestIndices(size_t fold_idx) const
-  {
-    return folds[fold_idx];
-  }
+  const std::vector<int>& getTestIndices(size_t fold_idx) const;
 
   // Get training indices (all except the specified fold)
-  std::vector<int> getTrainingIndices(size_t fold_idx) const
-  {
-    std::vector<int> train_indices;
-    for (size_t i = 0; i < folds.size(); ++i) {
-      if (i != fold_idx) {
-        train_indices.insert(
-          train_indices.end(), folds[i].begin(), folds[i].end());
-      }
-    }
-    return train_indices;
-  }
+  std::vector<int> getTrainingIndices(size_t fold_idx) const;
 
   template<typename MatrixType>
   std::tuple<MatrixType, Eigen::MatrixXd, MatrixType, Eigen::MatrixXd>

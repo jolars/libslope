@@ -1,7 +1,27 @@
 #include "folds.h"
 #include <algorithm>
 #include <random>
+
 namespace slope {
+
+const std::vector<int>&
+Folds::getTestIndices(size_t fold_idx) const
+{
+  return folds[fold_idx];
+}
+
+std::vector<int>
+Folds::getTrainingIndices(size_t fold_idx) const
+{
+  std::vector<int> train_indices;
+  for (size_t i = 0; i < folds.size(); ++i) {
+    if (i != fold_idx) {
+      train_indices.insert(
+        train_indices.end(), folds[i].begin(), folds[i].end());
+    }
+  }
+  return train_indices;
+}
 
 std::vector<std::vector<int>>
 Folds::createFolds(int n, int n_folds, uint64_t random_seed)
