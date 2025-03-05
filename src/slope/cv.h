@@ -1,3 +1,5 @@
+#pragma once
+
 #include "folds.h"
 #include "score.h"
 #include "slope.h"
