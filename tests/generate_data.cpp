@@ -77,7 +77,7 @@ generateData(int n,
     // Poisson: rate = exp(x*beta) and y ~ Poisson(rate)
     data.y = Eigen::VectorXd(n);
     for (int i = 0; i < n; ++i) {
-      double lambda = std::exp(eta(i));
+      double lambda = std::exp(eta(i) * 1e-2);
       std::poisson_distribution<int> pois(lambda);
       data.y(i) = static_cast<double>(pois(rng));
     }
