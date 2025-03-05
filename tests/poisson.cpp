@@ -1,4 +1,5 @@
 #include "slope/losses/poisson.h"
+#include "generate_data.hpp"
 #include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
@@ -235,4 +236,18 @@ TEST_CASE("Poisson predictions", "[poisson][predict]")
   std::array<double, 3> expected = { 298.867, 24.5325, 2.4596 };
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected, 1e-3));
+}
+
+TEST_CASE("Poisson low regularization", "[fail]")
+{
+  auto data = generateData(100, 5, "poisson", 1, 1, 1);
+
+  slope::Slope model;
+
+  model.setLoss("poisson");
+  model.setSolver("pgd");
+
+  double alpha = 1e-5;
+
+  auto fit = model.fit(data.x, data.y, alpha);
 }
