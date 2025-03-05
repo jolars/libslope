@@ -1,3 +1,13 @@
+/**
+ * @file
+ * @brief Cross-validation functionality for SLOPE models
+ *
+ * This file provides data structures and functions for performing k-fold
+ * cross-validation on SLOPE models to find optimal hyperparameters.
+ * It includes functionality for parameter grid searches, fold generation,
+ * and result aggregation with support for parallel processing.
+ */
+
 #pragma once
 
 #include "folds.h"
@@ -10,6 +20,12 @@
 
 namespace slope {
 
+/**
+ * @brief Stores cross-validation results for a specific set of hyperparameters
+ *
+ * This struct contains evaluation scores, parameters, and statistics for a
+ * single hyperparameter configuration across all cross-validation folds.
+ */
 struct GridResult
 {
   Eigen::MatrixXd score;                // indexed by (fold, alpha)
@@ -20,6 +36,13 @@ struct GridResult
   Eigen::ArrayXd std_errors;
 };
 
+/**
+ * @brief Contains overall results from a cross-validation process
+ *
+ * This struct aggregates results from cross-validation across multiple
+ * hyperparameter combinations, including information about the optimal
+ * configuration.
+ */
 struct CvResult
 {
   std::vector<GridResult> results;
@@ -30,6 +53,13 @@ struct CvResult
   int best_alpha_ind;
 };
 
+/**
+ * @brief Configuration settings for cross-validation
+ *
+ * This struct specifies the parameters used to control the cross-validation
+ * process, including fold count, evaluation metric, random seed, and
+ * hyperparameter grid.
+ */
 struct CvConfig
 {
   int n_folds = 10;
@@ -39,9 +69,30 @@ struct CvConfig
   std::optional<std::vector<std::vector<int>>> predefined_folds;
 };
 
+/**
+ * @brief Creates a grid of parameter combinations from parameter value ranges
+ *
+ * @param param_values Map of parameter names to vectors of possible values
+ * @return std::vector<std::map<std::string, double>> Vector of parameter
+ * combinations
+ *
+ * This function takes a map where keys are parameter names and values are
+ * vectors of possible values for each parameter, then generates all possible
+ * combinations.
+ */
 std::vector<std::map<std::string, double>>
 createGrid(const std::map<std::string, std::vector<double>>& param_values);
 
+/**
+ * @brief Identifies the best parameters from cross-validation results
+ *
+ * @param cv_result Cross-validation results to analyze and update
+ * @param scorer The scoring metric used to evaluate performance
+ *
+ * This function examines all cross-validation results across the parameter grid
+ * and updates the cv_result with information about the best parameter
+ * combination, including the best score and corresponding indices.
+ */
 void
 findBestParameters(CvResult& cv_result, const std::unique_ptr<Score>& scorer);
 
