@@ -46,7 +46,7 @@ Eigen::ArrayXd
 geomSpace(const double start, const double end, const int n)
 {
   if (n == 1) {
-    return Eigen::ArrayXd::Constant(1, std::log(start));
+    return Eigen::ArrayXd::Constant(1, start);
   } else {
     return Eigen::ArrayXd::LinSpaced(n, std::log(start), std::log(end)).exp();
   }
