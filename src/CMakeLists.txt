@@ -4,13 +4,13 @@ add_library(
   slope/cv.cpp
   slope/folds.cpp
   slope/kkt_check.cpp
-  slope/math.cpp
-  slope/normalize.cpp
   slope/losses/logistic.cpp
-  slope/losses/quadratic.cpp
   slope/losses/multinomial.cpp
   slope/losses/poisson.cpp
+  slope/losses/quadratic.cpp
   slope/losses/setup_loss.cpp
+  slope/math.cpp
+  slope/normalize.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
   slope/score.cpp
