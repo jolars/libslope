@@ -146,14 +146,10 @@ crossValidate(Slope model,
     result.params = params;
     model.setQ(params.at("q"));
 
-    // model.setModifyX(false);
-
     auto initial_path = model.path(x, y);
     result.alphas = initial_path.getAlpha();
 
     assert((result.alphas > 0).all());
-
-    // model.setModifyX(true); // We create copies of x in the loop
 
     Eigen::MatrixXd scores =
       Eigen::MatrixXd::Zero(config.n_folds, result.alphas.size());
