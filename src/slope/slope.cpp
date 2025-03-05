@@ -128,8 +128,8 @@ Slope::path(T& x,
   }
 
   // Path variables
-  double null_deviance = loss->nullDeviance(y, intercept);
-  double dev_prev = loss->deviance(eta, y);
+  double null_deviance = loss->deviance(eta, y);
+  double dev_prev = null_deviance;
 
   Timer timer;
 
