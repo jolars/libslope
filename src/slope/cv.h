@@ -94,6 +94,30 @@ findBestParameters(CvResult& cv_result, const std::unique_ptr<Score>& scorer)
   }
 }
 
+/**
+ * @brief Performs cross-validation on a SLOPE model to select optimal
+ * hyperparameters
+ *
+ * @tparam MatrixType Type of design matrix (supports both dense and sparse
+ * matrices)
+ * @param model The SLOPE model to be cross-validated
+ * @param x The design matrix containing predictors
+ * @param y_in The response matrix
+ * @param config Configuration parameters for cross-validation (optional)
+ * @return CvResult Object containing cross-validation results, including best
+ * parameters, regularization paths, and performance metrics across folds
+ *
+ * This function implements k-fold cross-validation for SLOPE models, evaluating
+ * model performance across a grid of hyperparameters. For each hyperparameter
+ * combination, the function:
+ * 1. Splits the data into training and validation sets according to the fold
+ * configuration
+ * 2. Fits the model on each training set and evaluates on the validation set
+ * 3. Computes the specified evaluation metric for each regularization parameter
+ * 4. Averages results across folds to select optimal hyperparameters
+ *
+ * The function supports parallel processing with OpenMP when available.
+ */
 template<typename MatrixType>
 CvResult
 crossValidate(Slope model,
