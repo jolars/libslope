@@ -56,7 +56,7 @@ normalize(Eigen::SparseMatrix<double>& x,
           Eigen::VectorXd& x_scales,
           const std::string& centering_type,
           const std::string& scaling_type,
-          const bool modify_x)
+          const bool)
 {
   computeCenters(x_centers, x, centering_type);
   computeScales(x_scales, x, scaling_type);
