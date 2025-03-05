@@ -8,6 +8,7 @@
  */
 #pragma once
 
+#include "utils.h"
 #include <Eigen/Core>
 #include <cstdint>
 #include <vector>
