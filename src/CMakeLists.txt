@@ -1,6 +1,7 @@
 add_library(
   slope
   slope/clusters.cpp
+  slope/cv.cpp
   slope/folds.cpp
   slope/kkt_check.cpp
   slope/math.cpp
