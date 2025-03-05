@@ -1,9 +1,10 @@
-#include "../src/slope/slope.h"
 #include "slope/threads.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <slope/score.h>
+#include <slope/slope.h>
 
 TEST_CASE("Assertions", "[assertions]")
 {
@@ -65,5 +66,10 @@ TEST_CASE("Assertions", "[assertions]")
   SECTION("Threads")
   {
     REQUIRE_THROWS_AS(slope::Threads::set(-1), std::invalid_argument);
+  }
+
+  SECTION("Scores")
+  {
+    REQUIRE_THROWS_AS(slope::Score::create("mes"), std::invalid_argument);
   }
 }

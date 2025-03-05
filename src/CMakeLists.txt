@@ -1,6 +1,7 @@
 add_library(
   slope
   slope/clusters.cpp
+  slope/folds.cpp
   slope/kkt_check.cpp
   slope/math.cpp
   slope/normalize.cpp
@@ -11,6 +12,7 @@ add_library(
   slope/losses/setup_loss.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
+  slope/score.cpp
   slope/screening.cpp
   slope/slope.cpp
   slope/solvers/hybrid.cpp

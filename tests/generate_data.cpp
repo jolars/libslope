@@ -21,6 +21,8 @@ generateData(int n,
              double coef_sparsity,
              unsigned seed)
 {
+  m = type == "multinomial" ? m : 1;
+
   SimulatedData data(n, p, m);
 
   std::mt19937 rng(seed);

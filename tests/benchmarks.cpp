@@ -1,5 +1,3 @@
-#include "../src/slope/math.h"
-#include "../src/slope/threads.h"
 #include "generate_data.hpp"
 #include "slope/slope.h"
 #include "test_helpers.hpp"
@@ -8,6 +6,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
+#include <slope/cv.h>
+#include <slope/math.h>
+#include <slope/threads.h>
 
 TEST_CASE("Parallelized gradient computations", "[!benchmark]")
 {
@@ -100,5 +101,27 @@ TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
   {
     model.setScreening("none");
     model.fit(data.x, data.y, alpha);
+  };
+}
+
+TEST_CASE("Parallel cross-validation", "[!benchmark]")
+{
+  const int p = 100;
+  const int n = 1000;
+
+  auto data = generateData(n, p, "quadratic");
+
+  slope::Slope model;
+
+  BENCHMARK("Sequential")
+  {
+    slope::Threads::set(1);
+    crossValidate(model, data.x, data.y);
+  };
+
+  BENCHMARK("Parallel")
+  {
+    slope::Threads::set(4);
+    crossValidate(model, data.x, data.y);
   };
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "normalize.h"
+#include "jit_normalization.h"
 #include "slope/losses/loss.h"
 #include "slope/sorted_l1_norm.h"
 #include <Eigen/Dense>

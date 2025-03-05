@@ -294,14 +294,21 @@ TEST_CASE("Normalization, loop combinations", "[normalization]")
   model.setLoss("quadratic");
   model.setDiagnostics(true);
 
-  Eigen::MatrixXd x(3, 2);
-  Eigen::Vector2d beta;
-  Eigen::VectorXd y(3);
+  int n = 7;
+  int p = 2;
+
+  Eigen::MatrixXd x(n, p);
+  Eigen::VectorXd beta(p);
+  Eigen::VectorXd y(n);
 
   // clang-format off
-    x << 1.1, 2.3,
-         0.2, 1.5,
-         0.5, 0.2;
+  x <<  1.1,  2.3,
+        0.2,  0.0,
+        0.1, -5.1,
+        8.5, -0.9,
+        0.0,  0.0,
+        9.1,  0.0,
+        0.5, -0.2;
   // clang-format on
   beta << 1, 2;
 
@@ -311,16 +318,34 @@ TEST_CASE("Normalization, loop combinations", "[normalization]")
   std::vector<std::string> scaling_types = { "none", "sd",      "l1",
                                              "l2",   "max_abs", "range" };
 
+  Eigen::VectorXd x_centers_dense;
+  Eigen::VectorXd x_centers_sparse;
+  Eigen::VectorXd x_scales_dense;
+  Eigen::VectorXd x_scales_sparse;
+
   for (const auto& centering_type : centering_types) {
     for (const auto& scaling_type : scaling_types) {
       model.setCentering(centering_type);
       model.setScaling(scaling_type);
 
       // clang-format off
-        x << 1.1, 2.3,
-             0.2, 1.5,
-             0.5, 0.2;
+      x << 1.1,  2.3,
+           0.2,  0.0,
+           0.0, -5.1,
+           8.5, -0.9,
+           0.0,  0.0,
+           9.1,  0.0,
+           0.5, -0.2;
       // clang-format on
+      Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+
+      slope::computeCenters(x_centers_dense, x, centering_type);
+      slope::computeCenters(x_centers_sparse, x_sparse, centering_type);
+      REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse, 1e-5));
+
+      slope::computeScales(x_scales_dense, x, scaling_type);
+      slope::computeScales(x_scales_sparse, x, scaling_type);
+      REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse, 1e-5));
 
       double alpha = 1e-5;
 
@@ -334,8 +359,24 @@ TEST_CASE("Normalization, loop combinations", "[normalization]")
       Eigen::VectorXd coefs_nomod = fit_nomod.getCoefs();
       double intercept_nomod = fit_mod.getIntercepts()[0];
 
+      model.setModifyX(false);
+      auto fit_sparse_mod = model.fit(x_sparse, y, alpha);
+      double intercept_sparse_mod = fit_sparse_mod.getIntercepts()[0];
+      Eigen::VectorXd coefs_sparse_mod = fit_sparse_mod.getCoefs();
+
+      model.setModifyX(true);
+      auto fit_sparse_nomod = model.fit(x_sparse, y, alpha);
+      Eigen::VectorXd coefs_sparse_nomod = fit_sparse_nomod.getCoefs();
+      double intercept_sparse_nomod = fit_sparse_nomod.getIntercepts()[0];
+
       REQUIRE_THAT(coefs_mod, VectorApproxEqual(coefs_nomod, 1e-4));
+      REQUIRE_THAT(coefs_sparse_mod, VectorApproxEqual(coefs_nomod, 1e-4));
+      REQUIRE_THAT(coefs_sparse_nomod, VectorApproxEqual(coefs_nomod, 1e-4));
       REQUIRE_THAT(intercept_mod,
+                   Catch::Matchers::WithinAbs(intercept_nomod, 1e-4));
+      REQUIRE_THAT(intercept_sparse_mod,
+                   Catch::Matchers::WithinAbs(intercept_nomod, 1e-4));
+      REQUIRE_THAT(intercept_sparse_nomod,
                    Catch::Matchers::WithinAbs(intercept_nomod, 1e-4));
     }
   }

@@ -2,6 +2,7 @@
 
 #include "slope/losses/setup_loss.h"
 #include "slope/normalize.h"
+#include "slope/utils.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <memory>
@@ -108,6 +109,11 @@ public:
   double getDeviance() const { return deviance; }
 
   /**
+   * @brief Gets the model's loss type
+   */
+  const std::string& getLossType() const { return loss_type; }
+
+  /**
    * @brief Gets the null model deviance
    */
   double getNullDeviance() const { return null_deviance; }
@@ -157,12 +163,17 @@ public:
 
   /**
    * @brief Predict the response for a given input matrix
+   * @tparam T Type of input matrix (dense or sparse)
+   * @param x Input matrix of features
+   * @param type Type of prediction to return ("response" or "linear")
    * @return Matrix of predicted responses
    * @see Loss
    */
   template<typename T>
-  Eigen::MatrixXd predict(T& x) const
+  Eigen::MatrixXd predict(T& x, const std::string& type = "response") const
   {
+    validateOption(type, { "response", "linear" }, "type");
+
     int n = x.rows();
     int m = coefs.cols();
 
@@ -186,6 +197,11 @@ public:
       eta.col(k).array() += intercepts(k);
     }
 
+    if (type == "linear") {
+      return eta;
+    }
+
+    // Return predictions
     return loss->predict(eta);
   }
 };

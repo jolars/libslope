@@ -254,6 +254,12 @@ public:
   void setScaling(const Eigen::VectorXd& x_scales);
 
   /**
+   * @brief Get currently defined loss type
+   * @return The loss type
+   */
+  const std::string& getLossType();
+
+  /**
    * @brief Computes SLOPE regression solution path for multiple alpha and
    * lambda values
    *
