@@ -1,4 +1,5 @@
 #include "poisson.h"
+#include "slope/constants.h"
 
 namespace slope {
 
@@ -19,7 +20,7 @@ Poisson::dual(const Eigen::MatrixXd& theta,
   assert((e >= 0).all() &&
          "Dual function is not defined for negative residuals");
 
-  return (e * (1.0 - e.log())).mean();
+  return (e * (1.0 - e.max(constants::P_MIN).log())).mean();
 }
 
 Eigen::MatrixXd
@@ -63,7 +64,7 @@ Poisson::updateIntercept(Eigen::VectorXd& beta0,
 Eigen::MatrixXd
 Poisson::link(const Eigen::MatrixXd& mu)
 {
-  return mu.array().log();
+  return mu.array().max(constants::P_MIN).log();
 }
 
 Eigen::MatrixXd
