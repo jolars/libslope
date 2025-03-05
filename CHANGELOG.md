@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.21.0](https://github.com/jolars/libslope/compare/v0.20.1...v0.21.0) (2025-03-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove log-factorial term from poisson loss
+* remove `nullDeviance()`
+* correctly compute deviance
+
+### Features
+
+* add cross validation ([#103](https://github.com/jolars/libslope/issues/103)) ([da894c8](https://github.com/jolars/libslope/commit/da894c849bf3f25e795e46b5f0b1b0e07c0fc5cd)), closes [#100](https://github.com/jolars/libslope/issues/100)
+* add predict method for loss functions ([#97](https://github.com/jolars/libslope/issues/97)) ([fac54f1](https://github.com/jolars/libslope/commit/fac54f1f563d98c83d9070d7634ce5c7d9775c1b)), closes [#70](https://github.com/jolars/libslope/issues/70)
+* add prediction method to `SlopeFit` ([#99](https://github.com/jolars/libslope/issues/99)) ([f45b628](https://github.com/jolars/libslope/commit/f45b628c9c83a6de5c05df8766d4a19c8e4dd668))
+* handle small or nonpositive input to poisson loss and link ([801ccd7](https://github.com/jolars/libslope/commit/801ccd7558c6ca164200bb001e48ff3dbac44ffd))
+* remove `nullDeviance()` ([042c2b2](https://github.com/jolars/libslope/commit/042c2b2fd73d43e979e6cc828976d144c981b075))
+* remove log-factorial term from poisson loss ([85660d7](https://github.com/jolars/libslope/commit/85660d7eabcf9fa56f256396700a7005a6acc718))
+
+
+### Bug Fixes
+
+* correctly compute deviance ([042c2b2](https://github.com/jolars/libslope/commit/042c2b2fd73d43e979e6cc828976d144c981b075))
+* setup path correctly when path_length = 1 ([17e78a4](https://github.com/jolars/libslope/commit/17e78a49fb94a8bcb18c278ad47d3678bf0c42e4))
+* **sparse:** fix bug with sparse and modify x ([78c83b1](https://github.com/jolars/libslope/commit/78c83b1238be721b88a6ce29f79889576a4826f1))
+
 ## [0.20.1](https://github.com/jolars/libslope/compare/v0.20.0...v0.20.1) (2025-02-28)
 
 
