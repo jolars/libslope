@@ -4,10 +4,9 @@
  */
 
 #include "pgd.h"
+#include "../clusters.h"
+#include "../losses/loss.h"
 #include "../sorted_l1_norm.h"
-#include "math.h"
-#include "slope/clusters.h"
-#include "slope/losses/loss.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <memory>

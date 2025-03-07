@@ -6,11 +6,11 @@
 
 #pragma once
 
+#include "../clusters.h"
+#include "../losses/loss.h"
+#include "../sorted_l1_norm.h"
 #include "hybrid_cd.h"
 #include "pgd.h"
-#include "slope/clusters.h"
-#include "slope/losses/loss.h"
-#include "slope/sorted_l1_norm.h"
 #include "solver.h"
 #include <memory>
 

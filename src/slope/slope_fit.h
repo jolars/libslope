@@ -1,8 +1,8 @@
 #pragma once
 
-#include "slope/losses/setup_loss.h"
-#include "slope/normalize.h"
-#include "slope/utils.h"
+#include "losses/setup_loss.h"
+#include "normalize.h"
+#include "utils.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <memory>

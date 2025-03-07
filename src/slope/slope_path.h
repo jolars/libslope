@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "slope/slope_fit.h"
+#include "slope_fit.h"
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 

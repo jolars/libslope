@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "slope/clusters.h"
-#include "slope/losses/loss.h"
-#include "slope/normalize.h"
-#include "slope/sorted_l1_norm.h"
+#include "../clusters.h"
+#include "../jit_normalization.h"
+#include "../losses/loss.h"
+#include "../sorted_l1_norm.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <memory>
