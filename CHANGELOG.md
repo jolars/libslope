@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.1](https://github.com/jolars/libslope/compare/v0.21.0...v0.21.1) (2025-03-10)
+
+
+### Bug Fixes
+
+* **cv:** pick correct optimum in cross-validation ([0b85be7](https://github.com/jolars/libslope/commit/0b85be7212831edbaff0312c5b2684c5b02051c0))
+
 ## [0.21.0](https://github.com/jolars/libslope/compare/v0.20.1...v0.21.0) (2025-03-05)
 
 
