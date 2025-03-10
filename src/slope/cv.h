@@ -84,6 +84,7 @@ struct CvResult
  * hyperparameter grid.
  *
  * @param n_folds Number of folds for cross-validation (default: 10)
+ * @param n_repeats Number of times to repeat the cross-validation (default: 1)
  * @param metric Evaluation metric used for model assessment (default: "mse")
  * @param random_seed Seed for random number generator to ensure reproducibility
  * (default: 42)
@@ -95,10 +96,11 @@ struct CvResult
 struct CvConfig
 {
   int n_folds = 10;
+  int n_repeats = 1;
   std::string metric = "mse";
   uint64_t random_seed = 42;
   std::map<std::string, std::vector<double>> hyperparams = { { "q", { 0.1 } } };
-  std::optional<std::vector<std::vector<int>>> predefined_folds;
+  std::optional<std::vector<std::vector<std::vector<int>>>> predefined_folds;
 };
 
 /**
@@ -169,9 +171,13 @@ crossValidate(Slope model,
   auto scorer = Score::create(config.metric);
   auto grid = createGrid(config.hyperparams);
 
-  Folds folds = config.predefined_folds.has_value()
-                  ? Folds(config.predefined_folds.value())
-                  : Folds(n, config.n_folds, config.random_seed);
+  // Total number of evaluations (n_repeats * n_folds)
+  Folds folds =
+    config.predefined_folds.has_value()
+      ? Folds(config.predefined_folds.value())
+      : Folds(n, config.n_folds, config.n_repeats, config.random_seed);
+
+  int n_evals = folds.numEvals();
 
   for (const auto& params : grid) {
     GridResult result;
@@ -180,11 +186,11 @@ crossValidate(Slope model,
 
     auto initial_path = model.path(x, y);
     result.alphas = initial_path.getAlpha();
+    int n_alpha = result.alphas.size();
 
     assert((result.alphas > 0).all());
 
-    Eigen::MatrixXd scores =
-      Eigen::MatrixXd::Zero(config.n_folds, result.alphas.size());
+    Eigen::MatrixXd scores = Eigen::MatrixXd::Zero(n_evals, n_alpha);
 
     Eigen::setNbThreads(1);
 
@@ -192,22 +198,24 @@ crossValidate(Slope model,
     omp_set_max_active_levels(1);
 #pragma omp parallel for num_threads(Threads::get()) shared(scores)
 #endif
-    for (int i = 0; i < config.n_folds; ++i) {
+    for (int i = 0; i < n_evals; ++i) {
+      auto [rep, fold] = std::div(i, folds.numFolds());
+
       Slope thread_model = model;
       thread_model.setModifyX(true);
 
       // TODO: Maybe consider not copying at all?
-      auto [x_train, y_train, x_test, y_test] = folds.split(x, y, i);
+      auto [x_train, y_train, x_test, y_test] = folds.split(x, y, fold, rep);
       auto path = thread_model.path(x_train, y_train, result.alphas);
 
-      for (int j = 0; j < result.alphas.size(); ++j) {
+      for (int j = 0; j < n_alpha; ++j) {
         auto eta = path(j).predict(x_test, "linear");
         scores(i, j) = scorer->eval(eta, y_test, loss);
       }
     }
 
     result.mean_scores = scores.colwise().mean();
-    result.std_errors = stdDevs(scores).array() / std::sqrt(config.n_folds);
+    result.std_errors = stdDevs(scores).array() / std::sqrt(n_evals);
     result.score = std::move(scores);
     cv_result.results.push_back(result);
   }
