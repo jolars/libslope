@@ -194,24 +194,51 @@ crossValidate(Slope model,
 
     Eigen::setNbThreads(1);
 
+    // Thread-safety for exceptions
+    std::vector<std::string> thread_errors(n_evals);
+    bool had_exception = false;
+
 #ifdef _OPENMP
     omp_set_max_active_levels(1);
-#pragma omp parallel for num_threads(Threads::get()) shared(scores)
+#pragma omp parallel for num_threads(Threads::get())                           \
+  shared(scores, thread_errors, had_exception)
 #endif
     for (int i = 0; i < n_evals; ++i) {
-      auto [rep, fold] = std::div(i, folds.numFolds());
+      try {
+        auto [rep, fold] = std::div(i, folds.numFolds());
 
-      Slope thread_model = model;
-      thread_model.setModifyX(true);
+        Slope thread_model = model;
+        thread_model.setModifyX(true);
 
-      // TODO: Maybe consider not copying at all?
-      auto [x_train, y_train, x_test, y_test] = folds.split(x, y, fold, rep);
-      auto path = thread_model.path(x_train, y_train, result.alphas);
+        // TODO: Maybe consider not copying at all?
+        auto [x_train, y_train, x_test, y_test] = folds.split(x, y, fold, rep);
 
-      for (int j = 0; j < n_alpha; ++j) {
-        auto eta = path(j).predict(x_test, "linear");
-        scores(i, j) = scorer->eval(eta, y_test, loss);
+        auto path = thread_model.path(x_train, y_train, result.alphas);
+
+        for (int j = 0; j < n_alpha; ++j) {
+          auto eta = path(j).predict(x_test, "linear");
+          scores(i, j) = scorer->eval(eta, y_test, loss);
+        }
+      } catch (const std::exception& e) {
+        thread_errors[i] = e.what();
+#pragma omp atomic write
+        had_exception = true;
+      } catch (...) {
+        thread_errors[i] = "Unknown exception";
+#pragma omp atomic write
+        had_exception = true;
       }
+    }
+
+    if (had_exception) {
+      std::string error_message = "Exception(s) during cross-validation:\n";
+      for (int i = 0; i < n_evals; ++i) {
+        if (!thread_errors[i].empty()) {
+          error_message +=
+            "Fold " + std::to_string(i) + ": " + thread_errors[i] + "\n";
+        }
+      }
+      throw std::runtime_error(error_message);
     }
 
     result.mean_scores = scores.colwise().mean();
