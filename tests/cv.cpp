@@ -127,3 +127,51 @@ TEST_CASE("Cross-validation", "[cv]")
     REQUIRE(*best_s1 != res.best_score);
   }
 }
+
+TEST_CASE("Repeated cross-validation", "[cv]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  auto data = generateData(100, 10);
+  Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
+
+  slope::Slope model;
+
+  auto cv_config = slope::CvConfig();
+
+  cv_config.metric = "deviance";
+  cv_config.n_folds = 3;
+  cv_config.n_repeats = 2;
+  cv_config.hyperparams["q"] = { 0.1, 0.2 };
+  cv_config.random_seed = 83;
+
+  auto res = crossValidate(model, data.x, data.y, cv_config);
+
+  auto optim = res.best_params;
+  auto s0 = res.results[0].mean_scores;
+
+  REQUIRE(res.results.front().score.rows() ==
+          cv_config.n_repeats * cv_config.n_folds);
+}
+
+TEST_CASE("Cross-validation: user folds", "[cv][user_folds]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  slope::Slope model;
+  int n = 9;
+
+  auto cv_config = slope::CvConfig();
+  auto data = generateData(n, 2, "quadratic", 1, 1);
+
+  std::vector<std::vector<std::vector<int>>> user_folds = {
+    { { 0, 2, 4 }, { 1, 5, 8 }, { 7, 6, 3 } },
+    { { 2, 0, 3 }, { 6, 5, 1 }, { 7, 1, 8 } }
+  };
+  cv_config.hyperparams["q"] = { 0.1, 0.2 };
+  cv_config.predefined_folds = user_folds;
+
+  auto res = crossValidate(model, data.x, data.y, cv_config);
+
+  REQUIRE(res.results.front().score.rows() == 6);
+}
