@@ -121,6 +121,12 @@ public:
    */
   void update(const Eigen::VectorXd& beta);
 
+  /**
+   * @brief Returns the clusters as a vector of vectors.
+   * @return The clusters as a vector of vectors.
+   */
+  std::vector<std::vector<int>> getClusters() const;
+
 private:
   std::vector<double> c;  /**< The coefficients of the clusters. */
   std::vector<int> c_ind; /**< The indices of the clusters. */

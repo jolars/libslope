@@ -204,4 +204,17 @@ Clusters::merge(const int old_index, const int new_index)
   c_ptr.erase(c_ptr.begin() + old_index + 1);
 }
 
+std::vector<std::vector<int>>
+Clusters::getClusters() const
+{
+  std::vector<std::vector<int>> clusters;
+  clusters.reserve(n_clusters());
+
+  for (int i = 0; i < n_clusters(); ++i) {
+    clusters.emplace_back(cbegin(i), cend(i));
+  }
+
+  return clusters;
+}
+
 } // namespace slope
