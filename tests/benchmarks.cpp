@@ -9,7 +9,7 @@
 #include <slope/slope.h>
 #include <slope/threads.h>
 
-TEST_CASE("Parallelized gradient computations", "[!benchmark][parallelization]")
+TEST_CASE("Parallelized gradient computations", "[!benchmark]")
 {
   int n = 1000;
   int p = 1000;
@@ -53,7 +53,7 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark][parallelization]")
   };
 }
 
-TEST_CASE("Path screening benchmarks", "[!benchmark][screening]")
+TEST_CASE("Path screening benchmarks", "[!benchmark]")
 {
   const int p = 1000;
   const int n = 100;
@@ -77,7 +77,7 @@ TEST_CASE("Path screening benchmarks", "[!benchmark][screening]")
   };
 }
 
-TEST_CASE("One lambda screening benchmarks", "[!benchmark][screening]")
+TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
 {
   const int p = 1000;
   const int n = 100;
@@ -103,7 +103,7 @@ TEST_CASE("One lambda screening benchmarks", "[!benchmark][screening]")
   };
 }
 
-TEST_CASE("Parallel cross-validation", "[!benchmark][cv][parallelization]")
+TEST_CASE("Parallel cross-validation", "[!benchmark]")
 {
   const int p = 100;
   const int n = 1000;
@@ -125,7 +125,7 @@ TEST_CASE("Parallel cross-validation", "[!benchmark][cv][parallelization]")
   };
 }
 
-TEST_CASE("Cluster updating", "[!benchmark][clusters]")
+TEST_CASE("Benchmark cluster updating", "[!benchmark]")
 {
   const int p = 10000;
   const int n = 100;
