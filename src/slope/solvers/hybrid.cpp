@@ -4,7 +4,6 @@
  */
 
 #include "hybrid.h"
-#include "../clusters.h"
 #include "../losses/loss.h"
 #include "../sorted_l1_norm.h"
 #include <Eigen/Dense>
@@ -19,7 +18,6 @@ void
 Hybrid::run(Eigen::VectorXd& beta0,
             Eigen::VectorXd& beta,
             Eigen::MatrixXd& eta,
-            Clusters& clusters,
             const Eigen::ArrayXd& lambda,
             const std::unique_ptr<Loss>& loss,
             const SortedL1Norm& penalty,
@@ -33,7 +31,6 @@ Hybrid::run(Eigen::VectorXd& beta0,
   runImpl(beta0,
           beta,
           eta,
-          clusters,
           lambda,
           loss,
           penalty,
@@ -50,7 +47,6 @@ void
 Hybrid::run(Eigen::VectorXd& beta0,
             Eigen::VectorXd& beta,
             Eigen::MatrixXd& eta,
-            Clusters& clusters,
             const Eigen::ArrayXd& lambda,
             const std::unique_ptr<Loss>& loss,
             const SortedL1Norm& penalty,
@@ -64,7 +60,6 @@ Hybrid::run(Eigen::VectorXd& beta0,
   runImpl(beta0,
           beta,
           eta,
-          clusters,
           lambda,
           loss,
           penalty,

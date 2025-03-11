@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "../clusters.h"
 #include "../losses/loss.h"
 #include "../math.h"
 #include "../sorted_l1_norm.h"
@@ -48,7 +47,6 @@ public:
   void run(Eigen::VectorXd& beta0,
            Eigen::VectorXd& beta,
            Eigen::MatrixXd& eta,
-           Clusters& clusters,
            const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Loss>& loss,
            const SortedL1Norm& penalty,
@@ -63,7 +61,6 @@ public:
   void run(Eigen::VectorXd& beta0,
            Eigen::VectorXd& beta,
            Eigen::MatrixXd& eta,
-           Clusters& clusters,
            const Eigen::ArrayXd& lambda,
            const std::unique_ptr<Loss>& loss,
            const SortedL1Norm& penalty,
@@ -79,7 +76,6 @@ private:
   void runImpl(Eigen::VectorXd& beta0,
                Eigen::VectorXd& beta,
                Eigen::MatrixXd& eta,
-               Clusters&,
                const Eigen::ArrayXd& lambda,
                const std::unique_ptr<Loss>& loss,
                const SortedL1Norm& penalty,

@@ -123,4 +123,17 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 
     REQUIRE_NOTHROW(model.path(data.x, data.y, alpha, lambda));
   }
+
+  SECTION("Return clusters")
+  {
+    slope::Slope model;
+    model.setPathLength(84);
+    model.setReturnClusters(true);
+
+    auto data = generateData(100, 10);
+
+    auto path = model.path(data.x, data.y);
+
+    REQUIRE(path.getClusters().size() > 0);
+  }
 }
