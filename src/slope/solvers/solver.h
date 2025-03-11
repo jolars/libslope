@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "../clusters.h"
 #include "../jit_normalization.h"
 #include "../losses/loss.h"
 #include "../sorted_l1_norm.h"
@@ -53,7 +52,6 @@ public:
    * @param beta0 Intercept terms for each response
    * @param beta Coefficients (size p x m)
    * @param eta Linear predictor matrix (n samples x m responses)
-   * @param clusters Coefficient clustering structure
    * @param lambda Vector of regularization parameters
    * @param loss Pointer to loss function object
    * @param penalty Sorted L1 norm object for proximal operations
@@ -67,7 +65,6 @@ public:
   virtual void run(Eigen::VectorXd& beta0,
                    Eigen::VectorXd& beta,
                    Eigen::MatrixXd& eta,
-                   Clusters& clusters,
                    const Eigen::ArrayXd& lambda,
                    const std::unique_ptr<Loss>& loss,
                    const SortedL1Norm& penalty,
@@ -84,7 +81,6 @@ public:
    * @param beta0 Intercept terms for each response
    * @param beta Coefficient vecttor (size p x m)
    * @param eta Linear predictor matrix (n samples x m responses)
-   * @param clusters Coefficient clustering structure
    * @param lambda Vector of regularization parameters
    * @param loss Pointer to loss function object
    * @param penalty Sorted L1 norm object for proximal operations
@@ -98,7 +94,6 @@ public:
   virtual void run(Eigen::VectorXd& beta0,
                    Eigen::VectorXd& beta,
                    Eigen::MatrixXd& eta,
-                   Clusters& clusters,
                    const Eigen::ArrayXd& lambda,
                    const std::unique_ptr<Loss>& loss,
                    const SortedL1Norm& penalty,
