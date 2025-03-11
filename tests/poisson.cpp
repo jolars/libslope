@@ -238,7 +238,7 @@ TEST_CASE("Poisson predictions", "[poisson][predict]")
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected, 1e-3));
 }
 
-TEST_CASE("Poisson low regularization", "[fail]")
+TEST_CASE("Poisson low regularization", "[poisson]")
 {
   auto data = generateData(100, 5, "poisson", 1, 1, 1);
 
