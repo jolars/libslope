@@ -1,6 +1,5 @@
 #include "generate_data.hpp"
 #include "slope/slope.h"
-#include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
