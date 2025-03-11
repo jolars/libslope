@@ -59,4 +59,4 @@ tasks:
   benchmark:
     deps: [build]
     cmds:
-      - ./build/tests [!benchmark]
+      - ./build/tests [!benchmark] --benchmark-samples 20
