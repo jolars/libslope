@@ -1,13 +1,13 @@
-#include "slope/screening.h"
 #include "generate_data.hpp"
-#include "slope/kkt_check.h"
-#include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
+#include <slope/kkt_check.h>
+#include <slope/screening.h>
+#include <slope/slope.h>
 
 TEST_CASE("Strong screening rule", "[screening]")
 {
