@@ -10,7 +10,7 @@
 #include <slope/math.h>
 #include <slope/threads.h>
 
-TEST_CASE("Parallelized gradient computations", "[!benchmark]")
+TEST_CASE("Parallelized gradient computations", "[!benchmark][parallelization]")
 {
   int n = 1000;
   int p = 1000;
@@ -54,7 +54,7 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
   };
 }
 
-TEST_CASE("Path screening benchmarks", "[!benchmark]")
+TEST_CASE("Path screening benchmarks", "[!benchmark][screening]")
 {
   const int p = 1000;
   const int n = 100;
@@ -78,7 +78,7 @@ TEST_CASE("Path screening benchmarks", "[!benchmark]")
   };
 }
 
-TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
+TEST_CASE("One lambda screening benchmarks", "[!benchmark][screening]")
 {
   const int p = 1000;
   const int n = 100;
@@ -104,7 +104,7 @@ TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
   };
 }
 
-TEST_CASE("Parallel cross-validation", "[!benchmark]")
+TEST_CASE("Parallel cross-validation", "[!benchmark][cv][parallelization]")
 {
   const int p = 100;
   const int n = 1000;
