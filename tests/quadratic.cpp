@@ -303,3 +303,25 @@ TEST_CASE("Gaussian predictions", "[gaussian][predict]")
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(eta));
 }
+
+TEST_CASE("Cluster updating", "[gaussian][clusters]")
+{
+  using namespace Catch::Matchers;
+
+  auto data = generateData(100, 2000);
+
+  slope::Slope model;
+
+  model.setSolver("hybrid");
+
+  model.setUpdateClusters(true);
+  auto fit_updates = model.fit(data.x, data.y);
+
+  model.setUpdateClusters(false);
+  auto fit_wo_updates = model.fit(data.x, data.y);
+
+  Eigen::VectorXd coefs_updates = fit_updates.getCoefs();
+  Eigen::VectorXd coefs_wo_updates = fit_wo_updates.getCoefs();
+
+  REQUIRE_THAT(coefs_updates, VectorApproxEqual(coefs_wo_updates));
+}
