@@ -125,3 +125,27 @@ TEST_CASE("Parallel cross-validation", "[!benchmark][cv][parallelization]")
     crossValidate(model, data.x, data.y);
   };
 }
+
+TEST_CASE("Cluster updating", "[!benchmark][clusters]")
+{
+  const int p = 10000;
+  const int n = 100;
+
+  auto data = generateData(n, p, "quadratic");
+
+  slope::Slope model;
+
+  model.setUpdateClusters(true);
+
+  BENCHMARK("With cluster updates")
+  {
+    model.path(data.x, data.y);
+  };
+
+  model.setUpdateClusters(false);
+
+  BENCHMARK("Without cluster updates")
+  {
+    model.path(data.x, data.y);
+  };
+}
