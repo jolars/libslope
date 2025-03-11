@@ -1,5 +1,4 @@
 #include "generate_data.hpp"
-#include "slope/slope.h"
 #include <Eigen/Core>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -7,6 +6,7 @@
 #include <cmath>
 #include <slope/cv.h>
 #include <slope/math.h>
+#include <slope/slope.h>
 #include <slope/threads.h>
 
 TEST_CASE("Parallelized gradient computations", "[!benchmark][parallelization]")
