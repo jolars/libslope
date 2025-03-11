@@ -29,6 +29,14 @@ public:
    * @param i The index of the cluster.
    * @return An iterator pointing to the beginning of the cluster.
    */
+  std::size_t size() { return c.size(); }
+
+  /**
+   * @brief Returns an iterator pointing to the beginning of the cluster with
+   * the given index.
+   * @param i The index of the cluster.
+   * @return An iterator pointing to the beginning of the cluster.
+   */
   std::vector<int>::iterator begin(const int i);
 
   /**
