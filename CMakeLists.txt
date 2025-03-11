@@ -43,6 +43,7 @@ if(BUILD_TESTING)
     tests
     tests/assertions.cpp
     tests/benchmarks.cpp
+    tests/clusters.cpp
     tests/cv.cpp
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
