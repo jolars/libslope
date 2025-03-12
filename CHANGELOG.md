@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.22.0](https://github.com/jolars/libslope/compare/v0.21.0...v0.22.0) (2025-03-12)
+
+
+### Features
+
+* add `Clusters::getClusters()` ([c79dba7](https://github.com/jolars/libslope/commit/c79dba7356374009e3add363ee0444623fa2419b))
+* add `size()` method to `Clusters` ([84aeaa1](https://github.com/jolars/libslope/commit/84aeaa19ec392c4e36ea78a2d5a50ae7b4d329bd))
+* add a warnings logger ([#115](https://github.com/jolars/libslope/issues/115)) ([1c3e4b2](https://github.com/jolars/libslope/commit/1c3e4b239566794989764e532c762269173239c7)), closes [#108](https://github.com/jolars/libslope/issues/108)
+* add repeated k-fold cv ([#106](https://github.com/jolars/libslope/issues/106)) ([32d526c](https://github.com/jolars/libslope/commit/32d526cf9e58fa17796d122ad4208b25ac321959))
+
+
+### Bug Fixes
+
+* **cv:** pick correct optimum in cross-validation ([0b85be7](https://github.com/jolars/libslope/commit/0b85be7212831edbaff0312c5b2684c5b02051c0))
+* handle exceptions in openmp regions ([#110](https://github.com/jolars/libslope/issues/110)) ([54a7cf0](https://github.com/jolars/libslope/commit/54a7cf0cc12d2288b2463e7cee3927226430582e)), closes [#105](https://github.com/jolars/libslope/issues/105)
+
+
+### Performance Improvements
+
+* speed up Clusters::update() ([3d56e60](https://github.com/jolars/libslope/commit/3d56e60acde9936c564f0d5d6d678e4d54fecdd1))
+* use lazy cumulative sums in threshold function ([1c4ce3b](https://github.com/jolars/libslope/commit/1c4ce3b41e30a0ca34176526600eb01f801eec53))
+
 ## [0.21.0](https://github.com/jolars/libslope/compare/v0.20.1...v0.21.0) (2025-03-05)
 
 
