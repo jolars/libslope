@@ -325,4 +325,48 @@ TEST_CASE("Clusters", "[clusters]")
     REQUIRE(all_clusters.size() == 1);
     REQUIRE_THAT(all_clusters[0], Equals(ivec{ 0 }));
   }
+
+  SECTION("Debug update method for infinite loop")
+  {
+    // Create a simple vector with distinct values in different clusters
+    Eigen::VectorXd beta(6);
+    beta << 1.0, 3.0, 2.0, -2.0, 3.0, -1.0;
+
+    slope::Clusters clusters(beta);
+
+    // Verify initial state
+    REQUIRE(clusters.n_clusters() == 3);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3.0, 2.0, 1.0 }));
+
+    // Get initial clusters for comparison
+    auto initial_clusters = clusters.getClusters();
+    REQUIRE_THAT(initial_clusters[0], UnorderedEquals(ivec{ 1, 4 }));
+    REQUIRE_THAT(initial_clusters[1], UnorderedEquals(ivec{ 2, 3 }));
+    REQUIRE_THAT(initial_clusters[2], UnorderedEquals(ivec{ 0, 5 }));
+
+    // First update - move from first cluster to second
+    INFO("About to perform first update");
+    clusters.update(0, 1, 2.0);
+
+    // Verify state after first update
+    INFO("After first update");
+    REQUIRE(clusters.n_clusters() == 2);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 2.0, 1.0 }));
+
+    auto clusters_after_first = clusters.getClusters();
+    REQUIRE_THAT(clusters_after_first[0], UnorderedEquals(ivec{ 1, 2, 3, 4 }));
+    REQUIRE_THAT(clusters_after_first[1], UnorderedEquals(ivec{ 0, 5 }));
+
+    // Second update - move from second cluster to first
+    INFO("About to perform second update");
+    clusters.update(1, 0, 2.0);
+
+    // Verify final state
+    INFO("After second update");
+    REQUIRE(clusters.n_clusters() == 1);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 2.0 }));
+
+    auto final_clusters = clusters.getClusters();
+    REQUIRE_THAT(final_clusters[0], UnorderedEquals(ivec{ 0, 1, 2, 3, 4, 5 }));
+  }
 }
