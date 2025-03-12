@@ -304,7 +304,7 @@ TEST_CASE("Gaussian predictions", "[gaussian][predict]")
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(eta));
 }
 
-TEST_CASE("Cluster updating", "[gaussian][clusters]")
+TEST_CASE("Cluster updating", "[quadratic][clusters]")
 {
   using namespace Catch::Matchers;
 
