@@ -4,6 +4,7 @@ add_library(
   slope/cv.cpp
   slope/folds.cpp
   slope/kkt_check.cpp
+  slope/logger.cpp
   slope/losses/logistic.cpp
   slope/losses/multinomial.cpp
   slope/losses/poisson.cpp
