@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "diagnostics.h"
 #include "kkt_check.h"
+#include "logger.h"
 #include "losses/loss.h"
 #include "losses/setup_loss.h"
 #include "math.h"
@@ -169,9 +170,6 @@ Slope::path(T& x,
 
     int it = 0;
     for (; it < this->max_it; ++it) {
-      // TODO: Return a warning code if the solver does not converge
-      assert(it < this->max_it - 1 && "Exceeded maximum number of iterations");
-
       // Compute primal, dual, and gap
       residual = loss->residual(eta, y);
       updateGradient(gradient,
@@ -292,6 +290,13 @@ Slope::path(T& x,
                   this->x_centers,
                   this->x_scales,
                   y);
+    }
+
+    if (it == this->max_it) {
+      WarningLogger::addWarning(
+        WarningCode::MAXIT_REACHED,
+        "Maximum number of iterations reached at step = " +
+          std::to_string(path_step) + ".");
     }
 
     // Store everything for this step of the path

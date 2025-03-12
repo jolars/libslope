@@ -48,6 +48,7 @@ if(BUILD_TESTING)
     tests/generate_data.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
+    tests/logger.cpp
     tests/logistic.cpp
     tests/multinomial.cpp
     tests/normalization.cpp
