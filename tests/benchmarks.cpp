@@ -209,9 +209,9 @@ TEST_CASE("Cluster comparison", "[!benchmark]")
 TEST_CASE("Thresholding", "[!benchmark]")
 {
 
-  double a = 0.8;
+  double a = 0.1;
   int p = 100000;
-  int j = 3;
+  int j = 0;
 
   Eigen::VectorXd beta = Eigen::VectorXd::Random(p);
 
@@ -221,6 +221,10 @@ TEST_CASE("Thresholding", "[!benchmark]")
     for (int j = 0; j < cluster_size; j++) {
       beta(i + j) = value;
     }
+  }
+
+  for (int i = 0; i < 1000; ++i) {
+    beta(i) = 1.1;
   }
 
   Eigen::ArrayXd lambdas = slope::lambdaSequence(p, 0.2, "bh");
