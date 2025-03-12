@@ -4,9 +4,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
+#include <slope/clusters.h>
 #include <slope/cv.h>
 #include <slope/math.h>
+#include <slope/regularization_sequence.h>
 #include <slope/slope.h>
+#include <slope/solvers/slope_threshold.h>
 #include <slope/threads.h>
 
 TEST_CASE("Parallelized gradient computations", "[!benchmark]")
@@ -146,5 +149,86 @@ TEST_CASE("Benchmark cluster updating", "[!benchmark]")
   BENCHMARK("Without cluster updates")
   {
     model.path(data.x, data.y);
+  };
+}
+
+TEST_CASE("Cluster comparison", "[!benchmark]")
+{
+  const int p = 100000;
+  const int n = 100;
+
+  auto data = generateData(n, p, "quadratic");
+  auto beta = data.beta;
+
+  slope::Slope model;
+
+  // Create a more challenging beta vector with some clusters
+  Eigen::VectorXd beta_clustered = Eigen::VectorXd::Random(p);
+  // Create some clusters by setting coefficients equal
+  for (int i = 0; i < p; i += 3) {
+    double value = beta_clustered(i);
+    int cluster_size = std::min(3, p - i);
+    for (int j = 0; j < cluster_size; j++) {
+      beta_clustered(i + j) = value;
+    }
+  }
+
+  BENCHMARK("Cluster initialization")
+  {
+    slope::Clusters clusters(beta_clustered);
+  };
+
+  // Create instances for update benchmarks
+  slope::Clusters clusters(beta_clustered);
+
+  BENCHMARK("Clusters accessing")
+  {
+    // Clone to avoid modifying the original
+    // Random updates (use the old API with three parameters)
+    for (int j = 0; j < clusters.n_clusters(); ++j) {
+      double c_old = clusters.coeff(j);
+
+      std::vector<int> s;
+      int cluster_size = clusters.cluster_size(j);
+      s.reserve(cluster_size);
+
+      for (auto c_it = clusters.cbegin(j); c_it != clusters.cend(j); ++c_it) {
+        int k = *c_it;
+        double s_k = beta(k) * c_old;
+        s.emplace_back(s_k);
+      }
+    };
+  };
+
+  BENCHMARK("Cluster reordering")
+  {
+    clusters.update(5, clusters.n_clusters() - 1, 0.912);
+  };
+}
+
+TEST_CASE("Thresholding", "[!benchmark]")
+{
+
+  double a = 0.8;
+  int p = 100000;
+  int j = 3;
+
+  Eigen::VectorXd beta = Eigen::VectorXd::Random(p);
+
+  for (int i = 0; i < p; i += 3) {
+    double value = beta(i);
+    int cluster_size = std::min(3, p - i);
+    for (int j = 0; j < cluster_size; j++) {
+      beta(i + j) = value;
+    }
+  }
+
+  Eigen::ArrayXd lambdas = slope::lambdaSequence(p, 0.2, "bh");
+
+  slope::Clusters clusters(beta);
+
+  BENCHMARK("Thresholding")
+  {
+    slope::slopeThreshold(a, j, lambdas, clusters);
   };
 }
