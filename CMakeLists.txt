@@ -60,6 +60,7 @@ if(BUILD_TESTING)
     tests/real_data.cpp
     tests/score.cpp
     tests/screening.cpp
+    tests/thresholding.cpp
     tests/utils.cpp
     tests/sparse.cpp
   )
