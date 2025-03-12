@@ -1,5 +1,5 @@
 #include "generate_data.hpp"
-#include <Eigen/Core>
+#include <Eigen/SparseCore>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -234,5 +234,40 @@ TEST_CASE("Thresholding", "[!benchmark]")
   BENCHMARK("Thresholding")
   {
     slope::slopeThreshold(a, j, lambdas, clusters);
+  };
+}
+
+TEST_CASE("Normalization", "[!benchmark]")
+{
+  auto data = generateData(100, 500, "quadratic", 1, 0.01, 0.01);
+
+  Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
+
+  slope::Slope model;
+
+  BENCHMARK("Dense: JIT")
+  {
+    model.setModifyX(false);
+    model.path(data.x, data.y);
+  };
+
+  BENCHMARK("Dense: Modify X")
+  {
+    model.setModifyX(true);
+    model.path(data.x, data.y);
+  };
+
+  BENCHMARK("Sparse: JIT")
+  {
+    model.setModifyX(false);
+    model.path(x_sparse, data.y);
+  };
+
+  // Should currently be just as fast as the JIT version since
+  // we actually do not modify X when it is sparse
+  BENCHMARK("Sparse: Modify X")
+  {
+    model.setModifyX(true);
+    model.path(x_sparse, data.y);
   };
 }
