@@ -91,7 +91,6 @@ if(BUILD_DOCS)
   doxygen_add_docs(
     docs
     ${PROJECT_SOURCE_DIR}
-    docs/
     README.md
     ALL
     COMMENT "Generate package documentation"

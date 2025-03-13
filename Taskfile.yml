@@ -60,3 +60,8 @@ tasks:
     deps: [build]
     cmds:
       - ./build/tests [!benchmark] --benchmark-samples 20
+
+  normalization:
+    deps: [build]
+    cmds:
+      - ./build/tests "Normalization JIT" --benchmark-samples 10
