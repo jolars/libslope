@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/jolars/libslope/compare/v0.22.0...v0.23.0) (2025-03-14)
+
+
+### Features
+
+* add `fitOls()`, a function for fitting OLS ([3c7408a](https://github.com/jolars/libslope/commit/3c7408a9565a64f83221eacc5cee1be49cfb3d6c))
+
 ## [0.22.0](https://github.com/jolars/libslope/compare/v0.21.0...v0.22.0) (2025-03-12)
 
 
