@@ -33,8 +33,6 @@ endif()
 
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 add_subdirectory(src)
 
 if(BUILD_TESTING)

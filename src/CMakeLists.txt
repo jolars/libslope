@@ -26,7 +26,12 @@ add_library(
   slope/utils.cpp
 )
 
-target_include_directories(slope PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(
+  slope
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${EIGEN3_INCLUDE_DIR}
+)
+
+target_link_libraries(slope PUBLIC Eigen3::Eigen)
 
 install(TARGETS slope DESTINATION lib)
 install(
