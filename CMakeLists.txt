@@ -9,6 +9,7 @@ option(ENABLE_COVERAGE "Generate coverage report" OFF)
 option(DAP_DEBUG "Interactive debugging" OFF)
 
 include(CTest)
+include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -86,12 +87,30 @@ endif()
 if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
 
+  string(
+    CONCAT
+    AWESOME_CSS_URL
+    "https://github.com/jothepro/"
+    "doxygen-awesome-css/archive/refs/heads/main.zip"
+  )
+
+  FetchContent_Declare(
+    doxygen-awesome-css
+    URL ${AWESOME_CSS_URL}
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  )
+  FetchContent_MakeAvailable(doxygen-awesome-css)
+
+  # Save the location the files were cloned into
+  # This allows us to get the path to doxygen-awesome.css
+  FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+
+  # Generate the Doxyfile
   set(DOXYGEN_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/assets")
-  set(DOXYGEN_CSS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/doxygen-awesome-css")
   set(
     DOXYGEN_HTML_EXTRA_STYLESHEET
-    "${DOXYGEN_CSS_DIR}/doxygen-awesome.css"
-    "${DOXYGEN_CSS_DIR}/doxygen-awesome-sidebar-only.css"
+    "${AWESOME_CSS_DIR}/doxygen-awesome.css"
+    "${AWESOME_CSS_DIR}/doxygen-awesome-sidebar-only.css"
   )
   set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/assets/slope-logo.png")
   set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
