@@ -93,12 +93,17 @@ if(BUILD_DOCS)
   )
   set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/assets/slope-logo.png")
   set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
+  set(
+    DOXYGEN_USE_MDFILE_AS_MAINPAGE
+    "${CMAKE_CURRENT_SOURCE_DIR}/docs/mainpage.md"
+  )
   set(DOXYGEN_USE_MATHJAX YES)
-  set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+  set(DOXYGEN_DISABLE_INDEX NO)
+  set(DOXYGEN_GENERATE_TREEVIEW NO)
   doxygen_add_docs(
     docs
+    docs/mainpage.md
     ${PROJECT_SOURCE_DIR}
-    README.md
     ALL
     COMMENT "Generate package documentation"
   )
