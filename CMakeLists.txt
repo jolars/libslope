@@ -51,6 +51,7 @@ if(BUILD_TESTING)
     tests/logistic.cpp
     tests/multinomial.cpp
     tests/normalization.cpp
+    tests/alpha_est.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/predictions.cpp

@@ -12,6 +12,7 @@ add_library(
   slope/losses/setup_loss.cpp
   slope/math.cpp
   slope/normalize.cpp
+  slope/ols.cpp
   slope/qnorm.cpp
   slope/regularization_sequence.cpp
   slope/score.cpp
