@@ -87,9 +87,11 @@ if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
 
   set(DOXYGEN_IMAGE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+  set(DOXYGEN_CSS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/doxygen-awesome-css")
   set(
     DOXYGEN_HTML_EXTRA_STYLESHEET
-    "${CMAKE_CURRENT_SOURCE_DIR}/assets/custom.css"
+    "${DOXYGEN_CSS_DIR}/doxygen-awesome.css"
+    "${DOXYGEN_CSS_DIR}/doxygen-awesome-sidebar-only.css"
   )
   set(DOXYGEN_PROJECT_LOGO "${CMAKE_CURRENT_SOURCE_DIR}/assets/slope-logo.png")
   set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/docs)
@@ -99,7 +101,10 @@ if(BUILD_DOCS)
   )
   set(DOXYGEN_USE_MATHJAX YES)
   set(DOXYGEN_DISABLE_INDEX NO)
-  set(DOXYGEN_GENERATE_TREEVIEW NO)
+  set(DOXYGEN_FULL_SIDEBAR NO)
+  set(DOXYGEN_GENERATE_TREEVIEW YES)
+  set(HTML_COLORSTYLE LIGHT)
+
   doxygen_add_docs(
     docs
     docs/mainpage.md
