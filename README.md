@@ -1,4 +1,4 @@
-# SLOPE <a href="https://jolars.github.io/libslope/"><img src='https://raw.githubusercontent.com/jolars/libslope/refs/heads/main/assets/slope-logo.png' align="right" height="139" /></a>
+# SLOPE <img src='https://raw.githubusercontent.com/jolars/libslope/refs/heads/main/assets/slope-logo.png' align="right" height="139" />
 
 [![CI](https://github.com/jolars/libslope/actions/workflows/ci.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/jolars/libslope/graph/badge.svg?token=y0mJN9eqYr)](https://codecov.io/gh/jolars/libslope)
