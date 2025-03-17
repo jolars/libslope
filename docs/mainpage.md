@@ -1,54 +1,21 @@
 # SLOPE {#mainpage}
 
 SLOPE is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
-purpose is to serve as a backend for R and Python packages, but it can also be
-used as a standalone library in the off-chance that you want to fit your models
-entirely through C++.
+purpose is to serve as a backend for higher-level language packages in R and
+Python, but it can also be used as a standalone library in the off-chance that
+you want to fit your models entirely via C++.
 
-## Getting Started
+SLOPE solves the following optimization problem:
+\f[
+\min_{\beta} \frac{1}{n} f(X\beta + \beta_0) + \alpha \sum_{j=1}^p \lambda_j |\beta_{(j)}|,
+\f]
 
-First, we define our model. Let's use logistic regression, by setting the
-loss to `"logistic"`.
+where \f(\beta_{(j)}\f) is the \f(j\f)th element of non-increasingly sorted vector
+of \f(\beta\f), and \f(f\f) is a convex loss function. SLOPE is a generalization of
+the lasso.
 
-```cpp
-#include "slope.h"
+See the following sections for more information:
+- @subpage getting_started
+- @subpage dependencies
 
-Slope::Model model;
 
-model.setLoss("logistic");
-```
-
-Next, we set the data matrix `x` and the response vector `y`. Here we use some
-toy data.
-
-```cpp
-Eigen::MatrixXd x(3, 2);
-Eigen::VectorXd y(3);
-
-x << 1.1, 2.3, 0.2, 1.5, 0.5, 0.2;
-y << 0, 1, 0;
-```
-
-Finally, we call the `path()` method to fit the full SLOPE path.
-
-```cpp
-auto res = model.path(x, y);
-```
-
-Now we can retrieve the coefficients by calling `res.getCoefs()`.
-
-## Dependencies
-
-### Building
-
-- A C++17 compiler
-- CMake 3.15 or later
-- Eigen 3.3 or later
-
-### Documentation
-
-- Doxygen
-
-### Testing
-
-- Catch2

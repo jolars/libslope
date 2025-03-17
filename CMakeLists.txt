@@ -122,6 +122,9 @@ if(BUILD_DOCS)
 
   doxygen_add_docs(
     docs
+    docs/convergence.md
+    docs/dependencies.md
+    docs/getting_started.md
     docs/mainpage.md
     ${PROJECT_SOURCE_DIR}
     ALL
