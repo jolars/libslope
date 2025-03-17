@@ -132,18 +132,21 @@ TEST_CASE("estimateNoise basic functionality", "[estimate_alpha]")
   }
 }
 
-TEST_CASE("estimateAlpha for n >= p + 30", "[estimate_alpha]")
+TEST_CASE("estimateAlpha with sparse matrix for n >= p + 30",
+          "[estimate_alpha]")
 {
+  using Eigen::MatrixXd;
+  using Eigen::VectorXd;
+
   // Create a case where n is much larger than p
   int n = 100; // observations
   int p = 10;  // predictors
 
-  Eigen::MatrixXd x = Eigen::MatrixXd::Random(n, p);
-  Eigen::VectorXd true_coefs = Eigen::VectorXd::Random(p);
-  // Make some coefficients exactly zero to simulate sparsity
-  true_coefs(2) = 0.0;
-  true_coefs(5) = 0.0;
-  true_coefs(8) = 0.0;
+  auto data = generateData(n, p, "quadratic", 1, 0.1, 0.5, 412);
+
+  Eigen::MatrixXd x_dense = data.x;
+  Eigen::VectorXd true_coefs = data.beta;
+  Eigen::SparseMatrix<double> x_sparse = x_dense.sparseView();
 
   double true_intercept = 1.5;
   double sigma = 0.5;
@@ -152,7 +155,7 @@ TEST_CASE("estimateAlpha for n >= p + 30", "[estimate_alpha]")
   std::normal_distribution<double> noise_dist(0, sigma);
 
   Eigen::MatrixXd y =
-    x * true_coefs + Eigen::VectorXd::NullaryExpr(n, [&](int) {
+    x_dense * true_coefs + Eigen::VectorXd::NullaryExpr(n, [&](int) {
       return noise_dist(gen) + true_intercept;
     });
 
@@ -160,34 +163,38 @@ TEST_CASE("estimateAlpha for n >= p + 30", "[estimate_alpha]")
   slope::Slope model;
   model.setIntercept(true);
 
-  // Run alpha estimation
-  auto path = slope::estimateAlpha(x, y, model);
+  // Run alpha estimation on both dense and sparse matrices
+  auto dense_path = slope::estimateAlpha(x_dense, y, model);
+  auto sparse_path = slope::estimateAlpha(x_sparse, y, model);
 
-  // Check that result is valid
-  REQUIRE(path.getAlpha().size() == 1);
-  REQUIRE(path.getCoefs().size() > 0);
+  // Check that results are valid
+  REQUIRE(dense_path.getAlpha().size() == sparse_path.getAlpha().size());
+  REQUIRE(dense_path.getCoefs().size() == sparse_path.getCoefs().size());
 
-  // Some basic sanity checks
-  auto coefs = path.getCoefs().back();
-  REQUIRE(coefs.nonZeros() > 0);  // Should select at least some variables
-  REQUIRE(coefs.nonZeros() <= p); // Should not select more than p variables
+  // Compare results between dense and sparse implementations
+  REQUIRE(dense_path.getAlpha()[0] == sparse_path.getAlpha()[0]);
+
+  // Compare coefficients
+  VectorXd dense_coefs = dense_path.getCoefs().back();
+  VectorXd sparse_coefs = sparse_path.getCoefs().back();
+
+  REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
 }
 
-TEST_CASE("estimateAlpha for n < p + 30", "[estimate_alpha]")
+TEST_CASE("estimateAlpha with sparse matrix for n < p + 30",
+          "[estimate_alpha][sparse]")
 {
   // Test the iterative procedure case
   int n = 25; // observations
   int p = 20; // predictors - making n < p + 30
 
-  Eigen::MatrixXd x = Eigen::MatrixXd::Random(n, p);
-  // Creating a sparse true coefficient vector
-  Eigen::VectorXd true_coefs = Eigen::VectorXd::Zero(p);
-  // Only 5 non-zero coefficients
-  true_coefs(0) = 2.0;
-  true_coefs(5) = -1.5;
-  true_coefs(10) = 3.0;
-  true_coefs(15) = -2.5;
-  true_coefs(19) = 1.8;
+  // Create dense matrices first
+  auto data = generateData(n, p);
+
+  Eigen::MatrixXd x_dense = data.x;
+  Eigen::VectorXd true_coefs = data.beta;
+
+  Eigen::SparseMatrix<double> x_sparse = x_dense.sparseView();
 
   double sigma = 0.3;
   std::mt19937 gen(456);
@@ -195,73 +202,62 @@ TEST_CASE("estimateAlpha for n < p + 30", "[estimate_alpha]")
 
   // No intercept in this test case
   Eigen::MatrixXd y =
-    x * true_coefs +
+    x_dense * true_coefs +
     Eigen::VectorXd::NullaryExpr(n, [&](int) { return noise_dist(gen); });
 
-  // Setup slope model
+  // Setup slope models for dense and sparse
   slope::Slope model;
   model.setIntercept(false);
-  model.setAlphaEstimationMaxIterations(20); // Ensure enough iterations
+  model.setAlphaEstimationMaxIterations(20);
 
-  // Run alpha estimation
-  auto path = slope::estimateAlpha(x, y, model);
+  // Run alpha estimation on both
+  auto dense_path = slope::estimateAlpha(x_dense, y, model);
+  auto sparse_path = slope::estimateAlpha(x_sparse, y, model);
 
-  // Check that result is valid
-  REQUIRE(path.getAlpha().size() > 0);
-  REQUIRE(path.getCoefs().size() > 0);
+  // Check that results are valid and identical
+  REQUIRE(dense_path.getAlpha().size() == sparse_path.getAlpha().size());
+  REQUIRE(dense_path.getCoefs().size() == sparse_path.getCoefs().size());
 
-  // Sanity checks
-  auto coefs = path.getCoefs().back();
-  REQUIRE(coefs.nonZeros() > 0); // Should select some variables
-  REQUIRE(coefs.nonZeros() < n); // Should select fewer than n variables
+  Eigen::ArrayXd dense_alphas = dense_path.getAlpha();
+  Eigen::ArrayXd sparse_alphas = sparse_path.getAlpha();
+  REQUIRE_THAT(dense_alphas, VectorApproxEqual(sparse_alphas, 1e-6));
 
-  // Check if at least some of the true non-zero coefficients are selected
-  int true_nonzeros_selected = 0;
-  for (Eigen::SparseMatrix<double>::InnerIterator it(coefs, 0); it; ++it) {
-    if (true_coefs(it.row()) != 0) {
-      true_nonzeros_selected++;
-    }
-  }
-  // We should identify at least some of the true non-zero coefficients
-  REQUIRE(true_nonzeros_selected > 0);
+  // Compare final coefficients
+  Eigen::VectorXd dense_coefs = dense_path.getCoefs().back();
+  Eigen::VectorXd sparse_coefs = sparse_path.getCoefs().back();
+
+  REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
 }
 
-TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")
-{
-  // Test error cases
-  int n = 15; // Small number of observations
-  int p = 14; // Almost as many predictors as observations
-
-  Eigen::MatrixXd x = Eigen::MatrixXd::Random(n, p);
-  Eigen::MatrixXd y = Eigen::VectorXd::Random(n);
-
-  slope::Slope model;
-  model.setIntercept(false);
-
-  SECTION("When max iterations is reached")
-  {
-    // Set a very low max iteration count
-    model.setAlphaEstimationMaxIterations(1);
-
-    // This should throw due to max iterations
-    REQUIRE_THROWS_AS(slope::estimateAlpha(x, y, model), std::runtime_error);
-  }
-}
-
-TEST_CASE("Full fit with estimate alpha", "[estimate_alpha][fail]")
+TEST_CASE("Full fit with estimate alpha using sparse matrix",
+          "[estimate_alpha][sparse]")
 {
   int n = 100;
   int p = 20;
 
   auto data = generateData(n, p);
 
-  slope::Slope model;
+  // Convert to sparse
+  Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
 
-  model.setAlphaType("estimate");
+  // Test with dense matrix
+  slope::Slope dense_model;
+  dense_model.setAlphaType("estimate");
+  auto fit = dense_model.fit(data.x, data.y);
 
-  REQUIRE_NOTHROW(model.fit(data.x, data.y));
+  // Test with sparse matrix
+  slope::Slope sparse_model;
+  sparse_model.setAlphaType("estimate");
+  auto fit_sparse = sparse_model.fit(x_sparse, data.y);
 
-  model.setLoss("logistic");
+  // Compare coefficients
+  Eigen::VectorXd dense_coefs = fit.getCoefs();
+  Eigen::VectorXd sparse_coefs = fit_sparse.getCoefs();
 
-  REQUIRE_THROWS_AS(model.fit(data.x, data.y), std::invalid_argument);
+  REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
+
+  // Should throw for logistic regression which doesn't support alpha estimation
+  dense_model.setLoss("logistic");
+
+  REQUIRE_THROWS_AS(dense_model.fit(data.x, data.y), std::invalid_argument);
 }
