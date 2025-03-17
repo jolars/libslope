@@ -35,7 +35,7 @@ template<typename MatrixType>
 double
 computeDual(const Eigen::VectorXd& beta,
             const Eigen::MatrixXd& residual,
-            const std::unique_ptr<Loss>& loss,
+            const std::unique_ptr<losses::Loss>& loss,
             const SortedL1Norm& sl1_norm,
             const Eigen::ArrayXd& lambda,
             const MatrixType& x,

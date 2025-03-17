@@ -11,6 +11,17 @@
 namespace slope {
 
 /**
+ * @brief Namespace containing loss function implementations
+ *
+ * This namespace contains the Loss base class and its derived implementations
+ * for various statistical loss functions used in model fitting and
+ * optimization. These classes provide functionality for calculating loss
+ * values, residuals, working responses, and other components required for
+ * gradient-based optimization.
+ */
+namespace losses {
+
+/**
  * Loss function interface
  *
  * This class defines the interface for an loss function, which is used in
@@ -156,4 +167,5 @@ private:
   const double lipschitz_constant;
 };
 
+} // namespace losses
 } // namespace slope

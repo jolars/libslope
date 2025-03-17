@@ -11,6 +11,7 @@
 #include "loss.h"
 
 namespace slope {
+namespace losses {
 /**
  * @class Poisson
  * @brief The Poisson class represents a Poisson regression loss function.
@@ -123,4 +124,5 @@ public:
   Eigen::MatrixXd predict(const Eigen::MatrixXd& eta) override;
 };
 
+} // namespace losses
 } // namespace slope

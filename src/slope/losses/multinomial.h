@@ -3,6 +3,7 @@
 #include "loss.h"
 
 namespace slope {
+namespace losses {
 /**
  * @class Multinomial
  * @brief The Multinomial class represents a multinomial logistic regression
@@ -97,4 +98,5 @@ public:
   Eigen::MatrixXd predict(const Eigen::MatrixXd& eta);
 };
 
+} // namespace losses
 } // namespace slope

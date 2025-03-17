@@ -5,6 +5,7 @@
 #include <unordered_set>
 
 namespace slope {
+namespace losses {
 
 double
 Multinomial::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
@@ -125,4 +126,5 @@ Multinomial::predict(const Eigen::MatrixXd& eta)
 
 // TODO: Consider adjusting the coefficients somehow.
 
+} // namespace losses
 } // namespace slope

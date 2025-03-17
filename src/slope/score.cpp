@@ -126,7 +126,7 @@ MaximizeScore::initValue() const
 double
 MSE::eval(const Eigen::MatrixXd& eta,
           const Eigen::MatrixXd& y,
-          const std::unique_ptr<Loss>&) const
+          const std::unique_ptr<losses::Loss>&) const
 {
   return (y - eta).squaredNorm() / y.rows();
 }
@@ -134,7 +134,7 @@ MSE::eval(const Eigen::MatrixXd& eta,
 double
 MAE::eval(const Eigen::MatrixXd& eta,
           const Eigen::MatrixXd& y,
-          const std::unique_ptr<Loss>&) const
+          const std::unique_ptr<losses::Loss>&) const
 {
   return (y - eta).cwiseAbs().mean();
 }
@@ -142,7 +142,7 @@ MAE::eval(const Eigen::MatrixXd& eta,
 double
 Accuracy::eval(const Eigen::MatrixXd& eta,
                const Eigen::MatrixXd& y,
-               const std::unique_ptr<Loss>& loss) const
+               const std::unique_ptr<losses::Loss>& loss) const
 {
   Eigen::MatrixXd y_pred = loss->predict(eta);
 
@@ -154,7 +154,7 @@ Accuracy::eval(const Eigen::MatrixXd& eta,
 double
 MisClass::eval(const Eigen::MatrixXd& eta,
                const Eigen::MatrixXd& y,
-               const std::unique_ptr<Loss>& loss) const
+               const std::unique_ptr<losses::Loss>& loss) const
 {
   Eigen::MatrixXd y_pred = loss->predict(eta);
   Eigen::MatrixXd comparison = (y_pred.array() == y.array()).cast<double>();
@@ -164,7 +164,7 @@ MisClass::eval(const Eigen::MatrixXd& eta,
 double
 Deviance::eval(const Eigen::MatrixXd& eta,
                const Eigen::MatrixXd& y,
-               const std::unique_ptr<Loss>& loss) const
+               const std::unique_ptr<losses::Loss>& loss) const
 {
   return loss->deviance(eta, y);
 }
@@ -172,7 +172,7 @@ Deviance::eval(const Eigen::MatrixXd& eta,
 double
 AUC::eval(const Eigen::MatrixXd& eta,
           const Eigen::MatrixXd& y,
-          const std::unique_ptr<Loss>& loss) const
+          const std::unique_ptr<losses::Loss>& loss) const
 {
   Eigen::MatrixXd probs = loss->inverseLink(eta);
   return rocAuc(probs, y);

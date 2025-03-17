@@ -230,7 +230,7 @@ TEST_CASE("Poisson predictions", "[poisson][predict]")
 
   eta = x * beta;
 
-  slope::Poisson loss;
+  slope::losses::Poisson loss;
 
   auto pred = loss.predict(eta);
   std::array<double, 3> expected = { 298.867, 24.5325, 2.4596 };

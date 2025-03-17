@@ -3,6 +3,7 @@
 #include "../math.h"
 
 namespace slope {
+namespace losses {
 
 double
 Logistic::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
@@ -81,4 +82,5 @@ Logistic::predict(const Eigen::MatrixXd& eta)
   return prob.unaryExpr([](double pr) { return pr > 0.5 ? 1.0 : 0.0; });
 }
 
+} // namespace losses
 } // namespace slope

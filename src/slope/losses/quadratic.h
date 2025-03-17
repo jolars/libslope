@@ -12,6 +12,7 @@
 #include "loss.h"
 
 namespace slope {
+namespace losses {
 
 /**
  * @class Quadratic
@@ -123,4 +124,5 @@ public:
   Eigen::MatrixXd predict(const Eigen::MatrixXd& eta);
 };
 
+} // namespace losses
 } // namespace slope

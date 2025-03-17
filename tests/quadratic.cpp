@@ -297,7 +297,7 @@ TEST_CASE("Gaussian predictions", "[gaussian][predict]")
 
   eta = x * beta;
 
-  slope::Quadratic loss;
+  slope::losses::Quadratic loss;
 
   auto pred = loss.predict(eta);
 

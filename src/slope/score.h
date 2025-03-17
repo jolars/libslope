@@ -78,7 +78,7 @@ public:
    */
   virtual double eval(const Eigen::MatrixXd& eta,
                       const Eigen::MatrixXd& y,
-                      const std::unique_ptr<Loss>& loss) const = 0;
+                      const std::unique_ptr<losses::Loss>& loss) const = 0;
 
   /**
    * Factory method to create specific Score implementations.
@@ -162,7 +162,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>&) const override;
+              const std::unique_ptr<losses::Loss>&) const override;
 };
 
 /**
@@ -192,7 +192,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>&) const override;
+              const std::unique_ptr<losses::Loss>&) const override;
 };
 
 /**
@@ -220,7 +220,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>& loss) const override;
+              const std::unique_ptr<losses::Loss>& loss) const override;
 };
 
 /**
@@ -250,7 +250,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>& loss) const override;
+              const std::unique_ptr<losses::Loss>& loss) const override;
 };
 
 /**
@@ -276,7 +276,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>& loss) const override;
+              const std::unique_ptr<losses::Loss>& loss) const override;
 };
 
 /**
@@ -308,7 +308,7 @@ public:
    */
   double eval(const Eigen::MatrixXd& eta,
               const Eigen::MatrixXd& y,
-              const std::unique_ptr<Loss>& loss) const override;
+              const std::unique_ptr<losses::Loss>& loss) const override;
 };
 
 } // namespace slope

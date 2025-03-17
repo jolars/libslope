@@ -3,6 +3,7 @@
 #include "loss.h"
 
 namespace slope {
+namespace losses {
 /**
  * @class Logistic
  * @brief The Logistic class represents a logistic loss function.
@@ -91,4 +92,5 @@ public:
   Eigen::MatrixXd predict(const Eigen::MatrixXd& eta);
 };
 
+} // namespace losses
 } // namespace slope

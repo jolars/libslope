@@ -146,7 +146,7 @@ TEST_CASE("Multinomial predictions", "[multinomial][predict]")
 
   eta = x * beta;
 
-  slope::Multinomial loss;
+  slope::losses::Multinomial loss;
 
   auto pred = loss.predict(eta);
 

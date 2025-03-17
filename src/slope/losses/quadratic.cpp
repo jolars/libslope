@@ -1,6 +1,7 @@
 #include "quadratic.h"
 
 namespace slope {
+namespace losses {
 
 double
 Quadratic::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
@@ -58,4 +59,5 @@ Quadratic::predict(const Eigen::MatrixXd& eta)
   return eta;
 }
 
+} // namespace losses
 } // namespace slope
