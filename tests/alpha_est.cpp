@@ -132,8 +132,7 @@ TEST_CASE("estimateNoise basic functionality", "[estimate_alpha]")
   }
 }
 
-TEST_CASE("estimateAlpha with sparse matrix for n >= p + 30",
-          "[estimate_alpha]")
+TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
 {
   using Eigen::MatrixXd;
   using Eigen::VectorXd;
@@ -179,10 +178,19 @@ TEST_CASE("estimateAlpha with sparse matrix for n >= p + 30",
   VectorXd sparse_coefs = sparse_path.getCoefs().back();
 
   REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
+
+  // Run alpha estimation
+  // Check that result is valid
+  REQUIRE(dense_path.getAlpha().size() == 1);
+  REQUIRE(dense_path.getCoefs().size() > 0);
+
+  // Some basic sanity checks
+  REQUIRE(dense_coefs.nonZeros() > 0); // Should select at least some variables
+  REQUIRE(dense_coefs.nonZeros() <=
+          p); // Should not select more than p variables
 }
 
-TEST_CASE("estimateAlpha with sparse matrix for n < p + 30",
-          "[estimate_alpha][sparse]")
+TEST_CASE("Alpha estimation for n < p + 30", "[estimate_alpha]")
 {
   // Test the iterative procedure case
   int n = 25; // observations
@@ -227,6 +235,54 @@ TEST_CASE("estimateAlpha with sparse matrix for n < p + 30",
   Eigen::VectorXd sparse_coefs = sparse_path.getCoefs().back();
 
   REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
+
+  // Check that result is valid
+  REQUIRE(dense_path.getAlpha().size() > 0);
+  REQUIRE(dense_path.getCoefs().size() > 0);
+
+  // Sanity checks
+  REQUIRE(dense_coefs.nonZeros() > 0); // Should select some variables
+  REQUIRE(dense_coefs.nonZeros() < n); // Should select fewer than n variables
+}
+
+TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")
+{
+  // Test error cases
+  int n = 15; // Small number of observations
+  int p = 14; // Almost as many predictors as observations
+
+  Eigen::MatrixXd x = Eigen::MatrixXd::Random(n, p);
+  Eigen::MatrixXd y = Eigen::VectorXd::Random(n);
+
+  slope::Slope model;
+  model.setIntercept(false);
+
+  SECTION("When max iterations is reached")
+  {
+    // Set a very low max iteration count
+    model.setAlphaEstimationMaxIterations(1);
+
+    // This should throw due to max iterations
+    REQUIRE_THROWS_AS(slope::estimateAlpha(x, y, model), std::runtime_error);
+  }
+}
+
+TEST_CASE("Full fit with estimate alpha", "[estimate_alpha]")
+{
+  int n = 100;
+  int p = 20;
+
+  auto data = generateData(n, p);
+
+  slope::Slope model;
+
+  model.setAlphaType("estimate");
+
+  REQUIRE_NOTHROW(model.fit(data.x, data.y));
+
+  model.setLoss("logistic");
+
+  REQUIRE_THROWS_AS(model.fit(data.x, data.y), std::invalid_argument);
 }
 
 TEST_CASE("Full fit with estimate alpha using sparse matrix",
@@ -241,14 +297,10 @@ TEST_CASE("Full fit with estimate alpha using sparse matrix",
   Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
 
   // Test with dense matrix
-  slope::Slope dense_model;
-  dense_model.setAlphaType("estimate");
-  auto fit = dense_model.fit(data.x, data.y);
-
-  // Test with sparse matrix
-  slope::Slope sparse_model;
-  sparse_model.setAlphaType("estimate");
-  auto fit_sparse = sparse_model.fit(x_sparse, data.y);
+  slope::Slope model;
+  model.setAlphaType("estimate");
+  auto fit = model.fit(data.x, data.y);
+  auto fit_sparse = model.fit(x_sparse, data.y);
 
   // Compare coefficients
   Eigen::VectorXd dense_coefs = fit.getCoefs();
@@ -257,7 +309,7 @@ TEST_CASE("Full fit with estimate alpha using sparse matrix",
   REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
 
   // Should throw for logistic regression which doesn't support alpha estimation
-  dense_model.setLoss("logistic");
+  model.setLoss("logistic");
 
-  REQUIRE_THROWS_AS(dense_model.fit(data.x, data.y), std::invalid_argument);
+  REQUIRE_THROWS_AS(model.fit(data.x, data.y), std::invalid_argument);
 }
