@@ -23,6 +23,21 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 
   y = x * beta;
 
+  SECTION("Single alpha")
+  {
+    Eigen::ArrayXd alpha(1);
+    alpha << 0.41658754;
+    Eigen::ArrayXd lambda(2);
+    lambda << 1.959964, 1.644854;
+
+    slope::Slope model;
+    model.setLoss("quadratic");
+
+    auto fit = model.path(x, y, alpha, lambda);
+
+    REQUIRE(fit.getAlpha().size() == 1);
+  }
+
   SECTION("Fixed alpha and lambda")
   {
     Eigen::ArrayXd alpha(7);
@@ -40,6 +55,7 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));
+    REQUIRE(fit.getAlpha().size() == 7);
   }
 
   SECTION("Automatic alpha")
