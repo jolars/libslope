@@ -29,7 +29,6 @@ tasks:
     cmds:
       - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=ON -DBUILD_TESTING=OFF
       - cmake --build {{.BUILD_DIR}}
-      - ctest --test-dir {{.BUILD_DIR}} --output-on-failure
 
   coverage:
     cmds:
