@@ -113,8 +113,8 @@ public:
   virtual std::string toString() const = 0;
 
 protected:
-  // Internal state that screening rules may need to maintain
-  std::vector<int> strong_set; /// Strong set of variables
+  /// Strong set of variables
+  std::vector<int> strong_set;
 };
 
 /**
