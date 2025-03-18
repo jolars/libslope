@@ -114,7 +114,7 @@ public:
 
 protected:
   // Internal state that screening rules may need to maintain
-  std::vector<int> strong_set;
+  std::vector<int> strong_set; /// Strong set of variables
 };
 
 /**
