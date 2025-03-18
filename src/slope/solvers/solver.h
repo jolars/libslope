@@ -13,13 +13,6 @@
 #include <memory>
 
 namespace slope {
-
-/**
- * @brief Namespace containing numerical optimization solvers for SLOPE
- *
- * This namespace contains classes for implementing numerical optimization
- * algorithms for solving the SLOPE (Sorted L-One Penalized Estimation) problem.
- */
 namespace solvers {
 
 /**
