@@ -70,6 +70,7 @@ public:
    * @param lambda_curr Current lambda values
    * @param lambda_prev Previous lambda values
    * @param beta Current beta coefficients
+   * @param full_set Full set of features
    * @return Working set for the current path step
    */
   virtual std::vector<int> screen(Eigen::VectorXd& gradient,
