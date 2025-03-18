@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.25.0](https://github.com/jolars/libslope/compare/v0.24.0...v0.25.0) (2025-03-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove solvers namespace
+
+### Features
+
+* remove solvers namespace ([6ddb7be](https://github.com/jolars/libslope/commit/6ddb7be8188e33ea93c3f1a9259545c3c94f09bc))
+
+
+### Reverts
+
+* "docs: document solvers namespace" ([a67de13](https://github.com/jolars/libslope/commit/a67de1344d94a90969b1e995af27c2116fb5da57))
+* "feat!: wrap loss functions in `losses` namespace" ([143c83b](https://github.com/jolars/libslope/commit/143c83b5bc5e06697fbadea28fd0f6e8a87b0d91))
+
 ## [0.24.0](https://github.com/jolars/libslope/compare/v0.23.0...v0.24.0) (2025-03-17)
 
 
