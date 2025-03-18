@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.24.0](https://github.com/jolars/libslope/compare/v0.23.0...v0.24.0) (2025-03-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* wrap loss functions in `losses` namespace
+
+### Features
+
+* wrap loss functions in `losses` namespace ([ef38bbf](https://github.com/jolars/libslope/commit/ef38bbfc9a90d634ef2d86f60df60fcbc72633a9))
+
 ## [0.23.0](https://github.com/jolars/libslope/compare/v0.22.0...v0.23.0) (2025-03-17)
 
 
