@@ -61,6 +61,59 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
   };
 }
 
+TEST_CASE("Linear predictor parallelization", "[!benchmark]")
+{
+  int n = 1000;
+  int p = 10000;
+
+  Eigen::VectorXd gradient(p);
+  std::vector<int> active_set(p);
+  Eigen::VectorXd x_centers(p);
+  Eigen::VectorXd x_scales(p);
+  Eigen::VectorXd w = Eigen::VectorXd::Ones(n);
+  slope::JitNormalization jit_normalization = slope::JitNormalization::Both;
+
+  Eigen::VectorXd beta0 = Eigen::VectorXd::Random(1);
+  Eigen::VectorXd beta = Eigen::VectorXd::Random(p);
+  bool intercept = true;
+
+  std::iota(active_set.begin(), active_set.end(), 0);
+
+  auto data = generateData(n, p);
+
+  auto x = data.x;
+  auto residual = data.y;
+
+  slope::computeCenters(x_centers, x, "mean");
+  slope::computeScales(x_scales, x, "sd");
+
+  BENCHMARK("Linear predictor sequential")
+  {
+    slope::Threads::set(1);
+    linearPredictor(x,
+                    active_set,
+                    beta0,
+                    beta,
+                    x_centers,
+                    x_scales,
+                    jit_normalization,
+                    intercept);
+  };
+
+  BENCHMARK("Linear predictor parallel")
+  {
+    slope::Threads::set(4);
+    linearPredictor(x,
+                    active_set,
+                    beta0,
+                    beta,
+                    x_centers,
+                    x_scales,
+                    jit_normalization,
+                    intercept);
+  };
+}
+
 TEST_CASE("Path screening benchmarks", "[!benchmark]")
 {
   const int p = 1000;
