@@ -60,7 +60,12 @@ tasks:
     cmds:
       - ./build/tests [!benchmark] --benchmark-samples 20
 
-  normalization:
+  linpred-benchmark:
     deps: [build]
     cmds:
-      - ./build/tests "Normalization JIT" --benchmark-samples 10
+      - ./build/tests "Linear predictor parallelization" --benchmark-samples 10
+
+  gradient-benchmark:
+    deps: [build]
+    cmds:
+      - ./build/tests "Parallelized gradient computations" --benchmark-samples 10
