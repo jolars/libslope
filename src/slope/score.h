@@ -285,7 +285,7 @@ public:
 };
 
 /**
- * Area Under the ROC Curve (AUC-ROC) scoring metric.
+ * @brief Area Under the ROC Curve (AUC-ROC) scoring metric.
  *
  * Computes the area under the Receiver Operating Characteristic curve,
  * which plots the true positive rate against false positive rate at
