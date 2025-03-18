@@ -117,7 +117,7 @@ protected:
 };
 
 /**
- * @class NoneScreening
+ * @class NoScreening
  * @brief No screening rule - uses all variables.
  */
 class NoScreening : public ScreeningRule

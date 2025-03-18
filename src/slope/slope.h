@@ -18,7 +18,7 @@
 namespace slope {
 
 /**
- * Class representing SLOPE (Sorted L-One Penalized Estimation) optimization.
+ * @brief The SLOPE model.
  *
  * This class implements the SLOPE algorithm for regularized regression
  * problems. It supports different loss functions (quadratic, logistic, poisson)
