@@ -14,20 +14,25 @@
 
 TEST_CASE("Parallelized gradient computations", "[!benchmark]")
 {
-  int n = 1000;
-  int p = 1000;
+  int n = 10;
+  int p = 10000;
 
   Eigen::VectorXd gradient(p);
   std::vector<int> active_set(p);
   Eigen::VectorXd x_centers(p);
   Eigen::VectorXd x_scales(p);
-  Eigen::VectorXd w(n);
+  Eigen::VectorXd w = Eigen::VectorXd::Ones(n);
   slope::JitNormalization jit_normalization = slope::JitNormalization::Both;
+
+  std::iota(active_set.begin(), active_set.end(), 0);
 
   auto data = generateData(n, p);
 
   auto x = data.x;
   auto residual = data.y;
+
+  slope::computeCenters(x_centers, x, "mean");
+  slope::computeScales(x_scales, x, "sd");
 
   BENCHMARK("Gradient sequential")
   {
