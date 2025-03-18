@@ -1,3 +1,9 @@
+/**
+ * @file
+ * @brief Functions for estimating noise level and regularization parameter
+ * alpha
+ */
+
 #pragma once
 
 #include "slope.h"

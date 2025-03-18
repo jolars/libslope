@@ -1,5 +1,4 @@
 /**
- * @internal
  * @file
  * @brief Mathematical support functions for the slope package.
  */

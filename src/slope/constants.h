@@ -1,5 +1,4 @@
 /**
- * @internal
  * @file
  * @brief Definitions of constants used in libslope
  */

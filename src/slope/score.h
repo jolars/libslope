@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Scoring metrics for model evaluation
+ */
+
 #pragma once
 
 #include "losses/loss.h"

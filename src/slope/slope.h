@@ -1,6 +1,6 @@
-/*
+/**
  * @file
- * @brief The actual function that fits SLOPE
+ * @brief SLOPE (Sorted L-One Penalized Estimation) optimization
  */
 
 #pragma once
