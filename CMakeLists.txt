@@ -45,6 +45,7 @@ if(BUILD_TESTING)
     tests/clusters.cpp
     tests/cv.cpp
     tests/generate_data.cpp
+    tests/hybrid.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
     tests/logger.cpp
