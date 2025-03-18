@@ -47,7 +47,7 @@ Slope::path(T& x,
                                      this->scaling_type,
                                      this->modify_x);
 
-  std::unique_ptr<losses::Loss> loss = setupLoss(this->loss_type);
+  std::unique_ptr<Loss> loss = setupLoss(this->loss_type);
 
   MatrixXd y = loss->preprocessResponse(y_in);
 

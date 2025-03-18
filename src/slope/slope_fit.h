@@ -188,7 +188,7 @@ public:
     int n = x.rows();
     int m = coefs.cols();
 
-    std::unique_ptr<losses::Loss> loss = setupLoss(this->loss_type);
+    std::unique_ptr<Loss> loss = setupLoss(this->loss_type);
 
     Eigen::VectorXd x_centers;
     Eigen::VectorXd x_scales;

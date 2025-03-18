@@ -2,7 +2,6 @@
 #include "../constants.h"
 
 namespace slope {
-namespace losses {
 
 double
 Poisson::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
@@ -78,5 +77,4 @@ Poisson::predict(const Eigen::MatrixXd& eta)
   return inverseLink(eta);
 }
 
-} // namespace losses
 } // namespace slope

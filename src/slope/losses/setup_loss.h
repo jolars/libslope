@@ -22,7 +22,7 @@ namespace slope {
  * @return std::unique_ptr<Loss> A unique pointer to the appropriate
  * loss function object
  */
-std::unique_ptr<losses::Loss>
+std::unique_ptr<Loss>
 setupLoss(const std::string& loss);
 
 }

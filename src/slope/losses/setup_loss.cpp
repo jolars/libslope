@@ -6,18 +6,18 @@
 
 namespace slope {
 
-std::unique_ptr<losses::Loss>
+std::unique_ptr<Loss>
 setupLoss(const std::string& loss)
 {
   if (loss == "logistic")
-    return std::make_unique<losses::Logistic>();
+    return std::make_unique<Logistic>();
   else if (loss == "poisson")
-    return std::make_unique<losses::Poisson>();
+    return std::make_unique<Poisson>();
   else if (loss == "multinomial")
-    return std::make_unique<losses::Multinomial>();
+    return std::make_unique<Multinomial>();
 
   // else Quadratic
-  return std::make_unique<losses::Quadratic>();
+  return std::make_unique<Quadratic>();
 }
 
 }

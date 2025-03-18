@@ -157,7 +157,7 @@ TEST_CASE("Logistic predictions", "[logistic][predict]")
 
   eta = x * beta;
 
-  slope::losses::Logistic loss;
+  slope::Logistic loss;
 
   auto pred = loss.predict(eta);
 
