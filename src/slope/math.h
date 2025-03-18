@@ -241,7 +241,8 @@ updateGradient(Eigen::VectorXd& gradient,
   Eigen::ArrayXd wr_sums(m);
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(Threads::get())
+  bool large_problem = active_set.size() > 100 && n * active_set.size() > 1e5;
+#pragma omp parallel for num_threads(Threads::get()) if (large_problem)
 #endif
   for (int k = 0; k < m; ++k) {
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
@@ -249,7 +250,7 @@ updateGradient(Eigen::VectorXd& gradient,
   }
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(Threads::get())
+#pragma omp parallel for num_threads(Threads::get()) if (large_problem)
 #endif
   for (size_t i = 0; i < active_set.size(); ++i) {
     int ind = active_set[i];
