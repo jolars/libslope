@@ -45,6 +45,7 @@ public:
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
+    , alpha_est_maxit(1000)
     , max_it(1e4)
     , path_length(100)
     , cd_iterations(10)
