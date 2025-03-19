@@ -112,7 +112,7 @@ estimateAlpha(MatrixType& x, Eigen::MatrixXd& y, Slope& model)
 
   // Estimate the noise level, if possible
   if (n >= p + 30) {
-    alpha = estimateNoise(x, y, model.getFitIntercept()) / n;
+    alpha(0) = estimateNoise(x, y, model.getFitIntercept()) / n;
     result = model.path(x, y, alpha);
   } else {
     for (int it = 0; it < alpha_est_maxit; ++it) {
