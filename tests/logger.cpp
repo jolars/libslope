@@ -1,6 +1,8 @@
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <slope/logger.h>
+#include <vector>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -43,12 +45,11 @@ TEST_CASE("WarningLogger basic functionality", "[logger]")
   {
     slope::WarningLogger::addWarning(slope::WarningCode::GENERIC_WARNING,
                                      "Test message");
-
     REQUIRE(slope::WarningLogger::hasWarnings());
     auto warnings = slope::WarningLogger::getWarnings();
     REQUIRE(warnings.size() == 1);
-    REQUIRE(warnings.count(slope::WarningCode::GENERIC_WARNING) == 1);
-    REQUIRE(warnings[slope::WarningCode::GENERIC_WARNING] == "Test message");
+    REQUIRE(warnings[0].code == slope::WarningCode::GENERIC_WARNING);
+    REQUIRE(warnings[0].message == "Test message");
   }
 
   SECTION("Warning codes are deduplicated")
@@ -59,10 +60,13 @@ TEST_CASE("WarningLogger basic functionality", "[logger]")
                                      "Second message");
 
     auto warnings = slope::WarningLogger::getWarnings();
-    REQUIRE(warnings.size() == 1);
-    // The last message should win
-    REQUIRE(warnings[slope::WarningCode::DEPRECATED_FEATURE] ==
-            "Second message");
+    REQUIRE(warnings.size() == 2);
+    // Both messages should be present, with the second one being added after
+    // the first
+    REQUIRE(warnings[0].code == slope::WarningCode::DEPRECATED_FEATURE);
+    REQUIRE(warnings[0].message == "First message");
+    REQUIRE(warnings[1].code == slope::WarningCode::DEPRECATED_FEATURE);
+    REQUIRE(warnings[1].message == "Second message");
   }
 
   SECTION("Multiple warning types")
@@ -78,10 +82,21 @@ TEST_CASE("WarningLogger basic functionality", "[logger]")
 
     auto warnings = slope::WarningLogger::getWarnings();
     REQUIRE(warnings.size() == 4);
-    REQUIRE(warnings[slope::WarningCode::GENERIC_WARNING] == "Generic");
-    REQUIRE(warnings[slope::WarningCode::DEPRECATED_FEATURE] == "Deprecated");
-    REQUIRE(warnings[slope::WarningCode::MAXIT_REACHED] == "Max iterations");
-    REQUIRE(warnings[slope::WarningCode::LINE_SEARCH_FAILED] == "Line search");
+
+    // Collect all the messages to check they all exist
+    std::vector<std::string> messages;
+    for (const auto& warning : warnings) {
+      messages.push_back(warning.message);
+    }
+
+    REQUIRE(std::find(messages.begin(), messages.end(), "Generic") !=
+            messages.end());
+    REQUIRE(std::find(messages.begin(), messages.end(), "Deprecated") !=
+            messages.end());
+    REQUIRE(std::find(messages.begin(), messages.end(), "Max iterations") !=
+            messages.end());
+    REQUIRE(std::find(messages.begin(), messages.end(), "Line search") !=
+            messages.end());
   }
 
   SECTION("Clear warnings")
@@ -107,10 +122,9 @@ TEST_CASE("WarningLogger with multiple threads", "[logger][parallel]")
 
     add_warnings_in_parallel(num_threads, warnings_per_thread);
 
-    // We should have at most num_threads warnings because
-    // each thread is using the same warning code
+    // We should have num_threads * warnings_per_thread warnings
     auto warnings = slope::WarningLogger::getWarnings();
-    REQUIRE(warnings.size() == 1);
+    REQUIRE(warnings.size() == num_threads * warnings_per_thread);
   }
 
   SECTION("Different warning codes per thread")
@@ -149,12 +163,12 @@ TEST_CASE("WarningLogger with multiple threads", "[logger][parallel]")
     auto warnings = slope::WarningLogger::getWarnings();
 
 #ifdef _OPENMP
-    size_t expected_threads = std::min(4, omp_get_max_threads());
+    size_t expected_warnings = std::min(4, omp_get_max_threads());
 #else
-    size_t expected_threads = 1;
+    size_t expected_warnings = 1;
 #endif
 
-    REQUIRE(warnings.size() == expected_threads);
+    REQUIRE(warnings.size() == expected_warnings);
   }
 
   SECTION("Get warnings by thread ID")
@@ -177,8 +191,9 @@ TEST_CASE("WarningLogger with multiple threads", "[logger][parallel]")
     // Check for thread-specific warnings
     for (int i = 0; i < std::min(4, omp_get_max_threads()); i++) {
       auto thread_warnings = slope::WarningLogger::getThreadWarnings(i);
-      REQUIRE_FALSE(thread_warnings.empty());
-      REQUIRE(thread_warnings.at(slope::WarningCode::GENERIC_WARNING) ==
+      REQUIRE(thread_warnings.size() == 1);
+      REQUIRE(thread_warnings[0].code == slope::WarningCode::GENERIC_WARNING);
+      REQUIRE(thread_warnings[0].message ==
               "Thread specific " + std::to_string(i));
     }
 #endif

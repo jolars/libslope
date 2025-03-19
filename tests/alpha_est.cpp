@@ -267,7 +267,15 @@ TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")
     auto warnings = slope::WarningLogger::getWarnings();
 
     REQUIRE(slope::WarningLogger::hasWarnings());
-    REQUIRE(warnings.find(slope::WarningCode::MAXIT_REACHED) != warnings.end());
+    // Look for MAXIT_REACHED warning in the vector
+    bool found_warning = false;
+    for (const auto& warning : warnings) {
+      if (warning.code == slope::WarningCode::MAXIT_REACHED) {
+        found_warning = true;
+        break;
+      }
+    }
+    REQUIRE(found_warning);
   }
 }
 
