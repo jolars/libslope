@@ -262,8 +262,12 @@ TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")
     // Set a very low max iteration count
     model.setAlphaEstimationMaxIterations(1);
 
-    // This should throw due to max iterations
-    REQUIRE_THROWS_AS(slope::estimateAlpha(x, y, model), std::runtime_error);
+    // This should add a warning
+    slope::estimateAlpha(x, y, model);
+    auto warnings = slope::WarningLogger::getWarnings();
+
+    REQUIRE(slope::WarningLogger::hasWarnings());
+    REQUIRE(warnings.find(slope::WarningCode::MAXIT_REACHED) != warnings.end());
   }
 }
 
