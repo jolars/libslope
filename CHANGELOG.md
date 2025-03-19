@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.26.0](https://github.com/jolars/libslope/compare/v0.25.0...v0.26.0) (2025-03-19)
+
+
+### Features
+
+* add a `Screening` class ([266cd42](https://github.com/jolars/libslope/commit/266cd422e31ab0f3ea3ca23100a9f7561de6f155))
+
+
+### Performance Improvements
+
+* conditionally parallelize gradient computation ([6716762](https://github.com/jolars/libslope/commit/6716762493033daab7bf44077d6fc8bcea6ce947))
+* **hybrid:** use sparse collapsed cluster ([#124](https://github.com/jolars/libslope/issues/124)) ([7c3c8d9](https://github.com/jolars/libslope/commit/7c3c8d94b2722fe00d53ca3120e41647c4148053))
+* parallelize linear predictor ([efa7e2d](https://github.com/jolars/libslope/commit/efa7e2d2acd593daee40e2f885de54ae5e183368))
+
 ## [0.25.0](https://github.com/jolars/libslope/compare/v0.24.0...v0.25.0) (2025-03-18)
 
 
