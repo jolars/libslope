@@ -7,6 +7,7 @@
 #pragma once
 
 #include "slope.h"
+#include "slope/logger.h"
 #include "slope/ols.h"
 #include "utils.h"
 
@@ -143,7 +144,9 @@ estimateAlpha(MatrixType& x, Eigen::MatrixXd& y, Slope& model)
       }
     }
 
-    throw std::runtime_error("maximum iterations reached in alpha estimation");
+    slope::WarningLogger::addWarning(
+      slope::WarningCode::MAXIT_REACHED,
+      "Maximum iterations reached in alpha estimation");
   }
 
   return result;
