@@ -46,7 +46,7 @@ Now we can retrieve the coefficients by calling `res.getCoefs()`.
 
 - A C++17 compiler
 - CMake 3.15 or later
-- Eigen 3.3 or later
+- Eigen 3.4 or later
 
 ### Documentation
 
