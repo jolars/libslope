@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.27.0](https://github.com/jolars/libslope/compare/v0.26.0...v0.27.0) (2025-03-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* redesign logger
+
+### Features
+
+* degrade error from maxit in alpha est to warning ([1e2d44a](https://github.com/jolars/libslope/commit/1e2d44a118ca16b99193398a18dab1b8d0168e15))
+* redesign logger ([40bb591](https://github.com/jolars/libslope/commit/40bb59139651bf8dcee2808e621bf4aef232389e))
+* set `alpha_est_maxit` default to 1000 ([5f45da2](https://github.com/jolars/libslope/commit/5f45da2e1c10b53447cae6ac4581d0e7e37160ff))
+
 ## [0.26.0](https://github.com/jolars/libslope/compare/v0.25.0...v0.26.0) (2025-03-19)
 
 
