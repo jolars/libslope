@@ -59,6 +59,7 @@ jobs:
             build-essential \
             libeigen3-dev \
             doxygen \
+            graphviz \
             catch2
 
       - name: Setup cmake
