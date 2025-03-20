@@ -123,8 +123,7 @@ Slope::path(T& x,
       throw std::invalid_argument(
         "Automatic alpha estimation is only available for the quadratic loss");
     }
-    Slope model = *this;
-    return estimateAlpha(x, y, model);
+    return estimateAlpha(x, y, *this);
   }
 
   // Screening setup
