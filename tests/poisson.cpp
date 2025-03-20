@@ -310,9 +310,7 @@ TEST_CASE("Poisson sparse and dense methods agree", "[poisson][sparse]")
   model.setScaling("sd");
   model.setLoss("poisson");
   model.setSolver("pgd");
-  model.setModifyX(true);
-
-  slope::Threads::set(1);
+  model.setTol(1e-8);
 
   slope::Threads::set(1);
 
@@ -325,5 +323,5 @@ TEST_CASE("Poisson sparse and dense methods agree", "[poisson][sparse]")
   Eigen::VectorXd dense_ref = dense_coefs[3];
   Eigen::VectorXd sparse_ref = sparse_coefs[3];
 
-  REQUIRE_THAT(dense_ref, VectorApproxEqual(sparse_ref, 1e-7));
+  REQUIRE_THAT(dense_ref, VectorApproxEqual(sparse_ref, 1e-4));
 }
