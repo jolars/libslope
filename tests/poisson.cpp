@@ -9,7 +9,7 @@
 #include <slope/cv.h>
 #include <slope/slope.h>
 
-TEST_CASE("Poisson, models", "[poisson]")
+TEST_CASE("Poisson models", "[poisson]")
 {
   using namespace Catch::Matchers;
 
