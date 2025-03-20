@@ -252,7 +252,6 @@ Slope::path(T& x,
                                              this->x_scales,
                                              jit_normalization,
                                              full_set);
-
         if (no_violations) {
           break;
         }
