@@ -15,6 +15,7 @@ jobs:
             lcov \
             gcovr \
             doxygen \
+            graphviz \
             catch2
 
       - name: Setup cmake
