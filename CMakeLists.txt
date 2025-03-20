@@ -40,6 +40,7 @@ if(BUILD_TESTING)
 
   add_executable(
     tests
+    tests/alpha_est.cpp
     tests/assertions.cpp
     tests/benchmarks.cpp
     tests/clusters.cpp
@@ -52,7 +53,6 @@ if(BUILD_TESTING)
     tests/logistic.cpp
     tests/multinomial.cpp
     tests/normalization.cpp
-    tests/alpha_est.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/predictions.cpp
@@ -62,9 +62,9 @@ if(BUILD_TESTING)
     tests/real_data.cpp
     tests/score.cpp
     tests/screening.cpp
+    tests/sparse.cpp
     tests/thresholding.cpp
     tests/utils.cpp
-    tests/sparse.cpp
   )
   target_link_libraries(
     tests
