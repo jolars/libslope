@@ -117,8 +117,8 @@ TEST_CASE("WarningLogger with multiple threads", "[logger][parallel]")
 
   SECTION("Warnings from multiple threads")
   {
-    int num_threads = 4;
-    int warnings_per_thread = 3;
+    size_t num_threads = 4;
+    size_t warnings_per_thread = 3;
 
     add_warnings_in_parallel(num_threads, warnings_per_thread);
 
