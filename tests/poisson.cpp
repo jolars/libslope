@@ -291,11 +291,28 @@ TEST_CASE("Poisson sparse and dense methods agree", "[poisson][sparse]")
 
   Eigen::SparseMatrix<double> x_sparse = x_dense.sparseView();
 
+  Eigen::VectorXd x_centers_sparse(p);
+  Eigen::VectorXd x_scales_sparse(p);
+  Eigen::VectorXd x_centers_dense(p);
+  Eigen::VectorXd x_scales_dense(p);
+
+  slope::computeCenters(x_centers_sparse, x_sparse, "mean");
+  slope::computeScales(x_scales_sparse, x_sparse, "sd");
+  slope::computeCenters(x_centers_dense, x_dense, "mean");
+  slope::computeScales(x_scales_dense, x_dense, "sd");
+
+  REQUIRE_THAT(x_centers_dense, VectorApproxEqual(x_centers_sparse, 1e-5));
+  REQUIRE_THAT(x_scales_dense, VectorApproxEqual(x_scales_sparse, 1e-5));
+
   slope::Slope model;
 
   model.setCentering("none");
+  model.setScaling("sd");
   model.setLoss("poisson");
   model.setSolver("pgd");
+  model.setModifyX(true);
+
+  slope::Threads::set(1);
 
   slope::Threads::set(1);
 

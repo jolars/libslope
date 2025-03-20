@@ -7,9 +7,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-TEST_CASE(
-  "linearPredictor correctly computes predictions with different normalization",
-  "[math][linearPredictor]")
+TEST_CASE("Linear predictor computations", "[math][linearPredictor]")
 {
   using namespace Catch::Matchers;
 
@@ -233,5 +231,390 @@ TEST_CASE(
     REQUIRE_THAT(eta_seq.reshaped(), VectorApproxEqual(eta_par.reshaped()));
     REQUIRE_THAT(eta_seq.reshaped(),
                  VectorApproxEqual(eta_par_sparse.reshaped()));
+  }
+}
+
+TEST_CASE("Gradient computations", "[math][updateGradient]")
+{
+  using namespace Catch::Matchers;
+
+  // Create a simple matrix
+  int n = 6;
+  int p = 2;
+  int m = 2;
+  Eigen::MatrixXd x(n, p);
+  // clang-format off
+  x <<  1.0,  2.0,
+        3.0,  3.0,
+        0.0,  4.0,
+        5.0, -6.0,
+       -1.0,  0.0,
+        0.0,  0.0;
+  // clang-format on
+
+  Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+
+  // Create residuals (e.g., from a model prediction)
+  Eigen::MatrixXd residual(n, m);
+  // clang-format off
+  residual << 0.5, -0.2,
+              0.1,  0.3,
+             -0.4,  0.5,
+              0.7, -0.1,
+             -0.2,  0.0,
+              0.3,  0.2;
+  // clang-format on
+
+  // Centers and scales for the features
+  Eigen::VectorXd x_centers(p);
+  Eigen::VectorXd x_scales(p);
+
+  x_centers << -1.0, 2.0;
+  x_scales << 2.0, 2.0;
+
+  // Create an active set with all indices (0, 1, 2, 3)
+  std::vector<int> active_set = { 0, 1, 2, 3 };
+
+  // Working weights - typically 1.0 for linear models, different for GLMs
+  Eigen::VectorXd w = Eigen::VectorXd::Ones(n);
+
+  SECTION("No normalization")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_dense,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_sparse,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+
+    // Manually compute expected values for verification
+    double expected_0_0 = x.col(0).dot(residual.col(0)) / n;
+    double expected_1_0 = x.col(1).dot(residual.col(0)) / n;
+    double expected_0_1 = x.col(0).dot(residual.col(1)) / n;
+    double expected_1_1 = x.col(1).dot(residual.col(1)) / n;
+
+    REQUIRE_THAT(gradient_dense(0), WithinAbs(expected_0_0, 1e-10));
+    REQUIRE_THAT(gradient_dense(p), WithinAbs(expected_0_1, 1e-10));
+    REQUIRE_THAT(gradient_dense(1), WithinAbs(expected_1_0, 1e-10));
+    REQUIRE_THAT(gradient_dense(p + 1), WithinAbs(expected_1_1, 1e-10));
+  }
+
+  SECTION("With centering")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_dense,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Center);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_sparse,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Center);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+  }
+
+  SECTION("With scaling")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_dense,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Scale);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_sparse,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Scale);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+  }
+
+  SECTION("With both centering and scaling")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_dense,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_sparse,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+  }
+
+  SECTION("With non-uniform weights")
+  {
+    // Set up non-uniform weights
+    w << 0.5, 1.2, 0.8, 1.0, 0.7, 0.9;
+
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_dense,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_sparse,
+                          x_sparse,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+  }
+}
+
+TEST_CASE("Gradient offset calculations", "[math][offsetGradient]")
+{
+  using namespace Catch::Matchers;
+
+  // Create a simple matrix
+  int n = 6;
+  int p = 2;
+  int m = 2;
+  Eigen::MatrixXd x(n, p);
+  // clang-format off
+  x <<  1.0,  2.0,
+        3.0,  3.0,
+        0.0,  4.0,
+        5.0, -6.0,
+       -1.0,  0.0,
+        0.0,  0.0;
+  // clang-format on
+
+  Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+
+  // Centers and scales for the features
+  Eigen::VectorXd x_centers(p);
+  Eigen::VectorXd x_scales(p);
+
+  x_centers << -1.0, 2.0;
+  x_scales << 2.0, 2.0;
+
+  // Create an active set with all indices (0, 1, 2, 3)
+  std::vector<int> active_set = { 0, 1, 2, 3 };
+
+  // Create offset vector for each outcome
+  Eigen::VectorXd offset(m);
+  offset << 0.5, -0.3;
+
+  // Compute column sums for manual verification
+  Eigen::VectorXd col_sums(p);
+  for (int j = 0; j < p; ++j) {
+    col_sums(j) = x.col(j).sum();
+  }
+
+  SECTION("No normalization")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    Eigen::VectorXd gradient_dense_copy = gradient_dense;
+    slope::offsetGradient(gradient_dense,
+                          x,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::None);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    Eigen::VectorXd gradient_sparse_copy = gradient_sparse;
+    slope::offsetGradient(gradient_sparse,
+                          x_sparse,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::None);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+
+    // Manual verification for the first outcome
+    double expected_offset_0_0 = -offset(0) * col_sums(0) / n;
+    double expected_offset_1_0 = -offset(0) * col_sums(1) / n;
+
+    // Manual verification for the second outcome
+    double expected_offset_0_1 = -offset(1) * col_sums(0) / n;
+    double expected_offset_1_1 = -offset(1) * col_sums(1) / n;
+
+    REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
+                 WithinAbs(expected_offset_0_0, 1e-10));
+    REQUIRE_THAT(gradient_dense(1) - gradient_dense_copy(1),
+                 WithinAbs(expected_offset_1_0, 1e-10));
+    REQUIRE_THAT(gradient_dense(p) - gradient_dense_copy(p),
+                 WithinAbs(expected_offset_0_1, 1e-10));
+    REQUIRE_THAT(gradient_dense(p + 1) - gradient_dense_copy(p + 1),
+                 WithinAbs(expected_offset_1_1, 1e-10));
+  }
+
+  SECTION("With centering")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense =
+      Eigen::VectorXd::Ones(p * m); // Start with non-zero values
+    Eigen::VectorXd gradient_dense_copy = gradient_dense;
+    slope::offsetGradient(gradient_dense,
+                          x,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Center);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse =
+      Eigen::VectorXd::Ones(p * m); // Start with non-zero values
+    Eigen::VectorXd gradient_sparse_copy = gradient_sparse;
+    slope::offsetGradient(gradient_sparse,
+                          x_sparse,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Center);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+
+    // Manual verification for first feature with first outcome
+    double expected_offset_0_0 = -offset(0) * (col_sums(0) / n - x_centers(0));
+    REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
+                 WithinAbs(expected_offset_0_0, 1e-10));
+  }
+
+  SECTION("With scaling")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    Eigen::VectorXd gradient_dense_copy = gradient_dense;
+    slope::offsetGradient(gradient_dense,
+                          x,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Scale);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::offsetGradient(gradient_sparse,
+                          x_sparse,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Scale);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+
+    // Manual verification for first feature with first outcome
+    double expected_offset_0_0 = -offset(0) * col_sums(0) / (n * x_scales(0));
+    REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
+                 WithinAbs(expected_offset_0_0, 1e-10));
+  }
+
+  SECTION("With both centering and scaling")
+  {
+    // Test with dense matrix
+    Eigen::VectorXd gradient_dense = Eigen::VectorXd::Zero(p * m);
+    Eigen::VectorXd gradient_dense_copy = gradient_dense;
+    slope::offsetGradient(gradient_dense,
+                          x,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Both);
+
+    // Test with sparse matrix
+    Eigen::VectorXd gradient_sparse = Eigen::VectorXd::Zero(p * m);
+    slope::offsetGradient(gradient_sparse,
+                          x_sparse,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Both);
+
+    // Check that dense and sparse implementations produce the same result
+    REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
+
+    // Manual verification for first feature with first outcome
+    double expected_offset_0_0 =
+      -offset(0) * (col_sums(0) / n - x_centers(0)) / x_scales(0);
+    REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
+                 WithinAbs(expected_offset_0_0, 1e-10));
   }
 }
