@@ -28,6 +28,7 @@
             gcc
             ghostscript
             gdb
+            graphviz
             lcov
             lldb
             llvmPackages.openmp
