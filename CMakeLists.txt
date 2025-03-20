@@ -51,6 +51,7 @@ if(BUILD_TESTING)
     tests/load_data.cpp
     tests/logger.cpp
     tests/logistic.cpp
+    tests/math.cpp
     tests/multinomial.cpp
     tests/normalization.cpp
     tests/path.cpp
