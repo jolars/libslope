@@ -119,7 +119,7 @@ public:
    * @param threadId The ID of the thread whose warnings should be retrieved
    * @return std::vector<Warning> Vector of warnings for the specified thread
    */
-  static std::vector<Warning> getThreadWarnings(int threadId);
+  static std::vector<Warning> getThreadWarnings(int thread_id);
 };
 
 } // namespace slope
