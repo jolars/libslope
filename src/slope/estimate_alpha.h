@@ -39,6 +39,9 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
 
   if (p == 0) {
     // Handle the case when X has zero columns
+    residuals = y;
+    df = n - 1;
+
     if (fit_intercept) {
       // Only intercept model
       double intercept = y.mean();
@@ -58,7 +61,7 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
       residuals.array() -= ols_intercept;
     }
 
-    df = n - p - static_cast<int>(fit_intercept);
+    df = n - p - static_cast<int>(fit_intercept) - 1;
   }
 
   return std::sqrt(residuals.squaredNorm() / df);
