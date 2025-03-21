@@ -43,14 +43,8 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
     df = n - 1;
 
     if (fit_intercept) {
-      // Only intercept model
-      double intercept = y.mean();
-      residuals = y.array() - intercept;
-      df = n - 1;
-    } else {
-      // Empty model (predicting with zeros)
-      residuals = y;
-      df = n;
+      y.array() -= y.mean();
+      df -= 1;
     }
   } else {
     // Normal case with predictors
@@ -64,9 +58,9 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
     df = n - p - static_cast<int>(fit_intercept) - 1;
   }
 
-  return std::sqrt(residuals.squaredNorm() / df);
   assert(df > 0);
 
+  return residuals.norm() / std::sqrt(df);
 }
 
 /**
