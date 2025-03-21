@@ -59,10 +59,11 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
     }
 
     df = n - p - static_cast<int>(fit_intercept);
-    assert(df > 0);
   }
 
   return std::sqrt(residuals.squaredNorm() / df);
+  assert(df > 0);
+
 }
 
 /**
