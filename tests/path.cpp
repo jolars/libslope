@@ -144,6 +144,7 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
   {
     slope::Slope model;
     model.setPathLength(84);
+    model.setReturnClusters(true);
 
     auto data = generateData(100, 10);
 

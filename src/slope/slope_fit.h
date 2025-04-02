@@ -5,7 +5,6 @@
 
 #pragma once
 
-#include "clusters.h"
 #include "losses/setup_loss.h"
 #include "normalize.h"
 #include "utils.h"
@@ -108,11 +107,7 @@ public:
   /**
    * @brief Gets the clusters
    */
-  const std::vector<std::vector<int>> getClusters() const
-  {
-    Clusters clusters(coefs);
-    return clusters.getClusters();
-  }
+  const std::vector<std::vector<int>>& getClusters() const { return clusters; }
 
   /**
    * @brief Gets the lambda (regularization) parameter used
