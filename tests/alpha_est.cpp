@@ -134,6 +134,8 @@ TEST_CASE("estimateNoise basic functionality", "[estimate_alpha]")
 
 TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
 {
+  using Catch::Matchers::WithinAbs;
+
   using Eigen::MatrixXd;
   using Eigen::VectorXd;
 
@@ -171,7 +173,8 @@ TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
   REQUIRE(dense_path.getCoefs().size() == sparse_path.getCoefs().size());
 
   // Compare results between dense and sparse implementations
-  REQUIRE(dense_path.getAlpha()[0] == sparse_path.getAlpha()[0]);
+  REQUIRE_THAT(dense_path.getAlpha()[0],
+               WithinAbs(sparse_path.getAlpha()[0], 1e-6));
 
   // Compare coefficients
   VectorXd dense_coefs = dense_path.getCoefs().back();
@@ -192,6 +195,8 @@ TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
 
 TEST_CASE("Alpha estimation for n < p + 30", "[estimate_alpha]")
 {
+  using Catch::Matchers::WithinAbs;
+
   // Test the iterative procedure case
   int n = 25; // observations
   int p = 20; // predictors - making n < p + 30
@@ -302,6 +307,34 @@ TEST_CASE("Full fit with estimate alpha using sparse matrix",
 {
   int n = 100;
   int p = 20;
+
+  auto data = generateData(n, p);
+
+  // Convert to sparse
+  Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
+
+  // Test with dense matrix
+  slope::Slope model;
+  model.setAlphaType("estimate");
+  auto fit = model.fit(data.x, data.y);
+  auto fit_sparse = model.fit(x_sparse, data.y);
+
+  // Compare coefficients
+  Eigen::VectorXd dense_coefs = fit.getCoefs();
+  Eigen::VectorXd sparse_coefs = fit_sparse.getCoefs();
+
+  REQUIRE_THAT(dense_coefs, VectorApproxEqual(sparse_coefs, 1e-6));
+
+  // Should throw for logistic regression which doesn't support alpha estimation
+  model.setLoss("logistic");
+
+  REQUIRE_THROWS_AS(model.fit(data.x, data.y), std::invalid_argument);
+}
+
+TEST_CASE("Interactive alpha estimations", "[estimate_alpha]")
+{
+  int n = 100;
+  int p = 80;
 
   auto data = generateData(n, p);
 
