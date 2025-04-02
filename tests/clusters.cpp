@@ -1,3 +1,4 @@
+#include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -368,5 +369,99 @@ TEST_CASE("Clusters", "[clusters]")
 
     auto final_clusters = clusters.getClusters();
     REQUIRE_THAT(final_clusters[0], UnorderedEquals(ivec{ 0, 1, 2, 3, 4, 5 }));
+  }
+}
+
+TEST_CASE("Pattern matrix", "[clusters][pattern]")
+{
+  SECTION("Standard pattern matrix")
+  {
+    Eigen::VectorXd beta(7);
+    beta << 1.0, 3.0, 2.0, 3.0, -1.0, 0.0, 0.0;
+
+    slope::Clusters clusters(beta);
+    auto patt = clusters.patternMatrix(beta);
+
+    // Check dimensions
+    REQUIRE(patt.rows() == beta.size());
+    REQUIRE(patt.cols() == 3);
+    REQUIRE(patt.nonZeros() == beta.size() - 2);
+
+    // Check contents
+    // Should be:
+    // 0  0  1
+    // 1  0  0
+    // 0  1  0
+    // 1  0  0
+    // 0  0 -1
+    // 0  0  0
+    // 0  0  0
+    REQUIRE(patt.coeff(0, 0) == 0);
+    REQUIRE(patt.coeff(0, 2) == 1);
+    REQUIRE(patt.coeff(1, 0) == 1);
+    REQUIRE(patt.coeff(2, 1) == 1);
+    REQUIRE(patt.coeff(3, 0) == 1);
+    REQUIRE(patt.coeff(3, 2) == 0);
+    REQUIRE(patt.coeff(4, 2) == -1);
+    REQUIRE(patt.coeff(5, 0) == 0);
+    REQUIRE(patt.coeff(5, 1) == 0);
+    REQUIRE(patt.coeff(5, 2) == 0);
+    REQUIRE(patt.coeff(6, 0) == 0);
+    REQUIRE(patt.coeff(6, 1) == 0);
+
+    auto patt2 = slope::patternMatrix(beta);
+
+    Eigen::MatrixXi patt1_mat = patt;
+    Eigen::MatrixXi patt2_mat = patt2;
+
+    REQUIRE_THAT(patt2_mat.reshaped(),
+                 VectorApproxEqual(patt1_mat.reshaped(), 1e-4));
+  }
+
+  SECTION("No zeros")
+  {
+    Eigen::VectorXd beta(5);
+    beta << 1.0, 3.0, 2.0, 3.0, -1.0;
+
+    slope::Clusters clusters(beta);
+    auto patt = clusters.patternMatrix(beta);
+
+    // Check dimensions
+    REQUIRE(patt.rows() == beta.size());
+    REQUIRE(patt.cols() == 3);
+    REQUIRE(patt.nonZeros() == beta.size());
+
+    // Check contents
+    // Should be:
+    // 0  0  1
+    // 1  0  0
+    // 0  1  0
+    // 1  0  0
+    // 0  0 -1
+    REQUIRE(patt.coeff(0, 0) == 0);
+    REQUIRE(patt.coeff(0, 2) == 1);
+    REQUIRE(patt.coeff(1, 0) == 1);
+    REQUIRE(patt.coeff(2, 1) == 1);
+    REQUIRE(patt.coeff(3, 0) == 1);
+    REQUIRE(patt.coeff(3, 2) == 0);
+    REQUIRE(patt.coeff(4, 2) == -1);
+
+    auto patt2 = slope::patternMatrix(beta);
+
+    Eigen::MatrixXi patt1_mat = patt;
+    Eigen::MatrixXi patt2_mat = patt2;
+
+    REQUIRE_THAT(patt2_mat.reshaped(),
+                 VectorApproxEqual(patt1_mat.reshaped(), 1e-4));
+  }
+
+  SECTION("Degenerative all zeros case")
+  {
+    Eigen::VectorXd beta = Eigen::VectorXd::Zero(5);
+
+    auto patt = slope::patternMatrix(beta);
+
+    REQUIRE(patt.rows() == beta.size());
+    REQUIRE(patt.cols() == 0);
   }
 }
