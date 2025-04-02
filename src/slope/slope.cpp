@@ -292,11 +292,6 @@ Slope::path(T& x,
 
     std::vector<std::vector<int>> clusters;
 
-    if (return_clusters) {
-      Clusters beta_clusters(beta);
-      clusters = beta_clusters.getClusters();
-    }
-
     SlopeFit fit{
       beta0_out, beta_out.sparseView(), clusters,          alpha_curr, lambda,
       dev,       null_deviance,         primals,           duals,      time,
@@ -398,12 +393,6 @@ void
 Slope::setUpdateClusters(bool update_clusters)
 {
   this->update_clusters = update_clusters;
-}
-
-void
-Slope::setReturnClusters(const bool return_clusters)
-{
-  this->return_clusters = return_clusters;
 }
 
 void

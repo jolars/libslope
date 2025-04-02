@@ -38,7 +38,6 @@ public:
     , modify_x(false)
     , update_clusters(false)
     , collect_diagnostics(false)
-    , return_clusters(false)
     , alpha_min_ratio(-1) // TODO: Use std::optional for alpha_min_ratio
     , dev_change_tol(1e-5)
     , dev_ratio_tol(0.999)
@@ -93,14 +92,6 @@ public:
    * clusters updated.
    */
   void setUpdateClusters(bool update_clusters);
-
-  /**
-   * @brief Sets the update clusters flag.
-   *
-   * @param return_clusters Selects whether the fitted model should return
-   * cluster information.
-   */
-  void setReturnClusters(const bool return_clusters);
 
   /**
    * @brief Sets the alpha min ratio.
@@ -358,7 +349,6 @@ private:
   bool modify_x;
   bool update_clusters;
   bool collect_diagnostics;
-  bool return_clusters;
   double alpha_min_ratio;
   double dev_change_tol;
   double dev_ratio_tol;
