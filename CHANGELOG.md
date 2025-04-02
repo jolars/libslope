@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.28.0](https://github.com/jolars/libslope/compare/v0.27.0...v0.28.0) (2025-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove `setReturnClusters()` from `Slope`
+
+### Features
+
+* add `patternMatrix()` + equiv method for `Clusters` ([3659336](https://github.com/jolars/libslope/commit/36593365f64035550343327dd67426644cbccde7))
+* remove `setReturnClusters()` from `Slope` ([e1fe04b](https://github.com/jolars/libslope/commit/e1fe04b1754af1e9fa49952880797f517e48b630))
+
+
+### Bug Fixes
+
+* use correct estimate of standard deviation ([b1aed85](https://github.com/jolars/libslope/commit/b1aed8526881f2d5c4186000ab93a46f659acea1))
+
+
+### Reverts
+
+* "feat!: remove `setReturnClusters()` from `Slope`" ([4ca2e73](https://github.com/jolars/libslope/commit/4ca2e734dfbcc57c5722540386c487778ce1d359))
+
 ## [0.27.0](https://github.com/jolars/libslope/compare/v0.26.0...v0.27.0) (2025-03-19)
 
 
