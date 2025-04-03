@@ -157,6 +157,17 @@ private:
   int p;   /**< The number of features. */
 
   /**
+   * @brief Mutable vector to store zero indices when needed
+   * This is mutable to allow const methods to modify it
+   */
+  mutable std::vector<int> zero_indices;
+
+  /**
+   * @brief Flag to track if zero_indices are up to date
+   */
+  mutable bool zero_indices_valid = false;
+
+  /**
    * @brief Reorders the cluster structure when an index is changed.
    * @param old_index The old index.
    * @param new_index The new index.
@@ -169,6 +180,18 @@ private:
    * @param new_index The index of the cluster to merge into.
    */
   void merge(const int old_index, const int new_index);
+
+  /**
+   * @brief Helper function to compute zero cluster indices
+   * @return Reference to vector containing zero cluster indices
+   */
+  std::vector<int>& getZeroIndices() const;
+
+  /**
+   * @brief Checks if this represents an all-zeros vector
+   * @return true if the cluster contains only zeros
+   */
+  bool hasAllZeros() const;
 };
 
 /**

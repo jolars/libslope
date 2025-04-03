@@ -9,52 +9,118 @@ Clusters::Clusters(const Eigen::VectorXd& beta)
   update(beta);
 }
 
-std::vector<int>::iterator
-Clusters::begin(const int i)
+bool
+Clusters::hasAllZeros() const
 {
-  return c_ind.begin() + c_ptr[i];
+  return !c.empty() && c[0] == 0 && c.size() == 1 && c_ind.empty();
 }
 
-std::vector<int>::iterator
-Clusters::end(const int i)
+std::vector<int>&
+Clusters::getZeroIndices() const
 {
-  return c_ind.begin() + c_ptr[i + 1];
+  if (!zero_indices_valid) {
+    zero_indices.clear();
+
+    // Find indices not in c_ind (set difference)
+    for (int j = 0; j < p; ++j) {
+      if (std::find(c_ind.begin(), c_ind.end(), j) == c_ind.end()) {
+        zero_indices.push_back(j);
+      }
+    }
+
+    zero_indices_valid = true;
+  }
+
+  return zero_indices;
 }
 
 std::vector<int>::const_iterator
 Clusters::cbegin(const int i) const
 {
-  return c_ind.cbegin() + c_ptr[i];
+  if (i < static_cast<int>(c.size())) {
+    return c_ind.cbegin() + c_ptr[i];
+  }
+
+  return getZeroIndices().cbegin();
 }
 
 std::vector<int>::const_iterator
 Clusters::cend(const int i) const
 {
-  return c_ind.cbegin() + c_ptr[i + 1];
+  if (i < static_cast<int>(c.size())) {
+    return c_ind.cbegin() + c_ptr[i + 1];
+  }
+
+  return getZeroIndices().cend();
+}
+
+std::vector<int>::iterator
+Clusters::begin(const int i)
+{
+  if (i < static_cast<int>(c.size())) {
+    return c_ind.begin() + c_ptr[i];
+  }
+
+  return getZeroIndices().begin();
+}
+
+std::vector<int>::iterator
+Clusters::end(const int i)
+{
+  if (i < static_cast<int>(c.size())) {
+    return c_ind.begin() + c_ptr[i + 1];
+  }
+
+  return getZeroIndices().end();
 }
 
 int
 Clusters::cluster_size(const int i) const
 {
-  return c_ptr[i + 1] - c_ptr[i];
+  if (i < static_cast<int>(c.size())) {
+    return c_ptr[i + 1] - c_ptr[i];
+  }
+
+  // For zero cluster, compute the size based on indices not in other clusters
+  if (i == static_cast<int>(c.size()) && p > static_cast<int>(c_ind.size())) {
+    return p - static_cast<int>(c_ind.size());
+  }
+
+  return 0; // Invalid cluster index
 }
 
 int
 Clusters::pointer(const int i) const
 {
-  return c_ptr[i];
+  if (i < static_cast<int>(c_ptr.size())) {
+    return c_ptr[i];
+  }
+
+  return c_ind.size(); // Return end of indices for virtual zero cluster
 }
 
 int
 Clusters::n_clusters() const
 {
-  return c.size();
+  // Special case: if we have a coefficient of 0 in c, that means all values are
+  // 0
+  if (hasAllZeros()) {
+    return 1;
+  }
+
+  // Regular case: count non-zero clusters, and add 1 if there are zero
+  // coefficients
+  return c.size() + (p > static_cast<int>(c_ind.size()) ? 1 : 0);
 }
 
 double
 Clusters::coeff(const int i) const
 {
-  return c[i];
+  if (i < static_cast<int>(c.size())) {
+    return c[i];
+  }
+
+  return 0.0; // Return 0 for the virtual zero cluster
 }
 
 void
@@ -66,7 +132,20 @@ Clusters::setCoeff(const int i, const double x)
 std::vector<double>
 Clusters::coeffs() const
 {
-  return c;
+  std::vector<double> result = c;
+
+  // Special case: if we have a coefficient of 0 in c and all values are zeros
+  // don't add an additional zero
+  if (hasAllZeros()) {
+    return result; // Just return {0.0}
+  }
+
+  // Add zero coefficient if there's a zero cluster
+  if (p > static_cast<int>(c_ind.size())) {
+    result.push_back(0.0);
+  }
+
+  return result;
 }
 
 std::vector<int>
@@ -84,6 +163,9 @@ Clusters::pointers() const
 void
 Clusters::update(const int old_index, const int new_index, const double c_new)
 {
+  // Invalidate zero indices cache - the cluster structure is changing
+  zero_indices_valid = false;
+
   auto c_old = coeff(old_index);
 
   if (c_new != c_old) {
@@ -110,13 +192,28 @@ Clusters::update(const Eigen::VectorXd& beta)
   c_ptr.clear();
   signs.clear();
 
+  // Invalidate zero indices cache
+  zero_indices_valid = false;
+
   std::vector<sort_pair> sorted;
   sorted.reserve(p);
   signs.reserve(p);
 
   for (int i = 0; i < beta.size(); ++i) {
     signs.emplace_back(sign(beta(i)));
-    sorted.emplace_back(std::abs(beta(i)), i);
+    double abs_val = std::abs(beta(i));
+    if (abs_val > 0) {
+      sorted.emplace_back(abs_val, i);
+    }
+  }
+
+  // Special case: all values are zero
+  if (sorted.empty() && p > 0) {
+    c.push_back(0.0); // Add a single zero coefficient
+    c_ptr.push_back(0);
+    c_ptr.push_back(0);
+
+    return;
   }
 
   std::sort(sorted.begin(), sorted.end(), std::greater<sort_pair>());
@@ -217,6 +314,16 @@ Clusters::getClusters() const
 {
   std::vector<std::vector<int>> clusters;
   clusters.reserve(n_clusters());
+
+  // Special case for all zeros vector
+  if (hasAllZeros()) {
+    std::vector<int> zero_cluster;
+    for (int i = 0; i < p; ++i) {
+      zero_cluster.push_back(i);
+    }
+    clusters.push_back(zero_cluster);
+    return clusters;
+  }
 
   for (int i = 0; i < n_clusters(); ++i) {
     clusters.emplace_back(cbegin(i), cend(i));
