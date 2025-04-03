@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.29.0](https://github.com/jolars/libslope/compare/v0.28.0...v0.29.0) (2025-04-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* drop argument of `patternMatrix()` of `Clusters`
+
+### Features
+
+* drop argument of `patternMatrix()` of `Clusters` ([403f4fe](https://github.com/jolars/libslope/commit/403f4fedd93999771f9e944250f8e55ad21c00d0))
+
+
+### Performance Improvements
+
+* lazily compute zero clusters ([#128](https://github.com/jolars/libslope/issues/128)) ([b9f34db](https://github.com/jolars/libslope/commit/b9f34db9610f65e5c473234944728dbb0668d7ef))
+
 ## [0.28.0](https://github.com/jolars/libslope/compare/v0.27.0...v0.28.0) (2025-04-02)
 
 
