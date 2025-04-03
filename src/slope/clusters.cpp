@@ -103,16 +103,19 @@ Clusters::update(const Eigen::VectorXd& beta)
 {
   using sort_pair = std::pair<double, int>;
 
-  this->p = beta.size();
+  p = beta.size();
 
   c.clear();
   c_ind.clear();
   c_ptr.clear();
+  signs.clear();
 
   std::vector<sort_pair> sorted;
-  sorted.reserve(beta.size());
+  sorted.reserve(p);
+  signs.reserve(p);
 
   for (int i = 0; i < beta.size(); ++i) {
+    signs.emplace_back(sign(beta(i)));
     sorted.emplace_back(std::abs(beta(i)), i);
   }
 
@@ -223,10 +226,8 @@ Clusters::getClusters() const
 }
 
 Eigen::SparseMatrix<int>
-Clusters::patternMatrix(const Eigen::VectorXd& beta) const
+Clusters::patternMatrix() const
 {
-  int p = beta.size();
-
   std::vector<Eigen::Triplet<int>> triplets;
   triplets.reserve(p);
 
@@ -242,7 +243,7 @@ Clusters::patternMatrix(const Eigen::VectorXd& beta) const
 
     for (auto it = cbegin(k); it != cend(k); ++it) {
       int ind = *it;
-      int s = sign(beta(ind));
+      int s = signs[ind];
       triplets.emplace_back(ind, k, s);
     }
   }
@@ -257,7 +258,7 @@ Eigen::SparseMatrix<int>
 patternMatrix(const Eigen::VectorXd& beta)
 {
   Clusters clusters(beta);
-  return clusters.patternMatrix(beta);
+  return clusters.patternMatrix();
 }
 
 } // namespace slope

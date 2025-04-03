@@ -380,7 +380,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     beta << 1.0, 3.0, 2.0, 3.0, -1.0, 0.0, 0.0;
 
     slope::Clusters clusters(beta);
-    auto patt = clusters.patternMatrix(beta);
+    auto patt = clusters.patternMatrix();
 
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());
@@ -424,7 +424,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     beta << 1.0, 3.0, 2.0, 3.0, -1.0;
 
     slope::Clusters clusters(beta);
-    auto patt = clusters.patternMatrix(beta);
+    auto patt = clusters.patternMatrix();
 
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());
