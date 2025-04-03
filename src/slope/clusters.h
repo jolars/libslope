@@ -142,7 +142,7 @@ public:
    * @brief Returns the cluster pattern as a sparse matrix
    * @return A sparse matrix, where the indices of column j
    *   are the indices of the features in cluster j.
-   *   The matrix is of size \f(p \times (m - 1))\f, where \f$p\f$ is the number
+   *   The matrix is of size \f$p \times (m - 1)\f$, where \f$p\f$ is the number
    *   of features and \f$m\f$ is the number of clusters. The features
    *   of the zero cluster are not included.
    */
@@ -196,9 +196,10 @@ private:
 
 /**
  * @brief Returns the cluster pattern as a sparse matrix
+ * @param beta The beta vector used to create the clusters
  * @return A sparse matrix, where the indices of column j
  *   are the indices of the features in cluster j.
- *   The matrix is of size \f(p \times (m - 1))\f, where \f$p\f$ is the number
+ *   The matrix is of size \f$p \times (m - 1)\f$, where \f$p\f$ is the number
  *   of features and \f$m\f$ is the number of clusters. The features
  *   of the zero cluster are not included.
  */
