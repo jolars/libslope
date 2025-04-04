@@ -38,10 +38,15 @@ TEST_CASE("Guassian, simple design", "[quadratic]")
   fit = model.fit(x, y, alpha, lambda);
 
   Eigen::VectorXd coef = fit.getCoefs();
+  Eigen::VectorXd coef_scaled = fit.getCoefs(false);
   auto dual_gaps = fit.getGaps();
   auto primals = fit.getPrimals();
 
+  REQUIRE(coef.rows() == coef_scaled.rows());
+  REQUIRE(coef.cols() == coef_scaled.cols());
+
   REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
+  REQUIRE_THAT(coef, VectorApproxEqual(coef_scaled, 1e-4));
 
   double gap = dual_gaps.back();
   double primal = primals.back();
