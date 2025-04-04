@@ -293,7 +293,7 @@ Slope::path(T& x,
     }
 
     SlopeFit fit{ beta0,
-                  beta.sparseView(),
+                  beta.reshaped(p, m).sparseView(),
                   clusters,
                   alpha_curr,
                   lambda,

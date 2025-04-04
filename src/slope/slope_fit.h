@@ -107,6 +107,8 @@ public:
 
   /**
    * @brief Gets the intercept terms for this SLOPE fit
+   * @param original_scale Whether to return the intercept on the
+   * original scale or not
    */
   Eigen::VectorXd getIntercepts(const bool original_scale = true) const
   {
@@ -125,6 +127,8 @@ public:
 
   /**
    * @brief Gets the sparse coefficient matrix for this fit
+   * @param original_scale Whether to return the intercept on the
+   * original scale or not
    */
   Eigen::SparseMatrix<double> getCoefs(const bool original_scale = true) const
   {
