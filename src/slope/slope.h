@@ -5,8 +5,11 @@
 
 #pragma once
 
+#include "logger.h"
+#include "screening.h"
 #include "slope_fit.h"
 #include "slope_path.h"
+#include "solvers/hybrid_cd.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <cassert>
@@ -351,6 +354,161 @@ public:
                const Eigen::MatrixXd& y_in,
                const double alpha = 1.0,
                Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0));
+
+  /**
+   * @brief Relaxes a fitted SLOPE model
+   *
+   * @tparam T Matrix type for feature input (supports dense or sparse matrices)
+   * @param fit Previously fitted SLOPE model containing coefficient estimates
+   * @param x Feature matrix of size n x p
+   * @param y_in Response vector of size n
+   * @param tol Convergence tolerance for the optimizer
+   * @param maxit_irls Maximum number of IRLS (Iteratively Reweighted Least
+   * Squares) iterations
+   * @param maxit_inner Maximum number of inner optimization iterations per IRLS
+   * step
+   * @return SlopeFit Object containing the relaxed model with unpenalized
+   * coefficients
+   *
+   * This method performs post-fitting relaxation where the SLOPE penalty is
+   * removed and the model is re-fit using only the selected variables from the
+   * original fit, keeping the cluster structure. This is sometimes
+   * referred to as the _debiased_ SLOPE.
+   */
+  template<typename T>
+  SlopeFit relax(const SlopeFit& fit,
+                 T& x,
+                 const Eigen::VectorXd& y_in,
+                 const double tol = 1e-6,
+                 const int maxit_irls = 100,
+                 const int maxit_inner = 10000)
+  {
+    using Eigen::MatrixXd;
+    using Eigen::VectorXd;
+
+    int n = x.rows();
+    int p = x.cols();
+
+    Eigen::VectorXd beta0 = fit.getIntercepts(false);
+    Eigen::VectorXd beta = fit.getCoefs(false);
+
+    double alpha = 0;
+
+    auto jit_normalization =
+      normalize(x, x_centers, x_scales, centering_type, scaling_type, modify_x);
+
+    bool update_clusters = false;
+
+    std::unique_ptr<Loss> loss = setupLoss(this->loss_type);
+
+    MatrixXd y = loss->preprocessResponse(y_in);
+
+    int m = y.cols();
+
+    Eigen::ArrayXd lambda_relax = Eigen::ArrayXd::Zero(p * m);
+
+    auto working_set = activeSet(beta);
+
+    Eigen::MatrixXd eta = linearPredictor(x,
+                                          working_set,
+                                          beta0,
+                                          beta,
+                                          x_centers,
+                                          x_scales,
+                                          jit_normalization,
+                                          intercept);
+    VectorXd residual(n);
+    VectorXd working_residual(n);
+    VectorXd gradient(p * m);
+
+    VectorXd w = VectorXd::Ones(n);
+    VectorXd z = y;
+
+    Clusters clusters = fit.getClusters();
+
+    int passes = 0;
+
+    for (int irls_it = 0; irls_it < maxit_irls; irls_it++) {
+      residual = loss->residual(eta, y);
+
+      updateGradient(gradient,
+                     x,
+                     residual,
+                     working_set,
+                     x_centers,
+                     x_scales,
+                     Eigen::VectorXd::Ones(n),
+                     jit_normalization);
+
+      if (gradient.lpNorm<Eigen::Infinity>() < tol) {
+        break;
+      }
+
+      loss->updateWeightsAndWorkingResponse(w, z, eta, y);
+      working_residual = eta - z;
+
+      for (int inner_it = 0; inner_it < maxit_inner; ++inner_it) {
+        if (inner_it % 10 == 0) {
+          // Compute gradient for weighted least-squares problem
+          updateGradient(gradient,
+                         x,
+                         working_residual,
+                         working_set,
+                         x_centers,
+                         x_scales,
+                         w,
+                         jit_normalization);
+
+          if (gradient.lpNorm<Eigen::Infinity>() < tol) {
+            break;
+          }
+        }
+
+        passes++;
+
+        coordinateDescent(beta0,
+                          beta,
+                          working_residual,
+                          clusters,
+                          lambda_relax,
+                          x,
+                          w,
+                          x_centers,
+                          x_scales,
+                          intercept,
+                          jit_normalization,
+                          update_clusters);
+      }
+
+      eta = working_residual + z;
+
+      if (irls_it == maxit_irls) {
+        WarningLogger::addWarning(WarningCode::MAXIT_REACHED,
+                                  "Maximum number of IRLS iterations reached.");
+      }
+    }
+
+    double dev = loss->deviance(eta, y);
+
+    SlopeFit fit_out{ beta0,
+                      beta.sparseView(),
+                      clusters,
+                      alpha,
+                      lambda_relax,
+                      dev,
+                      fit.getNullDeviance(),
+                      fit.getPrimals(), // TODO: Update this
+                      fit.getDuals(),   // TODO: Update this
+                      fit.getTime(),    // TODO: Update this
+                      passes,
+                      centering_type,
+                      scaling_type,
+                      intercept,
+                      x_centers,
+                      x_scales };
+
+    return fit_out;
+  }
 
 private:
   // Parameters
