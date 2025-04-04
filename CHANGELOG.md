@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.30.0](https://github.com/jolars/libslope/compare/v0.29.0...v0.30.0) (2025-04-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove `getCoefs(size_t)` method from `SlopePath`
+
+### Features
+
+* add `hasIntercept()` to `SlopeFit` class ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+* add original scale arguments to coef/intercept getters ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+* add relaxed SLOPE method ([#131](https://github.com/jolars/libslope/issues/131)) ([9d94d3d](https://github.com/jolars/libslope/commit/9d94d3dc23837438b17e32821f7c9e72e32b3701)), closes [#101](https://github.com/jolars/libslope/issues/101)
+* remove `getCoefs(size_t)` method from `SlopePath` ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+
+
+### Bug Fixes
+
+* use correct scale for coefs in cross-validation ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+
+
+### Performance Improvements
+
+* use sparse representation when rescaling coefs ([208853a](https://github.com/jolars/libslope/commit/208853a8daa3f1e7d1816d0005a7de8a4e7a8cf2))
+
 ## [0.29.0](https://github.com/jolars/libslope/compare/v0.28.0...v0.29.0) (2025-04-03)
 
 
