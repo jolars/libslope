@@ -61,6 +61,7 @@ if(BUILD_TESTING)
     tests/qnorm.cpp
     tests/quadratic.cpp
     tests/real_data.cpp
+    tests/relax.cpp
     tests/score.cpp
     tests/screening.cpp
     tests/sparse.cpp

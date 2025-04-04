@@ -10,6 +10,7 @@
 #include "../math.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
+#include <iostream>
 #include <vector>
 
 namespace slope {
@@ -232,8 +233,17 @@ coordinateDescent(Eigen::VectorXd& beta0,
         x, j, s, clusters, w, residual, x_centers, x_scales, jit_normalization);
     }
 
-    auto [c_tilde, new_index] = slopeThreshold(
-      c_old - gradient_j / hessian_j, j, lambda / hessian_j, clusters);
+    double c_tilde;
+    int new_index;
+
+    if (lambda(0) == 0) {
+      // No regularization
+      c_tilde = c_old - gradient_j / hessian_j;
+      new_index = j;
+    } else {
+      std::tie(c_tilde, new_index) = slopeThreshold(
+        c_old - gradient_j / hessian_j, j, lambda / hessian_j, clusters);
+    }
 
     double c_diff = c_old - c_tilde;
 
