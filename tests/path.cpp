@@ -51,7 +51,7 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 
     auto fit = model.path(x, y, alpha, lambda);
 
-    Eigen::VectorXd coef = fit.getCoefs(2);
+    Eigen::VectorXd coef = fit.getCoefs()[2];
     std::vector<double> coef_true = { 0.4487011, 0.6207310 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_true, 1e-4));

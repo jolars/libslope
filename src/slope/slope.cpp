@@ -278,10 +278,6 @@ Slope::path(T& x,
           std::to_string(path_step) + ".");
     }
 
-    // Store everything for this step of the path
-    auto [beta0_out, beta_out] = rescaleCoefficients(
-      beta0, beta, this->x_centers, this->x_scales, this->intercept);
-
     alpha_prev = alpha_curr;
 
     // Compute early stopping criteria
@@ -296,11 +292,22 @@ Slope::path(T& x,
       clusters.update(beta);
     }
 
-    SlopeFit fit{
-      beta0_out, beta_out.sparseView(), clusters,          alpha_curr, lambda,
-      dev,       null_deviance,         primals,           duals,      time,
-      it,        this->centering_type,  this->scaling_type
-    };
+    SlopeFit fit{ beta0,
+                  beta.sparseView(),
+                  clusters,
+                  alpha_curr,
+                  lambda,
+                  dev,
+                  null_deviance,
+                  primals,
+                  duals,
+                  time,
+                  it,
+                  this->centering_type,
+                  this->scaling_type,
+                  this->intercept,
+                  this->x_centers,
+                  this->x_scales };
 
     fits.emplace_back(std::move(fit));
 

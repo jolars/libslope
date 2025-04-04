@@ -90,6 +90,7 @@ normalize(Eigen::SparseMatrix<double>& x,
   return jit_normalization;
 }
 
+// TODO: Make this work for sparse beta
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
 rescaleCoefficients(const Eigen::VectorXd& beta0,
                     const Eigen::VectorXd& beta,
