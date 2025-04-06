@@ -491,7 +491,7 @@ public:
     double dev = loss->deviance(eta, y);
 
     SlopeFit fit_out{ beta0,
-                      beta.sparseView(),
+                      beta.reshaped(p, m).sparseView(),
                       clusters,
                       alpha,
                       lambda_relax,
