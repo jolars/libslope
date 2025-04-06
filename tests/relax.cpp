@@ -80,4 +80,28 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 
     REQUIRE_THAT(coef[1], WithinRel(beta_ols[0], 1e-4));
   }
+
+  SECTION("Scaling")
+  {
+    double alpha = 0.7;
+
+    fit = model.fit(x, y, alpha, lambda);
+    Eigen::VectorXd coef0 = fit.getCoefs();
+
+    double gamma = 0.25;
+
+    auto relaxed_fit = model.relax(fit, x, y, gamma);
+    Eigen::VectorXd coef = relaxed_fit.getCoefs();
+
+    auto [beta0_ols, beta_ols] = fitOls(slope::subsetCols(x, { 1 }), y);
+
+    Eigen::VectorXd full_coefs = model.relax(fit, x, y, 0).getCoefs();
+
+    double coef_target = (1 - gamma) * beta_ols[0] + gamma * coef0[1];
+
+    REQUIRE_THAT(full_coefs[1], WithinRel(beta_ols[0], 1e-4));
+
+    REQUIRE(coef[0] == 0);
+    REQUIRE_THAT(coef[1], WithinRel(coef_target, 1e-4));
+  }
 }
