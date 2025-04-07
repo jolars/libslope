@@ -104,4 +104,54 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     REQUIRE(coef[0] == 0);
     REQUIRE_THAT(coef[1], WithinRel(coef_target, 1e-4));
   }
+
+  SECTION("Clustered solution")
+  {
+    double alpha = 0.12;
+
+    int n = 4;
+    int p = 3;
+
+    Eigen::MatrixXd x(n, p);
+    Eigen::VectorXd beta(p);
+
+    // model.setNormalization("none");
+
+    // clang-format off
+    x << 1.1, 0.3, 0.2,
+         0.2, 0.9, 1.1,
+         0.2, 2.5, 0.5,
+         0.5, 0.0, 0.2;
+    // clang-format on
+
+    beta << 2.05, 0, 2;
+
+    Eigen::VectorXd y = x * beta;
+
+    fit = model.fit(x, y, alpha);
+    Eigen::VectorXd coef_reg = fit.getCoefs();
+
+    // Check that there is the expected cluster
+    REQUIRE(coef_reg[0] > 0);
+    REQUIRE(coef_reg[0] == coef_reg[2]);
+
+    double gamma = 0;
+
+    auto relaxed_fit = model.relax(fit, x, y, gamma);
+
+    Eigen::SparseMatrix<double> U =
+      fit.getClusters().patternMatrix().cast<double>();
+
+    REQUIRE(U.rows() == p);
+    REQUIRE(U.cols() == 2);
+
+    Eigen::MatrixXd x_collapsed = x * U;
+
+    auto [beta0_ols, beta_ols] = fitOls(x_collapsed, y);
+
+    Eigen::VectorXd coef = relaxed_fit.getCoefs();
+
+    REQUIRE_THAT(coef[0], WithinRel(beta_ols[0], 1e-4));
+    REQUIRE_THAT(coef[2], WithinRel(beta_ols[0], 1e-4));
+  }
 }
