@@ -10,6 +10,7 @@
 #include "slope_fit.h"
 #include "slope_path.h"
 #include "solvers/hybrid_cd.h"
+#include "timer.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <cassert>
@@ -419,6 +420,11 @@ public:
 
     double alpha = 0;
 
+    Timer timer;
+
+    std::vector<double> primals, duals, time;
+    timer.start();
+
     auto jit_normalization =
       normalize(x, x_centers, x_scales, centering_type, scaling_type, modify_x);
 
@@ -455,6 +461,12 @@ public:
 
     for (int irls_it = 0; irls_it < max_it_outer_relax; irls_it++) {
       residual = loss->residual(eta, y);
+
+      if (collect_diagnostics) {
+        primals.push_back(loss->loss(eta, y));
+        duals.push_back(0.0);
+        time.push_back(timer.elapsed());
+      }
 
       updateGradient(gradient,
                      x,
@@ -528,9 +540,9 @@ public:
                       lambda_relax,
                       dev,
                       fit.getNullDeviance(),
-                      fit.getPrimals(), // TODO: Update this
-                      fit.getDuals(),   // TODO: Update this
-                      fit.getTime(),    // TODO: Update this
+                      primals,
+                      duals,
+                      time,
                       passes,
                       centering_type,
                       scaling_type,
