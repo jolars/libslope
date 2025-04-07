@@ -1,3 +1,4 @@
+#include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -153,5 +154,40 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 
     REQUIRE_THAT(coef[0], WithinRel(beta_ols[0], 1e-4));
     REQUIRE_THAT(coef[2], WithinRel(beta_ols[0], 1e-4));
+  }
+
+  SECTION("Path")
+  {
+    model.setPathLength(20);
+
+    auto data = generateData(100, 10);
+
+    int n = 4;
+    int p = 3;
+
+    Eigen::MatrixXd x(n, p);
+    Eigen::VectorXd beta(p);
+
+    // model.setNormalization("none");
+
+    // clang-format off
+    x << 1.1, 0.3, 0.2,
+         0.2, 0.9, 1.1,
+         0.2, 2.5, 0.5,
+         0.5, 0.0, 0.2;
+    // clang-format on
+
+    beta << 2.05, 0, 2;
+
+    Eigen::VectorXd y = x * beta;
+
+    auto path = model.path(x, y);
+
+    model.setRelaxTol(1e-2);
+    model.setRelaxMaxInnerIterations(1e2);
+
+    auto relaxed_path = model.relax(path, x, y, 0.8);
+
+    // REQUIRE(relaxed_path.size() == path.size());
   }
 }

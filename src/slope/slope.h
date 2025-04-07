@@ -554,6 +554,42 @@ public:
     return fit_out;
   }
 
+  /**
+   * @brief Relaxes a fitted SLOPE path
+   *
+   * @tparam T Matrix type for feature input (supports dense or sparse matrices)
+   * @param path Previously fitted SLOPE path
+   * @param x Feature matrix of size n x p
+   * @param y Response vector of size n
+   * @param gamma Relaxation parameter, proportion of SLOPE-penalized fit. Must
+   * be between 0 and 1. Default is 0.0 which means fully relaxed.
+   * @return SlopePath Object containing the relaxed model with unpenalized
+   * coefficients
+   */
+  template<typename T>
+  SlopePath relax(const SlopePath& path,
+                  T& x,
+                  const Eigen::VectorXd& y,
+                  const double gamma = 0.0)
+  {
+    std::vector<SlopeFit> fits;
+
+    Eigen::VectorXd beta0 = path(0).getIntercepts(false);
+    Eigen::VectorXd beta = path(0).getCoefs(false);
+
+    for (size_t i = 0; i < path.size(); i++) {
+      auto relaxed_fit = relax(path(i), x, y, gamma, beta0, beta);
+
+      fits.emplace_back(relaxed_fit);
+
+      // Update warm starts
+      beta0 = relaxed_fit.getIntercepts(false);
+      beta = relaxed_fit.getCoefs(false);
+    }
+
+    return fits;
+  }
+
 private:
   // Parameters
   bool intercept;
