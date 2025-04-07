@@ -471,6 +471,16 @@ Slope::setTol(double tol)
 }
 
 void
+Slope::setRelaxTol(double tol)
+{
+  if (tol < 0) {
+    throw std::invalid_argument("tol must be non-negative");
+  }
+
+  this->tol_relax = tol;
+}
+
+void
 Slope::setMaxIterations(int max_it)
 {
   if (max_it < 1) {

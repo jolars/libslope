@@ -48,6 +48,7 @@ public:
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
+    , tol_relax(1e-4)
     , alpha_est_maxit(1000)
     , max_it(1e4)
     , path_length(100)
@@ -160,6 +161,13 @@ public:
    * @param tol The value to set for the tolerance value. Must be positive.
    */
   void setTol(double tol);
+
+  /**
+   * @brief Sets the tolerance value for the relaxed SLOPE solver.
+   *
+   * @param tol The value to set for the tolerance value. Must be positive.
+   */
+  void setRelaxTol(double tol);
 
   /**
    * @brief Sets the maximum number of iterations.
@@ -382,7 +390,6 @@ public:
                  T& x,
                  const Eigen::VectorXd& y_in,
                  const double gamma = 0.0,
-                 const double tol = 1e-6,       // TODO: move to setters
                  const int maxit_irls = 100,    // TODO: Move to setters
                  const int maxit_inner = 10000) // TODO: Move to setters
   {
@@ -443,7 +450,7 @@ public:
                      Eigen::VectorXd::Ones(n),
                      jit_normalization);
 
-      if (gradient.lpNorm<Eigen::Infinity>() < tol) {
+      if (gradient.lpNorm<Eigen::Infinity>() < tol_relax) {
         break;
       }
 
@@ -462,7 +469,7 @@ public:
                          w,
                          jit_normalization);
 
-          if (gradient.lpNorm<Eigen::Infinity>() < tol) {
+          if (gradient.lpNorm<Eigen::Infinity>() < tol_relax) {
             break;
           }
         }
@@ -531,6 +538,7 @@ private:
   double dev_ratio_tol;
   double learning_rate_decr;
   double q;
+  double tol_relax;
   double theta1;
   double theta2;
   double tol;
