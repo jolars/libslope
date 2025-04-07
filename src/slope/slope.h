@@ -49,7 +49,7 @@ public:
     , learning_rate_decr(0.5)
     , q(0.1)
     , tol(1e-4)
-    , tol_relax(1e-6)
+    , tol_relax(1e-4)
     , alpha_est_maxit(1000)
     , max_it(1e4)
     , max_it_inner_relax(1e5)
