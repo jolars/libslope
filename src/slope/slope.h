@@ -362,6 +362,8 @@ public:
    * @param fit Previously fitted SLOPE model containing coefficient estimates
    * @param x Feature matrix of size n x p
    * @param y_in Response vector of size n
+   * @param gamma Relaxation parameter, proportion of SLOPE-penalized fit. Must
+   * be between 0 and 1.
    * @param tol Convergence tolerance for the optimizer
    * @param maxit_irls Maximum number of IRLS (Iteratively Reweighted Least
    * Squares) iterations
@@ -379,9 +381,10 @@ public:
   SlopeFit relax(const SlopeFit& fit,
                  T& x,
                  const Eigen::VectorXd& y_in,
-                 const double tol = 1e-6,
-                 const int maxit_irls = 100,
-                 const int maxit_inner = 10000)
+                 const double gamma = 0.0,
+                 const double tol = 1e-6,       // TODO: move to setters
+                 const int maxit_irls = 100,    // TODO: Move to setters
+                 const int maxit_inner = 10000) // TODO: Move to setters
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -489,6 +492,12 @@ public:
     }
 
     double dev = loss->deviance(eta, y);
+
+    if (gamma > 0) {
+      Eigen::VectorXd old_coefs = fit.getCoefs(false);
+      Eigen::VectorXd old_intercept = fit.getIntercepts(false);
+      beta = (1 - gamma) * beta + gamma * old_coefs;
+    }
 
     SlopeFit fit_out{ beta0,
                       beta.reshaped(p, m).sparseView(),
