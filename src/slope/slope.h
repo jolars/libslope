@@ -406,7 +406,7 @@ public:
   SlopeFit relax(const SlopeFit& fit,
                  T& x,
                  const Eigen::VectorXd& y_in,
-                 const double gamma = 0.0) // TODO: Move to setters
+                 const double gamma = 0.0)
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
