@@ -172,6 +172,15 @@ public:
   void setRelaxTol(double tol);
 
   /**
+   * @brief Sets the maximum number of outer (IRLS) iterations for the relaxed
+   * solver.
+   *
+   * @param max_it The value to set for the maximum number of iterations. Must
+   * be positive.
+   */
+  void setRelaxMaxOuterIterations(int max_it);
+
+  /**
    * @brief Sets the maximum number of iner iterations for the relaxed solver.
    *
    * @param max_it The value to set for the maximum number of iterations. Must
@@ -397,8 +406,7 @@ public:
   SlopeFit relax(const SlopeFit& fit,
                  T& x,
                  const Eigen::VectorXd& y_in,
-                 const double gamma = 0.0,
-                 const int maxit_irls = 100) // TODO: Move to setters
+                 const double gamma = 0.0) // TODO: Move to setters
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -445,7 +453,7 @@ public:
 
     int passes = 0;
 
-    for (int irls_it = 0; irls_it < maxit_irls; irls_it++) {
+    for (int irls_it = 0; irls_it < max_it_outer_relax; irls_it++) {
       residual = loss->residual(eta, y);
 
       updateGradient(gradient,
@@ -499,7 +507,7 @@ public:
 
       eta = working_residual + z;
 
-      if (irls_it == maxit_irls) {
+      if (irls_it == max_it_outer_relax) {
         WarningLogger::addWarning(WarningCode::MAXIT_REACHED,
                                   "Maximum number of IRLS iterations reached.");
       }
@@ -552,6 +560,7 @@ private:
   int alpha_est_maxit;
   int max_it;
   int max_it_inner_relax;
+  int max_it_outer_relax;
   int path_length;
   int cd_iterations;
   std::optional<int> max_clusters;

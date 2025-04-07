@@ -481,6 +481,15 @@ Slope::setRelaxTol(double tol)
 }
 
 void
+Slope::setRelaxMaxOuterIterations(int max_it)
+{
+  if (max_it < 1) {
+    throw std::invalid_argument("max_it must be >= 1");
+  }
+  this->max_it_outer_relax = max_it;
+}
+
+void
 Slope::setRelaxMaxInnerIterations(int max_it)
 {
   if (max_it < 1) {
