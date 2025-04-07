@@ -55,7 +55,7 @@ public:
    * @param step the
    * @return The fit at step `step` of the path. A SlopeFit object.
    */
-  const SlopeFit& operator()(const size_t step)
+  const SlopeFit& operator()(const size_t step) const
   {
     assert(step < fits.size());
 
