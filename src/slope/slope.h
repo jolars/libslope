@@ -51,6 +51,8 @@ public:
     , tol_relax(1e-4)
     , alpha_est_maxit(1000)
     , max_it(1e4)
+    , max_it_inner_relax(1e5)
+    , max_it_outer_relax(50)
     , path_length(100)
     , cd_iterations(10)
     , max_clusters(std::optional<int>())
@@ -168,6 +170,14 @@ public:
    * @param tol The value to set for the tolerance value. Must be positive.
    */
   void setRelaxTol(double tol);
+
+  /**
+   * @brief Sets the maximum number of iner iterations for the relaxed solver.
+   *
+   * @param max_it The value to set for the maximum number of iterations. Must
+   * be positive.
+   */
+  void setRelaxMaxInnerIterations(int max_it);
 
   /**
    * @brief Sets the maximum number of iterations.
@@ -375,8 +385,6 @@ public:
    * @param tol Convergence tolerance for the optimizer
    * @param maxit_irls Maximum number of IRLS (Iteratively Reweighted Least
    * Squares) iterations
-   * @param maxit_inner Maximum number of inner optimization iterations per IRLS
-   * step
    * @return SlopeFit Object containing the relaxed model with unpenalized
    * coefficients
    *
@@ -390,8 +398,7 @@ public:
                  T& x,
                  const Eigen::VectorXd& y_in,
                  const double gamma = 0.0,
-                 const int maxit_irls = 100,    // TODO: Move to setters
-                 const int maxit_inner = 10000) // TODO: Move to setters
+                 const int maxit_irls = 100) // TODO: Move to setters
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -457,7 +464,7 @@ public:
       loss->updateWeightsAndWorkingResponse(w, z, eta, y);
       working_residual = eta - z;
 
-      for (int inner_it = 0; inner_it < maxit_inner; ++inner_it) {
+      for (int inner_it = 0; inner_it < max_it_inner_relax; ++inner_it) {
         if (inner_it % 10 == 0) {
           // Compute gradient for weighted least-squares problem
           updateGradient(gradient,
@@ -538,12 +545,13 @@ private:
   double dev_ratio_tol;
   double learning_rate_decr;
   double q;
-  double tol_relax;
   double theta1;
   double theta2;
   double tol;
+  double tol_relax;
   int alpha_est_maxit;
   int max_it;
+  int max_it_inner_relax;
   int path_length;
   int cd_iterations;
   std::optional<int> max_clusters;
