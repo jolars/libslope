@@ -102,7 +102,7 @@ public:
   void setUpdateClusters(bool update_clusters);
 
   /**
-   * @brief Sets the update clusters flag.
+   * @brief Sets the return clusters flag.
    *
    * @param return_clusters Selects whether the fitted model should return
    * cluster information.
@@ -182,7 +182,7 @@ public:
   void setRelaxMaxOuterIterations(int max_it);
 
   /**
-   * @brief Sets the maximum number of iner iterations for the relaxed solver.
+   * @brief Sets the maximum number of inner iterations for the relaxed solver.
    *
    * @param max_it The value to set for the maximum number of iterations. Must
    * be positive.
@@ -269,9 +269,9 @@ public:
   void setDevRatioTol(const double dev_ratio_tol);
 
   /**
-   * @brief Sets tolerance in deviance change for early stopping.
+   * @brief Sets the maximum number of clusters.
    * @param max_clusters The maximum number of clusters. SLOPE
-   * can (theoretically) select at most select min(n, p) clusters (unique
+   * can (theoretically) select at most min(n, p) clusters (unique
    * non-zero betas). By default, this is set to -1, which means that the number
    * of clusters will be automatically set to the number of observations + 1.
    */
@@ -336,7 +336,7 @@ public:
 
   /**
    * @brief Get currently defined loss type
-   * @return The loss type
+   * @return The loss type as a string
    */
   const std::string& getLossType();
 
@@ -391,17 +391,9 @@ public:
    * @param x Feature matrix of size n x p
    * @param y_in Response vector of size n
    * @param gamma Relaxation parameter, proportion of SLOPE-penalized fit. Must
-   * be between 0 and 1.
-   * @param tol Convergence tolerance for the optimizer
-   * @param maxit_irls Maximum number of IRLS (Iteratively Reweighted Least
-   * Squares) iterations
+   * be between 0 and 1. Default is 0.0 which means fully relaxed.
    * @return SlopeFit Object containing the relaxed model with unpenalized
    * coefficients
-   *
-   * This method performs post-fitting relaxation where the SLOPE penalty is
-   * removed and the model is re-fit using only the selected variables from the
-   * original fit, keeping the cluster structure. This is sometimes
-   * referred to as the _debiased_ SLOPE.
    */
   template<typename T>
   SlopeFit relax(const SlopeFit& fit,
