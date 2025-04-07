@@ -247,6 +247,12 @@ public:
 
     return gaps;
   }
+
+  /**
+   * @brief Gets the number of solutions in the path
+   * @return Size of the path (number of SlopeFit objects)
+   */
+  std::size_t size() const { return fits.size(); }
 };
 
 } // namespace slope
