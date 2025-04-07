@@ -392,6 +392,8 @@ public:
    * @param y_in Response vector of size n
    * @param gamma Relaxation parameter, proportion of SLOPE-penalized fit. Must
    * be between 0 and 1. Default is 0.0 which means fully relaxed.
+   * @param beta0 Warm start intercept values (optional)
+   * @param beta Warm start coefficient values (optional)
    * @return SlopeFit Object containing the relaxed model with unpenalized
    * coefficients
    */
@@ -399,7 +401,9 @@ public:
   SlopeFit relax(const SlopeFit& fit,
                  T& x,
                  const Eigen::VectorXd& y_in,
-                 const double gamma = 0.0)
+                 const double gamma = 0.0,
+                 Eigen::VectorXd beta0 = Eigen::VectorXd(0),
+                 Eigen::VectorXd beta = Eigen::VectorXd(0))
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -407,8 +411,13 @@ public:
     int n = x.rows();
     int p = x.cols();
 
-    Eigen::VectorXd beta0 = fit.getIntercepts(false);
-    Eigen::VectorXd beta = fit.getCoefs(false);
+    if (beta0.size() == 0) {
+      beta0 = fit.getIntercepts(false);
+    }
+
+    if (beta.size() == 0) {
+      beta = fit.getCoefs(false);
+    }
 
     double alpha = 0;
 
