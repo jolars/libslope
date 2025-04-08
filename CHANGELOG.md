@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.30.0](https://github.com/jolars/libslope/compare/v0.29.0...v0.30.0) (2025-04-08)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove `getCoefs(size_t)` method from `SlopePath`
+
+### Features
+
+* add `hasIntercept()` to `SlopeFit` class ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+* add `relax()` method for paths ([7976455](https://github.com/jolars/libslope/commit/7976455c9f64fad9a55c0063d7932a988bb53b92))
+* add `size()` method to `SlopePath` ([c2a8ba7](https://github.com/jolars/libslope/commit/c2a8ba7e05a7dc9bbfd9c5ecafe76cb7d9fde6b0))
+* add mixing parameter `gamma` for relaxed fits ([#134](https://github.com/jolars/libslope/issues/134)) ([a2019ae](https://github.com/jolars/libslope/commit/a2019ae3bf566011a49d6c859a1aa3bfec947b3b)), closes [#133](https://github.com/jolars/libslope/issues/133)
+* add optional warm starting to `relax()` ([a39207a](https://github.com/jolars/libslope/commit/a39207a7d23dc21269a4842892d72f04f8d140ef))
+* add original scale arguments to coef/intercept getters ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+* add relaxed SLOPE method ([#131](https://github.com/jolars/libslope/issues/131)) ([9d94d3d](https://github.com/jolars/libslope/commit/9d94d3dc23837438b17e32821f7c9e72e32b3701)), closes [#101](https://github.com/jolars/libslope/issues/101)
+* correctly collect diagnostics in `relax()` ([c94ccb8](https://github.com/jolars/libslope/commit/c94ccb87e322c7c79db81f174dd4dc30265c6b1c))
+* decrease default tolerance in relaxed solver ([d1b347d](https://github.com/jolars/libslope/commit/d1b347d09751d778c92b90a80e6c4aa1781d6283))
+* enable cross-validation over relaxation parameter ([e8a1af4](https://github.com/jolars/libslope/commit/e8a1af492c742e299e8b9374735dfd6b5d88dad2))
+* move `max_it_inner` to setter ([07d0c52](https://github.com/jolars/libslope/commit/07d0c526c770ecd7d2147535f5e3f4e64a8b5478))
+* move `maxit_irls` to setter ([4f12077](https://github.com/jolars/libslope/commit/4f12077e412d8e9eb29cb69bf8d0430d0d9a6e58))
+* move `tol` in `relax()` to setter ([2076056](https://github.com/jolars/libslope/commit/207605635f4bb61f659950a2d316c2e2ce0d2b64))
+* reduce tolerance in relaxed method ([1d5afea](https://github.com/jolars/libslope/commit/1d5afeaba234366447eb1f2192c797f672c17d4d))
+* remove `getCoefs(size_t)` method from `SlopePath` ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+
+
+### Bug Fixes
+
+* correctly reshape beta in `relax()` ([840354f](https://github.com/jolars/libslope/commit/840354f131a1d11d8793285e5a66e40520268baf))
+* **relax:** initialize gradient to zero ([442eaee](https://github.com/jolars/libslope/commit/442eaee2623d6c33272b7ad8fdd225f528d85517))
+* use correct scale for coefs in cross-validation ([5d53ab2](https://github.com/jolars/libslope/commit/5d53ab24696f35962b4f13518384add89e34a045))
+
+
+### Performance Improvements
+
+* use sparse representation when rescaling coefs ([208853a](https://github.com/jolars/libslope/commit/208853a8daa3f1e7d1816d0005a7de8a4e7a8cf2))
+
 ## [0.29.0](https://github.com/jolars/libslope/compare/v0.28.0...v0.29.0) (2025-04-03)
 
 
