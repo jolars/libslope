@@ -61,7 +61,7 @@ TEST_CASE("Cross-validation", "[cv]")
     }
   }
 
-  SECTION("Multiple params")
+  SECTION("Vector param values")
   {
     slope::Slope model;
 
@@ -72,6 +72,20 @@ TEST_CASE("Cross-validation", "[cv]")
     auto res_dense = crossValidate(model, data.x, data.y, cv_config);
 
     REQUIRE(res_dense.results.size() == 2);
+  }
+
+  SECTION("Multiple params")
+  {
+    slope::Slope model;
+
+    auto cv_config = slope::CvConfig();
+
+    cv_config.hyperparams["q"] = { 0.1, 0.2 };
+    cv_config.hyperparams["gamma"] = { 0.0, 0.5, 1.0 };
+
+    auto res_dense = crossValidate(model, data.x, data.y, cv_config);
+
+    REQUIRE(res_dense.results.size() == 6);
   }
 
   SECTION("Pick correct best score")
