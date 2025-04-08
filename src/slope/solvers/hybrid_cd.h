@@ -184,7 +184,7 @@ computeClusterGradientAndHessian(const Eigen::SparseMatrix<double>& x,
  * @see JitNormalization
  */
 template<typename T>
-void
+double
 coordinateDescent(Eigen::VectorXd& beta0,
                   Eigen::VectorXd& beta,
                   Eigen::VectorXd& residual,
@@ -201,6 +201,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
   using namespace Eigen;
 
   const int n = x.rows();
+
+  double max_abs_gradient = 0;
 
   for (int j = 0; j < clusters.n_clusters(); ++j) {
     double c_old = clusters.coeff(j);
@@ -232,6 +234,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
       std::tie(hessian_j, gradient_j) = computeClusterGradientAndHessian(
         x, j, s, clusters, w, residual, x_centers, x_scales, jit_normalization);
     }
+
+    max_abs_gradient = std::max(max_abs_gradient, std::abs(gradient_j));
 
     double c_tilde;
     int new_index;
@@ -292,6 +296,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
     residual.array() -= beta0_update;
     beta0(0) -= beta0_update;
   }
+
+  return max_abs_gradient;
 }
 
 } // namespace slope

@@ -191,3 +191,25 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     // REQUIRE(relaxed_path.size() == path.size());
   }
 }
+
+TEST_CASE("Relaxed path", "[fail]")
+{
+
+  using Catch::Matchers::WithinRel;
+
+  slope::Slope model;
+  slope::SlopeFit fit;
+
+  model.setPathLength(20);
+
+  auto data = generateData(100, 10);
+
+  auto path = model.path(data.x, data.y);
+
+  // model.setRelaxTol(1e-2);
+  // model.setRelaxMaxInnerIterations(1e2);
+
+  auto relaxed_path = model.relax(path, data.x, data.y, 0.8);
+
+  REQUIRE(relaxed_path.size() == path.size());
+}

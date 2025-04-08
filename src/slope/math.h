@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "clusters.h"
 #include "jit_normalization.h"
 #include "threads.h"
 #include <Eigen/Core>
@@ -619,5 +620,58 @@ mins(const Eigen::SparseMatrix<double>& x);
  */
 Eigen::VectorXd
 mins(const Eigen::MatrixXd& x);
+
+template<typename T>
+Eigen::VectorXd
+clusterGradient(Eigen::VectorXd& beta,
+                Eigen::VectorXd& residual,
+                Clusters& clusters,
+                const T& x,
+                const Eigen::VectorXd& w,
+                const Eigen::VectorXd& x_centers,
+                const Eigen::VectorXd& x_scales,
+                const JitNormalization jit_normalization)
+{
+  using namespace Eigen;
+
+  const int n = x.rows();
+  const int n_clusters = clusters.n_clusters();
+
+  Eigen::VectorXd gradient = Eigen::VectorXd::Zero(n_clusters);
+
+  for (int j = 0; j < n_clusters; ++j) {
+    double c_old = clusters.coeff(j);
+
+    if (c_old == 0) {
+      gradient(j) = 0;
+      continue;
+    }
+
+    int cluster_size = clusters.cluster_size(j);
+    std::vector<int> s;
+    s.reserve(cluster_size);
+
+    for (auto c_it = clusters.cbegin(j); c_it != clusters.cend(j); ++c_it) {
+      double s_k = sign(beta(*c_it));
+      s.emplace_back(s_k);
+    }
+
+    double hessian_j = 1;
+    double gradient_j = 0;
+
+    if (cluster_size == 1) {
+      int k = *clusters.cbegin(j);
+      std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
+        x, k, w, residual, x_centers, x_scales, s[0], jit_normalization, n);
+    } else {
+      std::tie(hessian_j, gradient_j) = computeClusterGradientAndHessian(
+        x, j, s, clusters, w, residual, x_centers, x_scales, jit_normalization);
+    }
+
+    gradient(j) = gradient_j;
+  }
+
+  return gradient;
+}
 
 } // namespace slope

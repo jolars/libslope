@@ -454,6 +454,7 @@ public:
     VectorXd working_residual(n);
 
     VectorXd w = VectorXd::Ones(n);
+    VectorXd w_ones = VectorXd::Ones(n);
     VectorXd z = y;
 
     Clusters clusters = fit.getClusters();
@@ -469,16 +470,18 @@ public:
         time.push_back(timer.elapsed());
       }
 
-      updateGradient(gradient,
-                     x,
-                     residual,
-                     working_set,
-                     x_centers,
-                     x_scales,
-                     Eigen::VectorXd::Ones(n),
-                     jit_normalization);
+      Eigen::VectorXd cluster_gradient = clusterGradient(beta,
+                                                         residual,
+                                                         clusters,
+                                                         x,
+                                                         w_ones,
+                                                         x_centers,
+                                                         x_scales,
+                                                         jit_normalization);
 
-      if (gradient.lpNorm<Eigen::Infinity>() < tol_relax) {
+      double norm_grad = cluster_gradient.lpNorm<Eigen::Infinity>();
+
+      if (norm_grad < tol_relax) {
         break;
       }
 
@@ -486,36 +489,24 @@ public:
       working_residual = eta - z;
 
       for (int inner_it = 0; inner_it < max_it_inner_relax; ++inner_it) {
-        if (inner_it % 10 == 0) {
-          // Compute gradient for weighted least-squares problem
-          updateGradient(gradient,
-                         x,
-                         working_residual,
-                         working_set,
-                         x_centers,
-                         x_scales,
-                         w,
-                         jit_normalization);
-
-          if (gradient.lpNorm<Eigen::Infinity>() < tol_relax) {
-            break;
-          }
-        }
-
         passes++;
 
-        coordinateDescent(beta0,
-                          beta,
-                          working_residual,
-                          clusters,
-                          lambda_relax,
-                          x,
-                          w,
-                          x_centers,
-                          x_scales,
-                          intercept,
-                          jit_normalization,
-                          update_clusters);
+        double max_abs_gradient = coordinateDescent(beta0,
+                                                    beta,
+                                                    working_residual,
+                                                    clusters,
+                                                    lambda_relax,
+                                                    x,
+                                                    w,
+                                                    x_centers,
+                                                    x_scales,
+                                                    intercept,
+                                                    jit_normalization,
+                                                    update_clusters);
+
+        if (max_abs_gradient < tol_relax) {
+          break;
+        }
       }
 
       eta = working_residual + z;
