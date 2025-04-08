@@ -449,9 +449,9 @@ public:
                                           x_scales,
                                           jit_normalization,
                                           intercept);
+    VectorXd gradient = VectorXd::Zero(p * m);
     VectorXd residual(n);
     VectorXd working_residual(n);
-    VectorXd gradient(p * m);
 
     VectorXd w = VectorXd::Ones(n);
     VectorXd z = y;
