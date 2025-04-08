@@ -583,6 +583,9 @@ public:
       fits.emplace_back(relaxed_fit);
 
       // Update warm starts
+      // TODO: Maybe be more clever about whether to use the
+      // previous values or the regularized estimates and warm starts.
+      // Maybe just pick the solution with larger coefficients?
       beta0 = relaxed_fit.getIntercepts(false);
       beta = relaxed_fit.getCoefs(false);
     }
