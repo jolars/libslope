@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.30.1](https://github.com/jolars/libslope/compare/v0.30.0...v0.30.1) (2025-04-09)
+
+
+### Bug Fixes
+
+* remove slope path from included header ([ea404fe](https://github.com/jolars/libslope/commit/ea404fe5f54ed30bc848dfd7b07ad9a7fcaa3a7d))
+* remove slope path from inclusions in `estimate_alpha.h` ([dcbf379](https://github.com/jolars/libslope/commit/dcbf37986934b0284219eb0a801426a7b9f1daf6))
+
 ## [0.30.0](https://github.com/jolars/libslope/compare/v0.29.0...v0.30.0) (2025-04-08)
 
 
