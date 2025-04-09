@@ -99,7 +99,6 @@ rescaleCoefficients(const Eigen::VectorXd& beta0,
                     const bool intercept)
 {
   int m = beta0.size();
-  int p = beta.size() / m;
 
   bool centering = x_centers.size() > 0;
   bool scaling = x_scales.size() > 0;
