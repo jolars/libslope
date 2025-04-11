@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          vcpkg install eigen3 catch2
+          vcpkg install eigen3 catch2 --triplet x64-windows
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2.0
@@ -35,7 +35,7 @@ jobs:
           cmake-version: "3.25"
 
       - name: Configure CMake
-        run: cmake -B build -S . -DBUILD_TESTING=ON
+        run: cmake -B build -S . -DBUILD_TESTING=ON ${{ runner.os == 'Windows' && '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake' || '' }}
 
       - name: Build
         run: cmake --build build
