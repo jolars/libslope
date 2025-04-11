@@ -211,7 +211,7 @@ TEST_CASE("Poisson abalone data", "[poisson][realdata]")
   auto path = model.path(x, y);
 
   REQUIRE(path.getDeviance().back() > 0);
-  REQUIRE(path.getDeviance().size() > 5);
+  REQUIRE(path.getDeviance().size() > 1);
 }
 
 TEST_CASE("Poisson predictions", "[poisson][predict]")

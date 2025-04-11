@@ -102,6 +102,8 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 
     auto data = generateData(100, 200);
 
+    model.setDevRatioTol(0.99);
+
     auto path = model.path(data.x, data.y);
 
     auto null_deviance = path.getNullDeviance();
@@ -113,7 +115,8 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
     REQUIRE(deviances.size() < 100);
     REQUIRE_THAT(deviances, VectorMonotonic(false, true));
 
-    model.setDevRatioTol(0.99);
+    model.setDevRatioTol(0.9);
+
     auto fit = model.path(data.x, data.y);
 
     REQUIRE(fit.getDeviance().size() < path_length);
