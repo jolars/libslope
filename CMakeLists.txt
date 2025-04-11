@@ -33,8 +33,6 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/external)
 
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
-
 add_subdirectory(src)
 
 if(BUILD_TESTING)
@@ -70,10 +68,7 @@ if(BUILD_TESTING)
     tests/thresholding.cpp
     tests/utils.cpp
   )
-  target_link_libraries(
-    tests
-    PRIVATE slope Catch2::Catch2WithMain Eigen3::Eigen
-  )
+  target_link_libraries(tests PRIVATE slope Catch2::Catch2WithMain)
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
