@@ -27,7 +27,8 @@ jobs:
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          vcpkg install eigen3 catch2 --triplet x64-windows
+          choco install mingw
+          vcpkg install eigen3 catch2 --triplet x64-mingw-dynamic
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2.0
@@ -35,13 +36,13 @@ jobs:
           cmake-version: "3.25"
 
       - name: Configure CMake
-        run: cmake -B build -S . -DBUILD_TESTING=ON ${{ runner.os == 'Windows' && '-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake' || '' }}
+        run: cmake -B build -S . -DBUILD_TESTING=ON ${{ runner.os == 'Windows' && '-G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic' || '' }}
 
       - name: Build
         run: cmake --build build
 
       - name: Install
-        run: sudo cmake --install build
+        run: ${{ runner.os == 'Windows' && 'cmake --install build' || 'sudo cmake --install build' }}
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
