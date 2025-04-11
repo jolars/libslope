@@ -165,7 +165,7 @@ linearPredictor(const T& x,
 #ifdef _OPENMP
 #pragma omp for nowait
 #endif
-    for (size_t i = 0; i < active_set.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(active_set.size()); ++i) {
       int ind = active_set[i];
       auto [k, j] = std::div(ind, p);
 
