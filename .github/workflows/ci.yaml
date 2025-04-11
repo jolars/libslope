@@ -16,18 +16,17 @@ jobs:
         run: |
           sudo apt-get install -y \
             build-essential \
-            libeigen3-dev \
             catch2
 
       - name: Install dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install eigen catch2
+          brew install catch2
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          vcpkg install eigen3 catch2
+          vcpkg install catch2
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2.0
