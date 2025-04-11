@@ -3,11 +3,16 @@ on: [push, pull_request]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y \
             build-essential \
@@ -17,6 +22,17 @@ jobs:
             doxygen \
             graphviz \
             catch2
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install eigen lcov gcovr doxygen graphviz catch2
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install eigen3 catch2 doxygen
+          choco install graphviz lcov gcovr
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2.0
@@ -36,6 +52,7 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
       - name: Upload coverage reports to Codecov
+        if: runner.os == 'Linux'
         uses: codecov/codecov-action@v5.4.0
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
