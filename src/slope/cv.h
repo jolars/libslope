@@ -14,6 +14,7 @@
 #include "score.h"
 #include "slope.h"
 #include <vector>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -244,11 +245,15 @@ crossValidate(Slope model,
         }
       } catch (const std::exception& e) {
         thread_errors[i] = e.what();
+#ifdef _OPENMP
 #pragma omp atomic write
+#endif
         had_exception = true;
       } catch (...) {
         thread_errors[i] = "Unknown exception";
+#ifdef _OPENMP
 #pragma omp atomic write
+#endif
         had_exception = true;
       }
     }
