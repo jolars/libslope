@@ -255,7 +255,7 @@ updateGradient(Eigen::VectorXd& gradient,
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(Threads::get()) if (large_problem)
 #endif
-  for (size_t i = 0; i < active_set.size(); ++i) {
+  for (int i = 0; i < static_cast<int>(active_set.size()); ++i) {
     int ind = active_set[i];
     auto [k, j] = std::div(ind, p);
 
