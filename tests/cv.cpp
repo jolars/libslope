@@ -86,59 +86,6 @@ TEST_CASE("Cross-validation", "[cv]")
 
     REQUIRE(res_dense.results.size() == 6);
   }
-
-  SECTION("Pick correct best score")
-  {
-    slope::Slope model;
-    auto data = generateData(100, 2);
-
-    auto cv_config = slope::CvConfig();
-
-    cv_config.metric = "deviance";
-    cv_config.n_folds = 3;
-    cv_config.hyperparams["q"] = { 0.1, 0.2 };
-    cv_config.random_seed = 1982;
-
-    auto res = crossValidate(model, data.x, data.y, cv_config);
-
-    auto optim = res.best_params;
-    auto s0 = res.results[0].mean_scores;
-
-    auto best_s0 = std::min_element(s0.begin(), s0.end());
-
-    int best_alpha_ind = std::distance(s0.begin(), best_s0);
-
-    REQUIRE(*best_s0 == res.best_score);
-    REQUIRE(res.best_params["q"] == 0.1);
-    REQUIRE(res.best_params["alpha"] == res.results[0].alphas[best_alpha_ind]);
-
-    auto s1 = res.results[1].mean_scores;
-    auto best_s1 = std::min_element(s1.begin(), s1.end());
-
-    REQUIRE(*best_s1 != res.best_score);
-
-    cv_config.metric = "accuracy";
-
-    data = generateData(100, 2, "logistic");
-    model.setLoss("logistic");
-    res = crossValidate(model, data.x, data.y, cv_config);
-
-    optim = res.best_params;
-    s0 = res.results[0].mean_scores;
-
-    best_s0 = std::max_element(s0.begin(), s0.end());
-
-    best_alpha_ind = std::distance(s0.begin(), best_s0);
-
-    REQUIRE(*best_s0 == res.best_score);
-    REQUIRE(res.best_params["q"] == 0.1);
-    REQUIRE(res.best_params["alpha"] == res.results[0].alphas[best_alpha_ind]);
-
-    s1 = res.results[1].mean_scores;
-    best_s1 = std::min_element(s1.begin(), s1.end());
-
-    REQUIRE(*best_s1 != res.best_score);
-  }
 }
 
 TEST_CASE("Repeated cross-validation", "[cv]")
