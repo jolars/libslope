@@ -219,7 +219,11 @@ crossValidate(Slope model,
     bool had_exception = false;
 
 #ifdef _OPENMP
+#ifdef _WIN32
+    // Windows OpenMP does not support max_active_levels
+#else
     omp_set_max_active_levels(1);
+#endif
 #pragma omp parallel for num_threads(Threads::get())                           \
   shared(scores, thread_errors, had_exception)
 #endif
