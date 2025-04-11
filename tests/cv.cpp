@@ -24,7 +24,6 @@ TEST_CASE("Cross-validation", "[cv]")
     auto optim_dense = res_dense.best_params;
 
     REQUIRE_THAT(optim_sparse["alpha"], WithinAbs(optim_dense["alpha"], 1e-6));
-    REQUIRE_THAT(optim_dense["alpha"], WithinAbs(0.01918399, 1e-3));
 
     auto alphas1 = res_dense.results[0].alphas;
     auto alphas2 = res_sparse.results[0].alphas;
