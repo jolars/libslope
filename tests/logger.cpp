@@ -124,7 +124,11 @@ TEST_CASE("WarningLogger with multiple threads", "[logger][parallel]")
 
     // We should have num_threads * warnings_per_thread warnings
     auto warnings = slope::WarningLogger::getWarnings();
+#ifdef _OPENMP
     REQUIRE(warnings.size() == num_threads * warnings_per_thread);
+#else
+    REQUIRE(warnings.size() == warnings_per_thread);
+#endif
   }
 
   SECTION("Different warning codes per thread")
