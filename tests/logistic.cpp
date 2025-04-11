@@ -130,7 +130,7 @@ TEST_CASE("Logistic path", "[logistic]")
   auto gaps = fit.getGaps();
 
   for (auto& gap : gaps) {
-    REQUIRE(gap.back() >= 0.0);
+    REQUIRE(gap.back() >= -1e-12);  // Allow for minimal floating point error
   }
 
   REQUIRE(null_deviance >= 0);
