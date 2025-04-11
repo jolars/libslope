@@ -32,7 +32,6 @@
             lcov
             lldb
             llvmPackages.openmp
-            jq
           ];
         };
       }
