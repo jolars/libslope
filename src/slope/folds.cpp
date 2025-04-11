@@ -32,15 +32,7 @@ Folds::createFolds(int n, int n_folds, uint64_t random_seed)
   // Create and shuffle indices
   std::vector<int> indices(n);
   std::iota(indices.begin(), indices.end(), 0);
-
-  // std::shuffle(indices.begin(), indices.end(), generator);
-
-  // Use a manually implemented Fisher-Yates shuffle for platform independence
-  for (int i = n - 1; i > 0; --i) {
-    std::uniform_int_distribution<int> dist(0, i);
-    int j = dist(generator);
-    std::swap(indices[i], indices[j]);
-  }
+  std::shuffle(indices.begin(), indices.end(), generator);
 
   // Create folds
   std::vector<std::vector<int>> folds(n_folds);
