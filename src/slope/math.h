@@ -7,11 +7,14 @@
 
 #include "clusters.h"
 #include "jit_normalization.h"
-#include "threads.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <numeric>
 #include <vector>
+
+#ifdef _OPENMP
+#include "threads.h"
+#endif
 
 namespace slope {
 
