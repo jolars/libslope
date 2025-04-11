@@ -4,6 +4,7 @@
 #include <Eigen/SparseCore>
 #include <cmath>
 #include <random>
+#include <numeric>
 
 SimulatedData::SimulatedData(const int n, const int p, const int m)
 {
