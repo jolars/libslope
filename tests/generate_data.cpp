@@ -3,8 +3,8 @@
 #include <Eigen/Dense>
 #include <Eigen/SparseCore>
 #include <cmath>
-#include <random>
 #include <numeric>
+#include <random>
 
 SimulatedData::SimulatedData(const int n, const int p, const int m)
 {
