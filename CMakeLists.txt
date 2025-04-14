@@ -133,3 +133,5 @@ if(BUILD_DOCS)
     COMMENT "Generate package documentation"
   )
 endif()
+
+install(FILES LICENSE DESTINATION share/licenses/${PROJECT_NAME})
