@@ -3,6 +3,7 @@ version: "3"
 vars:
   BUILD_DIR: build
   TEST_DIR: test
+  JOBS: 8
 
 tasks:
   default:
@@ -23,7 +24,7 @@ tasks:
   build:
     deps: [configure]
     cmds:
-      - cmake --build {{.BUILD_DIR}}
+      - cmake --build {{.BUILD_DIR}} --parallel {{.JOBS}}
 
   docs:
     cmds:
