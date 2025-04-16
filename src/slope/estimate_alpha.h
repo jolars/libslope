@@ -117,7 +117,7 @@ estimateAlpha(MatrixType& x, Eigen::MatrixXd& y, const Slope& model)
   } else {
     for (int it = 0; it < alpha_est_maxit; ++it) {
 
-      MatrixType x_selected = subsetCols(x, selected);
+      auto x_selected = subsetCols(x, selected);
 
       std::vector<int> selected_prev = selected;
       selected.clear();

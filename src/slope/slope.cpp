@@ -641,6 +641,19 @@ Slope::fit<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
                                         const Eigen::MatrixXd&,
                                         const double,
                                         Eigen::ArrayXd);
+
+template SlopePath
+Slope::path<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
+                                         const Eigen::MatrixXd&,
+                                         Eigen::ArrayXd,
+                                         Eigen::ArrayXd);
+
+template SlopeFit
+Slope::fit<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
+                                        const Eigen::MatrixXd&,
+                                        const double,
+                                        Eigen::ArrayXd);
+
 /// @endcond
 
 } // namespace slope
