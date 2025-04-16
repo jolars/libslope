@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.31.0](https://github.com/jolars/libslope/compare/v0.30.1...v0.31.0) (2025-04-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* attempt a platform-indepenent shuffle method
+
+### Features
+
+* support features of type `Eigen::Map<>` ([24c41f0](https://github.com/jolars/libslope/commit/24c41f017ecbe1392a0ed9615b7ccff8d7c3154d))
+
+
+### Bug Fixes
+
+* add missing threads header ([6e306a7](https://github.com/jolars/libslope/commit/6e306a78db35139e6fed279c705585cbf4adc3e5))
+* install license file ([265eac0](https://github.com/jolars/libslope/commit/265eac06dd400b80f22f1710fc5d4fbd39dda5e4))
+* **windows:** don't set omp_set_max_active_levels on windows ([77b2c05](https://github.com/jolars/libslope/commit/77b2c05b80f7c9e9144870fc2da6e07292a28e29))
+* **windows:** use signed int in openmp for loop ([4f39c08](https://github.com/jolars/libslope/commit/4f39c08b8ddeaf0b823e3a1e227c3fe11036abe5))
+* **windows:** use signed integer in for loop for openmp ([b3fe760](https://github.com/jolars/libslope/commit/b3fe760e7333bab72eabe3fe4e2791ba077f0ca6))
+* wrap openmp pragmas in if else guards ([1fdec59](https://github.com/jolars/libslope/commit/1fdec596abf1b1966a12ab1f14565705605e0ce6))
+
+
+### Reverts
+
+* "build: try to avoid eigen cmake checks" ([e44c900](https://github.com/jolars/libslope/commit/e44c9009bf657bc31afc6b1ad2d8131a13851dc6))
+* "build(deps): provide eigen in external/" ([822bcd7](https://github.com/jolars/libslope/commit/822bcd7d7ec6c0f62fde895b3282fb753b13a57c))
+* "fix(windows): don't set omp_set_max_active_levels on windows" ([0d1a4d2](https://github.com/jolars/libslope/commit/0d1a4d2172e9c0a573ea5f00a00a96c99995a943))
+* "refactor!: attempt a platform-indepenent shuffle method" ([93b348c](https://github.com/jolars/libslope/commit/93b348c7609a0819ead3f36138274513dd38c16a))
+
+
+### Code Refactoring
+
+* attempt a platform-indepenent shuffle method ([8626db8](https://github.com/jolars/libslope/commit/8626db8fcd119e9fe3adaa2512852b795565a524))
+
 ## [0.30.1](https://github.com/jolars/libslope/compare/v0.30.0...v0.30.1) (2025-04-09)
 
 
