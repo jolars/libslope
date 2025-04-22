@@ -38,12 +38,12 @@ TEST_CASE("OLS on small dense matrix with intercept", "[ols]")
   Eigen::VectorXd y(3);
 
   // clang-format off
-    X << 1.0, 1.0,
-         2.0, 1.0,
-         5.0, 2.0;
-    y << 10 + 1*1.0 + 2*1.0,   // = 13
-         10 + 1*2.0 + 2*1.0,   // = 14
-         10 + 1*5.0 + 2*2.0;   // = 19
+  X << 1.0, 1.0,
+       2.0, 1.0,
+       5.0, 2.0;
+  y << 10 + 1*1.0 + 2*1.0,   // = 13
+       10 + 1*2.0 + 2*1.0,   // = 14
+       10 + 1*5.0 + 2*2.0;   // = 19
   // clang-format on
 
   auto [intercept, coeffs] = fitOls(X, y, /*fit_intercept=*/true);
