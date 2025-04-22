@@ -32,6 +32,7 @@
             lcov
             lldb
             llvmPackages.openmp
+            nodejs
           ];
         };
       }
