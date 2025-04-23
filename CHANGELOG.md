@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.32.0](https://github.com/jolars/libslope/compare/v0.31.0...v0.32.0) (2025-04-23)
+
+### Features
+
+* set defaults for theta1 and theta2 ([9902044](https://github.com/jolars/libslope/commit/9902044eb7ab778e0910270e32160e9efe168d52))
+
 ## [0.31.0](https://github.com/jolars/libslope/compare/v0.30.1...v0.31.0) (2025-04-16)
 
 
