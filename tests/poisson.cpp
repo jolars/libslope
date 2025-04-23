@@ -7,8 +7,8 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/cv.h>
 #include <slope/losses/poisson.h>
-#include <slope/threads.h>
 #include <slope/slope.h>
+#include <slope/threads.h>
 
 TEST_CASE("Poisson models", "[poisson]")
 {
