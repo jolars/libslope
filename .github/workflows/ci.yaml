@@ -83,7 +83,6 @@ jobs:
   release:
     name: Release
     needs:
-      - docs
       - build-and-test
     runs-on: ubuntu-latest
     permissions:
