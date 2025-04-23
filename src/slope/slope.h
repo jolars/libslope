@@ -574,7 +574,7 @@ private:
   double tol_relax = 1e-4;
   int alpha_est_maxit = 1000;
   int cd_iterations = 10;
-  int max_it = 1e4;
+  int max_it = 1e5;
   int max_it_inner_relax = 1e5;
   int max_it_outer_relax = 50;
   int path_length = 100;
