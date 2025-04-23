@@ -37,35 +37,7 @@ public:
    *
    * Initializes the Slope object with default parameter values.
    */
-  Slope()
-    : intercept(true)
-    , modify_x(false)
-    , update_clusters(false)
-    , collect_diagnostics(false)
-    , return_clusters(true)
-    , alpha_min_ratio(-1) // TODO: Use std::optional for alpha_min_ratio
-    , dev_change_tol(1e-5)
-    , dev_ratio_tol(0.999)
-    , learning_rate_decr(0.5)
-    , q(0.1)
-    , tol(1e-4)
-    , tol_relax(1e-4)
-    , alpha_est_maxit(1000)
-    , max_it(1e4)
-    , max_it_inner_relax(1e5)
-    , max_it_outer_relax(50)
-    , path_length(100)
-    , cd_iterations(10)
-    , max_clusters(std::optional<int>())
-    , alpha_type("path")
-    , lambda_type("bh")
-    , centering_type("mean")
-    , scaling_type("sd")
-    , loss_type("quadratic")
-    , screening_type("strong")
-    , solver_type("auto")
-  {
-  }
+  Slope() = default;
 
   /**
    * @brief Sets the numerical solver used to fit the model.
@@ -586,34 +558,34 @@ public:
 
 private:
   // Parameters
-  bool intercept;
-  bool modify_x;
-  bool update_clusters;
-  bool collect_diagnostics;
-  bool return_clusters;
-  double alpha_min_ratio;
-  double dev_change_tol;
-  double dev_ratio_tol;
-  double learning_rate_decr;
-  double q;
-  double theta1;
-  double theta2;
-  double tol;
-  double tol_relax;
-  int alpha_est_maxit;
-  int max_it;
-  int max_it_inner_relax;
-  int max_it_outer_relax;
-  int path_length;
-  int cd_iterations;
-  std::optional<int> max_clusters;
-  std::string alpha_type;
-  std::string lambda_type;
-  std::string centering_type;
-  std::string scaling_type;
-  std::string loss_type;
-  std::string screening_type;
-  std::string solver_type;
+  bool intercept = true;
+  bool modify_x = false;
+  bool update_clusters = false;
+  bool collect_diagnostics = false;
+  bool return_clusters = true;
+  double alpha_min_ratio = -1;
+  double dev_change_tol = 1e-5;
+  double dev_ratio_tol = 0.999;
+  double learning_rate_decr = 0.5;
+  double q = 0.1;
+  double theta1 = 1.0;
+  double theta2 = 0.5;
+  double tol = 1e-4;
+  double tol_relax = 1e-4;
+  int alpha_est_maxit = 1000;
+  int max_it = 1e4;
+  int max_it_inner_relax = 1e5;
+  int max_it_outer_relax = 50;
+  int path_length = 100;
+  int cd_iterations = 10;
+  std::optional<int> max_clusters = std::nullopt;
+  std::string alpha_type = "path";
+  std::string lambda_type = "bh";
+  std::string centering_type = "mean";
+  std::string scaling_type = "sd";
+  std::string loss_type = "quadratic";
+  std::string screening_type = "strong";
+  std::string solver_type = "auto";
 
   // Data
   Eigen::VectorXd x_centers;
