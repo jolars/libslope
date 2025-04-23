@@ -558,11 +558,11 @@ public:
 
 private:
   // Parameters
+  bool collect_diagnostics = false;
   bool intercept = true;
   bool modify_x = false;
-  bool update_clusters = false;
-  bool collect_diagnostics = false;
   bool return_clusters = true;
+  bool update_clusters = false;
   double alpha_min_ratio = -1;
   double dev_change_tol = 1e-5;
   double dev_ratio_tol = 0.999;
@@ -573,17 +573,17 @@ private:
   double tol = 1e-4;
   double tol_relax = 1e-4;
   int alpha_est_maxit = 1000;
+  int cd_iterations = 10;
   int max_it = 1e4;
   int max_it_inner_relax = 1e5;
   int max_it_outer_relax = 50;
   int path_length = 100;
-  int cd_iterations = 10;
   std::optional<int> max_clusters = std::nullopt;
   std::string alpha_type = "path";
-  std::string lambda_type = "bh";
   std::string centering_type = "mean";
-  std::string scaling_type = "sd";
+  std::string lambda_type = "bh";
   std::string loss_type = "quadratic";
+  std::string scaling_type = "sd";
   std::string screening_type = "strong";
   std::string solver_type = "auto";
 
