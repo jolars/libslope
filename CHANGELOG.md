@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.0](https://github.com/jolars/libslope/compare/v0.32.0...v1.0.0) (2025-04-23)
+
+### ⚠ BREAKING CHANGES
+
+* increase default maximum number of iterations to 1e5
+
+### Features
+
+* increase default maximum number of iterations to 1e5 ([3882c93](https://github.com/jolars/libslope/commit/3882c93c0aed4261b29ef7938174f57e86c5a2ae))
+
 ## [0.32.0](https://github.com/jolars/libslope/compare/v0.31.0...v0.32.0) (2025-04-23)
 
 ### Features
