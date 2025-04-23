@@ -19,7 +19,7 @@ TEST_CASE("Abalone dataset", "[realdata][poisson][quadratic]")
     {
       model.setLoss(loss);
 
-      auto solver = loss == "poisson" ? "fista" : "hybrid";
+      auto solver = loss == "poisson" ? "pgd" : "hybrid";
 
       model.setSolver(solver);
 
