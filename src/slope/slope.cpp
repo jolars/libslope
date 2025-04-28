@@ -502,7 +502,7 @@ void
 Slope::setMaxIterations(int max_it)
 {
   if (max_it < 1) {
-    throw std::invalid_argument("max_it_outer must be >= 1");
+    throw std::invalid_argument("max_it must be >= 1");
   }
   this->max_it = max_it;
 }
