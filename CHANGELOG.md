@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1](https://github.com/jolars/libslope/compare/v1.0.0...v1.0.1) (2025-04-29)
+
+### Bug Fixes
+
+* use correct argument name in error message ([fe77f45](https://github.com/jolars/libslope/commit/fe77f45bf62c130d994f8c7f63b193ce1bbb4eca))
+
 ## [1.0.0](https://github.com/jolars/libslope/compare/v0.32.0...v1.0.0) (2025-04-23)
 
 ### ⚠ BREAKING CHANGES
