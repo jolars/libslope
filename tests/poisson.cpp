@@ -206,7 +206,7 @@ TEST_CASE("Poisson abalone data", "[poisson][realdata]")
   slope::Slope model;
 
   model.setLoss("poisson");
-  model.setSolver("pgd");
+  model.setSolver("hybrid");
 
   auto path = model.path(x, y);
 
