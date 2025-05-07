@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0](https://github.com/jolars/libslope/compare/v1.0.1...v1.1.0) (2025-05-07)
+
+### Features
+
+* **solver:** fall back to pgd method if no progress ([252b1c0](https://github.com/jolars/libslope/commit/252b1c0a20d805c0ffcd51f79f2d3dc4ad1e613c)), closes [#83](https://github.com/jolars/libslope/issues/83)
+
 ## [1.0.1](https://github.com/jolars/libslope/compare/v1.0.0...v1.0.1) (2025-04-29)
 
 ### Bug Fixes
