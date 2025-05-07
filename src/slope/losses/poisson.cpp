@@ -6,7 +6,7 @@ namespace slope {
 double
 Poisson::loss(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
 {
-  return -(y.array() * eta.array() - eta.array().exp()).mean();
+  return (eta.array().exp() - y.array() * eta.array()).mean();
 }
 
 double
