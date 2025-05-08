@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0](https://github.com/jolars/libslope/compare/v1.1.1...v1.2.0) (2025-05-08)
+
+### Features
+
+* support multinomial logistic regression in hybrid solver ([#143](https://github.com/jolars/libslope/issues/143)) ([9f87daa](https://github.com/jolars/libslope/commit/9f87daa50fb876f7f7845e5d7f4c3ff471e3e1b0)), closes [#65](https://github.com/jolars/libslope/issues/65)
+
 ## [1.1.1](https://github.com/jolars/libslope/compare/v1.1.0...v1.1.1) (2025-05-08)
 
 ### Performance Improvements
