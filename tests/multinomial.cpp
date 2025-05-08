@@ -45,7 +45,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   slope::Slope model;
 
   model.setLoss("multinomial");
-  model.setSolver("pgd");
+  model.setSolver("hybrid");
   model.setMaxIterations(2000);
   model.setTol(1e-8);
 
@@ -108,6 +108,7 @@ TEST_CASE("Multinomial wine data", "[multinomial]")
   slope::Slope model;
 
   model.setLoss("multinomial");
+  model.setSolver("pgd");
 
   auto path = model.path(x, y);
 

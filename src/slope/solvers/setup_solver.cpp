@@ -22,11 +22,6 @@ setupSolver(const std::string& solver_type,
     solver_choice = loss == "multinomial" ? "fista" : "hybrid";
   }
 
-  if (loss == "multinomial" && solver_choice == "hybrid") {
-    throw std::invalid_argument("multinomial loss is currently not "
-                                "supported with the hybrid solver");
-  }
-
   if (solver_choice == "pgd") {
     return std::make_unique<PGD>(jit_normalization, intercept, "pgd");
   } else if (solver_choice == "fista") {
