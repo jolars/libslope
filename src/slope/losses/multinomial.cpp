@@ -82,7 +82,8 @@ Multinomial::preprocessResponse(const Eigen::MatrixXd& y)
 Eigen::MatrixXd
 Multinomial::hessianDiagonal(const Eigen::MatrixXd& eta)
 {
-  throw std::runtime_error("Multinomial loss does not currently support IRLS");
+  auto pr = inverseLink(eta);
+  return pr.array() * (1 - pr.array());
 }
 
 Eigen::MatrixXd

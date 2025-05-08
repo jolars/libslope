@@ -422,11 +422,11 @@ public:
                                           jit_normalization,
                                           intercept);
     VectorXd gradient = VectorXd::Zero(p * m);
-    VectorXd residual(n);
-    VectorXd working_residual(n);
+    MatrixXd residual(n, m);
+    MatrixXd working_residual(n, m);
 
     MatrixXd w = MatrixXd::Ones(n, m);
-    VectorXd w_ones = VectorXd::Ones(n);
+    MatrixXd w_ones = MatrixXd::Ones(n, m);
     MatrixXd z = y;
 
     Clusters clusters = fit.getClusters();

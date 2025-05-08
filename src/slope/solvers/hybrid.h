@@ -113,6 +113,7 @@ private:
     using Eigen::VectorXd;
 
     const int n = x.rows();
+    const int m = eta.cols();
 
     PGD pgd_solver(jit_normalization, intercept, "pgd");
 
@@ -132,15 +133,17 @@ private:
 
     Clusters clusters(beta);
 
-    MatrixXd w = VectorXd::Ones(n);
+    // TODO: Make these parameters and initialize once
+    MatrixXd w = MatrixXd::Ones(n, m);
     MatrixXd z = y;
+
     loss->updateWeightsAndWorkingResponse(w, z, eta, y);
 
-    VectorXd residual = eta - z;
+    MatrixXd residual = eta - z;
 
     for (int it = 0; it < this->cd_iterations; ++it) {
       Clusters old_clusters = clusters;
-      Eigen::VectorXd old_residual = residual;
+      Eigen::MatrixXd old_residual = residual;
       Eigen::VectorXd old_beta = beta;
       Eigen::VectorXd old_beta0 = beta0;
 
@@ -178,10 +181,13 @@ private:
     // TODO: register convergence status
   }
 
+  // TODO: These should be used in the PGD solver and taken as arguments to the
+  // Hybrid solver and not just set and ignored here.
   double pgd_learning_rate =
     1.0; ///< Learning rate for proximal gradient descent steps
   double pgd_learning_rate_decr =
     0.5; ///< Learning rate decrease factor on failed PGD steps
+
   bool update_clusters = false; ///< If true, updates clusters during CD steps
   int cd_iterations = 10;       ///< Number of CD iterations per hybrid step
 };

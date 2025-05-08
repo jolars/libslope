@@ -627,10 +627,10 @@ mins(const Eigen::MatrixXd& x);
 template<typename T>
 Eigen::VectorXd
 clusterGradient(Eigen::VectorXd& beta,
-                Eigen::VectorXd& residual,
+                Eigen::MatrixXd& residual,
                 Clusters& clusters,
                 const T& x,
-                const Eigen::VectorXd& w,
+                const Eigen::MatrixXd& w,
                 const Eigen::VectorXd& x_centers,
                 const Eigen::VectorXd& x_scales,
                 const JitNormalization jit_normalization)
@@ -638,6 +638,7 @@ clusterGradient(Eigen::VectorXd& beta,
   using namespace Eigen;
 
   const int n = x.rows();
+  const int p = x.cols();
   const int n_clusters = clusters.n_clusters();
 
   Eigen::VectorXd gradient = Eigen::VectorXd::Zero(n_clusters);
@@ -655,23 +656,24 @@ clusterGradient(Eigen::VectorXd& beta,
     s.reserve(cluster_size);
 
     for (auto c_it = clusters.cbegin(j); c_it != clusters.cend(j); ++c_it) {
-      double s_k = sign(beta(*c_it));
+      int ind = *c_it;
+      double s_k = sign(beta(ind));
       s.emplace_back(s_k);
     }
 
-    double hessian_j = 1;
-    double gradient_j = 0;
+    double hess = 1;
+    double grad = 0;
 
     if (cluster_size == 1) {
       int k = *clusters.cbegin(j);
-      std::tie(gradient_j, hessian_j) = computeGradientAndHessian(
+      std::tie(grad, hess) = computeGradientAndHessian(
         x, k, w, residual, x_centers, x_scales, s[0], jit_normalization, n);
     } else {
-      std::tie(hessian_j, gradient_j) = computeClusterGradientAndHessian(
+      std::tie(hess, grad) = computeClusterGradientAndHessian(
         x, j, s, clusters, w, residual, x_centers, x_scales, jit_normalization);
     }
 
-    gradient(j) = gradient_j;
+    gradient(j) = grad;
   }
 
   return gradient;
