@@ -36,8 +36,7 @@ Quadratic::updateWeightsAndWorkingResponse(Eigen::MatrixXd& w,
                                            const Eigen::MatrixXd&,
                                            const Eigen::MatrixXd& y)
 {
-  w.setOnes();
-  z = y;
+  // Do nothing since weights are already one and working response is y.
 }
 
 Eigen::MatrixXd
