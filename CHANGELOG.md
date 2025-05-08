@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.1](https://github.com/jolars/libslope/compare/v1.1.0...v1.1.1) (2025-05-08)
+
+### Performance Improvements
+
+* do not modify weights and response in quadratic loss ([9370122](https://github.com/jolars/libslope/commit/93701228ac5fbdb25dd9539cafb69bed8569cda3))
+
 ## [1.1.0](https://github.com/jolars/libslope/compare/v1.0.1...v1.1.0) (2025-05-07)
 
 ### Features
