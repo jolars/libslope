@@ -107,7 +107,7 @@ private:
                const MatrixType& x,
                const Eigen::VectorXd& x_centers,
                const Eigen::VectorXd& x_scales,
-               const Eigen::VectorXd& y)
+               const Eigen::MatrixXd& y)
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -132,8 +132,8 @@ private:
 
     Clusters clusters(beta);
 
-    VectorXd w = VectorXd::Ones(n);
-    VectorXd z = y;
+    MatrixXd w = VectorXd::Ones(n);
+    MatrixXd z = y;
     loss->updateWeightsAndWorkingResponse(w, z, eta, y);
 
     VectorXd residual = eta - z;

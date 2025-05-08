@@ -425,9 +425,9 @@ public:
     VectorXd residual(n);
     VectorXd working_residual(n);
 
-    VectorXd w = VectorXd::Ones(n);
+    MatrixXd w = MatrixXd::Ones(n, m);
     VectorXd w_ones = VectorXd::Ones(n);
-    VectorXd z = y;
+    MatrixXd z = y;
 
     Clusters clusters = fit.getClusters();
 

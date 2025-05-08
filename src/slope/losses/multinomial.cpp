@@ -31,12 +31,6 @@ Multinomial::dual(const Eigen::MatrixXd& theta,
 }
 
 Eigen::MatrixXd
-Multinomial::residual(const Eigen::MatrixXd& eta, const Eigen::MatrixXd& y)
-{
-  return softmax(eta) - y;
-}
-
-Eigen::MatrixXd
 Multinomial::preprocessResponse(const Eigen::MatrixXd& y)
 {
   const int n = y.rows();
@@ -85,11 +79,8 @@ Multinomial::preprocessResponse(const Eigen::MatrixXd& y)
   return result;
 }
 
-void
-Multinomial::updateWeightsAndWorkingResponse(Eigen::VectorXd&,
-                                             Eigen::VectorXd&,
-                                             const Eigen::VectorXd&,
-                                             const Eigen::VectorXd&)
+Eigen::MatrixXd
+Multinomial::hessianDiagonal(const Eigen::MatrixXd& eta)
 {
   throw std::runtime_error("Multinomial loss does not currently support IRLS");
 }

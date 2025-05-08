@@ -46,16 +46,6 @@ public:
               const Eigen::VectorXd& w);
 
   /**
-   * @brief Calculates the residual for the multinomial loss function.
-   * @param eta The predicted values (n x k matrix of linear predictors).
-   * @param y The true labels (n x k matrix of one-hot encoded class
-   * memberships).
-   * @return The residual matrix (n x k).
-   */
-  Eigen::MatrixXd residual(const Eigen::MatrixXd& eta,
-                           const Eigen::MatrixXd& y);
-
-  /**
    * @brief Preprocesses the response for the Multinomial model
    * @param y Predicted values vector (n x 1) of integer class labels
    * @return Matrix of response (n x 1)
@@ -63,20 +53,13 @@ public:
   Eigen::MatrixXd preprocessResponse(const Eigen::MatrixXd& y);
 
   /**
-   * @brief Updates the weights and working response for the multinomial
-   * loss function. Currently not implemented since there is
-   * no coordinate descent solver for the multinomial logistic regression
-   * loss.
-   * @param w The weights vector.
-   * @param z The working response vector.
-   * @param eta The predicted values (n x k matrix of linear predictors).
-   * @param y The true labels (n x k matrix of one-hot encoded class
-   * memberships).
+   * @brief Calculates hessian diagonal
+   *
+   * @param eta Linear predictor
+   * @param y Response
+   * @return A matrix of ones (n x m)
    */
-  void updateWeightsAndWorkingResponse(Eigen::VectorXd& w,
-                                       Eigen::VectorXd& z,
-                                       const Eigen::VectorXd& eta,
-                                       const Eigen::VectorXd& y);
+  Eigen::MatrixXd hessianDiagonal(const Eigen::MatrixXd& eta);
 
   /**
    * @brief The link function
