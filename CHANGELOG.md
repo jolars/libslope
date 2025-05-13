@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0](https://github.com/jolars/libslope/compare/v1.2.0...v2.0.0) (2025-05-13)
+
+### ⚠ BREAKING CHANGES
+
+* use non-redundant multinomial logistic formulation (#145)
+
+### Features
+
+* use non-redundant multinomial logistic formulation ([#145](https://github.com/jolars/libslope/issues/145)) ([b2dcdbb](https://github.com/jolars/libslope/commit/b2dcdbbd27b101d1abbc1cae6073eb7889a6a669))
+
 ## [1.2.0](https://github.com/jolars/libslope/compare/v1.1.1...v1.2.0) (2025-05-08)
 
 ### Features
