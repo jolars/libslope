@@ -2,11 +2,11 @@
 #include "generate_data.hpp"
 #include "slope/normalize.h"
 #include "test_helpers.hpp"
-#include <slope/threads.h>
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/threads.h>
 
 TEST_CASE("Linear predictor computations", "[math][linearPredictor]")
 {
@@ -618,4 +618,28 @@ TEST_CASE("Gradient offset calculations", "[math][offsetGradient]")
     REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
                  WithinAbs(expected_offset_0_0, 1e-10));
   }
+}
+
+TEST_CASE("logSumExp", "[math]")
+{
+  Eigen::ArrayXXd x(2, 3);
+
+  x << -0.5, 2, 0.1, 5, 3, 0.01;
+
+  auto out = slope::logSumExp(x);
+  Eigen::VectorXd ref = (1.0 + x.exp().rowwise().sum()).log();
+
+  REQUIRE_THAT(out, VectorApproxEqual(ref));
+}
+
+TEST_CASE("softmax", "[math]")
+{
+  Eigen::ArrayXXd x(2, 3);
+
+  x << -0.1, 0.05, 0.1, -0.9, 2.5, 0.01;
+
+  auto out = slope::softmax(x);
+  Eigen::MatrixXd ref = x.exp().colwise() / (1.0 + x.exp().rowwise().sum());
+
+  REQUIRE_THAT(out.reshaped(), VectorApproxEqual(ref.reshaped()));
 }

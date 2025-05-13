@@ -16,6 +16,7 @@
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <iostream>
 #include <memory>
 #include <numeric>
 #include <set>
@@ -235,6 +236,8 @@ Slope::path(T& x,
       }
 
       double dual_gap = primal - dual;
+
+      // std::cout << "gap: " << dual_gap << std::endl;
 
       assert(dual_gap > -1e-6 && "Dual gap should be positive");
 

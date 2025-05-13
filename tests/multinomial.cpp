@@ -38,9 +38,9 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   Eigen::VectorXd y(20);
   y << 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1;
 
-  Eigen::MatrixXd expected_coef(2, 3);
+  Eigen::MatrixXd expected_coef(2, 2);
   Eigen::VectorXd expected_intercept(2);
-  Eigen::VectorXd lambda(6);
+  Eigen::VectorXd lambda(4);
 
   slope::Slope model;
 
@@ -51,19 +51,16 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
   SECTION("No intercept")
   {
-    // clang-format off
-    expected_coef << 0.1094486, 0.0000000, -0.2235200,
-                     0.0000000, 0.3097892, -0.4369607;
-    // clang-format on
+    expected_coef << 0.3329687, 0.2235199, 0.4369607, 0.7467499;
 
     // Fit the model
     model.setIntercept(false);
     model.setNormalization("none");
-    // model.setScreening("none");
+    model.setScreening("none");
     model.setDiagnostics(true);
 
     double alpha = 0;
-    lambda << 6.0, 5.0, 4.0, 3.0, 2.0, 1.0;
+    lambda << 6.0, 5.0, 4.0, 3.0;
 
     auto fit = model.fit(x, y, alpha, lambda);
 
@@ -71,11 +68,13 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     Eigen::MatrixXd coef = fit.getCoefs();
 
     REQUIRE(coef.rows() == 2);
-    REQUIRE(coef.cols() == 3);
+    REQUIRE(coef.cols() == 2);
 
     // Normalize hack to make comparison with glmnet output correct
-    coef.row(0).array() -= coef(0, 1);
-    coef.row(1).array() -= coef(1, 0);
+    // coef.row(0).array() -= coef(0, 1);
+    // coef.row(1).array() -= coef(1, 0);
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
 
     // Compare coefficients with expected values
     REQUIRE_THAT(coef.reshaped(),
@@ -98,6 +97,8 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     REQUIRE(deviances.size() > 0);
     REQUIRE(deviances.size() < 100);
     REQUIRE_THAT(deviances, VectorMonotonic(false, true));
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
   }
 }
 
@@ -125,8 +126,8 @@ TEST_CASE("Multinomial predictions", "[multinomial][predict]")
   int m = 3;
 
   Eigen::MatrixXd x(n, p);
-  Eigen::MatrixXd beta(p, m);
-  Eigen::MatrixXd eta(n, m);
+  Eigen::MatrixXd beta(p, m - 1);
+  Eigen::MatrixXd eta(n, m - 1);
 
   // clang-format off
   x <<  0.288,  -0.0452,  0.880,
@@ -140,9 +141,9 @@ TEST_CASE("Multinomial predictions", "[multinomial][predict]")
        -0.478,   0.418,   1.360,
        -0.103,   0.388,  -0.0538;
 
-  beta <<  1,   2, -3,
-          -1,   2, -0.5,
-          -0.1, 0,  1.5;
+  beta <<  1,   2,
+          -1,   2,
+          -0.1, 0;
   // clang-format on
 
   eta = x * beta;
@@ -154,6 +155,7 @@ TEST_CASE("Multinomial predictions", "[multinomial][predict]")
   std::array<double, n> expected = { 1, 1, 1, 2, 1, 1, 0, 0, 2, 1 };
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
+  REQUIRE(!slope::WarningLogger::hasWarnings());
 }
 
 TEST_CASE("Multinomial alternative response types", "[multinomial][predict]")
@@ -190,4 +192,5 @@ TEST_CASE("Multinomial alternative response types", "[multinomial][predict]")
   Eigen::MatrixXd coef2 = fit2.getCoefs();
 
   REQUIRE_THAT(coef1.reshaped(), VectorApproxEqual(coef2.reshaped()));
+  REQUIRE(!slope::WarningLogger::hasWarnings());
 }
