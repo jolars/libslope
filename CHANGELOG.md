@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.1](https://github.com/jolars/libslope/compare/v2.0.0...v2.0.1) (2025-05-14)
+
+### Bug Fixes
+
+* include penalty in descent check in hybrid method ([09d982d](https://github.com/jolars/libslope/commit/09d982de05ce5f8489f00df69a7b8043f2d9f107))
+
 ## [2.0.0](https://github.com/jolars/libslope/compare/v1.2.0...v2.0.0) (2025-05-13)
 
 ### ⚠ BREAKING CHANGES
