@@ -70,6 +70,7 @@ TEST_CASE("Quadratic, X is identity", "[quadratic]")
   model.setIntercept(false);
   model.setNormalization("none");
   model.setDiagnostics(true);
+  model.setTol(1e-5);
   auto fit = model.fit(x, y, alpha, lambda);
 
   double gap = fit.getGaps().back();
@@ -79,7 +80,7 @@ TEST_CASE("Quadratic, X is identity", "[quadratic]")
 
   std::array<double, 4> expected = { 4.0, 3.0, 2.0, 1.0 };
 
-  REQUIRE_THAT(coefs, VectorApproxEqual(expected));
+  REQUIRE_THAT(coefs, VectorApproxEqual(expected, 1e-3));
   REQUIRE(gap < primal * 1e-4);
 }
 

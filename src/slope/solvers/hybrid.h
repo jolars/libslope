@@ -147,7 +147,9 @@ private:
       Eigen::VectorXd old_beta = beta;
       Eigen::VectorXd old_beta0 = beta0;
 
-      double old_loss = residual.cwiseProduct(w).norm();
+      double old_loss =
+        residual.cwiseProduct(w).norm() +
+        penalty.eval(beta(working_set), lambda.head(working_set.size()));
 
       coordinateDescent(beta0,
                         beta,
@@ -162,7 +164,9 @@ private:
                         this->jit_normalization,
                         this->update_clusters);
 
-      double loss = residual.cwiseProduct(w).norm();
+      double loss =
+        residual.cwiseProduct(w).norm() +
+        penalty.eval(beta(working_set), lambda.head(working_set.size()));
 
       if (loss >= old_loss) {
         // No progress, revert to previous state
