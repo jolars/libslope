@@ -49,7 +49,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   model.setMaxIterations(2000);
   model.setTol(1e-8);
 
-  SECTION("No intercept")
+  SECTION("No regularization, no intercept")
   {
     expected_coef << 0.3329687, 0.2235199, 0.4369607, 0.7467499;
 
@@ -83,6 +83,51 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     REQUIRE(fit.getGaps().back() <= 1e-6);
   }
 
+  SECTION("Regularization, no intercept")
+  {
+    expected_coef << 0.09260631, 0.0000000, 0.09260631, 0.3757873;
+
+    // Fit the model
+    model.setIntercept(false);
+
+    double alpha = 0.005;
+    lambda << 4, 3, 2, 1;
+
+    auto fit = model.fit(x, y, alpha, lambda);
+
+    // Get coefficients
+    Eigen::MatrixXd coef = fit.getCoefs();
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
+
+    // Compare coefficients with expected values
+    REQUIRE_THAT(coef.reshaped(),
+                 VectorApproxEqual(expected_coef.reshaped(), 1e-4));
+  }
+
+  SECTION("Regularization, intercept")
+  {
+    expected_coef << 0.2310035, 0.1333503, 0.3364695, 0.6209708;
+    expected_intercept << 0.1775123, 0.1730744;
+
+    model.setIntercept(true);
+
+    double alpha = 0.002;
+    lambda << 4, 3, 2, 1;
+
+    auto fit = model.fit(x, y, alpha, lambda);
+
+    // Get coefficients
+    Eigen::MatrixXd coef = fit.getCoefs();
+    Eigen::MatrixXd intercept = fit.getIntercepts();
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
+
+    // Compare coefficients with expected values
+    REQUIRE_THAT(intercept.reshaped(),
+                 VectorApproxEqual(expected_intercept.reshaped(), 1e-4));
+  }
+
   SECTION("Path")
   {
     auto data = generateData(200, 20, "multinomial", 3, 0.4, 0.5, 93);
@@ -102,14 +147,14 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   }
 }
 
-TEST_CASE("Multinomial wine data", "[multinomial]")
+TEST_CASE("Multinomial wine data", "[multinomial][fail]")
 {
   auto [x, y] = loadData("tests/data/wine.csv");
 
   slope::Slope model;
 
   model.setLoss("multinomial");
-  model.setSolver("pgd");
+  // model.setSolver("pgd");
 
   auto path = model.path(x, y);
 

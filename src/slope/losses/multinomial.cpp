@@ -31,8 +31,8 @@ Multinomial::dual(const Eigen::MatrixXd& theta,
   Eigen::ArrayXXd eta = link(theta + y);
 
   // TODO: Find out if this formulation can be improved numerically
-  double out = logSumExp(eta).mean() - (y.array() * eta).sum() / n -
-               (theta.array() * eta).sum() / n;
+  double out =
+    logSumExp(eta).mean() - (eta * (y.array() + theta.array())).sum() / n;
 
   return out;
 }

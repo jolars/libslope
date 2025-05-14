@@ -7,21 +7,26 @@ Eigen::VectorXd
 logSumExp(const Eigen::MatrixXd& a)
 {
   Eigen::ArrayXd max_vals = a.rowwise().maxCoeff();
-  Eigen::ArrayXd sum_exp =
-    (-max_vals).exp() +
-    (a.colwise() - max_vals.matrix()).array().exp().rowwise().sum();
+  Eigen::ArrayXd sum_exp = (-max_vals).min(constants::MAX_EXP).exp() +
+                           (a.colwise() - max_vals.matrix())
+                             .array()
+                             .min(constants::MAX_EXP)
+                             .exp()
+                             .rowwise()
+                             .sum();
 
   return max_vals + sum_exp.max(constants::P_MIN).log();
 }
 
 Eigen::MatrixXd
-softmax(const Eigen::MatrixXd& a)
+softmax(const Eigen::MatrixXd& eta)
 {
-  Eigen::VectorXd shift = a.rowwise().maxCoeff();
-  Eigen::MatrixXd exp_a = (a.colwise() - shift).array().exp();
-  Eigen::ArrayXd row_sums = exp_a.rowwise().sum();
-
-  return exp_a.array().colwise() / ((-shift).array().exp() + row_sums);
+  return (eta.colwise() - logSumExp(eta))
+    .array()
+    .min(constants::MAX_EXP)
+    .exp()
+    .max(constants::P_MIN)
+    .min(constants::P_MAX);
 }
 
 std::vector<int>
