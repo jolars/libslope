@@ -154,9 +154,9 @@ TEST_CASE("Multinomial wine data", "[multinomial][fail]")
   slope::Slope model;
 
   model.setLoss("multinomial");
-  // model.setSolver("pgd");
 
   // TODO: Hybrid solver has convergence issues with this data
+  model.setSolver("pgd");
 
   auto path = model.path(x, y);
 
