@@ -10,7 +10,12 @@
 
 TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 {
-  Eigen::MatrixXd x(20, 2);
+
+  int n = 20;
+  int p = 2;
+  int m = 2;
+
+  Eigen::MatrixXd x(n, p);
 
   // clang-format off
   x <<  1.2, -0.3,
@@ -35,17 +40,18 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
        -0.8,  0.9;
   // clang-format on
 
-  Eigen::VectorXd y(20);
+  Eigen::VectorXd y(n);
   y << 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1;
 
-  Eigen::MatrixXd expected_coef(2, 2);
-  Eigen::VectorXd expected_intercept(2);
-  Eigen::VectorXd lambda(4);
+  Eigen::MatrixXd expected_coef(p, m);
+  Eigen::VectorXd expected_intercept(m);
+  Eigen::VectorXd lambda(p * m);
 
   slope::Slope model;
 
   model.setLoss("multinomial");
   model.setSolver("hybrid");
+  model.setNormalization("none");
   model.setMaxIterations(2000);
   model.setTol(1e-8);
 
@@ -55,8 +61,6 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 
     // Fit the model
     model.setIntercept(false);
-    model.setNormalization("none");
-    model.setScreening("none");
     model.setDiagnostics(true);
 
     double alpha = 0;
@@ -67,12 +71,8 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     // Get coefficients
     Eigen::MatrixXd coef = fit.getCoefs();
 
-    REQUIRE(coef.rows() == 2);
-    REQUIRE(coef.cols() == 2);
-
-    // Normalize hack to make comparison with glmnet output correct
-    // coef.row(0).array() -= coef(0, 1);
-    // coef.row(1).array() -= coef(1, 0);
+    REQUIRE(coef.rows() == p);
+    REQUIRE(coef.cols() == m);
 
     REQUIRE(!slope::WarningLogger::hasWarnings());
 
