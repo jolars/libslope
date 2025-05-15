@@ -156,6 +156,8 @@ TEST_CASE("Multinomial wine data", "[multinomial][fail]")
   model.setLoss("multinomial");
   // model.setSolver("pgd");
 
+  // TODO: Hybrid solver has convergence issues with this data
+
   auto path = model.path(x, y);
 
   REQUIRE(path.getDeviance().back() > 0);
