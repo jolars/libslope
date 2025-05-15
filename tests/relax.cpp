@@ -192,7 +192,7 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
   }
 }
 
-TEST_CASE("Relaxed path", "[fail]")
+TEST_CASE("Relaxed path", "[relax]")
 {
 
   using Catch::Matchers::WithinRel;

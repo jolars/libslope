@@ -167,7 +167,7 @@ private:
       double new_obj =
         computeObjective(penalty, beta, residual, w, lambda, working_set);
 
-      if (new_obj > old_obj) {
+      if (!std::isfinite(new_obj) || new_obj > old_obj) {
         // No progress, revert to previous state
         clusters = old_clusters;
         residual = old_residual;

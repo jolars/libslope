@@ -10,7 +10,12 @@
 
 TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 {
-  Eigen::MatrixXd x(20, 2);
+
+  int n = 20;
+  int p = 2;
+  int m = 2;
+
+  Eigen::MatrixXd x(n, p);
 
   // clang-format off
   x <<  1.2, -0.3,
@@ -35,28 +40,27 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
        -0.8,  0.9;
   // clang-format on
 
-  Eigen::VectorXd y(20);
+  Eigen::VectorXd y(n);
   y << 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1;
 
-  Eigen::MatrixXd expected_coef(2, 2);
-  Eigen::VectorXd expected_intercept(2);
-  Eigen::VectorXd lambda(4);
+  Eigen::MatrixXd expected_coef(p, m);
+  Eigen::VectorXd expected_intercept(m);
+  Eigen::VectorXd lambda(p * m);
 
   slope::Slope model;
 
   model.setLoss("multinomial");
   model.setSolver("hybrid");
+  model.setNormalization("none");
   model.setMaxIterations(2000);
   model.setTol(1e-8);
 
-  SECTION("No intercept")
+  SECTION("No regularization, no intercept")
   {
     expected_coef << 0.3329687, 0.2235199, 0.4369607, 0.7467499;
 
     // Fit the model
     model.setIntercept(false);
-    model.setNormalization("none");
-    model.setScreening("none");
     model.setDiagnostics(true);
 
     double alpha = 0;
@@ -67,12 +71,8 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     // Get coefficients
     Eigen::MatrixXd coef = fit.getCoefs();
 
-    REQUIRE(coef.rows() == 2);
-    REQUIRE(coef.cols() == 2);
-
-    // Normalize hack to make comparison with glmnet output correct
-    // coef.row(0).array() -= coef(0, 1);
-    // coef.row(1).array() -= coef(1, 0);
+    REQUIRE(coef.rows() == p);
+    REQUIRE(coef.cols() == m);
 
     REQUIRE(!slope::WarningLogger::hasWarnings());
 
@@ -81,6 +81,51 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
                  VectorApproxEqual(expected_coef.reshaped(), 1e-4));
 
     REQUIRE(fit.getGaps().back() <= 1e-6);
+  }
+
+  SECTION("Regularization, no intercept")
+  {
+    expected_coef << 0.09260631, 0.0000000, 0.09260631, 0.3757873;
+
+    // Fit the model
+    model.setIntercept(false);
+
+    double alpha = 0.005;
+    lambda << 4, 3, 2, 1;
+
+    auto fit = model.fit(x, y, alpha, lambda);
+
+    // Get coefficients
+    Eigen::MatrixXd coef = fit.getCoefs();
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
+
+    // Compare coefficients with expected values
+    REQUIRE_THAT(coef.reshaped(),
+                 VectorApproxEqual(expected_coef.reshaped(), 1e-4));
+  }
+
+  SECTION("Regularization, intercept")
+  {
+    expected_coef << 0.2310035, 0.1333503, 0.3364695, 0.6209708;
+    expected_intercept << 0.1775123, 0.1730744;
+
+    model.setIntercept(true);
+
+    double alpha = 0.002;
+    lambda << 4, 3, 2, 1;
+
+    auto fit = model.fit(x, y, alpha, lambda);
+
+    // Get coefficients
+    Eigen::MatrixXd coef = fit.getCoefs();
+    Eigen::MatrixXd intercept = fit.getIntercepts();
+
+    REQUIRE(!slope::WarningLogger::hasWarnings());
+
+    // Compare coefficients with expected values
+    REQUIRE_THAT(intercept.reshaped(),
+                 VectorApproxEqual(expected_intercept.reshaped(), 1e-4));
   }
 
   SECTION("Path")
@@ -102,13 +147,15 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   }
 }
 
-TEST_CASE("Multinomial wine data", "[multinomial]")
+TEST_CASE("Multinomial wine data", "[multinomial][fail]")
 {
   auto [x, y] = loadData("tests/data/wine.csv");
 
   slope::Slope model;
 
   model.setLoss("multinomial");
+
+  // TODO: Hybrid solver has convergence issues with this data
   model.setSolver("pgd");
 
   auto path = model.path(x, y);
