@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.2](https://github.com/jolars/libslope/compare/v2.0.1...v2.0.2) (2025-05-15)
+
+### Bug Fixes
+
+* use correct objective in hybrid failsafe step ([fae62d5](https://github.com/jolars/libslope/commit/fae62d500533f50d3dde11bfd39981f03ecf2fd0))
+
 ## [2.0.1](https://github.com/jolars/libslope/compare/v2.0.0...v2.0.1) (2025-05-14)
 
 ### Bug Fixes
