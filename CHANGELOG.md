@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.0](https://github.com/jolars/libslope/compare/v2.0.2...v2.1.0) (2025-05-15)
+
+### Features
+
+* fix multinomial convergence issue ([#148](https://github.com/jolars/libslope/issues/148)) ([f963255](https://github.com/jolars/libslope/commit/f96325501bcc4187e05927612efb16a7ca3852d5)), closes [#147](https://github.com/jolars/libslope/issues/147)
+
 ## [2.0.2](https://github.com/jolars/libslope/compare/v2.0.1...v2.0.2) (2025-05-15)
 
 ### Bug Fixes
