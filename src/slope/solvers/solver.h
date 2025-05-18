@@ -42,7 +42,7 @@ public:
   {
   }
 
-  /// Default desstructor
+  /// Default destructor
   virtual ~SolverBase() = default;
 
   /**
