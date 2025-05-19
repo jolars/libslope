@@ -7,6 +7,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <random>
 #include <slope/ols.h>
+#include <slope/slope.h>
 
 TEST_CASE("OLS on small dense matrix without intercept", "[ols]")
 {
@@ -165,8 +166,8 @@ TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
   model.setIntercept(true);
 
   // Run alpha estimation on both dense and sparse matrices
-  auto dense_path = slope::estimateAlpha(x_dense, y, model);
-  auto sparse_path = slope::estimateAlpha(x_sparse, y, model);
+  auto dense_path = model.estimateAlpha(x_dense, y);
+  auto sparse_path = model.estimateAlpha(x_sparse, y);
 
   // Check that results are valid
   REQUIRE(dense_path.getAlpha().size() == sparse_path.getAlpha().size());
@@ -224,8 +225,8 @@ TEST_CASE("Alpha estimation for n < p + 30", "[estimate_alpha]")
   model.setAlphaEstimationMaxIterations(20);
 
   // Run alpha estimation on both
-  auto dense_path = slope::estimateAlpha(x_dense, y, model);
-  auto sparse_path = slope::estimateAlpha(x_sparse, y, model);
+  auto dense_path = model.estimateAlpha(x_dense, y);
+  auto sparse_path = model.estimateAlpha(x_sparse, y);
 
   // Check that results are valid and identical
   REQUIRE(dense_path.getAlpha().size() == sparse_path.getAlpha().size());
@@ -268,7 +269,7 @@ TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")
     model.setAlphaEstimationMaxIterations(1);
 
     // This should add a warning
-    slope::estimateAlpha(x, y, model);
+    model.estimateAlpha(x, y);
     auto warnings = slope::WarningLogger::getWarnings();
 
     REQUIRE(slope::WarningLogger::hasWarnings());
