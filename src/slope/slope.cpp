@@ -628,10 +628,23 @@ Slope::path<Eigen::MatrixXd>(Eigen::MatrixXd&,
                              Eigen::ArrayXd);
 
 template SlopePath
+Slope::path<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
+                                         const Eigen::MatrixXd&,
+                                         Eigen::ArrayXd,
+                                         Eigen::ArrayXd);
+
+template SlopePath
 Slope::path<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
                                          const Eigen::MatrixXd&,
                                          Eigen::ArrayXd,
                                          Eigen::ArrayXd);
+
+template SlopePath
+Slope::path<Eigen::Map<Eigen::SparseMatrix<double>>>(
+  Eigen::Map<Eigen::SparseMatrix<double>>&,
+  const Eigen::MatrixXd&,
+  Eigen::ArrayXd,
+  Eigen::ArrayXd);
 
 template SlopeFit
 Slope::fit<Eigen::MatrixXd>(Eigen::MatrixXd&,
@@ -640,22 +653,23 @@ Slope::fit<Eigen::MatrixXd>(Eigen::MatrixXd&,
                             Eigen::ArrayXd);
 
 template SlopeFit
+Slope::fit<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
+                                        const Eigen::MatrixXd&,
+                                        const double,
+                                        Eigen::ArrayXd);
+
+template SlopeFit
 Slope::fit<Eigen::SparseMatrix<double>>(Eigen::SparseMatrix<double>&,
                                         const Eigen::MatrixXd&,
                                         const double,
                                         Eigen::ArrayXd);
 
-template SlopePath
-Slope::path<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
-                                         const Eigen::MatrixXd&,
-                                         Eigen::ArrayXd,
-                                         Eigen::ArrayXd);
-
 template SlopeFit
-Slope::fit<Eigen::Map<Eigen::MatrixXd>>(Eigen::Map<Eigen::MatrixXd>&,
-                                        const Eigen::MatrixXd&,
-                                        const double,
-                                        Eigen::ArrayXd);
+Slope::fit<Eigen::Map<Eigen::SparseMatrix<double>>>(
+  Eigen::Map<Eigen::SparseMatrix<double>>&,
+  const Eigen::MatrixXd&,
+  const double,
+  Eigen::ArrayXd);
 
 /// @endcond
 
