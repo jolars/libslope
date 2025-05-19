@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.3.0](https://github.com/jolars/libslope/compare/v2.2.0...v2.3.0) (2025-05-19)
+
+### Features
+
+* allow passing a matrix view as x ([d5a1b6d](https://github.com/jolars/libslope/commit/d5a1b6d06ff7c4a0cbfd2ae0ab2680fed2f07e6c))
+
 ## [2.2.0](https://github.com/jolars/libslope/compare/v2.1.0...v2.2.0) (2025-05-19)
 
 ### Features
