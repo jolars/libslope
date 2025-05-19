@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0](https://github.com/jolars/libslope/compare/v2.1.0...v2.2.0) (2025-05-19)
+
+### Features
+
+* add template instantiation for sparse matrix map ([5c8c364](https://github.com/jolars/libslope/commit/5c8c36447523e799fac3ab0dc8445aae89a299de))
+
 ## [2.1.0](https://github.com/jolars/libslope/compare/v2.0.2...v2.1.0) (2025-05-15)
 
 ### Features
