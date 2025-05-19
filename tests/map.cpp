@@ -50,6 +50,41 @@ TEST_CASE("Quadratic with Eigen::Map", "[quadratic][map]")
     REQUIRE_THAT(coefs_direct, VectorApproxEqual(coefs_map, 1e-8));
   }
 
+  SECTION("Sparse map vs direct matrix")
+  {
+    slope::Slope model;
+
+    model.setNormalization("standardization");
+    model.setIntercept(false);
+    model.setTol(1e-8);
+    model.setLambdaType("bh");
+
+    double alpha = 0.01;
+
+    // Create a sparse matrix from the dense matrix
+    Eigen::SparseMatrix<double> x_sparse = x_data.sparseView();
+
+    Eigen::Map<Eigen::SparseMatrix<double>> x_sparse_map(
+      x_sparse.rows(),
+      x_sparse.cols(),
+      x_sparse.nonZeros(),
+      x_sparse.outerIndexPtr(),
+      x_sparse.innerIndexPtr(),
+      x_sparse.valuePtr());
+
+    // Fit with direct matrix
+    auto fit_direct = model.fit(x_sparse, y_data, alpha);
+
+    // Fit with mapped matrix
+    auto fit_map = model.fit(x_sparse_map, y_data, alpha);
+
+    Eigen::VectorXd coefs_direct = fit_direct.getCoefs();
+    Eigen::VectorXd coefs_map = fit_direct.getCoefs();
+
+    // Check that coefficients are the same
+    REQUIRE_THAT(coefs_direct, VectorApproxEqual(coefs_map, 1e-8));
+  }
+
   SECTION("Path with mapped matrix")
   {
     slope::Slope model;
