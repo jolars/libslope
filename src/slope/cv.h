@@ -161,10 +161,10 @@ findBestParameters(CvResult& cv_result, const std::unique_ptr<Score>& scorer);
  *
  * The function supports parallel processing with OpenMP when available.
  */
-template<typename MatrixType>
+template<typename T>
 CvResult
 crossValidate(Slope model,
-              MatrixType& x,
+              Eigen::EigenBase<T>& x,
               const Eigen::MatrixXd& y_in,
               const CvConfig& config = CvConfig())
 {
@@ -240,7 +240,7 @@ crossValidate(Slope model,
         }
 
         for (int j = 0; j < n_alpha; ++j) {
-          auto eta = path(j).predict(x_test, "linear");
+          auto eta = path(j).predict(x_test.derived(), "linear");
           scores(i, j) = scorer->eval(eta, y_test, loss);
         }
       } catch (const std::exception& e) {

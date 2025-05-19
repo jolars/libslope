@@ -342,7 +342,7 @@ public:
    * all solutions and optimization metrics in a SlopePath object.
    */
   template<typename T>
-  SlopePath path(T& x,
+  SlopePath path(Eigen::EigenBase<T>& x,
                  const Eigen::MatrixXd& y_in,
                  Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
                  Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0))
@@ -358,7 +358,7 @@ public:
         "x and y_in must have the same number of rows");
     }
 
-    auto jit_normalization = normalize(x,
+    auto jit_normalization = normalize(x.derived(),
                                        this->x_centers,
                                        this->x_scales,
                                        this->centering_type,
@@ -419,7 +419,7 @@ public:
                               this->cd_iterations);
 
     updateGradient(gradient,
-                   x,
+                   x.derived(),
                    residual,
                    full_set,
                    this->x_centers,
@@ -444,7 +444,7 @@ public:
         throw std::invalid_argument("Automatic alpha estimation is only "
                                     "available for the quadratic loss");
       }
-      return this->estimateAlpha(x, y);
+      // return this->estimateAlpha(x, y);
     }
 
     // Screening setup
@@ -479,7 +479,7 @@ public:
       // TODO: Only update for non-working set since gradient is updated before
       // the convergence check in the inner loop for the working set
       updateGradient(gradient,
-                     x,
+                     x.derived(),
                      residual,
                      full_set,
                      x_centers,
@@ -495,7 +495,7 @@ public:
         // Compute primal, dual, and gap
         residual = loss->residual(eta, y);
         updateGradient(gradient,
-                       x,
+                       x.derived(),
                        residual,
                        working_set,
                        this->x_centers,
@@ -520,7 +520,7 @@ public:
           theta.rowwise() -= theta_mean.transpose();
 
           offsetGradient(dual_gradient,
-                         x,
+                         x.derived(),
                          theta_mean,
                          working_set,
                          this->x_centers,
@@ -542,7 +542,7 @@ public:
                                          loss,
                                          sl1_norm,
                                          lambda_curr,
-                                         x,
+                                         x.derived(),
                                          y,
                                          this->x_centers,
                                          this->x_scales,
@@ -569,7 +569,7 @@ public:
                                                beta,
                                                lambda_curr,
                                                working_set,
-                                               x,
+                                               x.derived(),
                                                residual,
                                                this->x_centers,
                                                this->x_scales,
@@ -588,7 +588,7 @@ public:
                     sl1_norm,
                     gradient,
                     working_set,
-                    x,
+                    x.derived(),
                     this->x_centers,
                     this->x_scales,
                     y);
@@ -662,7 +662,7 @@ public:
    * returning coefficients and optimization details in a SlopeFit object.
    */
   template<typename T>
-  SlopeFit fit(T& x,
+  SlopeFit fit(Eigen::EigenBase<T>& x,
                const Eigen::MatrixXd& y_in,
                const double alpha = 1.0,
                Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0))
@@ -697,8 +697,8 @@ public:
    * @throws std::runtime_error If maximum iterations reached or if too many
    * variables selected
    */
-  template<typename MatrixType>
-  SlopePath estimateAlpha(MatrixType& x, Eigen::MatrixXd& y)
+  template<typename T>
+  SlopePath estimateAlpha(Eigen::EigenBase<T>& x, Eigen::MatrixXd& y)
   {
     int n = x.rows();
     int p = x.cols();
@@ -718,7 +718,7 @@ public:
       result = model_copy.path(x, y, alpha);
     } else {
       for (int it = 0; it < this->alpha_est_maxit; ++it) {
-        auto x_selected = subsetCols(x, selected);
+        T x_selected = subsetCols(x.derived(), selected);
 
         std::vector<int> selected_prev = selected;
         selected.clear();

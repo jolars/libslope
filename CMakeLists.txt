@@ -66,6 +66,7 @@ if(BUILD_TESTING)
     tests/sparse.cpp
     tests/thresholding.cpp
     tests/utils.cpp
+    tests/views.cpp
   )
   target_link_libraries(
     tests

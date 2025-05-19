@@ -24,9 +24,11 @@ namespace slope {
  * @param fit_intercept Whether to include an intercept term in the model
  * @return The estimated noise level (standard error of residuals)
  */
-template<typename MatrixType>
+template<typename T>
 double
-estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
+estimateNoise(Eigen::EigenBase<T>& x,
+              Eigen::MatrixXd& y,
+              const bool fit_intercept)
 {
   int n = x.rows();
   int p = x.cols();
@@ -45,8 +47,8 @@ estimateNoise(MatrixType& x, Eigen::MatrixXd& y, const bool fit_intercept)
     }
   } else {
     // Normal case with predictors
-    auto [ols_intercept, ols_coefs] = fitOls(x, y, fit_intercept);
-    residuals = y - x * ols_coefs;
+    auto [ols_intercept, ols_coefs] = fitOls(x.derived(), y, fit_intercept);
+    residuals = y - x.derived() * ols_coefs;
 
     if (fit_intercept) {
       residuals.array() -= ols_intercept;
