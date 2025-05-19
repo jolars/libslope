@@ -158,3 +158,31 @@ TEST_CASE("Cross-validation: user folds", "[cv][user_folds]")
   REQUIRE_THROWS_AS(crossValidate(model, data.x, data.y, cv_config),
                     std::runtime_error);
 }
+
+TEST_CASE("Cross-validation: do not copy x", "[cv][user_folds]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  slope::Slope model;
+  int n = 9;
+
+  auto cv_config = slope::CvConfig();
+  auto data = generateData(n, 2, "quadratic", 1, 1);
+
+  std::vector<std::vector<std::vector<int>>> user_folds = {
+    { { 0, 2, 4 }, { 1, 5, 8 }, { 7, 6, 3 } },
+    { { 2, 0, 3 }, { 6, 5, 1 }, { 7, 1, 8 } }
+  };
+
+  cv_config.hyperparams["q"] = { 0.1, 0.2 };
+  cv_config.predefined_folds = user_folds;
+
+  auto res_copy = crossValidate(model, data.x, data.y, cv_config);
+
+  cv_config.copy_x = true;
+
+  auto res_view = crossValidate(model, data.x, data.y, cv_config);
+
+  REQUIRE(res_copy.results.front().score(0, 0) ==
+          res_view.results.front().score(0, 0));
+}

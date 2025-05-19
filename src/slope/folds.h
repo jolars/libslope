@@ -111,13 +111,17 @@ public:
    * @brief Split data into training and test sets for a specific fold and
    * repetition
    *
-   * @tparam MatrixType Type of design matrix (supports both dense and sparse
-   * matrices)
+   * @tparam T Type of design matrix (supports both dense and sparse matrices)
    * @param x Input feature matrix
    * @param y Response matrix
    * @param fold_idx Index of the fold to use as test set
    * @param rep_idx Index of the repetition (default: 0)
    * @return std::tuple containing (x_train, y_train, x_test, y_test)
+   *
+   * This method creates training and test datasets by subsetting the original
+   * data according to the specified fold indices. For dense matrices, it
+   * creates copies of the data. For sparse matrices, it creates efficiently
+   * constructed sparse matrix subsets.
    */
   template<typename T>
   std::tuple<T, Eigen::MatrixXd, T, Eigen::MatrixXd> split(
