@@ -33,7 +33,7 @@ TEST_CASE("Views", "[views][quadratic]")
   // clang-format on
 
   std::vector<int> subset = {
-    0, 1, 2, 3, 4,
+    0, 1, 2, 3, 9,
   };
 
   auto x_view = x(subset, Eigen::all);
@@ -46,7 +46,7 @@ TEST_CASE("Views", "[views][quadratic]")
                0.788,   0.576,  -0.305,
                1.510,   0.390,  -0.621,
               -2.210,  -1.120,  -0.0449,
-              -0.0162,  0.944,   0.821;
+              -0.103,   0.388,  -0.0538;
   // clang-format on
 
   auto fit_view = model.fit(x_view, y_subset);
