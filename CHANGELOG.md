@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.4.1](https://github.com/jolars/libslope/compare/v2.4.0...v2.4.1) (2025-05-19)
+
+### Bug Fixes
+
+* use correct dual formulation for logistic loss ([d89cca0](https://github.com/jolars/libslope/commit/d89cca00e1ef9e96cc78d2ccc96490b9b0ce028f))
+
 ## [2.4.0](https://github.com/jolars/libslope/compare/v2.3.0...v2.4.0) (2025-05-19)
 
 ### Features
