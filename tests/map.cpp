@@ -3,6 +3,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/cv.h>
 #include <slope/losses/quadratic.h>
 #include <slope/slope.h>
 #include <slope/threads.h>
@@ -111,5 +112,12 @@ TEST_CASE("Quadratic with Eigen::Map", "[quadratic][map]")
     model.setAlphaType("estimate");
 
     REQUIRE_NOTHROW(model.fit(x_map, y_data));
+  }
+
+  SECTION("Cross-validation")
+  {
+    slope::Slope model;
+
+    REQUIRE_NOTHROW(crossValidate(model, x_map, y_data));
   }
 }

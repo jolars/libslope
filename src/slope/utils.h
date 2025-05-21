@@ -229,7 +229,7 @@ subset(const Eigen::EigenBase<T>& x, const std::vector<int>& indices)
  * same.
  */
 template<typename T>
-T
+typename Eigen::MatrixBase<T>::PlainObject
 subset(const Eigen::DenseBase<T>& x, const std::vector<int>& indices)
 {
   return x.derived()(indices, Eigen::all);
@@ -247,6 +247,7 @@ subset(const Eigen::DenseBase<T>& x, const std::vector<int>& indices)
  * in the indices vector, preserving their order. The number of columns remains
  * the same. The sparsity structure is maintained in the extracted rows.
  */
+
 template<typename T>
 T
 subset(const Eigen::SparseMatrixBase<T>& x, const std::vector<int>& indices)
