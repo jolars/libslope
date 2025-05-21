@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.0](https://github.com/jolars/libslope/compare/v2.4.1...v2.5.0) (2025-05-21)
+
+### Features
+
+* support `Eigen::Map` in `crossValidate()` ([bb0b8da](https://github.com/jolars/libslope/commit/bb0b8daf56d7cbbc72413b8ad5b7cb43f902725d))
+
 ## [2.4.1](https://github.com/jolars/libslope/compare/v2.4.0...v2.4.1) (2025-05-19)
 
 ### Bug Fixes
