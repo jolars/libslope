@@ -186,3 +186,73 @@ TEST_CASE("Cross-validation: do not copy x", "[cv][user_folds]")
   REQUIRE(res_copy.results.front().score(0, 0) ==
           res_view.results.front().score(0, 0));
 }
+
+TEST_CASE("Best alpha index is within bounds", "[cv][alpha_index]")
+{
+  // Generate small dataset for testing
+  auto data = generateData(50, 5);
+
+  slope::Slope model;
+
+  // Create a basic CV configuration
+  auto cv_config = slope::CvConfig();
+  cv_config.n_folds = 3;
+  cv_config.hyperparams["q"] = { 0.1 };
+
+  // Run cross-validation
+  auto res = crossValidate(model, data.x, data.y, cv_config);
+
+  int best_alpha_ind = res.best_alpha_ind;
+
+  // Check that best_ind is within range of results
+  REQUIRE(res.best_ind >= 0);
+  REQUIRE(res.best_ind < static_cast<int>(res.results.size()));
+
+  // Get the best result
+  const auto& best_result = res.results[res.best_ind];
+
+  // Get the alpha values
+  const auto& alphas = best_result.alphas;
+
+  // Get the mean scores
+  const auto& mean_scores = best_result.mean_scores;
+
+  // Verify sizes match
+  REQUIRE(alphas.size() == mean_scores.size());
+
+  // Find best alpha index manually
+  int expected_best_idx = 0;
+  auto scorer = slope::Score::create(cv_config.metric); // Default is "mse"
+  auto comp = scorer->getComparator();
+
+  double best_score = mean_scores(0);
+  for (int i = 1; i < mean_scores.size(); ++i) {
+    if (comp(best_score, mean_scores(i))) {
+      best_score = mean_scores(i);
+      expected_best_idx = i;
+    }
+  }
+
+  // Extract best alpha index from the parameters
+  double best_alpha = res.best_params["alpha"];
+
+  // Find the index of this alpha in the alphas array
+  int actual_best_idx = -1;
+  for (int i = 0; i < alphas.size(); ++i) {
+    if (std::abs(alphas(i) - best_alpha) < 1e-10) {
+      actual_best_idx = i;
+      break;
+    }
+  }
+
+  REQUIRE(best_alpha_ind >= 0);
+  REQUIRE(best_alpha_ind < alphas.size());
+  REQUIRE(best_alpha_ind == actual_best_idx);
+  REQUIRE(best_alpha_ind == expected_best_idx);
+
+  INFO("Alphas: " << alphas);
+  INFO("Mean scores: " << mean_scores);
+  INFO("Best alpha index: " << best_alpha_ind);
+  INFO("Actual best alpha index: " << actual_best_idx);
+  INFO("Best alpha value: " << best_alpha);
+}
