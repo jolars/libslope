@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.5.1](https://github.com/jolars/libslope/compare/v2.5.0...v2.5.1) (2025-05-22)
+
+### Bug Fixes
+
+* actually set `best_alpha_ind` ([5989870](https://github.com/jolars/libslope/commit/5989870dbfbf80e70558135773bb39d07b0df614))
+
 ## [2.5.0](https://github.com/jolars/libslope/compare/v2.4.1...v2.5.0) (2025-05-21)
 
 ### Features
