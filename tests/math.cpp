@@ -694,4 +694,28 @@ TEST_CASE("whichBest function works correctly", "[score][math]")
     int best_idx = slope::whichBest(empty_scores, comp);
     REQUIRE(best_idx == -1);
   }
+
+  SECTION("MinimizeScore with multiple equal minima")
+  {
+    Eigen::ArrayXd scores(5);
+    scores << 5.0, 2.0, 7.0, 2.0, 4.0; // 2.0 appears at indices 1 and 3
+
+    auto scorer = slope::Score::create("mse");
+    auto comp = scorer->getComparator();
+
+    int best_idx = slope::whichBest(scores, comp);
+    REQUIRE(best_idx == 1); // Should pick the first occurrence
+  }
+
+  SECTION("Single element array")
+  {
+    Eigen::ArrayXd single_score(1);
+    single_score << 42.0;
+
+    auto scorer = slope::Score::create("mse");
+    auto comp = scorer->getComparator();
+
+    int best_idx = slope::whichBest(single_score, comp);
+    REQUIRE(best_idx == 0);
+  }
 }
