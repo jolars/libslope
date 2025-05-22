@@ -1,11 +1,12 @@
-#include "slope/math.h"
 #include "generate_data.hpp"
-#include "slope/normalize.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/math.h>
+#include <slope/normalize.h>
+#include <slope/score.h>
 #include <slope/threads.h>
 
 TEST_CASE("Linear predictor computations", "[math][linearPredictor]")
@@ -642,4 +643,55 @@ TEST_CASE("softmax", "[math]")
   Eigen::MatrixXd ref = x.exp().colwise() / (1.0 + x.exp().rowwise().sum());
 
   REQUIRE_THAT(out.reshaped(), VectorApproxEqual(ref.reshaped()));
+}
+
+TEST_CASE("whichBest function works correctly", "[score][math]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  // Test for MinimizeScore (lower is better)
+  SECTION("MinimizeScore")
+  {
+    // Create a vector with known values
+    Eigen::ArrayXd scores(5);
+    scores << 5.0, 3.0, 7.0, 2.0, 4.0;
+
+    // For MinimizeScore, 2.0 at index 3 should be best
+    auto minimize_scorer = slope::Score::create("mse"); // uses MinimizeScore
+    auto comp = minimize_scorer->getComparator();
+
+    int best_idx = slope::whichBest(scores, comp);
+    REQUIRE(best_idx == 3);
+    REQUIRE(scores[best_idx] == 2.0);
+    REQUIRE(best_idx < scores.size());
+  }
+
+  // Test for MaximizeScore (higher is better)
+  SECTION("MaximizeScore")
+  {
+    // Create a vector with known values
+    Eigen::ArrayXd scores(5);
+    scores << 5.0, 3.0, 7.0, 2.0, 4.0;
+
+    // For MaximizeScore, 7.0 at index 2 should be best
+    auto maximize_scorer =
+      slope::Score::create("accuracy"); // uses MaximizeScore
+    auto comp = maximize_scorer->getComparator();
+
+    int best_idx = slope::whichBest(scores, comp);
+    REQUIRE(best_idx == 2);
+    REQUIRE(scores[best_idx] == 7.0);
+    REQUIRE(best_idx < scores.size());
+  }
+
+  // Edge case: empty vector should return -1
+  SECTION("Empty vector")
+  {
+    Eigen::ArrayXd empty_scores(0);
+    auto scorer = slope::Score::create("mse");
+    auto comp = scorer->getComparator();
+
+    int best_idx = slope::whichBest(empty_scores, comp);
+    REQUIRE(best_idx == -1);
+  }
 }
