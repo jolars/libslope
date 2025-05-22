@@ -53,6 +53,7 @@ findBestParameters(CvResult& cv_result, const std::unique_ptr<Score>& scorer)
       cv_result.best_ind = i;
       cv_result.best_score = current_score;
       cv_result.best_params = result.params;
+      cv_result.best_alpha_ind = best_alpha_ind;
 
       cv_result.best_params["alpha"] = result.alphas(best_alpha_ind);
     }
