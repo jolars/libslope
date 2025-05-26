@@ -5,11 +5,6 @@ get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
 get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
 
-if(OPENMP_FOUND)
-  message(STATUS "OpenMP found")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-endif()
-
 add_library(slopejll SHARED slopejll.cpp cv.cpp fit.cpp helpers.cpp)
 
 target_link_libraries(
