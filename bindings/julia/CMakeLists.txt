@@ -10,13 +10,11 @@ if(OPENMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_library(SLOPE_LIBRARY slope REQUIRED)
-
 add_library(slopejll SHARED slopejll.cpp cv.cpp fit.cpp helpers.cpp)
 
 target_link_libraries(
   slopejll
-  PUBLIC JlCxx::cxxwrap_julia Eigen3::Eigen ${SLOPE_LIBRARY}
+  PUBLIC slope JlCxx::cxxwrap_julia Eigen3::Eigen ${SLOPE_LIBRARY}
 )
 
 install(TARGETS slopejll LIBRARY)
