@@ -7,6 +7,7 @@ project(slope LANGUAGES CXX VERSION ${project_version})
 option(BUILD_DOCS "Build documentation" OFF)
 option(ENABLE_COVERAGE "Generate coverage report" OFF)
 option(DAP_DEBUG "Interactive debugging" OFF)
+option(BUILD_JULIA_BINDINGS "Build Julia bindings" OFF)
 
 include(CTest)
 include(FetchContent)
@@ -84,6 +85,10 @@ if(BUILD_TESTING)
     add_coverage(slope)
     coverage_evaluate(tests-gcov)
   endif()
+endif()
+
+if(BUILD_JULIA_BINDINGS)
+  add_subdirectory(bindings/julia)
 endif()
 
 if(BUILD_DOCS)
