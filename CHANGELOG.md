@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.6.0](https://github.com/jolars/libslope/compare/v2.5.1...v2.6.0) (2025-05-26)
+
+### Features
+
+* add julia bindings ([ea9d6bf](https://github.com/jolars/libslope/commit/ea9d6bf25fea6c3afa08a4adcd5bacaf72607321))
+
 ## [2.5.1](https://github.com/jolars/libslope/compare/v2.5.0...v2.5.1) (2025-05-22)
 
 ### Bug Fixes
