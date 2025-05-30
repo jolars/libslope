@@ -25,7 +25,7 @@ TEST_CASE("Guassian, simple design", "[quadratic]")
 
   y = x * beta;
 
-  double alpha = 1e-12;
+  double alpha = 0;
   Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(2);
 
   slope::Slope model;
