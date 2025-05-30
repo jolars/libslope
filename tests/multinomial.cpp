@@ -147,7 +147,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   }
 }
 
-TEST_CASE("Multinomial wine data", "[multinomial][fail]")
+TEST_CASE("Multinomial wine data", "[multinomial]")
 {
   auto [x, y] = loadData("tests/data/wine.csv");
 
