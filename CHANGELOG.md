@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.7.0](https://github.com/jolars/libslope/compare/v2.6.1...v2.7.0) (2025-05-30)
+
+### Features
+
+* don't screen if no regularization ([6346802](https://github.com/jolars/libslope/commit/63468029603be5dc70a91c26cecfefc85f8645b1))
+
 ## [2.6.1](https://github.com/jolars/libslope/compare/v2.6.0...v2.6.1) (2025-05-30)
 
 ### Bug Fixes
