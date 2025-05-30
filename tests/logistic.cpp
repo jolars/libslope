@@ -166,7 +166,7 @@ TEST_CASE("Logistic predictions", "[logistic][predict]")
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
 }
 
-TEST_CASE("Failing example", "[logistic][fail]")
+TEST_CASE("Failing example (at one point)", "[logistic]")
 {
   int n = 30;
   int p = 5;
