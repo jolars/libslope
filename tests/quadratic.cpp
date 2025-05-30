@@ -331,3 +331,43 @@ TEST_CASE("Cluster updating", "[quadratic][clusters]")
 
   REQUIRE_THAT(coefs_updates, VectorApproxEqual(coefs_wo_updates));
 }
+
+TEST_CASE("Low regularization", "[quadratic][fail]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd x(3, 2);
+  Eigen::Vector2d beta;
+  Eigen::VectorXd y(3);
+
+  // clang-format off
+  x << 1.1, 2.3,
+       0.2, 1.5,
+       0.5, 0.2;
+  // clang-format on
+  beta << 1, 2;
+
+  y = x * beta;
+
+  double alpha = 1e-20;
+  Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(2);
+
+  slope::Slope model;
+  slope::SlopeFit fit;
+
+  model.setIntercept(false);
+  model.setNormalization("none");
+  model.setDiagnostics(true);
+
+  fit = model.fit(x, y, alpha, lambda);
+
+  Eigen::VectorXd coef = fit.getCoefs();
+  Eigen::VectorXd coef_scaled = fit.getCoefs(false);
+  REQUIRE_THAT(coef, VectorApproxEqual(beta, 1e-4));
+  REQUIRE_THAT(coef, VectorApproxEqual(coef_scaled, 1e-4));
+
+  auto primals = fit.getPrimals();
+  double gap = fit.getGaps().back();
+
+  REQUIRE(gap <= 1e-10);
+}
