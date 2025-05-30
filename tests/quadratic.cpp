@@ -332,7 +332,7 @@ TEST_CASE("Cluster updating", "[quadratic][clusters]")
   REQUIRE_THAT(coefs_updates, VectorApproxEqual(coefs_wo_updates));
 }
 
-TEST_CASE("Low regularization", "[quadratic][fail]")
+TEST_CASE("Low regularization", "[quadratic]")
 {
   using namespace Catch::Matchers;
 
