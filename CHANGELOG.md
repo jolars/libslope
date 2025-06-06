@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.8.0](https://github.com/jolars/libslope/compare/v2.7.0...v2.8.0) (2025-06-06)
+
+### Features
+
+* restart iteration count if there are KKT violations ([64f032f](https://github.com/jolars/libslope/commit/64f032f315c62c72cd9b346f61537674beb95dc3))
+
 ## [2.7.0](https://github.com/jolars/libslope/compare/v2.6.1...v2.7.0) (2025-05-30)
 
 ### Features
