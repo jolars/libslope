@@ -490,7 +490,8 @@ public:
         gradient, lambda_curr, lambda_prev, beta, full_set);
 
       int it = 0;
-      for (; it < this->max_it; ++it) {
+      int total_it = 0;
+      for (; it < this->max_it; ++it, ++total_it) {
         // Compute primal, dual, and gap
         residual = loss->residual(eta, y);
         updateGradient(gradient,
@@ -624,7 +625,7 @@ public:
                     primals,
                     duals,
                     time,
-                    it,
+                    total_it,
                     this->centering_type,
                     this->scaling_type,
                     this->intercept,
