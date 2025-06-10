@@ -180,7 +180,8 @@ move_elements(std::vector<T>& v, const int from, const int to, const int size)
   if (from > to) {
     std::rotate(v.begin() + to, v.begin() + from, v.begin() + from + size);
   } else {
-    std::rotate(v.begin() + from, v.begin() + from + size, v.begin() + to + 1);
+    std::rotate(
+      v.begin() + from, v.begin() + from + size, v.begin() + to + size);
   }
 }
 
