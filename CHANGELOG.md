@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.8.1](https://github.com/jolars/libslope/compare/v2.8.0...v2.8.1) (2025-06-10)
+
+### Bug Fixes
+
+* don't set `alpha` to zero when relaxing the fit ([bf59237](https://github.com/jolars/libslope/commit/bf59237c58b6a887c990020f51fadc319f2650ec))
+
 ## [2.8.0](https://github.com/jolars/libslope/compare/v2.7.0...v2.8.0) (2025-06-06)
 
 ### Features
