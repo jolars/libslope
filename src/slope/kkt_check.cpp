@@ -25,7 +25,6 @@ kktCheck(const Eigen::VectorXd& gradient,
 
   auto ord = sortIndex(flat_abs_gradient, true);
 
-  // TODO: Use dualNorm() instead
   ArrayXd diff = flat_abs_gradient(ord).array() - lambda.head(indices.size());
   ArrayXb tmp = cumSum(diff) >= 0.0;
   inversePermute(tmp, ord);
