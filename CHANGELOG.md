@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.8.2](https://github.com/jolars/libslope/compare/v2.8.1...v2.8.2) (2025-06-10)
+
+### Bug Fixes
+
+* correctly catch violations in `kktCheck()` ([5dc5f69](https://github.com/jolars/libslope/commit/5dc5f69540ec0ada37a20618da8e43e3c9547194))
+* correctly return total iterations ([8f48277](https://github.com/jolars/libslope/commit/8f482774196b189826f85fc2d347a8f8fe3a5b37))
+* fix `move_elements` when `from < to` and size > 1 ([6f58fff](https://github.com/jolars/libslope/commit/6f58fff06d12f258d684ced7906a33468a845be0))
+
 ## [2.8.1](https://github.com/jolars/libslope/compare/v2.8.0...v2.8.1) (2025-06-10)
 
 ### Bug Fixes
