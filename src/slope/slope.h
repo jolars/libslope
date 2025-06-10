@@ -790,7 +790,7 @@ public:
       beta = fit.getCoefs(false);
     }
 
-    double alpha = 0;
+    double alpha = fit.getAlpha();
 
     Timer timer;
 
