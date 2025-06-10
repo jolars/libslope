@@ -86,3 +86,32 @@ TEST_CASE("Strong screening rule", "[screening]")
     REQUIRE_THAT(coefs, VectorApproxEqual(coefs_screen, 1e-4));
   }
 }
+
+TEST_CASE("Gaps on screened path", "[screening][gaps][fail]")
+{
+  slope::Slope model;
+  model.setPathLength(100);
+  model.setDiagnostics(true);
+  model.setMaxIterations(100000);
+  // model.setScreening("none");
+
+  double tol = 1e-5;
+
+  model.setTol(tol);
+
+  auto data = generateData(10, 15, "quadratic", 1, 1, 0.2);
+
+  auto path = model.path(data.x, data.y);
+
+  for (int step = 0; step < path.size(); step++) {
+    auto fit = path(step);
+    auto gaps = fit.getGaps();
+    auto primals = fit.getPrimals();
+
+    DYNAMIC_SECTION("Step: " << step)
+    {
+      REQUIRE_FALSE(slope::WarningLogger::hasWarnings());
+      REQUIRE(gaps.back() / primals.back() <= tol);
+    }
+  }
+}
