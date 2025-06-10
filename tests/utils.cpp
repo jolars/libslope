@@ -185,3 +185,104 @@ TEST_CASE("Permutations", "[utils]")
     REQUIRE_THAT(eigen_vec[3], WithinAbs(2.2, 1e-8));
   }
 }
+
+TEST_CASE("Sorting", "[utils]")
+{
+  using namespace slope;
+  using Catch::Matchers::WithinAbs;
+
+  SECTION("Sorting integers in ascending order")
+  {
+    std::vector<int> values = { 30, 10, 50, 20, 40 };
+    std::vector<int> expected_indices = {
+      1, 3, 0, 4, 2
+    }; // Indices of sorted values: 10,20,30,40,50
+
+    auto indices = sortIndex(values);
+
+    REQUIRE(indices == expected_indices);
+
+    // Verify the indices point to the correct sorted order
+    std::vector<int> sorted_values;
+    for (auto idx : indices) {
+      sorted_values.push_back(values[idx]);
+    }
+
+    std::vector<int> expected_sorted = { 10, 20, 30, 40, 50 };
+    REQUIRE(sorted_values == expected_sorted);
+  }
+
+  SECTION("Sorting integers in descending order")
+  {
+    std::vector<int> values = { 30, 10, 50, 20, 40 };
+    std::vector<int> expected_indices = {
+      2, 4, 0, 3, 1
+    }; // Indices of sorted values: 50,40,30,20,10
+
+    auto indices = sortIndex(values, true); // descending=true
+
+    REQUIRE(indices == expected_indices);
+
+    // Verify the indices point to the correct sorted order
+    std::vector<int> sorted_values;
+    for (auto idx : indices) {
+      sorted_values.push_back(values[idx]);
+    }
+
+    std::vector<int> expected_sorted = { 50, 40, 30, 20, 10 };
+    REQUIRE(sorted_values == expected_sorted);
+  }
+
+  SECTION("Sorting floating point numbers")
+  {
+    std::vector<double> values = { 3.14, 1.41, 2.71, 1.62 };
+    std::vector<int> expected_indices = {
+      1, 3, 2, 0
+    }; // Indices of sorted values: 1.41,1.62,2.71,3.14
+
+    auto indices = sortIndex(values);
+
+    REQUIRE(indices == expected_indices);
+  }
+
+  SECTION("Sorting with duplicate values")
+  {
+    std::vector<int> values = { 5, 2, 8, 2, 1, 5 };
+
+    auto indices = sortIndex(values);
+
+    // Expected indices for sorted values: 1,2,3,4,5,8
+    // Note: The specific indices for duplicate values might vary by
+    // implementation So we'll check the resulting sorted order instead
+
+    std::vector<int> sorted_values;
+    for (auto idx : indices) {
+      sorted_values.push_back(values[idx]);
+    }
+
+    std::vector<int> expected_sorted = { 1, 2, 2, 5, 5, 8 };
+    REQUIRE(sorted_values == expected_sorted);
+  }
+
+  SECTION("Sorting with Eigen::VectorXd")
+  {
+    Eigen::VectorXd eigen_vec(5);
+    eigen_vec << 3.5, 1.2, 4.8, 2.3, 0.9;
+
+    auto indices = sortIndex(eigen_vec);
+
+    std::vector<double> sorted_values;
+    for (auto idx : indices) {
+      sorted_values.push_back(eigen_vec[idx]);
+    }
+
+    // Check if values are in ascending order
+    for (size_t i = 1; i < sorted_values.size(); ++i) {
+      REQUIRE(sorted_values[i - 1] <= sorted_values[i]);
+    }
+
+    // Check first and last values specifically
+    REQUIRE_THAT(sorted_values.front(), WithinAbs(0.9, 1e-8));
+    REQUIRE_THAT(sorted_values.back(), WithinAbs(4.8, 1e-8));
+  }
+}
