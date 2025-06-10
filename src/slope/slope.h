@@ -556,8 +556,6 @@ public:
 
         double dual_gap = primal - dual;
 
-        // std::cout << "gap: " << dual_gap << std::endl;
-
         assert(dual_gap > -1e-6 && "Dual gap should be positive");
 
         double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
