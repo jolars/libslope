@@ -35,7 +35,6 @@ TEST_CASE("Timer", "[utils]")
 }
 
 TEST_CASE("Subsetting", "[utils]")
-
 {
   auto data = generateData(20, 3, "quadratic", 1, 0.25);
 
