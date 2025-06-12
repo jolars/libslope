@@ -15,11 +15,12 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
   slope::Slope model;
   slope::SlopeFit fit;
 
-  // model.setNormalization("none");
+  int n = 3;
+  int p = 2;
 
-  Eigen::MatrixXd x(3, 2);
+  Eigen::MatrixXd x(n, p);
   Eigen::Vector2d beta;
-  Eigen::VectorXd y(3);
+  Eigen::VectorXd y(n);
 
   // clang-format off
   x << 1.1, 2.3,
@@ -30,11 +31,11 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 
   y = x * beta;
 
-  Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(2);
+  Eigen::ArrayXd lambda = Eigen::ArrayXd::Ones(p);
 
   SECTION("Relaxed fit is OLS on full set")
   {
-    double alpha = 1e-6;
+    double alpha = 1e-2;
 
     fit = model.fit(x, y, alpha, lambda);
 
@@ -45,25 +46,26 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     REQUIRE(coef0[1] > 0);
     REQUIRE(coef0[1] != coef0[0]);
 
-    Eigen::VectorXd bb(2);
+    Eigen::VectorXd bb(p);
     // bb << 0.37416793521666464, 1.7307684486543986;
     bb << 1, 2;
     double bb0 = -0.0000020240555609711093;
 
     Eigen::VectorXd eta = (x * bb).array() + bb0;
-
-    Eigen::VectorXd grad = x.transpose() * (eta - y) / 3;
-    // double deviance = 0.5 * (y - rr).squaredNorm() / 3;
+    Eigen::VectorXd grad = x.transpose() * (eta - y) / n;
 
     REQUIRE_THAT(grad(0), Catch::Matchers::WithinAbs(0.0, 1e-4));
 
     auto relaxed_fit = model.relax(fit, x, y);
+    auto relaxed_fit2 = model.relax(fit, x, y, 0.5);
 
     Eigen::VectorXd coef = relaxed_fit.getCoefs();
+    Eigen::VectorXd coef2 = relaxed_fit2.getCoefs();
 
     std::vector<double> coef_target = { 1, 2 };
 
     REQUIRE_THAT(coef, VectorApproxEqual(coef_target, 1e-4));
+    REQUIRE(coef[0] > coef2[0]);
   }
 
   SECTION("Second predictor selected")
@@ -155,61 +157,80 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     REQUIRE_THAT(coef[0], WithinRel(beta_ols[0], 1e-4));
     REQUIRE_THAT(coef[2], WithinRel(beta_ols[0], 1e-4));
   }
+}
 
-  SECTION("Path")
-  {
-    model.setPathLength(20);
+TEST_CASE("Orthogonal relaxed path", "[relax][fail]")
+{
+  slope::Slope model;
+  int n = 3;
+  int p = 3;
 
-    auto data = generateData(100, 10);
+  Eigen::MatrixXd x(n, p);
+  Eigen::VectorXd beta(p);
 
-    int n = 4;
-    int p = 3;
+  model.setNormalization("none");
+  model.setScreening("none");
+  model.setSolver("pgd");
+  model.setIntercept(false);
 
-    Eigen::MatrixXd x(n, p);
-    Eigen::VectorXd beta(p);
+  // clang-format off
+  x << 1, 0, 0,
+       0, 1, 0,
+       0, 0, 1;
+  // clang-format on
+  beta << 1, 0, 1;
 
-    // model.setNormalization("none");
+  Eigen::VectorXd y = x * beta;
 
-    // clang-format off
-    x << 1.1, 0.3, 0.2,
-         0.2, 0.9, 1.1,
-         0.2, 2.5, 0.5,
-         0.5, 0.0, 0.2;
-    // clang-format on
+  auto path = model.path(x, y);
 
-    beta << 2.05, 0, 2;
+  Eigen::VectorXd first_nonzero = path(2).getCoefs();
 
-    Eigen::VectorXd y = x * beta;
+  REQUIRE(first_nonzero(0) != 0);
+  REQUIRE(first_nonzero(1) == 0);
+  REQUIRE(first_nonzero(2) != 0);
 
-    auto path = model.path(x, y);
+  model.setRelaxTol(1e-6);
+  model.setRelaxMaxInnerIterations(1e3);
 
-    model.setRelaxTol(1e-2);
-    model.setRelaxMaxInnerIterations(1e2);
+  auto relaxed_path = model.relax(path, x, y, 0.0);
 
-    auto relaxed_path = model.relax(path, x, y, 0.8);
+  Eigen::VectorXd coefs = relaxed_path(20).getCoefs();
+  Eigen::VectorXd coefs_early = relaxed_path(3).getCoefs();
 
-    // REQUIRE(relaxed_path.size() == path.size());
-  }
+  REQUIRE(coefs(0) == beta(0));
+  REQUIRE(coefs(2) == beta(2));
+  REQUIRE(coefs_early(0) == coefs(0));
 }
 
 TEST_CASE("Relaxed path", "[relax]")
 {
-
-  using Catch::Matchers::WithinRel;
+  using Catch::Matchers::WithinAbs;
 
   slope::Slope model;
   slope::SlopeFit fit;
 
   model.setPathLength(20);
 
-  auto data = generateData(100, 10);
+  model.setRelaxTol(1e-8);
+  model.setRelaxMaxInnerIterations(1e3);
+
+  auto data = generateData(100, 2, "quadratic", 1, 1, 1);
+
+  model.setNormalization("none");
 
   auto path = model.path(data.x, data.y);
 
-  // model.setRelaxTol(1e-2);
-  // model.setRelaxMaxInnerIterations(1e2);
+  auto relaxed_path = model.relax(path, data.x, data.y, 0.0);
 
-  auto relaxed_path = model.relax(path, data.x, data.y, 0.8);
+  Eigen::VectorXd coefs1 = relaxed_path(6).getCoefs();
+  Eigen::VectorXd coefs2 = relaxed_path(12).getCoefs();
+
+  REQUIRE(coefs1(0) != 0);
+  REQUIRE(coefs1(1) != 0);
+
+  REQUIRE_THAT(coefs1(0), WithinAbs(coefs2(0), 1e-5));
+  REQUIRE_THAT(coefs1(1), WithinAbs(coefs2(1), 1e-5));
 
   REQUIRE(relaxed_path.size() == path.size());
 }
