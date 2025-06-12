@@ -899,7 +899,7 @@ public:
                       beta.reshaped(p, m).sparseView(),
                       clusters,
                       alpha,
-                      lambda_relax,
+                      fit.getLambda(),
                       dev,
                       fit.getNullDeviance(),
                       primals,
