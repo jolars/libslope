@@ -87,7 +87,7 @@ TEST_CASE("Strong screening rule", "[screening]")
   }
 }
 
-TEST_CASE("Gaps on screened path", "[screening][gaps][fail]")
+TEST_CASE("Gaps on screened path", "[screening][gaps]")
 {
   slope::Slope model;
   model.setPathLength(100);
