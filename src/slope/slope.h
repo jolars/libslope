@@ -827,7 +827,7 @@ public:
     MatrixXd w_ones = MatrixXd::Ones(n, m);
     MatrixXd z = y;
 
-    Clusters clusters = fit.getClusters();
+    slope::Clusters clusters(beta);
 
     int passes = 0;
 
