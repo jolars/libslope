@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.8.3](https://github.com/jolars/libslope/compare/v2.8.2...v2.8.3) (2025-06-12)
+
+### Bug Fixes
+
+* fix path relaxation ([0238e28](https://github.com/jolars/libslope/commit/0238e28d8fd0292e46eabaa6a4ce58c56586befb))
+
 ## [2.8.2](https://github.com/jolars/libslope/compare/v2.8.1...v2.8.2) (2025-06-10)
 
 ### Bug Fixes
