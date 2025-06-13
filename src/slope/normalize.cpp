@@ -2,7 +2,6 @@
 
 namespace slope {
 
-// TODO: Make this work for sparse beta
 std::tuple<Eigen::VectorXd, Eigen::MatrixXd>
 rescaleCoefficients(const Eigen::VectorXd& beta0,
                     const Eigen::SparseMatrix<double>& beta,
