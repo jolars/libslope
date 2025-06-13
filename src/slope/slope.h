@@ -200,6 +200,13 @@ public:
   void setHybridCdIterations(int cd_iterations);
 
   /**
+   * @brief Sets the frequence of proximal gradient descent steps.
+   *
+   * @param cd_type The type of coordinate descent to use in the hybrid solver.
+   */
+  void setHybridCdType(const std::string& cd_type);
+
+  /**
    * @brief Sets the lambda type for regularization weights.
    *
    * @param lambda_type The method used to compute regularization weights.
@@ -416,7 +423,8 @@ public:
                               jit_normalization,
                               this->intercept,
                               this->update_clusters,
-                              this->cd_iterations);
+                              this->cd_iterations,
+                              this->cd_type);
 
     updateGradient(gradient,
                    x.derived(),
@@ -974,6 +982,7 @@ private:
   int path_length = 100;
   std::optional<int> max_clusters = std::nullopt;
   std::string alpha_type = "path";
+  std::string cd_type = "cyclical";
   std::string centering_type = "mean";
   std::string lambda_type = "bh";
   std::string loss_type = "quadratic";
