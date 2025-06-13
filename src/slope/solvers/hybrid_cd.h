@@ -400,6 +400,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
         slopeThreshold(c_old - grad / hess, c_ind, lambda / hess, clusters);
     }
 
+    assert(new_index < clusters.n_clusters());
+
     double c_diff = c_old - c_tilde;
 
     if (c_diff != 0) {

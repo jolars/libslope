@@ -166,9 +166,13 @@ Clusters::update(const int old_index, const int new_index, const double c_new)
   // Invalidate zero indices cache - the cluster structure is changing
   zero_indices_valid = false;
 
+  assert(old_index < static_cast<int>(c.size()));
+
   auto c_old = coeff(old_index);
 
   if (c_new != c_old) {
+    assert(new_index < static_cast<int>(c.size()));
+
     if (c_new == coeff(new_index)) {
       merge(old_index, new_index);
     } else {
@@ -287,6 +291,8 @@ Clusters::reorder(const int old_index, const int new_index)
 void
 Clusters::merge(const int old_index, const int new_index)
 {
+  assert(old_index != new_index);
+
   auto c_size = cluster_size(old_index);
 
   // update coefficients
