@@ -18,23 +18,23 @@ slopeThreshold(const double x,
   const size_t n_lambda = lambdas.size();
 
   // Prepare a lazy cumulative sum of lambdas.
-  // cum[i] holds sum_{k=0}^{i-1} lambdas(k) with cum[0] = 0.
-  std::vector<double> cum(n_lambda + 1, 0.0);
+  // cumsum[i] holds sum_{k=0}^{i-1} lambdas(k) with cumsum[0] = 0.
+  std::vector<double> cumsum(n_lambda + 1, 0.0);
   size_t computed = 0; // Last index for which cum has been computed.
 
-  // getCum(i) computes and returns cum[i] on demand.
-  auto getCum = [&](size_t i) -> double {
+  // getCum(i) computes and returns cumsum[i] on demand.
+  auto getCumSum = [&](size_t i) -> double {
     i = std::min(i, n_lambda); // Prevent out-of-bounds access
     while (computed < i) {
       computed++;
-      cum[computed] = cum[computed - 1] + lambdas(computed - 1);
+      cumsum[computed] = cumsum[computed - 1] + lambdas(computed - 1);
     }
-    return cum[i];
+    return cumsum[i];
   };
 
   // getLambdaSum(start, len) returns sum of lambdas from start to start+len-1
   auto getLambdaSum = [&](size_t start, size_t len) -> double {
-    return getCum(start + len) - getCum(start);
+    return getCumSum(start + len) - getCumSum(start);
   };
 
   // Determine whether the update moves upward.
