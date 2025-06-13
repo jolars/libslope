@@ -1,3 +1,5 @@
+#include "generate_data.hpp"
+#include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
@@ -140,4 +142,25 @@ TEST_CASE("Cluster gradient and Hessian computation", "[hybrid]")
     REQUIRE_THAT(hessian, WithinAbs(hessian2, 1e-9));
     REQUIRE_THAT(gradient, WithinAbs(gradient2, 1e-9));
   }
+}
+
+TEST_CASE("Randomized CD", "[quadratic][hybrid]")
+{
+  using namespace Catch::Matchers;
+
+  auto data = generateData(100, 2000);
+
+  slope::Slope model;
+  model.setSolver("hybrid");
+
+  model.setHybridCdType("cyclical");
+  auto fit_cyclical = model.fit(data.x, data.y);
+
+  model.setHybridCdType("permuted");
+  auto fit_permuted = model.fit(data.x, data.y);
+
+  Eigen::VectorXd coefs_cyclical = fit_cyclical.getCoefs();
+  Eigen::VectorXd coefs_permuted = fit_permuted.getCoefs();
+
+  REQUIRE_THAT(coefs_cyclical, VectorApproxEqual(coefs_permuted));
 }
