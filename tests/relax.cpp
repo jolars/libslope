@@ -159,7 +159,7 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
   }
 }
 
-TEST_CASE("Orthogonal relaxed path", "[relax][fail]")
+TEST_CASE("Orthogonal relaxed path", "[relax]")
 {
   slope::Slope model;
   int n = 3;
