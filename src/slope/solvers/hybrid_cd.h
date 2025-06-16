@@ -350,8 +350,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
 
   // Create a vector of indices to process
   std::vector<int> indices;
-  indices.reserve(clusters.n_clusters());
-  for (int i = 0; i < clusters.n_clusters(); ++i) {
+  indices.reserve(clusters.size());
+  for (int i = 0; i < clusters.size(); ++i) {
     if (clusters.coeff(i) != 0) { // Skip zero cluster
       indices.push_back(i);
     }
@@ -365,7 +365,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
 
   for (int c_ind : indices) {
     // Skip if index is no longer valid due to cluster updates
-    if (c_ind >= clusters.n_clusters()) {
+    if (c_ind >= clusters.size()) {
       continue;
     }
 
@@ -383,7 +383,9 @@ coordinateDescent(Eigen::VectorXd& beta0,
 
     for (auto c_it = clusters.cbegin(c_ind); c_it != clusters.cend(c_ind);
          ++c_it) {
-      double s_ind = sign(beta(*c_it));
+      int ind = *c_it;
+      assert(ind >= 0 && ind < beta.size() && "Invalid index in cluster");
+      double s_ind = sign(beta(ind));
       s.emplace_back(s_ind);
     }
 
@@ -422,7 +424,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
         slopeThreshold(c_old - grad / hess, c_ind, lambda / hess, clusters);
     }
 
-    assert(new_index < clusters.n_clusters());
+    assert(new_index >= 0 && new_index <= clusters.size());
 
     double c_diff = c_old - c_tilde;
 

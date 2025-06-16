@@ -112,6 +112,17 @@ TEST_CASE("move_elements", "[utils]")
 
     REQUIRE(v == expected);
   }
+
+  SECTION("Move elements to end of vector")
+  {
+    std::vector<int> v = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    std::vector<int> expected = { 0, 1, 2, 3, 4, 5, 6, 9, 7, 8 };
+
+    // Move elements [1,2] to position 5
+    move_elements(v, 7, 8, 2);
+
+    REQUIRE(v == expected);
+  }
 }
 
 TEST_CASE("Permutations", "[utils]")

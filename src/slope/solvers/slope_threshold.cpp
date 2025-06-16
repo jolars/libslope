@@ -17,6 +17,8 @@ slopeThreshold(const double x,
   const int sign_x = sign(x);
   const size_t n_lambda = lambdas.size();
 
+  assert(j >= 0 && j < clusters.size());
+
   // Prepare a lazy cumulative sum of lambdas.
   // cumsum[i] holds sum_{k=0}^{i-1} lambdas(k) with cumsum[0] = 0.
   std::vector<double> cumsum(n_lambda + 1, 0.0);
@@ -69,7 +71,7 @@ slopeThreshold(const double x,
     int end = clusters.pointer(j + 1);
     double hi = getLambdaSum(end - cluster_size, cluster_size);
 
-    for (int k = j + 1; k < clusters.n_clusters(); ++k) {
+    for (int k = j + 1; k < clusters.size(); ++k) {
       end = clusters.pointer(k + 1);
       double lo = getLambdaSum(end - cluster_size, cluster_size);
       double c_k = clusters.coeff(k);
@@ -83,9 +85,10 @@ slopeThreshold(const double x,
     }
 
     if (abs_x > hi) {
-      return { x - sign_x * hi, clusters.n_clusters() - 1 };
+      return { x - sign_x * hi, clusters.size() - 1 };
     } else {
-      return { 0, clusters.n_clusters() - 1 };
+      // Zero cluster case
+      return { 0, clusters.size() };
     }
   }
 }

@@ -19,11 +19,12 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    // Check number of clusters
-    REQUIRE(clusters.n_clusters() == 5);
+    // Check number of clusters - should exclude zeros
+    REQUIRE(clusters.size() == 4);
 
     // Check cluster coefficients (unique absolute values in descending order)
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 2, 1, 0 }));
+    // No zeros included
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 2, 1 }));
 
     // Check indices for each cluster
     // Cluster 0 (coeff 5) should contain index 6
@@ -43,19 +44,15 @@ TEST_CASE("Clusters", "[clusters]")
     ivec cluster3_indices(clusters.cbegin(3), clusters.cend(3));
     REQUIRE_THAT(cluster3_indices, UnorderedEquals(ivec{ 1, 2 }));
 
-    // Cluster 4 (coeff 0) should contain indices 3, 4
-    REQUIRE(clusters.cluster_size(4) == 2);
-    ivec cluster4_indices(clusters.cbegin(4), clusters.cend(4));
-    REQUIRE_THAT(cluster4_indices, UnorderedEquals(ivec{ 3, 4 }));
+    // Zero indices (3, 4) should not be in any cluster
 
     auto all_clusters = clusters.getClusters();
-    REQUIRE(all_clusters.size() == 5);
+    REQUIRE(all_clusters.size() == 4);
 
     REQUIRE_THAT(all_clusters[0], Equals(ivec{ 6 }));
     REQUIRE_THAT(all_clusters[1], Equals(ivec{ 5 }));
     REQUIRE_THAT(all_clusters[2], Equals(ivec{ 0 }));
     REQUIRE_THAT(all_clusters[3], UnorderedEquals(ivec{ 1, 2 }));
-    REQUIRE_THAT(all_clusters[4], UnorderedEquals(ivec{ 3, 4 }));
   }
 
   SECTION("Update single coefficient")
@@ -65,13 +62,13 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    // Update coefficient at index 0 (value 2) to value 4
+    // Update coefficient at index 2 (value 2) to value 4
     // This should move it between clusters with values 5 and 3
     clusters.update(2, 1, 4);
 
-    // Should now have 5 clusters with coefficients [5, 4, 3, 1, 0]
-    REQUIRE(clusters.n_clusters() == 5);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 1, 0 }));
+    // Should now have 5 clusters with coefficients [5, 4, 3, 1]
+    REQUIRE(clusters.size() == 4);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 1 }));
 
     // Check each cluster's contents
     auto all_clusters = clusters.getClusters();
@@ -80,7 +77,6 @@ TEST_CASE("Clusters", "[clusters]")
     REQUIRE_THAT(all_clusters[1], Equals(ivec{ 0 })); // coeff 4 (updated)
     REQUIRE_THAT(all_clusters[2], Equals(ivec{ 5 })); // coeff 3
     REQUIRE_THAT(all_clusters[3], UnorderedEquals(ivec{ 1, 2 })); // coeff 1
-    REQUIRE_THAT(all_clusters[4], UnorderedEquals(ivec{ 3, 4 })); // coeff 0
   }
 
   SECTION("Update coefficient causing cluster merge")
@@ -91,13 +87,13 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    // Update coefficient at index 0 (value 2) to value 3
+    // Update coefficient at index 2 (value 2) to value 3
     // This should merge it with the cluster containing index 5
     clusters.update(2, 1, 3);
 
-    // Should now have 4 clusters with coefficients [5, 3, 1, 0]
-    REQUIRE(clusters.n_clusters() == 4);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 1, 0 }));
+    // Should now have 4 clusters with coefficients [5, 3, 1]
+    REQUIRE(clusters.size() == 3);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 1 }));
 
     // Check each cluster's contents
     auto all_clusters = clusters.getClusters();
@@ -110,7 +106,6 @@ TEST_CASE("Clusters", "[clusters]")
     REQUIRE_THAT(all_clusters[0], Equals(ivec{ 6 }));    // coeff 5
     REQUIRE_THAT(all_clusters[1], Equals(ivec{ 0, 5 })); // coeff 3 (merged)
     REQUIRE_THAT(all_clusters[2], Equals(ivec{ 1, 2 })); // coeff 1
-    REQUIRE_THAT(all_clusters[3], Equals(ivec{ 3, 4 })); // coeff 0
   }
 
   SECTION("No change update - coefficient remains the same")
@@ -124,8 +119,8 @@ TEST_CASE("Clusters", "[clusters]")
     // Update with same value - should be no-op
     clusters.update(2, 2, 2);
 
-    REQUIRE(clusters.n_clusters() == 5);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 2, 1, 0 }));
+    REQUIRE(clusters.size() == 4);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 2, 1 }));
     REQUIRE_THAT(clusters.getClusters(), Equals(original_clusters));
   }
 
@@ -139,7 +134,7 @@ TEST_CASE("Clusters", "[clusters]")
     // Update first coefficient to smallest value
     clusters.update(0, 4, 0.5);
 
-    REQUIRE(clusters.n_clusters() == 5);
+    REQUIRE(clusters.size() == 5);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 4, 3, 2, 1, 0.5 }));
 
     auto all_clusters = clusters.getClusters();
@@ -153,15 +148,12 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    REQUIRE(clusters.n_clusters() == 1);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 0 }));
+    // With zero clusters removed, there should be no clusters
+    REQUIRE(clusters.size() == 0);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{}));
 
     auto all_clusters = clusters.getClusters();
-    REQUIRE(all_clusters.size() == 1);
-
-    // Check all indices are in the single cluster
-    std::sort(all_clusters[0].begin(), all_clusters[0].end());
-    REQUIRE_THAT(all_clusters[0], Equals(ivec{ 0, 1, 2, 3, 4 }));
+    REQUIRE(all_clusters.size() == 0);
   }
 
   SECTION("All identical non-zero values")
@@ -171,7 +163,7 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    REQUIRE(clusters.n_clusters() == 1);
+    REQUIRE(clusters.size() == 1);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3 }));
 
     auto all_clusters = clusters.getClusters();
@@ -179,47 +171,6 @@ TEST_CASE("Clusters", "[clusters]")
 
     // Check all indices are in the single cluster
     REQUIRE_THAT(all_clusters[0], UnorderedEquals(ivec{ 0, 1, 2, 3, 4 }));
-  }
-
-  SECTION("Multiple sequential updates - debugging")
-  {
-    Eigen::VectorXd beta(5);
-    beta << 5, 4, 3, 2, 1;
-    slope::Clusters clusters(beta);
-
-    // Check initial state
-    REQUIRE(clusters.n_clusters() == 5);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 2, 1 }));
-
-    // First update
-    clusters.update(0, 2, 3);
-
-    // Check state after first update
-    INFO("After first update");
-    REQUIRE(clusters.n_clusters() == 4);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 4, 3, 2, 1 }));
-
-    // Second update
-    clusters.update(0, 1, 3);
-
-    // Check state after second update
-    INFO("After second update");
-    REQUIRE(clusters.n_clusters() == 3);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3, 2, 1 }));
-
-    // Third update
-    clusters.update(1, 0, 6);
-
-    // Final state
-    INFO("After third update");
-    REQUIRE(clusters.n_clusters() == 3);
-    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 6, 3, 1 }));
-
-    auto all_clusters = clusters.getClusters();
-
-    REQUIRE_THAT(all_clusters[0], Equals(ivec{ 3 }));                // coeff 6
-    REQUIRE_THAT(all_clusters[1], UnorderedEquals(ivec{ 0, 1, 2 })); // coeff 3
-    REQUIRE_THAT(all_clusters[2], Equals(ivec{ 4 }));                // coeff 1
   }
 
   SECTION("Multiple sequential updates")
@@ -231,7 +182,7 @@ TEST_CASE("Clusters", "[clusters]")
 
     // Initial clusters: [0], [1], [2], [3], [4]
     //                    5    4    3    2    1
-    REQUIRE(clusters.n_clusters() == 5);
+    REQUIRE(clusters.size() == 5);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 2, 1 }));
 
     // First update - change coefficient of cluster 0 (value 5) to 3
@@ -239,7 +190,7 @@ TEST_CASE("Clusters", "[clusters]")
 
     // After 1st update: [1], [0,2], [3], [4]
     //                    4     3     2    1
-    REQUIRE(clusters.n_clusters() == 4);
+    REQUIRE(clusters.size() == 4);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 4, 3, 2, 1 }));
 
     // Second update - change coefficient of cluster 0 (now value 4) to 3
@@ -247,14 +198,14 @@ TEST_CASE("Clusters", "[clusters]")
 
     // After 2nd update: [0,2,1], [3], [4]
     //                      3      2    1
-    REQUIRE(clusters.n_clusters() == 3);
+    REQUIRE(clusters.size() == 3);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3, 2, 1 }));
 
     // Third update - change coefficient of cluster 3 (value 1) to 6
     clusters.update(2, 0, 6); // Move cluster 3 to position 0, with value 6
 
     // Final expected: [4], [0,1,2], [3]
-    REQUIRE(clusters.n_clusters() == 3);
+    REQUIRE(clusters.size() == 3);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 6, 3, 2 }));
 
     auto all_clusters = clusters.getClusters();
@@ -276,7 +227,7 @@ TEST_CASE("Clusters", "[clusters]")
     slope::Clusters clusters(beta);
 
     // Check that absolute values are used for clustering
-    REQUIRE(clusters.n_clusters() == 5);
+    REQUIRE(clusters.size() == 5);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 2, 1 }));
 
     auto all_clusters = clusters.getClusters();
@@ -293,7 +244,7 @@ TEST_CASE("Clusters", "[clusters]")
     slope::Clusters clusters(beta);
 
     // Initially we should have 3 clusters
-    REQUIRE(clusters.n_clusters() == 3);
+    REQUIRE(clusters.size() == 3);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 1 }));
 
     // Create an updated beta vector where one of the 5s is changed to 4
@@ -304,7 +255,7 @@ TEST_CASE("Clusters", "[clusters]")
     clusters.update(updated_beta);
 
     // Now we should have 4 clusters
-    REQUIRE(clusters.n_clusters() == 4);
+    REQUIRE(clusters.size() == 4);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 4, 3, 1 }));
 
     auto all_clusters = clusters.getClusters();
@@ -319,12 +270,17 @@ TEST_CASE("Clusters", "[clusters]")
 
     slope::Clusters clusters(beta);
 
-    REQUIRE(clusters.n_clusters() == 1);
+    REQUIRE(clusters.size() == 1);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3 }));
 
     auto all_clusters = clusters.getClusters();
     REQUIRE(all_clusters.size() == 1);
     REQUIRE_THAT(all_clusters[0], Equals(ivec{ 0 }));
+
+    // Update to zero
+    clusters.update(0, 0, 0);
+    REQUIRE(clusters.size() == 0);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{}));
   }
 
   SECTION("Debug update method for infinite loop")
@@ -336,7 +292,7 @@ TEST_CASE("Clusters", "[clusters]")
     slope::Clusters clusters(beta);
 
     // Verify initial state
-    REQUIRE(clusters.n_clusters() == 3);
+    REQUIRE(clusters.size() == 3);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 3.0, 2.0, 1.0 }));
 
     // Get initial clusters for comparison
@@ -351,7 +307,7 @@ TEST_CASE("Clusters", "[clusters]")
 
     // Verify state after first update
     INFO("After first update");
-    REQUIRE(clusters.n_clusters() == 2);
+    REQUIRE(clusters.size() == 2);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 2.0, 1.0 }));
 
     auto clusters_after_first = clusters.getClusters();
@@ -364,11 +320,53 @@ TEST_CASE("Clusters", "[clusters]")
 
     // Verify final state
     INFO("After second update");
-    REQUIRE(clusters.n_clusters() == 1);
+    REQUIRE(clusters.size() == 1);
     REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 2.0 }));
 
     auto final_clusters = clusters.getClusters();
     REQUIRE_THAT(final_clusters[0], UnorderedEquals(ivec{ 0, 1, 2, 3, 4, 5 }));
+  }
+
+  SECTION("Update coefficient to zero")
+  {
+    Eigen::VectorXd beta(7);
+    beta << 2, -1, 1, 0, 0, 3, 5;
+
+    slope::Clusters clusters(beta);
+
+    // Initial state - 4 clusters (excluding zeros)
+    REQUIRE(clusters.size() == 4);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 2, 1 }));
+
+    // Update coefficient at index 2 (value 2) to 0
+    clusters.update(2, 2, 0);
+
+    // Should now have 3 clusters with coefficients [5, 3, 1]
+    REQUIRE(clusters.size() == 3);
+    REQUIRE_THAT(clusters.coeffs(), Equals(vec{ 5, 3, 1 }));
+
+    // Cluster with value 2 should be removed
+    auto all_clusters = clusters.getClusters();
+    REQUIRE_THAT(all_clusters[0], Equals(ivec{ 6 }));             // coeff 5
+    REQUIRE_THAT(all_clusters[1], Equals(ivec{ 5 }));             // coeff 3
+    REQUIRE_THAT(all_clusters[2], UnorderedEquals(ivec{ 1, 2 })); // coeff 1
+  }
+
+  SECTION("Merge to end of indices")
+  {
+    Eigen::VectorXd beta(6);
+    beta << 5, 10, 9, -5, 3, -5;
+
+    slope::Clusters clusters(beta);
+
+    int old_index = 2;
+    int new_index = 3;
+
+    clusters.update(old_index, new_index, 3);
+
+    auto all_clusters = clusters.getClusters();
+
+    REQUIRE_THAT(all_clusters[2], UnorderedEquals(ivec{ 0, 3, 4, 5 }));
   }
 }
 
@@ -462,6 +460,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     auto patt = slope::patternMatrix(beta);
 
     REQUIRE(patt.rows() == beta.size());
-    REQUIRE(patt.cols() == 0);
+    REQUIRE(patt.cols() == 0); // No columns for an all-zero vector
+    REQUIRE(patt.nonZeros() == 0);
   }
 }
