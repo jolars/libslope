@@ -1,5 +1,23 @@
 # Changelog
 
+## [3.0.0](https://github.com/jolars/libslope/compare/v2.9.0...v3.0.0) (2025-06-16)
+
+### ⚠ BREAKING CHANGES
+
+* remove `patternMatrix()` from `Clusters`
+
+### Features
+
+* remove `patternMatrix()` from `Clusters` ([8fb22d3](https://github.com/jolars/libslope/commit/8fb22d3577db969545f1c21cf5644ceef558318c))
+
+### Bug Fixes
+
+* fix cluster updating ([205ce89](https://github.com/jolars/libslope/commit/205ce89cdf22c7f15a87fbd6ae3609c5e2c1811b))
+
+### Performance Improvements
+
+* shrink `sorted` to fit actual size ([9536c24](https://github.com/jolars/libslope/commit/9536c2464854e6fa682b90636a3d6dc31db01714))
+
 ## [2.9.0](https://github.com/jolars/libslope/compare/v2.8.3...v2.9.0) (2025-06-16)
 
 ### Features
