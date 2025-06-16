@@ -12,12 +12,12 @@ slopeThreshold(const double x,
 {
   using std::size_t;
 
+  assert(j >= 0 && j < clusters.size());
+
   const size_t cluster_size = clusters.cluster_size(j);
   const double abs_x = std::abs(x);
   const int sign_x = sign(x);
   const size_t n_lambda = lambdas.size();
-
-  assert(j >= 0 && j < clusters.size());
 
   // Prepare a lazy cumulative sum of lambdas.
   // cumsum[i] holds sum_{k=0}^{i-1} lambdas(k) with cumsum[0] = 0.
