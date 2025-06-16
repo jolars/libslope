@@ -151,6 +151,8 @@ Clusters::update(const Eigen::VectorXd& beta)
     }
   }
 
+  sorted.shrink_to_fit();
+
   // Special case: all values are zero
   if (sorted.empty()) {
     c_ptr.push_back(0); // Initialize with a single pointer at 0
