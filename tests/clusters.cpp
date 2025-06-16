@@ -377,8 +377,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     Eigen::VectorXd beta(7);
     beta << 1.0, 3.0, 2.0, 3.0, -1.0, 0.0, 0.0;
 
-    slope::Clusters clusters(beta);
-    auto patt = clusters.patternMatrix();
+    auto patt = slope::patternMatrix(beta);
 
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());
@@ -421,8 +420,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     Eigen::VectorXd beta(5);
     beta << 1.0, 3.0, 2.0, 3.0, -1.0;
 
-    slope::Clusters clusters(beta);
-    auto patt = clusters.patternMatrix();
+    auto patt = slope::patternMatrix(beta);
 
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());

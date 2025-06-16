@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/clusters.h>
 #include <slope/losses/quadratic.h>
 #include <slope/ols.h>
 #include <slope/slope.h>
@@ -143,7 +144,7 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     auto relaxed_fit = model.relax(fit, x, y, gamma);
 
     Eigen::SparseMatrix<double> U =
-      fit.getClusters().patternMatrix().cast<double>();
+      slope::patternMatrix(fit.getCoefs(false)).cast<double>();
 
     REQUIRE(U.rows() == p);
     REQUIRE(U.cols() == 2);
