@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.9.0](https://github.com/jolars/libslope/compare/v2.8.3...v2.9.0) (2025-06-16)
+
+### Features
+
+* add randomized coordinate descent method ([ec33a86](https://github.com/jolars/libslope/commit/ec33a8637ec71cc3e6cdda7f6846e3a719f223df))
+
 ## [2.8.3](https://github.com/jolars/libslope/compare/v2.8.2...v2.8.3) (2025-06-12)
 
 ### Bug Fixes
