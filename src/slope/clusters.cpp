@@ -140,16 +140,12 @@ Clusters::update(const Eigen::VectorXd& beta)
   c.clear();
   c_ind.clear();
   c_ptr.clear();
-  signs.clear();
 
   std::vector<sort_pair> sorted;
   sorted.reserve(p);
-  signs.reserve(p);
 
   for (int i = 0; i < beta.size(); ++i) {
     double abs_val = std::abs(beta(i));
-    // TODO: Don't compute or store signs for zero coefficients
-    signs.emplace_back(sign(beta(i)));
     if (abs_val > 0) {
       sorted.emplace_back(abs_val, i);
     }
@@ -324,22 +320,26 @@ Clusters::getClusters() const
   return clusters;
 }
 
+// TODO: Template or overload for sparse matrices
 Eigen::SparseMatrix<int>
-Clusters::patternMatrix() const
+patternMatrix(const Eigen::VectorXd& beta)
 {
-  Eigen::SparseMatrix<int> out(p, c.size());
+  Clusters clusters(beta);
 
-  if (c.empty()) {
+  int p = beta.size();
+  Eigen::SparseMatrix<int> out(p, clusters.size());
+
+  if (clusters.size() == 0) {
     return out; // Return empty matrix if no clusters
   }
 
   std::vector<Eigen::Triplet<int>> triplets;
   triplets.reserve(p);
 
-  for (int k = 0; k < size(); ++k) {
-    for (auto it = cbegin(k); it != cend(k); ++it) {
+  for (int k = 0; k < clusters.size(); ++k) {
+    for (auto it = clusters.cbegin(k); it != clusters.cend(k); ++it) {
       int ind = *it;
-      int s = signs[ind];
+      int s = std::copysign(1.0, beta(ind));
       triplets.emplace_back(ind, k, s);
     }
   }
@@ -347,13 +347,6 @@ Clusters::patternMatrix() const
   out.setFromTriplets(triplets.begin(), triplets.end());
 
   return out;
-}
-
-Eigen::SparseMatrix<int>
-patternMatrix(const Eigen::VectorXd& beta)
-{
-  Clusters clusters(beta);
-  return clusters.patternMatrix();
 }
 
 } // namespace slope

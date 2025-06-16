@@ -138,20 +138,9 @@ public:
    */
   std::vector<std::vector<int>> getClusters() const;
 
-  /**
-   * @brief Returns the cluster pattern as a sparse matrix
-   * @return A sparse matrix, where the indices of column j
-   *   are the indices of the features in cluster j.
-   *   The matrix is of size \f$p \times (m - 1)\f$, where \f$p\f$ is the number
-   *   of features and \f$m\f$ is the number of clusters. The features
-   *   of the zero cluster are not included.
-   */
-  Eigen::SparseMatrix<int> patternMatrix() const;
-
 private:
   std::vector<double> c;  /**< The coefficients of the clusters. */
   std::vector<int> c_ind; /**< The indices of the clusters. */
-  std::vector<int> signs; /**< The signs of the coefficients. */
   std::vector<int>
     c_ptr; /**< Pointers to the start of each of the clusters' indices. */
   int p;   /**< The number of features. */
