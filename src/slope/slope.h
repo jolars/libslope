@@ -963,7 +963,7 @@ private:
   bool intercept = true;
   bool modify_x = false;
   bool return_clusters = true;
-  bool update_clusters = false;
+  bool update_clusters = true;
   double alpha_min_ratio = -1;
   double dev_change_tol = 1e-5;
   double dev_ratio_tol = 0.999;

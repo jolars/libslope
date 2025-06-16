@@ -53,6 +53,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
   model.setSolver("hybrid");
   model.setNormalization("none");
   model.setMaxIterations(2000);
+  model.setUpdateClusters(true);
   model.setTol(1e-8);
 
   SECTION("No regularization, no intercept")

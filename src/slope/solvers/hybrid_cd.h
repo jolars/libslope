@@ -415,14 +415,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
     double c_tilde;
     int new_index;
 
-    if (lambda(0) == 0) {
-      // No regularization
-      c_tilde = c_old - grad / hess;
-      new_index = c_ind;
-    } else {
-      std::tie(c_tilde, new_index) =
-        slopeThreshold(c_old - grad / hess, c_ind, lambda / hess, clusters);
-    }
+    std::tie(c_tilde, new_index) =
+      slopeThreshold(c_old - grad / hess, c_ind, lambda / hess, clusters);
 
     assert(new_index >= 0 && new_index <= clusters.size());
 
