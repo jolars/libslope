@@ -113,8 +113,6 @@ Clusters::update(const int old_index, const int new_index, const double c_new)
         c_ptr[i] -= cluster_size_val;
       }
 
-      // Remove the cluster if the new value is zero
-      // Remove from coefficients
       c.erase(c.begin() + old_index);
     } else if (c_new == coeff(new_index)) {
       merge(old_index, new_index);
