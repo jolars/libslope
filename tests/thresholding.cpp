@@ -10,15 +10,15 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
 
   // Create a sample Clusters object
   // Assuming Clusters has a constructor that can take these parameters
-  int p = 4;
+  int p = 5;
   Eigen::VectorXd beta(p);
   Eigen::ArrayXd lambdas(p);
 
-  beta << 4, -1, 4, 0;
-  lambdas << 4, 3.0, 2.0, 1.0;
+  beta << 4, -1, 4, 0.5, 0;
+  lambdas << 4, 3.0, 2.0, 1.0, 0.5;
 
   // Three clusters: {0, 2}, {1}, {3}
-  // Coefficients:     4,     1,   0
+  // Coefficients:     4,     1,  0.5
 
   slope::Clusters clusters(beta);
 
@@ -46,23 +46,23 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     REQUIRE(y == 1.5);
     REQUIRE(idx == 1);
 
-    x = 2.1; // Should not move
+    x = 2.9; // Should not move
     j = 1;
 
     std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
 
     REQUIRE(idx == 1);
-    REQUIRE_THAT(y, WithinAbs(0.1, 1e-4));
+    REQUIRE_THAT(y, WithinAbs(0.9, 1e-4));
 
-    x = 2; // Should merge with zero cluster
+    x = 1; // Should merge with zero cluster
     j = 1;
 
     std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
 
-    REQUIRE(idx == 2);
+    REQUIRE(idx == 3);
     REQUIRE(y == 0);
 
-    x = 2.8; // Should merge with second cluster
+    x = 2.9; // Should merge with second cluster
     j = 2;
 
     std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
@@ -89,6 +89,6 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
 
     CHECK(y <= 0); // Output should maintain sign of input
     CHECK(idx >= 0);
-    CHECK(idx < clusters.n_clusters());
+    CHECK(idx < clusters.size());
   }
 }

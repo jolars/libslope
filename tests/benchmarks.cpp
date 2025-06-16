@@ -243,7 +243,7 @@ TEST_CASE("Cluster comparison", "[!benchmark]")
   {
     // Clone to avoid modifying the original
     // Random updates (use the old API with three parameters)
-    for (int j = 0; j < clusters.n_clusters(); ++j) {
+    for (int j = 0; j < clusters.size(); ++j) {
       double c_old = clusters.coeff(j);
 
       std::vector<int> s;
@@ -260,7 +260,7 @@ TEST_CASE("Cluster comparison", "[!benchmark]")
 
   BENCHMARK("Cluster reordering")
   {
-    clusters.update(5, clusters.n_clusters() - 1, 0.912);
+    clusters.update(5, clusters.size() - 1, 0.912);
   };
 }
 
