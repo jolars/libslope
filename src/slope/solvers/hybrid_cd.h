@@ -359,8 +359,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
 
   if (cd_type == "permuted") {
     std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(indices.begin(), indices.end(), g);
+    std::mt19937 generator(rd());
+    std::shuffle(indices.begin(), indices.end(), generator);
   }
 
   for (int c_ind : indices) {
