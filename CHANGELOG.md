@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.0](https://github.com/jolars/libslope/compare/v3.0.0...v3.1.0) (2025-06-23)
+
+### Features
+
+* add `setRandomSeed()` to `Slope` ([942c570](https://github.com/jolars/libslope/commit/942c570f02744e875e8169ea4a56b77e4ebd3e4a))
+
 ## [3.0.0](https://github.com/jolars/libslope/compare/v2.9.0...v3.0.0) (2025-06-16)
 
 ### ⚠ BREAKING CHANGES
