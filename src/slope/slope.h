@@ -316,6 +316,13 @@ public:
   void setAlphaEstimationMaxIterations(const int alpha_est_maxit);
 
   /**
+   * @brief Sets the random seed
+   *
+   * @param seed The value to set for the path length.
+   */
+  void setRandomSeed(const int seed);
+
+  /**
    * @brief Gets the maximum number of iterations allowed for the
    * alpha estimation procedure
    */
@@ -880,7 +887,9 @@ public:
                                                     x_scales,
                                                     intercept,
                                                     jit_normalization,
-                                                    update_clusters);
+                                                    update_clusters,
+                                                    cd_type,
+                                                    random_seed);
 
         if (max_abs_gradient < tol_relax) {
           break;
@@ -981,6 +990,7 @@ private:
   int max_it_outer_relax = 50;
   int path_length = 100;
   std::optional<int> max_clusters = std::nullopt;
+  std::optional<int> random_seed = std::nullopt;
   std::string alpha_type = "path";
   std::string cd_type = "cyclical";
   std::string centering_type = "mean";

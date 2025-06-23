@@ -10,6 +10,7 @@
 #include "../math.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
+#include <optional>
 #include <random>
 #include <vector>
 
@@ -338,7 +339,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const bool intercept,
                   const JitNormalization jit_normalization,
                   const bool update_clusters,
-                  const std::string& cd_type = "cyclical")
+                  const std::string& cd_type = "cyclical",
+                  const std::optional<int>& seed = std::nullopt)
 {
   using namespace Eigen;
 
@@ -358,8 +360,13 @@ coordinateDescent(Eigen::VectorXd& beta0,
   }
 
   if (cd_type == "permuted") {
-    std::random_device rd;
-    std::mt19937 generator(rd());
+    std::mt19937 generator;
+    if (seed.has_value()) {
+      generator.seed(seed.value());
+    } else {
+      std::random_device rd;
+      generator.seed(rd());
+    }
     std::shuffle(indices.begin(), indices.end(), generator);
   }
 

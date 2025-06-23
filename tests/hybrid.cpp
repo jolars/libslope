@@ -157,6 +157,7 @@ TEST_CASE("Randomized CD", "[quadratic][hybrid]")
   auto fit_cyclical = model.fit(data.x, data.y);
 
   model.setHybridCdType("permuted");
+  model.setRandomSeed(40);
   auto fit_permuted = model.fit(data.x, data.y);
 
   Eigen::VectorXd coefs_cyclical = fit_cyclical.getCoefs();

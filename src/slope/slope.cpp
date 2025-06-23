@@ -276,6 +276,16 @@ Slope::setAlphaEstimationMaxIterations(const int alpha_est_maxit)
   this->alpha_est_maxit = alpha_est_maxit;
 }
 
+void
+Slope::setRandomSeed(const int seed)
+{
+  if (seed < 0) {
+    throw std::invalid_argument("seed must be >= 0");
+  }
+
+  this->random_seed = seed;
+}
+
 int
 Slope::getAlphaEstimationMaxIterations() const
 {
