@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.1.1](https://github.com/jolars/libslope/compare/v3.1.0...v3.1.1) (2025-06-24)
+
+### Bug Fixes
+
+* use `OpenMP_FOUND`, not `OPENMP_FOUND` ([0833785](https://github.com/jolars/libslope/commit/0833785b5be47d38417e1b4300cd652dfaf7f3e0))
+
 ## [3.1.0](https://github.com/jolars/libslope/compare/v3.0.0...v3.1.0) (2025-06-23)
 
 ### Features
