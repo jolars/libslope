@@ -10,7 +10,6 @@
 #include "../math.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
-#include <optional>
 #include <random>
 #include <vector>
 
