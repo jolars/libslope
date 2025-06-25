@@ -60,6 +60,8 @@ setupModel(bool fit_intercept,
   model.setScaling(scaling_type);
   model.setTol(tol);
 
+  model.setUpdateClusters(true);
+
   return model;
 }
 
