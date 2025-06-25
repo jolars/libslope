@@ -1018,7 +1018,7 @@ private:
   std::optional<int> max_clusters = std::nullopt;
   std::optional<int> random_seed = 0;
   std::string alpha_type = "path";
-  std::string cd_type = "cyclical";
+  std::string cd_type = "permuted";
   std::string centering_type = "mean";
   std::string lambda_type = "bh";
   std::string loss_type = "quadratic";
