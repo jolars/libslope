@@ -419,6 +419,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
     std::tie(c_tilde, new_index) =
       slopeThreshold(c_old - grad / hess, c_ind, lambda / hess, clusters);
 
+    assert(c_tilde == 0 || new_index < clusters.size());
     assert(new_index >= 0 && new_index <= clusters.size());
 
     double c_diff = c_old - c_tilde;
