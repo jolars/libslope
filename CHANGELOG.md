@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.0.0](https://github.com/jolars/libslope/compare/v4.1.0...v5.0.0) (2025-06-25)
+
+### ⚠ BREAKING CHANGES
+
+* change `slopeThresholding()` to take cumsum of lambda
+
+### Features
+
+* add `leading_zero` argument to `cumSum()` ([1c14d04](https://github.com/jolars/libslope/commit/1c14d048306483fa7ff31b9ee6212b28f3733962))
+* change `slopeThresholding()` to take cumsum of lambda ([b8a2746](https://github.com/jolars/libslope/commit/b8a27461ab5554f3a112067f3210851d7ef6456e))
+
 ## [4.1.0](https://github.com/jolars/libslope/compare/v4.0.0...v4.1.0) (2025-06-25)
 
 ### Features
