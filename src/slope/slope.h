@@ -323,6 +323,13 @@ public:
   void setRandomSeed(const int seed);
 
   /**
+   * @brief Sets the random seed
+   *
+   * @param seed The value to set for the path length.
+   */
+  void setRandomSeed(std::optional<int> seed);
+
+  /**
    * @brief Gets the maximum number of iterations allowed for the
    * alpha estimation procedure
    */

@@ -286,6 +286,15 @@ Slope::setRandomSeed(const int seed)
   this->random_seed = seed;
 }
 
+void
+Slope::setRandomSeed(std::optional<int> seed)
+{
+  if (seed.has_value() && *seed < 0) {
+    throw std::invalid_argument("seed must be >= 0");
+  }
+
+  this->random_seed = seed;
+}
 int
 Slope::getAlphaEstimationMaxIterations() const
 {
