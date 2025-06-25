@@ -44,7 +44,8 @@ setupModel(bool fit_intercept,
            double dev_change_tol,
            double dev_ratio_tol,
            double alpha_min_ratio,
-           const std::string& hybrid_cd_type)
+           const std::string& hybrid_cd_type,
+           int random_seed)
 {
   slope::Slope model;
 
@@ -61,6 +62,7 @@ setupModel(bool fit_intercept,
   model.setScaling(scaling_type);
   model.setTol(tol);
   model.setHybridCdType(hybrid_cd_type);
+  model.setRandomSeed(random_seed);
 
   model.setUpdateClusters(true);
 
