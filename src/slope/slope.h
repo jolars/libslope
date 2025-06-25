@@ -330,6 +330,11 @@ public:
   void setRandomSeed(std::optional<int> seed);
 
   /**
+   * @brief Checks if a random seed is set
+   */
+  bool hasRandomSeed() const;
+
+  /**
    * @brief Gets the maximum number of iterations allowed for the
    * alpha estimation procedure
    */
