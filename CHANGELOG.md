@@ -1,5 +1,22 @@
 # Changelog
 
+## [4.0.0](https://github.com/jolars/libslope/compare/v3.1.1...v4.0.0) (2025-06-25)
+
+### ⚠ BREAKING CHANGES
+
+* pass RNG, not seed, to `CoordinateDescent`
+
+### Features
+
+* add `getRandomSeed()` to `Slope` ([e096c33](https://github.com/jolars/libslope/commit/e096c335af375ec957a4e754533df769092abdd2))
+* add `hasRandomSeed()` to `Slope` ([1c163da](https://github.com/jolars/libslope/commit/1c163da08c69452e99f1333b71a3e1c8b83c3217))
+* default `random_seed` to 0 ([fbdca8a](https://github.com/jolars/libslope/commit/fbdca8a4d518e55168304e3765035d83d9f90660))
+* **julia:** set cluster updating to `true` ([5ad7153](https://github.com/jolars/libslope/commit/5ad71537346301595744f5140937f78efd125b65))
+* **julia:** support `setHybridCdType()` ([9a17d69](https://github.com/jolars/libslope/commit/9a17d697cd1de5f124c62be458ace19bc6c324be))
+* **julia:** support setting random seed ([87ee386](https://github.com/jolars/libslope/commit/87ee3866c7d2b68e6669bce78e776b4e13d39d0d))
+* overload `setRandomSeed` for `std::optional<int>` ([35727e4](https://github.com/jolars/libslope/commit/35727e4cb0fcd3a2b26cfcba9145ca18d83d5848))
+* pass RNG, not seed, to `CoordinateDescent` ([7861782](https://github.com/jolars/libslope/commit/7861782eb3eb925f389737928f6f434e41922e4f))
+
 ## [3.1.1](https://github.com/jolars/libslope/compare/v3.1.0...v3.1.1) (2025-06-24)
 
 ### Bug Fixes
