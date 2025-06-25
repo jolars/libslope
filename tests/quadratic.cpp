@@ -1,4 +1,5 @@
 #include "generate_data.hpp"
+#include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -370,4 +371,18 @@ TEST_CASE("Low regularization", "[quadratic]")
   double gap = fit.getGaps().back();
 
   REQUIRE(gap <= 1e-10);
+}
+
+TEST_CASE("Lasso", "[quadratic][lasso]")
+{
+  using namespace Catch::Matchers;
+
+  auto [x, y] = loadData("tests/data/diabetes.csv");
+
+  slope::Slope model;
+
+  model.setSolver("hybrid");
+  model.setLambdaType("lasso");
+
+  auto fit = model.path(x, y);
 }
