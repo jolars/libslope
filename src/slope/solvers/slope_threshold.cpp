@@ -6,7 +6,7 @@ namespace slope {
 std::tuple<double, int>
 slopeThreshold(const double x,
                const int j,
-               const Eigen::ArrayXd lambdas,
+               const Eigen::ArrayXd& lambda_cumsum,
                const Clusters& clusters)
 {
   using std::size_t;
@@ -16,25 +16,10 @@ slopeThreshold(const double x,
   const size_t cluster_size = clusters.cluster_size(j);
   const double abs_x = std::abs(x);
   const int sign_x = sign(x);
-  const size_t n_lambda = lambdas.size();
-
-  // Prepare a lazy cumulative sum of lambdas.
-  // cumsum[i] holds sum_{k=0}^{i-1} lambdas(k) with cumsum[0] = 0.
-  std::vector<double> cumsum(n_lambda + 1, 0.0);
-  size_t computed = 0; // Last index for which cum has been computed.
-
-  // getCum(i) computes and returns cumsum[i] on demand.
-  auto getCumSum = [&](size_t i) -> double {
-    while (computed < i) {
-      computed++;
-      cumsum[computed] = cumsum[computed - 1] + lambdas(computed - 1);
-    }
-    return cumsum[i];
-  };
 
   // getLambdaSum(start, len) returns sum of lambdas from start to start+len-1
   auto getLambdaSum = [&](size_t start, size_t len) -> double {
-    return getCumSum(start + len) - getCumSum(start);
+    return lambda_cumsum(start + len) - lambda_cumsum(start);
   };
 
   // Determine whether the update moves upward.

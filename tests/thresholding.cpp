@@ -1,6 +1,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/math.h>
 #include <slope/regularization_sequence.h>
 #include <slope/solvers/slope_threshold.h>
 
@@ -17,6 +18,8 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
   beta << 4, -1, 4, 0.5, 0;
   lambdas << 4, 3.0, 2.0, 1.0, 0.5;
 
+  Eigen::ArrayXd lambda_cumsum = slope::cumSum(lambdas, true);
+
   // Three clusters: {0, 2}, {1}, {3}
   // Coefficients:     4,     1,  0.5
 
@@ -28,7 +31,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     double x = 10.0; // Large enough to trigger direction_up
     int j = 1;
 
-    auto [y, idx] = slopeThreshold(x, j, lambdas, clusters);
+    auto [y, idx] = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     // Should be new top cluster
     REQUIRE(y == 6.0);
@@ -41,7 +44,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     double x = 3.5; // Small enough to not trigger direction_up
     int j = 1;
 
-    auto [y, idx] = slopeThreshold(x, j, lambdas, clusters);
+    auto [y, idx] = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     REQUIRE(y == 1.5);
     REQUIRE(idx == 1);
@@ -49,7 +52,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     x = 2.9; // Should not move
     j = 1;
 
-    std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
+    std::tie(y, idx) = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     REQUIRE(idx == 1);
     REQUIRE_THAT(y, WithinAbs(0.9, 1e-4));
@@ -57,7 +60,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     x = 1; // Should merge with zero cluster
     j = 1;
 
-    std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
+    std::tie(y, idx) = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     REQUIRE(idx == 3);
     REQUIRE(y == 0);
@@ -65,7 +68,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     x = 2.9; // Should merge with second cluster
     j = 2;
 
-    std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
+    std::tie(y, idx) = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     REQUIRE(idx == 1);
     REQUIRE(y == 1);
@@ -77,7 +80,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     double x = -9.0;
     int j = 2;
 
-    auto [y, idx] = slopeThreshold(x, j, lambdas, clusters);
+    auto [y, idx] = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     REQUIRE(y == -5);
     REQUIRE(idx == 0);
@@ -85,7 +88,7 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     x = -5.0;
     j = 2;
 
-    std::tie(y, idx) = slopeThreshold(x, j, lambdas, clusters);
+    std::tie(y, idx) = slopeThreshold(x, j, lambda_cumsum, clusters);
 
     CHECK(y <= 0); // Output should maintain sign of input
     CHECK(idx >= 0);

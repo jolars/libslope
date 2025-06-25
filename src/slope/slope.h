@@ -840,7 +840,7 @@ public:
 
     int m = y.cols();
 
-    Eigen::ArrayXd lambda_relax = Eigen::ArrayXd::Zero(p * m);
+    Eigen::ArrayXd lambda_cumsum_relax = Eigen::ArrayXd::Zero(p * m + 1);
 
     auto working_set = activeSet(beta);
 
@@ -906,7 +906,7 @@ public:
                                                     beta,
                                                     working_residual,
                                                     clusters,
-                                                    lambda_relax,
+                                                    lambda_cumsum_relax,
                                                     x,
                                                     w,
                                                     x_centers,
