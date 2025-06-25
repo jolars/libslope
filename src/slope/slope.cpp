@@ -301,6 +301,17 @@ Slope::hasRandomSeed() const
 {
   return random_seed.has_value();
 }
+
+int
+Slope::getRandomSeed() const
+{
+  if (!random_seed.has_value()) {
+    throw std::runtime_error("Random seed is not set.");
+  }
+
+  return *random_seed;
+}
+
 int
 Slope::getAlphaEstimationMaxIterations() const
 {
