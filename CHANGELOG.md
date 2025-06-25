@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.1.0](https://github.com/jolars/libslope/compare/v4.0.0...v4.1.0) (2025-06-25)
+
+### Features
+
+* make `cd_type = "permuted"` the default ([62adfd4](https://github.com/jolars/libslope/commit/62adfd4dab6b84ff861eabe3119cb681dde6ca2f))
+
+### Bug Fixes
+
+* fix bug in thresholding when direction is up ([c61acbd](https://github.com/jolars/libslope/commit/c61acbd338942c46259ea7f181ab2363d413a323))
+
 ## [4.0.0](https://github.com/jolars/libslope/compare/v3.1.1...v4.0.0) (2025-06-25)
 
 ### ⚠ BREAKING CHANGES
