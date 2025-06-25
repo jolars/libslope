@@ -990,7 +990,7 @@ private:
   int max_it_outer_relax = 50;
   int path_length = 100;
   std::optional<int> max_clusters = std::nullopt;
-  std::optional<int> random_seed = std::nullopt;
+  std::optional<int> random_seed = 0;
   std::string alpha_type = "path";
   std::string cd_type = "cyclical";
   std::string centering_type = "mean";
