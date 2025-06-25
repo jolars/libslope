@@ -33,6 +33,7 @@ cv_slope_dense(jlcxx::ArrayRef<double, 2> x_in,
                double dev_change_tol,
                double dev_ratio_tol,
                double alpha_min_ratio,
+               const std::string& hybrid_cd_type,
                std::int64_t n_folds,
                std::int64_t n_repeats,
                std::string metric,
@@ -57,7 +58,8 @@ cv_slope_dense(jlcxx::ArrayRef<double, 2> x_in,
                                   max_clusters,
                                   dev_change_tol,
                                   dev_ratio_tol,
-                                  alpha_min_ratio);
+                                  alpha_min_ratio,
+                                  hybrid_cd_type);
 
   Map<MatrixXd> x_map(x_in.data(), n, p);
   Map<VectorXd> y(y_in.data(), n);
@@ -168,6 +170,7 @@ cv_slope_sparse(jlcxx::ArrayRef<std::int64_t, 1> x_colptr,
                 double dev_change_tol,
                 double dev_ratio_tol,
                 double alpha_min_ratio,
+                const std::string& hybrid_cd_type,
                 std::int64_t n_folds,
                 std::int64_t n_repeats,
                 std::string metric,
@@ -192,7 +195,8 @@ cv_slope_sparse(jlcxx::ArrayRef<std::int64_t, 1> x_colptr,
                                   max_clusters,
                                   dev_change_tol,
                                   dev_ratio_tol,
-                                  alpha_min_ratio);
+                                  alpha_min_ratio,
+                                  hybrid_cd_type);
 
   auto x_map = mapSparseJuliaArray(x_colptr, x_rowval, x_vals, n, p);
   Map<VectorXd> y(y_in.data(), n);

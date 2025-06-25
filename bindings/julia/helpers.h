@@ -23,7 +23,8 @@ setupModel(bool fit_intercept,
            std::int64_t max_clusters,
            double dev_change_tol,
            double dev_ratio_tol,
-           double alpha_min_ratio);
+           double alpha_min_ratio,
+           const std::string& hybrid_cd_type);
 
 void
 returnOutput(const slope::SlopePath& res,
@@ -36,8 +37,7 @@ returnOutput(const slope::SlopePath& res,
              jlcxx::ArrayRef<double, 1> lambda_out);
 
 std::vector<std::vector<std::vector<int>>>
-createCvFolds(const std::vector<std::int64_t>& fold_indices, 
+createCvFolds(const std::vector<std::int64_t>& fold_indices,
               std::int64_t n,
               std::int64_t n_folds,
               std::int64_t n_repeats);
-
