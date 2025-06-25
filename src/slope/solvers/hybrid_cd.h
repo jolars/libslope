@@ -318,8 +318,9 @@ computeClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
  * @param x_scales The scale values of the data matrix columns
  * @param intercept Shuold an intervept be fit?
  * @param jit_normalization Type o fJIT normalization.
- * @param update_clusters Flag indicating whether to update the cluster
- * information
+ * @param rng Random number generator for shuffling indices in permuted CD.
+ * @param update_clusters Flag indicating whether to update the clusters
+ *   after each uupdate.
  *
  * @see Clusters
  * @see SortedL1Norm
@@ -339,8 +340,8 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const bool intercept,
                   const JitNormalization jit_normalization,
                   const bool update_clusters,
-                  const std::string& cd_type = "cyclical",
-                  const std::optional<int>& seed = std::nullopt)
+                  std::mt19937& rng,
+                  const std::string& cd_type = "cyclical")
 {
   using namespace Eigen;
 
@@ -360,14 +361,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
   }
 
   if (cd_type == "permuted") {
-    std::mt19937 generator;
-    if (seed.has_value()) {
-      generator.seed(seed.value());
-    } else {
-      std::random_device rd;
-      generator.seed(rd());
-    }
-    std::shuffle(indices.begin(), indices.end(), generator);
+    std::shuffle(indices.begin(), indices.end(), rng);
   }
 
   for (int c_ind : indices) {

@@ -448,7 +448,8 @@ public:
                               this->intercept,
                               this->update_clusters,
                               this->cd_iterations,
-                              this->cd_type);
+                              this->cd_type,
+                              this->random_seed);
 
     updateGradient(gradient,
                    x.derived(),
@@ -861,6 +862,14 @@ public:
 
     slope::Clusters clusters(beta);
 
+    std::mt19937 rng;
+
+    if (random_seed.has_value()) {
+      rng.seed(random_seed.value());
+    } else {
+      rng.seed(std::random_device{}());
+    }
+
     int passes = 0;
 
     for (int irls_it = 0; irls_it < max_it_outer_relax; irls_it++) {
@@ -905,8 +914,8 @@ public:
                                                     intercept,
                                                     jit_normalization,
                                                     update_clusters,
-                                                    cd_type,
-                                                    random_seed);
+                                                    rng,
+                                                    cd_type);
 
         if (max_abs_gradient < tol_relax) {
           break;
