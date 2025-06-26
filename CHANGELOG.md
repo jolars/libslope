@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.1.0](https://github.com/jolars/libslope/compare/v5.0.1...v5.1.0) (2025-06-26)
+
+### Features
+
+* **julia:** expose predictions API ([26f7c2f](https://github.com/jolars/libslope/commit/26f7c2f76f7142a2224e1e277665c67bb9fb75c0))
+
+### Bug Fixes
+
+* **julia:** include `predict.cpp` ([28caa56](https://github.com/jolars/libslope/commit/28caa56d2e391a2f6ea63f14db2c668d4565374c))
+
 ## [5.0.1](https://github.com/jolars/libslope/compare/v5.0.0...v5.0.1) (2025-06-26)
 
 ### Bug Fixes
