@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.1.2](https://github.com/jolars/libslope/compare/v5.1.1...v5.1.2) (2025-06-26)
+
+### Bug Fixes
+
+* **python:** change `value()` to dereferencing ([9c9a768](https://github.com/jolars/libslope/commit/9c9a768fea2d0f63803bd6a21b41931f362ef8fb))
+
 ## [5.1.1](https://github.com/jolars/libslope/compare/v5.1.0...v5.1.1) (2025-06-26)
 
 ### Bug Fixes
