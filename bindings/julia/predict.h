@@ -7,4 +7,7 @@
 #include <slope/losses/setup_loss.h>
 
 std::tuple<jlcxx::Array<double>, int>
-slope_predict(const Eigen::MatrixXd& eta, const std::string& loss_type);
+slope_predict(jlcxx::ArrayRef<double, 2> eta_in,
+              const int n,
+              const int m,
+              const std::string& loss_type);
