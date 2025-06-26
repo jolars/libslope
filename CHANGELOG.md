@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.0.1](https://github.com/jolars/libslope/compare/v5.0.0...v5.0.1) (2025-06-26)
+
+### Bug Fixes
+
+* **julia:** pass random seed correctly ([30b650e](https://github.com/jolars/libslope/commit/30b650e6c86e8c8980d525454902de8e950ef3fb))
+
 ## [5.0.0](https://github.com/jolars/libslope/compare/v4.1.0...v5.0.0) (2025-06-25)
 
 ### ⚠ BREAKING CHANGES
