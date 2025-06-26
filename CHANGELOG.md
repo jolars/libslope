@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.1.1](https://github.com/jolars/libslope/compare/v5.1.0...v5.1.1) (2025-06-26)
+
+### Bug Fixes
+
+* **julia:** take `jlcxx::ArrayRef` instead of `Eigen` type ([2a05bc1](https://github.com/jolars/libslope/commit/2a05bc1e6733fac725e496add578fdb3394fc7ab))
+
 ## [5.1.0](https://github.com/jolars/libslope/compare/v5.0.1...v5.1.0) (2025-06-26)
 
 ### Features
