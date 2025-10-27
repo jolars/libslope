@@ -1,5 +1,15 @@
 # Changelog
 
+## [6.0.0](https://github.com/jolars/libslope/compare/v5.1.2...v6.0.0) (2025-10-27)
+
+### ⚠ BREAKING CHANGES
+
+* use include folder instead
+
+### Code Refactoring
+
+* use include folder instead ([da3d8f8](https://github.com/jolars/libslope/commit/da3d8f8281b01ab882a52630441cdc696a1295b5))
+
 ## [5.1.2](https://github.com/jolars/libslope/compare/v5.1.1...v5.1.2) (2025-06-26)
 
 ### Bug Fixes
