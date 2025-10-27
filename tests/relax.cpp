@@ -77,7 +77,8 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 
     auto relaxed_fit = model.relax(fit, x, y);
 
-    auto [beta0_ols, beta_ols] = fitOls(slope::subsetCols(x, { 1 }), y);
+    auto [beta0_ols, beta_ols] =
+      slope::detail::fitOls(slope::subsetCols(x, { 1 }), y);
 
     Eigen::VectorXd coef = relaxed_fit.getCoefs();
     std::vector<double> coef_target = { 0, 2.1 };
@@ -97,7 +98,8 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
     auto relaxed_fit = model.relax(fit, x, y, gamma);
     Eigen::VectorXd coef = relaxed_fit.getCoefs();
 
-    auto [beta0_ols, beta_ols] = fitOls(slope::subsetCols(x, { 1 }), y);
+    auto [beta0_ols, beta_ols] =
+      slope::detail::fitOls(slope::subsetCols(x, { 1 }), y);
 
     Eigen::VectorXd full_coefs = model.relax(fit, x, y, 0).getCoefs();
 
@@ -151,7 +153,7 @@ TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 
     Eigen::MatrixXd x_collapsed = x * U;
 
-    auto [beta0_ols, beta_ols] = fitOls(x_collapsed, y);
+    auto [beta0_ols, beta_ols] = slope::detail::fitOls(x_collapsed, y);
 
     Eigen::VectorXd coef = relaxed_fit.getCoefs();
 

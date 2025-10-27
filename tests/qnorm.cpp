@@ -1,7 +1,7 @@
+#include "../src/slope/qnorm.h"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <limits>
-#include <slope/qnorm.h>
 
 TEST_CASE("Check that normal quantile algorithm works", "[stats]")
 {

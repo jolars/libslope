@@ -11,6 +11,8 @@
 
 TEST_CASE("OLS on small dense matrix without intercept", "[ols]")
 {
+  using namespace slope::detail;
+
   // Simple system: y = 2*x + 3*z
   Eigen::MatrixXd X(3, 2);
   Eigen::VectorXd y(3);
@@ -34,6 +36,8 @@ TEST_CASE("OLS on small dense matrix without intercept", "[ols]")
 
 TEST_CASE("OLS on small dense matrix with intercept", "[ols]")
 {
+  using namespace slope::detail;
+
   // y = 10 + 1*x + 2*z
   Eigen::MatrixXd X(3, 2);
   Eigen::VectorXd y(3);
@@ -60,6 +64,8 @@ TEST_CASE("OLS on small dense matrix with intercept", "[ols]")
 
 TEST_CASE("OLS on small sparse matrix with intercept", "[ols][sparse]")
 {
+  using namespace slope::detail;
+
   // Constructing a sparse matrix with the same relationship:
   // y = 5 + 2*x + 3*z
   typedef Eigen::Triplet<double> T;

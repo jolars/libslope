@@ -1,5 +1,5 @@
 #include "slope/losses/logistic.h"
-#include "../src/slope/slope.h"
+#include "slope/slope.h"
 #include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
