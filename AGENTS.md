@@ -1,4 +1,4 @@
-# Copilot Instructions for libslope
+# Agent Instructions for libslope
 
 ## Repository Overview
 
@@ -85,6 +85,7 @@ cmake/               # CMake helper modules
 ## CI/CD Pipeline
 
 **ci.yaml** (runs on push/PR):
+
 1. **build-and-test:** Ubuntu/macOS/Windows matrix → install deps → cmake configure/build/install → ctest
 2. **code-coverage:** Ubuntu only, `-DENABLE_COVERAGE=ON`, uploads to Codecov (requires lcov/gcovr)
 3. **release:** semantic-release updates version.txt/CHANGELOG.md (requires Node.js)
@@ -98,6 +99,7 @@ cmake/               # CMake helper modules
 **Workflow:** Explore first (find/grep) → minimal changes → incremental build (`cmake --build build --parallel 4`, no reconfigure unless CMakeLists.txt changes) → test frequently (`ctest --test-dir build --output-on-failure`)
 
 **Common patterns:**
+
 - New source: Edit `src/CMakeLists.txt` add_library()
 - New test: Edit root `CMakeLists.txt` add_executable(tests)
 - Loss functions: `src/slope/losses/`
