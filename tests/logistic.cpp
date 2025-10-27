@@ -1,6 +1,6 @@
 #include "slope/losses/logistic.h"
-#include "slope/slope.h"
 #include "generate_data.hpp"
+#include "slope/slope.h"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
