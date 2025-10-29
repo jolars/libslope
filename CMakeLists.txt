@@ -117,7 +117,7 @@ if(BUILD_DOCS)
     "${AWESOME_CSS_DIR}/doxygen-awesome-sidebar-only.css"
   )
   set(DOXYGEN_DISABLE_INDEX NO)
-  set(DOXYGEN_EXCLUDE_SYMBOLS qualpal::metrics::detail qualpal::detail)
+  set(DOXYGEN_EXCLUDE_SYMBOLS slope::detail)
   set(DOXYGEN_FULL_SIDEBAR NO)
   set(DOXYGEN_GENERATE_TREEVIEW YES)
   set(DOXYGEN_HTML_COLORSTYLE LIGHT)
