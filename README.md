@@ -1,6 +1,6 @@
 # SLOPE <img src='https://raw.githubusercontent.com/jolars/libslope/refs/heads/main/assets/slope-logo.png' align="right" height="139" />
 
-[![CI](https://github.com/jolars/libslope/actions/workflows/ci.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/ci.yaml)
+[![Build-and-Test](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml)
 [![codecov](https://codecov.io/gh/jolars/libslope/graph/badge.svg?token=y0mJN9eqYr)](https://codecov.io/gh/jolars/libslope)
 
 Libslope is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
@@ -10,17 +10,17 @@ entirely through C++.
 
 ## Public API
 
-Libslope provides a clean public API through the `include/` directory with minimal dependencies. 
+Libslope provides a clean public API through the `include/` directory with minimal dependencies.
 The public API exposes three main components:
 
 - **Core SLOPE functionality** - Main classes for fitting SLOPE models (`Slope`, `SlopeFit`, `SlopePath`)
-- **Cross-validation** - Hyperparameter tuning with k-fold cross-validation 
+- **Cross-validation** - Hyperparameter tuning with k-fold cross-validation
 - **Proximal operators** - Direct access to the sorted L1 penalty (`SortedL1Norm`)
 
 To use the public API, simply include:
 
 ```cpp
-#include <slope.h>  // Main public API header
+#include <slope.h> // Main public API header
 ```
 
 See [docs/public_api.md](docs/public_api.md) for complete documentation.
