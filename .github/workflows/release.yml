@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   build-and-test:
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/build-and-test.yaml
     permissions:
       actions: write
       contents: read
