@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.0.1](https://github.com/jolars/libslope/compare/v6.0.0...v6.0.1) (2025-10-29)
+
+### Bug Fixes
+
+* use library paths for non-relative includes ([f3435ff](https://github.com/jolars/libslope/commit/f3435ff6cd6ab77504051c754c6b3e5211e7eb76))
+
 ## [6.0.0](https://github.com/jolars/libslope/compare/v5.1.2...v6.0.0) (2025-10-27)
 
 ### ⚠ BREAKING CHANGES
