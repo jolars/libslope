@@ -34,6 +34,25 @@ find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 add_subdirectory(src)
 
+target_include_directories(
+  slope
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(slope PUBLIC Eigen3::Eigen)
+
+install(TARGETS slope DESTINATION lib)
+
+install(
+  DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+  DESTINATION include
+  FILES_MATCHING
+  PATTERN "*.h"
+  PATTERN "*.hpp"
+)
+
 if(BUILD_TESTING)
   find_package(Catch2 3 REQUIRED)
 

@@ -27,25 +27,3 @@ add_library(
   slope/timer.cpp
   slope/utils.cpp
 )
-
-target_include_directories(
-  slope
-  PUBLIC 
-    ${CMAKE_SOURCE_DIR}/include  # Public headers
-    ${EIGEN3_INCLUDE_DIR}
-  PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}  # For implementation files to access remaining internal headers
-)
-
-target_link_libraries(slope PUBLIC Eigen3::Eigen)
-
-install(TARGETS slope DESTINATION lib)
-
-# Install public headers only
-install(
-  DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-  DESTINATION include
-  FILES_MATCHING
-  PATTERN "*.h"
-  PATTERN "*.hpp"
-)
