@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.1.0](https://github.com/jolars/libslope/compare/v6.0.1...v6.1.0) (2025-11-06)
+
+### Features
+
+* add `check_interrupt()` callback ([806d515](https://github.com/jolars/libslope/commit/806d515c67090e968cc0caf7b4bd6cd1ec06b199))
+
 ## [6.0.1](https://github.com/jolars/libslope/compare/v6.0.0...v6.0.1) (2025-10-29)
 
 ### Bug Fixes
