@@ -233,7 +233,7 @@ public:
    *
    * @param screening_type Type of screening. Supported values are:
    * are:
-   *   - "strong": Strong screening rule ()
+   *   - "strong": Strong screening rule
    *   - "none": No screening
    */
   void setScreening(const std::string& screening_type);
