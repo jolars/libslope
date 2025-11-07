@@ -505,7 +505,14 @@ public:
     // Regularization path loop
     for (int path_step = 0; path_step < this->path_length; ++path_step) {
       // Check for interrupt at the start of each path step
-      if (check_interrupt()) {
+      bool local_interrupt = false;
+#ifdef _OPENMP
+#pragma omp critical(check_interrupt)
+#endif
+      {
+        local_interrupt = check_interrupt();
+      }
+      if (local_interrupt) {
         interrupt = true;
         break;
       }
@@ -627,8 +634,15 @@ public:
         }
 
         if (it % INTERRUPT_FREQ == 0) {
-          interrupt = check_interrupt();
-          if (interrupt) {
+          bool local_interrupt = false;
+#ifdef _OPENMP
+#pragma omp critical(check_interrupt)
+#endif
+          {
+            local_interrupt = check_interrupt();
+          }
+          if (local_interrupt) {
+            interrupt = true;
             break;
           }
         }
@@ -719,11 +733,12 @@ public:
    * returning coefficients and optimization details in a SlopeFit object.
    */
   template<typename T>
-  SlopeFit fit(Eigen::EigenBase<T>& x,
-               const Eigen::MatrixXd& y_in,
-               const double alpha = 1.0,
-               Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
-               std::function<bool()> check_interrupt = []() { return false; })
+  SlopeFit fit(
+    Eigen::EigenBase<T>& x,
+    const Eigen::MatrixXd& y_in,
+    const double alpha = 1.0,
+    Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
+    std::function<bool()> check_interrupt = []() { return false; })
   {
     Eigen::ArrayXd alpha_arr(1);
     alpha_arr(0) = alpha;
@@ -757,11 +772,10 @@ public:
    * variables selected
    */
   template<typename T>
-  SlopePath estimateAlpha(Eigen::EigenBase<T>& x,
-                          Eigen::MatrixXd& y,
-                          std::function<bool()> check_interrupt = []() {
-                            return false;
-                          })
+  SlopePath estimateAlpha(
+    Eigen::EigenBase<T>& x,
+    Eigen::MatrixXd& y,
+    std::function<bool()> check_interrupt = []() { return false; })
   {
     int n = x.rows();
     int p = x.cols();
@@ -778,7 +792,8 @@ public:
     if (n >= p + 30) {
       alpha(0) = estimateNoise(x, y, this->intercept) / n;
       this->alpha_estimate = alpha(0);
-      result = model_copy.path(x, y, alpha, Eigen::ArrayXd::Zero(0), check_interrupt);
+      result =
+        model_copy.path(x, y, alpha, Eigen::ArrayXd::Zero(0), check_interrupt);
     } else {
       for (int it = 0; it < this->alpha_est_maxit; ++it) {
         T x_selected = subsetCols(x.derived(), selected);
@@ -789,7 +804,8 @@ public:
         alpha(0) = estimateNoise(x_selected, y, this->intercept) / n;
         this->alpha_estimate = alpha(0);
 
-        result = model_copy.path(x, y, alpha, Eigen::ArrayXd::Zero(0), check_interrupt);
+        result = model_copy.path(
+          x, y, alpha, Eigen::ArrayXd::Zero(0), check_interrupt);
         auto coefs = result.getCoefs().back();
 
         for (typename Eigen::SparseMatrix<double>::InnerIterator it(coefs, 0);
