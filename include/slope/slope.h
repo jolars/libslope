@@ -727,6 +727,8 @@ public:
    * @param alpha Mixing parameter for elastic net regularization
    * @param lambda Vector of regularization parameters (if empty, computed
    * automatically)
+   * @param check_interrupt Optional lambda to check for user interrupt. It runs
+   *  periodically during the fitting.
    * @return SlopeFit Object containing fitted model and optimization metrics
    *
    * Fits a single SLOPE model with specified regularization parameters,
