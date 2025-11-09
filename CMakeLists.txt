@@ -30,7 +30,11 @@ if(OpenMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 REQUIRED NO_MODULE)
+
+if(Eigen3_VERSION VERSION_LESS 3.4)
+  message(FATAL_ERROR "Eigen 3.4 or newer required")
+endif()
 
 add_subdirectory(src)
 
