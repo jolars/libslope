@@ -36,7 +36,7 @@ TEST_CASE("Views", "[views][quadratic]")
     0, 1, 2, 3, 9,
   };
 
-  auto x_view = x(subset, Eigen::all);
+  auto x_view = x(subset, slope::all);
 
   Eigen::VectorXd y_subset = y(subset);
   Eigen::MatrixXd x_subset(subset.size(), p);
