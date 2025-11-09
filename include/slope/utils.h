@@ -20,6 +20,35 @@ namespace slope {
 using slope::all;
 
 /**
+ * Count non-zero elements in a matrix.
+ * 
+ * Helper function for Eigen matrices since nonZeros() was removed from 
+ * dense matrices in Eigen 5.0.0, but still exists for sparse matrices.
+ *
+ * @param x Sparse matrix
+ * @return Number of non-zero elements
+ */
+template<typename Derived>
+Eigen::Index
+nonZeros(const Eigen::SparseMatrixBase<Derived>& x)
+{
+  return x.derived().nonZeros();
+}
+
+/**
+ * Count non-zero elements in a dense matrix.
+ *
+ * @param x Dense matrix
+ * @return Number of non-zero elements
+ */
+template<typename Derived>
+Eigen::Index
+nonZeros(const Eigen::DenseBase<Derived>& x)
+{
+  return (x.array() != 0).count();
+}
+
+/**
  * Sorts the elements in a container in ascending or descending order.
  *
  * This function sorts the elements in the container `v` in either ascending or
@@ -266,7 +295,7 @@ T
 subset(const Eigen::SparseMatrixBase<T>& x, const std::vector<int>& indices)
 {
   std::vector<Eigen::Triplet<double>> triplets;
-  triplets.reserve(x.derived().nonZeros());
+  triplets.reserve(slope::nonZeros(x.derived()));
 
   for (int j = 0; j < x.cols(); ++j) {
     for (typename T::InnerIterator it(x.derived(), j); it; ++it) {
@@ -321,7 +350,7 @@ T
 subsetCols(const Eigen::SparseMatrixBase<T>& x, const std::vector<int>& indices)
 {
   std::vector<Eigen::Triplet<double>> triplets;
-  triplets.reserve(x.derived().nonZeros());
+  triplets.reserve(slope::nonZeros(x.derived()));
 
   for (size_t j_idx = 0; j_idx < indices.size(); ++j_idx) {
     int j = indices[j_idx];
