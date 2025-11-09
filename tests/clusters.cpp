@@ -4,6 +4,7 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_vector.hpp>
 #include <slope/clusters.h>
+#include <slope/utils.h>
 
 TEST_CASE("Clusters", "[clusters]")
 {
@@ -382,7 +383,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());
     REQUIRE(patt.cols() == 3);
-    REQUIRE(patt.nonZeros() == beta.size() - 2);
+    REQUIRE(slope::nonZeros(patt) == beta.size() - 2);
 
     // Check contents
     // Should be:
@@ -425,7 +426,7 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
     // Check dimensions
     REQUIRE(patt.rows() == beta.size());
     REQUIRE(patt.cols() == 3);
-    REQUIRE(patt.nonZeros() == beta.size());
+    REQUIRE(slope::nonZeros(patt) == beta.size());
 
     // Check contents
     // Should be:
@@ -459,6 +460,6 @@ TEST_CASE("Pattern matrix", "[clusters][pattern]")
 
     REQUIRE(patt.rows() == beta.size());
     REQUIRE(patt.cols() == 0); // No columns for an all-zero vector
-    REQUIRE(patt.nonZeros() == 0);
+    REQUIRE(slope::nonZeros(patt) == 0);
   }
 }

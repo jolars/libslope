@@ -8,6 +8,7 @@
 #include <random>
 #include <slope/ols.h>
 #include <slope/slope.h>
+#include <slope/utils.h>
 
 TEST_CASE("OLS on small dense matrix without intercept", "[ols]")
 {
@@ -195,8 +196,8 @@ TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
   REQUIRE(dense_path.getCoefs().size() > 0);
 
   // Some basic sanity checks
-  REQUIRE(dense_coefs.nonZeros() > 0); // Should select at least some variables
-  REQUIRE(dense_coefs.nonZeros() <=
+  REQUIRE(slope::nonZeros(dense_coefs) > 0); // Should select at least some variables
+  REQUIRE(slope::nonZeros(dense_coefs) <=
           p); // Should not select more than p variables
 }
 
@@ -253,8 +254,8 @@ TEST_CASE("Alpha estimation for n < p + 30", "[estimate_alpha]")
   REQUIRE(dense_path.getCoefs().size() > 0);
 
   // Sanity checks
-  REQUIRE(dense_coefs.nonZeros() > 0); // Should select some variables
-  REQUIRE(dense_coefs.nonZeros() < n); // Should select fewer than n variables
+  REQUIRE(slope::nonZeros(dense_coefs) > 0); // Should select some variables
+  REQUIRE(slope::nonZeros(dense_coefs) < n); // Should select fewer than n variables
 }
 
 TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")

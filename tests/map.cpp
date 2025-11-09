@@ -7,6 +7,7 @@
 #include <slope/losses/quadratic.h>
 #include <slope/slope.h>
 #include <slope/threads.h>
+#include <slope/utils.h>
 
 TEST_CASE("Quadratic with Eigen::Map", "[quadratic][map]")
 {
@@ -68,7 +69,7 @@ TEST_CASE("Quadratic with Eigen::Map", "[quadratic][map]")
     Eigen::Map<Eigen::SparseMatrix<double>> x_sparse_map(
       x_sparse.rows(),
       x_sparse.cols(),
-      x_sparse.nonZeros(),
+      slope::nonZeros(x_sparse),
       x_sparse.outerIndexPtr(),
       x_sparse.innerIndexPtr(),
       x_sparse.valuePtr());
