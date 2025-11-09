@@ -45,7 +45,7 @@ template<typename Derived>
 Eigen::Index
 nonZeros(const Eigen::DenseBase<Derived>& x)
 {
-  return (x.array() != 0).count();
+  return (x.derived().array() != 0).count();
 }
 
 /**
