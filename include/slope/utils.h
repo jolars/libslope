@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "eigen_compat.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <algorithm>
@@ -15,6 +16,8 @@
 #include <vector>
 
 namespace slope {
+
+using slope::all;
 
 /**
  * Sorts the elements in a container in ascending or descending order.
@@ -242,7 +245,7 @@ template<typename T>
 typename Eigen::MatrixBase<T>::PlainObject
 subset(const Eigen::DenseBase<T>& x, const std::vector<int>& indices)
 {
-  return x.derived()(indices, Eigen::all);
+  return x.derived()(indices, all);
 }
 
 /**
@@ -298,7 +301,7 @@ template<typename T>
 T
 subsetCols(const Eigen::MatrixBase<T>& x, const std::vector<int>& indices)
 {
-  return x.derived()(Eigen::all, indices);
+  return x.derived()(all, indices);
 }
 
 /**
