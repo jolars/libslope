@@ -30,7 +30,7 @@ if(OpenMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+find_package(Eigen3 3.4...6.0 REQUIRED NO_MODULE)
 
 add_subdirectory(src)
 
