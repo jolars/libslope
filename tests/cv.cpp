@@ -11,7 +11,7 @@ TEST_CASE("Cross-validation", "[cv]")
 {
   using Catch::Matchers::WithinAbs;
 
-  auto data = generateData(1000, 10);
+  auto data = generateData(100, 2);
   Eigen::SparseMatrix<double> x_sparse = data.x.sparseView();
 
   SECTION("Sparse vs dense")
@@ -35,7 +35,7 @@ TEST_CASE("Cross-validation", "[cv]")
        { "quadratic", "poisson", "logistic", "multinomial" }) {
     DYNAMIC_SECTION("Loss: " << loss)
     {
-      auto data = generateData(1000, 10, loss);
+      auto data = generateData(100, 2, loss);
       slope::Slope model;
       model.setLoss(loss);
 

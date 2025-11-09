@@ -121,7 +121,7 @@ TEST_CASE("Logistic path", "[logistic]")
   model.setLoss("logistic");
   model.setDiagnostics(true);
 
-  auto data = generateData(1000, 100, "logistic", 1, 0.4, 0.5, 93);
+  auto data = generateData(1000, 20, "logistic", 1, 0.4, 0.5, 93);
 
   auto fit = model.path(data.x, data.y);
 

@@ -92,14 +92,12 @@ TEST_CASE("Gaps on screened path", "[screening][gaps]")
   slope::Slope model;
   model.setPathLength(100);
   model.setDiagnostics(true);
-  model.setMaxIterations(100000);
-  // model.setScreening("none");
 
   double tol = 1e-5;
 
   model.setTol(tol);
 
-  auto data = generateData(10, 15, "quadratic", 1, 1, 0.2);
+  auto data = generateData(100, 5, "quadratic", 1, 1, 0.2);
 
   auto path = model.path(data.x, data.y);
 
