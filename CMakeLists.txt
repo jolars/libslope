@@ -21,8 +21,6 @@ if(DAP_DEBUG)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wno-cpp")
 endif()
 
-set(PROJECT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
-
 find_package(OpenMP)
 
 if(OpenMP_FOUND)
