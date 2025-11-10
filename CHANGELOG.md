@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.1.1](https://github.com/jolars/libslope/compare/v6.1.0...v6.1.1) (2025-11-10)
+
+### Bug Fixes
+
+* make `nonZeros()` work for non-matrices ([f8a73f7](https://github.com/jolars/libslope/commit/f8a73f7683ed35ccd9334119638c72073a9e5b90))
+* place interrupt check in critical openmp region ([f2273ab](https://github.com/jolars/libslope/commit/f2273ab69dd42e01ac56e58b083f2ccf3a50c409))
+* use `slope::all` in tests too ([1963b95](https://github.com/jolars/libslope/commit/1963b95fe7b54d4f6a3915810e8ee3ca1933af1f))
+* workaround Eigen 5.0.0 breaking change to `all` ([ec1b492](https://github.com/jolars/libslope/commit/ec1b4925913d59657c30b511d3093201d8a40f43))
+
 ## [6.1.0](https://github.com/jolars/libslope/compare/v6.0.1...v6.1.0) (2025-11-06)
 
 ### Features
