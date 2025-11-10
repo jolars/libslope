@@ -3,14 +3,14 @@
 [![Build-and-Test](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml)
 [![codecov](https://codecov.io/gh/jolars/libslope/graph/badge.svg?token=y0mJN9eqYr)](https://codecov.io/gh/jolars/libslope)
 
-Libslope is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
+SLOPE is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
 purpose is to serve as a backend for R and Python packages, but it can also be
 used as a standalone library in the off-chance that you want to fit your models
 entirely through C++.
 
 ## Public API
 
-Libslope provides a clean public API through the `include/` directory with minimal dependencies.
+SLOPE provides a clean public API through the `include/` directory with minimal dependencies.
 The public API exposes three main components:
 
 - **Core SLOPE functionality** - Main classes for fitting SLOPE models (`Slope`, `SlopeFit`, `SlopePath`)
