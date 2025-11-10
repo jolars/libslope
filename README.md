@@ -71,3 +71,7 @@ Now we can retrieve the coefficients by calling `res.getCoefs()`.
 ### Testing
 
 - Catch2
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
