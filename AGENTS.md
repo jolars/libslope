@@ -2,17 +2,11 @@
 
 ## Repository Overview
 
-**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with ~40 source files, ~30 test files, 80 unit tests.
+**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with 28 source files, 30 test files, 81 unit tests.
 
 **Stack:** C++17, CMake 3.15+, Catch2 v3, Doxygen, Eigen 3.4+, OpenMP (optional)
 
 ## Build Instructions
-
-### Prerequisites
-
-**Ubuntu:** `sudo apt-get install -y build-essential libeigen3-dev catch2`
-**macOS:** `brew install eigen catch2`
-**Windows:** `choco install mingw && vcpkg install eigen3 catch2 --triplet x64-mingw-dynamic`
 
 ### Standard Build Process (ALWAYS follow in order)
 
@@ -27,7 +21,7 @@
 **Release:** `-DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF` (optimized)
 **Julia Bindings:** `-DBUILD_JULIA_BINDINGS=ON` (optional)
 
-**Task Runner (Optional):** Project has Taskfile.yml but `go-task` is NOT installed by default. Use CMake commands directly.
+**Task Runner (Optional):** Project has Taskfile.yml.
 
 ### Critical Build Notes
 
@@ -38,23 +32,52 @@
 ### Source Code Layout
 
 ```
-src/slope/           # Main library source code
+include/slope/       # Public API headers
   slope.h            # Main API header
+  losses/            # Loss function headers
+    loss.h           # Base loss class
+    logistic.h       # Logistic regression
+    multinomial.h    # Multinomial regression
+    poisson.h        # Poisson regression
+    quadratic.h      # Gaussian/quadratic loss
+    setup_loss.h     # Loss factory
+  solvers/           # Optimization solver headers
+    solver.h         # Base solver class
+    hybrid.h         # Hybrid FISTA solver
+    hybrid_cd.h      # Coordinate descent solver
+    pgd.h            # Proximal gradient descent
+    setup_solver.h   # Solver factory
+    slope_threshold.h # Thresholding operations
+  [other headers: cv.h, normalize.h, screening.h, score.h, etc.]
+
+src/slope/           # Implementation files
   slope.cpp          # Main implementation
   losses/            # Loss function implementations
-    loss.h           # Base loss class
-    logistic.cpp     # Logistic regression
-    multinomial.cpp  # Multinomial regression
-    poisson.cpp      # Poisson regression
-    quadratic.cpp    # Gaussian/quadratic loss
-  solvers/           # Optimization solvers
-    hybrid.cpp       # Hybrid FISTA solver
-    hybrid_cd.cpp    # Coordinate descent solver
-    pgd.cpp          # Proximal gradient descent
-  [other core files: cv.cpp, normalize.cpp, screening.cpp, etc.]
+    loss.cpp
+    logistic.cpp
+    multinomial.cpp
+    poisson.cpp
+    quadratic.cpp
+    setup_loss.cpp
+  solvers/           # Optimization solver implementations
+    hybrid.cpp
+    hybrid_cd.cpp
+    pgd.cpp
+    setup_solver.cpp
+    slope_threshold.cpp
+  [other implementations: cv.cpp, normalize.cpp, screening.cpp, etc.]
 
-tests/               # Test files (one per component)
-  [80 test files matching src/ structure]
+tests/               # Test files (30 files, 81 tests)
+  alpha_est.cpp
+  assertions.cpp
+  benchmarks.cpp
+  clusters.cpp
+  cv.cpp
+  generate_data.cpp  # Test data generation
+  load_data.cpp      # Test data loading
+  [24 more test files]
+  data/              # Test datasets
+  *.hpp              # Test helpers
 
 bindings/julia/      # Julia language bindings (optional)
 
@@ -80,19 +103,20 @@ cmake/               # CMake helper modules
 **Specific:** `./build/tests "test name"`
 **Benchmarks:** `./build/tests [!benchmark] --benchmark-samples 20`
 
-80 tests using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp` and `tests/load_data.cpp`.
+80 tests using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp`, `tests/load_data.cpp`, and `tests/test_helpers.hpp`.
 
 ## CI/CD Pipeline
 
-**ci.yaml** (runs on push/PR):
+**build-and-test.yaml** (runs on push/PR):
 
 1. **build-and-test:** Ubuntu/macOS/Windows matrix → install deps → cmake configure/build/install → ctest
-2. **code-coverage:** Ubuntu only, `-DENABLE_COVERAGE=ON`, uploads to Codecov (requires lcov/gcovr)
+2. **code-coverage:** Ubuntu only, `-DENABLE_COVERAGE=ON`, uploads to Codecov (requires lcov)
 3. **release:** semantic-release updates version.txt/CHANGELOG.md (requires Node.js)
 
 **docs.yaml:** Manual/release trigger → builds Doxygen → deploys to GitHub Pages
+**codecov.yaml:** Coverage report upload configuration
 
-**Replicate CI locally:** Install deps → `cmake -B build -S . -DBUILD_TESTING=ON` → `cmake --build build` → `ctest --test-dir build --output-on-failure`
+**Replicate CI locally:** Install deps → `cmake -B build -S . -DBUILD_TESTING=ON` → `cmake --build build --parallel 4` → `ctest --test-dir build --output-on-failure`
 
 ## Making Code Changes
 
@@ -100,10 +124,10 @@ cmake/               # CMake helper modules
 
 **Common patterns:**
 
-- New source: Edit `src/CMakeLists.txt` add_library()
-- New test: Edit root `CMakeLists.txt` add_executable(tests)
-- Loss functions: `src/slope/losses/`
-- Solvers: `src/slope/solvers/`
+- New source: Add to `src/CMakeLists.txt` add_library()
+- New test: Add to root `CMakeLists.txt` add_executable(tests)
+- Loss functions: Headers in `include/slope/losses/`, implementations in `src/slope/losses/`
+- Solvers: Headers in `include/slope/solvers/`, implementations in `src/slope/solvers/`
 
 **Style:** C++17, 2-space indent (CMake), `#pragma once`, Eigen for matrices, OpenMP for parallelization
 
@@ -112,7 +136,7 @@ cmake/               # CMake helper modules
 ## Dependencies
 
 **Required:** Eigen 3.4+ (header-only), CMake 3.15+, C++17 compiler, Catch2 v3 (NOT v2)
-**Optional:** OpenMP (auto-detected, recommended), Doxygen+Graphviz (docs), lcov/gcovr (coverage), Node.js (CI only)
+**Optional:** OpenMP (auto-detected, recommended), Doxygen+Graphviz (docs), lcov (coverage), Node.js (CI only)
 **Note:** All system-installed, no vendoring/submodules. Catch2 v3 required (v2 incompatible).
 
 ## Quick Reference
