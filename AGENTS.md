@@ -85,7 +85,6 @@ docs/                # Documentation markdown files
   mainpage.md        # Doxygen main page
   dependencies.md    # Dependency documentation
   getting_started.md # Usage examples
-  convergence.md     # Algorithm details
 
 cmake/               # CMake helper modules
   FindGcov.cmake     # Coverage tool finder
