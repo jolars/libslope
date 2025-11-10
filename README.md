@@ -23,8 +23,6 @@ To use the public API, simply include:
 #include <slope.h> // Main public API header
 ```
 
-See [docs/public_api.md](docs/public_api.md) for complete documentation.
-
 ## Getting Started
 
 First, we define our model. Let's use logistic regression, by setting the
