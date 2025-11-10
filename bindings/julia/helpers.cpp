@@ -8,7 +8,7 @@ mapSparseJuliaArray(jlcxx::ArrayRef<std::int64_t, 1> x_colptr,
                     std::int64_t p)
 {
   // Create adjusted copies of the index arrays (1-indexed to 0-indexed)
-  // TODO: Can we avoid these copies?
+  // TODO: Investigate if we can avoid these copies.
   std::vector<int> adjusted_colptr(x_colptr.size());
   std::vector<int> adjusted_rowval(x_rowval.size());
 
