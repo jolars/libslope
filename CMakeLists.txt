@@ -90,6 +90,7 @@ if(BUILD_TESTING)
     tests/thresholding.cpp
     tests/utils.cpp
     tests/views.cpp
+    tests/zero_variance.cpp
   )
   target_link_libraries(
     tests

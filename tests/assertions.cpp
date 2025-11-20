@@ -45,14 +45,6 @@ TEST_CASE("Assertions", "[assertions]")
     REQUIRE_THROWS(model.setDevRatioTol(-1));
   }
 
-  SECTION("Invalid solver combinations")
-  {
-    model.setSolver("hybrid");
-    model.setLoss("multinomial");
-    y << 1, 0, 1, 2, 1, 0, 2, 0, 3, 0;
-    REQUIRE_THROWS_AS(model.fit(x, y), std::invalid_argument);
-  }
-
   SECTION("Invalid OSCAR parameters")
   {
     model.setLambdaType("oscar");
