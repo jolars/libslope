@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with 28 source files, 30 test files, 81 unit tests.
+**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with 26 source files, 31 test files, 165 unit tests.
 
 **Stack:** C++17, CMake 3.15+, Catch2 v3, Doxygen, Eigen 3.4+, OpenMP (optional)
 
@@ -12,7 +12,7 @@
 
 1. **Configure:** `cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug` (~2-5s, creates build/)
 2. **Build:** `cmake --build build --parallel 4` (~60-120s, produces build/src/libslope.a and build/tests)
-3. **Test:** `ctest --test-dir build --output-on-failure` (~180s for 80 tests, --output-on-failure is REQUIRED)
+3. **Test:** `ctest --test-dir build --output-on-failure` (~180s for 165 tests, --output-on-failure is REQUIRED)
 
 ### Build Variants
 
@@ -94,7 +94,7 @@ cmake/               # CMake helper modules
 
 ### Configuration Files
 
-**CMakeLists.txt** (root, main build), **src/CMakeLists.txt** (library target), **package.json** (semantic-release), **version.txt** (auto-updated by CI), **.gersemirc** (CMake format: 2 spaces)
+**CMakeLists.txt** (root, main build), **src/CMakeLists.txt** (library target), **.releaserc.json** (semantic-release config), **version.txt** (auto-updated by CI), **.gersemirc** (CMake format: 2 spaces)
 
 ## Testing
 
@@ -102,18 +102,17 @@ cmake/               # CMake helper modules
 **Specific:** `./build/tests "test name"`
 **Benchmarks:** `./build/tests [!benchmark] --benchmark-samples 20`
 
-80 tests using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp`, `tests/load_data.cpp`, and `tests/test_helpers.hpp`.
+165 tests using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp`, `tests/load_data.cpp`, and `tests/test_helpers.hpp`.
 
 ## CI/CD Pipeline
 
-**build-and-test.yaml** (runs on push/PR):
+**build-and-test.yaml** (runs on push/PR): Ubuntu/macOS/Windows matrix → install deps → cmake configure/build/install → ctest
 
-1. **build-and-test:** Ubuntu/macOS/Windows matrix → install deps → cmake configure/build/install → ctest
-2. **code-coverage:** Ubuntu only, `-DENABLE_COVERAGE=ON`, uploads to Codecov (requires lcov)
-3. **release:** semantic-release updates version.txt/CHANGELOG.md (requires Node.js)
+**codecov.yaml** (runs on push/PR): Ubuntu only, `-DENABLE_COVERAGE=ON`, uploads to Codecov (requires lcov/gcovr)
 
-**docs.yaml:** Manual/release trigger → builds Doxygen → deploys to GitHub Pages
-**codecov.yaml:** Coverage report upload configuration
+**release.yml** (manual trigger): Runs build-and-test → semantic-release updates version.txt/CHANGELOG.md
+
+**docs.yaml**: Manual/release trigger → builds Doxygen → deploys to GitHub Pages
 
 **Replicate CI locally:** Install deps → `cmake -B build -S . -DBUILD_TESTING=ON` → `cmake --build build --parallel 4` → `ctest --test-dir build --output-on-failure`
 
@@ -131,6 +130,28 @@ cmake/               # CMake helper modules
 **Style:** C++17, 2-space indent (CMake), `#pragma once`, Eigen for matrices, OpenMP for parallelization
 
 **Known quirks:** TODOs exist (optimization opportunities), hybrid solver has convergence issues with some multinomial data, warm starts disabled in some solvers
+
+## Commit Message Conventions
+
+**Use [Conventional Commits](https://www.conventionalcommits.org/)** for all commits. Format: `<type>(<scope>): <subject>`
+
+**Types:**
+- `feat`: New feature (minor version bump)
+- `fix`: Bug fix (patch version bump)
+- `docs`: Documentation changes
+- `style`: Code style/formatting
+- `refactor`: Code refactoring
+- `perf`: Performance improvements
+- `test`: Test changes
+- `build`: Build system changes
+- `ci`: CI/CD changes
+- `chore`: Other non-src/test changes
+
+**Breaking changes:** Use `feat!:` or add `BREAKING CHANGE:` in footer (major version bump)
+
+**Examples:** `feat(solvers): add ADMM solver`, `fix(loss): correct Poisson gradient`, `docs: update README`, `test(cv): add edge case tests`
+
+**Note:** semantic-release auto-generates version.txt and CHANGELOG.md from commit messages
 
 ## Dependencies
 
