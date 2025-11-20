@@ -155,8 +155,8 @@ TEST_CASE("Cross-validation: user folds", "[cv][user_folds]")
   cv_config.hyperparams["q"] = { 0.1, 0.2 };
   cv_config.predefined_folds = user_folds;
 
-  REQUIRE_THROWS_AS(crossValidate(model, data.x, data.y, cv_config),
-                    std::runtime_error);
+  // Should not throw even with potential zero-variance columns from sparse data
+  REQUIRE_NOTHROW(crossValidate(model, data.x, data.y, cv_config));
 }
 
 TEST_CASE("Cross-validation: do not copy x", "[cv][user_folds]")
