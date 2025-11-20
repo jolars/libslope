@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.1.2](https://github.com/jolars/libslope/compare/v6.1.1...v6.1.2) (2025-11-20)
+
+### Bug Fixes
+
+* handle zero-variance columns instead of throwing ([#164](https://github.com/jolars/libslope/issues/164)) ([a61895f](https://github.com/jolars/libslope/commit/a61895f093a2dcd83d5a202dce6e426ef4841eb4))
+
 ## [6.1.1](https://github.com/jolars/libslope/compare/v6.1.0...v6.1.1) (2025-11-10)
 
 ### Bug Fixes
