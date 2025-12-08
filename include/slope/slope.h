@@ -35,6 +35,16 @@
 namespace slope {
 
 /**
+ * @brief Default no-op interrupt checker
+ * @return Always returns false
+ */
+inline bool
+defaultInterruptChecker()
+{
+  return false;
+}
+
+/**
  * @brief The SLOPE model.
  *
  * This class implements the SLOPE algorithm for regularized regression
@@ -380,7 +390,7 @@ public:
     const Eigen::MatrixXd& y_in,
     Eigen::ArrayXd alpha = Eigen::ArrayXd::Zero(0),
     Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
-    std::function<bool()> check_interrupt = []() { return false; })
+    std::function<bool()> check_interrupt = defaultInterruptChecker)
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
