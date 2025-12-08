@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.2.0](https://github.com/jolars/libslope/compare/v6.1.2...v6.2.0) (2025-12-08)
+
+### Features
+
+* **julia:** add `lambda_type` to bindings ([64981c3](https://github.com/jolars/libslope/commit/64981c3a8f2ecc4045bebb8f70790f6c32548618))
+
 ## [6.1.2](https://github.com/jolars/libslope/compare/v6.1.1...v6.1.2) (2025-11-20)
 
 ### Bug Fixes
