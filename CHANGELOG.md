@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.2.1](https://github.com/jolars/libslope/compare/v6.2.0...v6.2.1) (2025-12-08)
+
+### Bug Fixes
+
+* **julia:** correctly bind to include folder ([7d0c8a6](https://github.com/jolars/libslope/commit/7d0c8a66b3fdee09c2bb03744a8349783585d617))
+* remove a couple more lambda defaults ([13aeef2](https://github.com/jolars/libslope/commit/13aeef23f8960a41e065b19828d22fb81310a24d))
+* set default to inlined function ([1f13ef9](https://github.com/jolars/libslope/commit/1f13ef9439c8607268d1777ee8124c623db68daf))
+
 ## [6.2.0](https://github.com/jolars/libslope/compare/v6.1.2...v6.2.0) (2025-12-08)
 
 ### Features
