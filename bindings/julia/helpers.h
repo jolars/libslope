@@ -14,6 +14,7 @@ mapSparseJuliaArray(jlcxx::ArrayRef<std::int64_t, 1> x_colptr,
 slope::Slope
 setupModel(bool fit_intercept,
            std::string loss_type,
+           std::string lambda_type,
            std::string centering_type,
            std::string scaling_type,
            std::int64_t path_length,
