@@ -27,4 +27,17 @@ target_link_libraries(
   PUBLIC slope JlCxx::cxxwrap_julia Eigen3::Eigen ${SLOPE_LIBRARY}
 )
 
+set_target_properties(
+  slopejll
+  PROPERTIES
+    CXX_STANDARD 17
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+)
+
+# Force C++17 to override JlCxx's C++20 requirement
+target_compile_options(slopejll PRIVATE -std=c++17)
+
 install(TARGETS slopejll LIBRARY)
