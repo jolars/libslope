@@ -750,7 +750,7 @@ public:
     const Eigen::MatrixXd& y_in,
     const double alpha = 1.0,
     Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
-    std::function<bool()> check_interrupt = []() { return false; })
+    std::function<bool()> check_interrupt = defaultInterruptChecker)
   {
     Eigen::ArrayXd alpha_arr(1);
     alpha_arr(0) = alpha;
@@ -787,7 +787,7 @@ public:
   SlopePath estimateAlpha(
     Eigen::EigenBase<T>& x,
     Eigen::MatrixXd& y,
-    std::function<bool()> check_interrupt = []() { return false; })
+    std::function<bool()> check_interrupt = defaultInterruptChecker)
   {
     int n = x.rows();
     int p = x.cols();
