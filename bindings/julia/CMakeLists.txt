@@ -15,6 +15,13 @@ add_library(
   predict.cpp
 )
 
+target_include_directories(
+  slopejll
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
+
 target_link_libraries(
   slopejll
   PUBLIC slope JlCxx::cxxwrap_julia Eigen3::Eigen ${SLOPE_LIBRARY}
