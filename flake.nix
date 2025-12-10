@@ -28,6 +28,13 @@
             "-DBUILD_TESTING=OFF"
             "-DCMAKE_BUILD_TYPE=Release"
           ];
+          
+          # Ensure Eigen headers are findable via <Eigen/...>
+          postInstall = ''
+            mkdir -p $out/include
+            ln -s ${pkgs.eigen}/include/eigen3/Eigen $out/include/Eigen
+            ln -s ${pkgs.eigen}/include/eigen3/unsupported $out/include/unsupported
+          '';
 
           meta = with pkgs.lib; {
             description = "Sorted L-One Penalized Estimation (SLOPE) library";
