@@ -22,7 +22,7 @@
           src = ./.;
 
           nativeBuildInputs = with pkgs; [ cmake ];
-          buildInputs = with pkgs; [ eigen ];
+          propagatedBuildInputs = with pkgs; [ eigen ];
 
           cmakeFlags = [
             "-DBUILD_TESTING=OFF"
