@@ -15,6 +15,27 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
+        packages.default = pkgs.stdenv.mkDerivation {
+          pname = "libslope";
+          version = builtins.readFile ./version.txt;
+
+          src = ./.;
+
+          nativeBuildInputs = with pkgs; [ cmake ];
+          buildInputs = with pkgs; [ eigen ];
+
+          cmakeFlags = [
+            "-DBUILD_TESTING=OFF"
+            "-DCMAKE_BUILD_TYPE=Release"
+          ];
+
+          meta = with pkgs.lib; {
+            description = "Sorted L-One Penalized Estimation (SLOPE) library";
+            license = licenses.gpl3Plus;
+            platforms = platforms.unix;
+          };
+        };
+
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             bashInteractive
