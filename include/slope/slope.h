@@ -461,6 +461,13 @@ public:
       if (!lambda.isFinite().all()) {
         throw std::invalid_argument("lambda must be finite");
       }
+      // Check that lambda is in decreasing order
+      for (int i = 1; i < lambda.size(); ++i) {
+        if (lambda(i) > lambda(i - 1)) {
+          throw std::invalid_argument(
+            "lambda must be in decreasing order");
+        }
+      }
     }
 
     // Setup the regularization sequence and path
