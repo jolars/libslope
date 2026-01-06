@@ -70,6 +70,7 @@ if(BUILD_TESTING)
     tests/cv.cpp
     tests/generate_data.cpp
     tests/hybrid.cpp
+    tests/input_validation.cpp
     tests/interrupt.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
