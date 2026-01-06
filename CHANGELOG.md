@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.3.0](https://github.com/jolars/libslope/compare/v6.2.1...v6.3.0) (2026-01-06)
+
+### Features
+
+* add `USE_OPENMP` cmake flag ([87c4824](https://github.com/jolars/libslope/commit/87c48245e2249fdb63067a8aa5f3fa9efaa32382))
+* throw exception on non-finite data ([8b34fe0](https://github.com/jolars/libslope/commit/8b34fe06351d90427bb1715400608e0efa466779))
+* throw exceptions on invalid penalty sequences ([196c5ff](https://github.com/jolars/libslope/commit/196c5ff88ed010165c1030cc4e8b2075e9e7feb4))
+
 ## [6.2.1](https://github.com/jolars/libslope/compare/v6.2.0...v6.2.1) (2025-12-08)
 
 ### Bug Fixes
