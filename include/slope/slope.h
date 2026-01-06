@@ -406,6 +406,14 @@ public:
         "x and y_in must have the same number of rows");
     }
 
+    if (!isFinite(x.derived())) {
+      throw std::invalid_argument("x must not contain NA, NaN, or Inf values");
+    }
+
+    if (!y_in.array().isFinite().all()) {
+      throw std::invalid_argument("y must not contain NA, NaN, or Inf values");
+    }
+
     auto jit_normalization = normalize(x.derived(),
                                        this->x_centers,
                                        this->x_scales,
