@@ -2,7 +2,7 @@
 
 ## Repository Overview
 
-**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with 26 source files, 31 test files, 165 unit tests.
+**libslope** is a C++ library for Sorted L-One Penalized Estimation (SLOPE) serving as a backend for R/Python packages. Medium-sized CMake project with 26 source files, 32 test files, 174 test cases across 87 test executables.
 
 **Stack:** C++17, CMake 3.15+, Catch2 v3, Doxygen, Eigen 3.4+, OpenMP (optional)
 
@@ -12,7 +12,7 @@
 
 1. **Configure:** `cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug` (~2-5s, creates build/)
 2. **Build:** `cmake --build build --parallel 4` (~60-120s, produces build/src/libslope.a and build/tests)
-3. **Test:** `ctest --test-dir build --output-on-failure` (~180s for 165 tests, --output-on-failure is REQUIRED)
+3. **Test:** `ctest --test-dir build --output-on-failure` (~2s for 87 tests, --output-on-failure is REQUIRED)
 
 ### Build Variants
 
@@ -25,7 +25,7 @@
 
 ### Critical Build Notes
 
-**ALWAYS configure before building.** Clean: `rm -rf build/*` then reconfigure. Incremental builds work. Tests take 180s minimum. Use `--parallel 4+` for speed.
+**ALWAYS configure before building.** Clean: `rm -rf build/*` then reconfigure. Incremental builds work. Tests take ~2s. Use `--parallel 4+` for speed.
 
 ## Repository Structure
 
@@ -67,13 +67,14 @@ src/slope/           # Implementation files
     slope_threshold.cpp
   [other implementations: cv.cpp, normalize.cpp, screening.cpp, etc.]
 
-tests/               # Test files (30 files, 81 tests)
+tests/               # Test files (32 files, 87 test executables, 174 test cases)
   alpha_est.cpp
   assertions.cpp
   benchmarks.cpp
   clusters.cpp
   cv.cpp
   generate_data.cpp  # Test data generation
+  input_validation.cpp # Input validation tests
   load_data.cpp      # Test data loading
   [24 more test files]
   data/              # Test datasets
@@ -102,7 +103,7 @@ cmake/               # CMake helper modules
 **Specific:** `./build/tests "test name"`
 **Benchmarks:** `./build/tests [!benchmark] --benchmark-samples 20`
 
-165 tests using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp`, `tests/load_data.cpp`, and `tests/test_helpers.hpp`.
+87 test executables with 174 test cases using Catch2 v3, mirror source structure. Slow tests: "Abalone dataset" (~7s), "Gaps on screened path" (~18s). Test data in `tests/data/`, helpers in `tests/generate_data.cpp`, `tests/load_data.cpp`, and `tests/test_helpers.hpp`.
 
 ## CI/CD Pipeline
 
@@ -126,6 +127,16 @@ cmake/               # CMake helper modules
 - New test: Add to root `CMakeLists.txt` add_executable(tests)
 - Loss functions: Headers in `include/slope/losses/`, implementations in `src/slope/losses/`
 - Solvers: Headers in `include/slope/solvers/`, implementations in `src/slope/solvers/`
+
+**Testing Requirements (CRITICAL):**
+
+- **ALWAYS add unit tests for new features/validation immediately** - don't wait to be asked
+- Add test file to `tests/` directory (e.g., `tests/feature_name.cpp`)
+- Update root `CMakeLists.txt` to include the new test file in add_executable(tests)
+- Use Catch2 v3 macros: `TEST_CASE`, `SECTION`, `REQUIRE`, `REQUIRE_THROWS_AS`, `REQUIRE_NOTHROW`
+- Include necessary matchers: `#include <catch2/matchers/catch_matchers_string.hpp>` for string matching
+- Test both success and failure cases
+- Verify all tests pass before considering feature complete
 
 **Style:** C++17, 2-space indent (CMake), `#pragma once`, Eigen for matrices, OpenMP for parallelization
 
@@ -165,7 +176,7 @@ cmake/               # CMake helper modules
 
 **Incremental:** `cmake --build build --parallel 4 && ctest --test-dir build --output-on-failure`
 
-**Times:** Configure 2-5s, full build 60-120s, incremental 5-30s, tests 180s, docs 30-60s
+**Times:** Configure 2-5s, full build 60-120s, incremental 5-30s, tests ~2s, docs 30-60s
 
 **Artifacts:** `build/src/libslope.a` (library), `build/tests` (executable), `build/docs/html/` (docs), `build/compile_commands.json` (IDE database)
 
@@ -175,4 +186,4 @@ cmake/               # CMake helper modules
 
 **When in doubt:** Clean (`rm -rf build/*`) → Configure → Build → Test (see Quick Reference)
 
-**Avoid:** Building before configuring, timeout <180s, forgetting `--output-on-failure`, no `--parallel`, Catch2 v2 (need v3)
+**Avoid:** Building before configuring, timeout <5s for tests, forgetting `--output-on-failure`, no `--parallel`, Catch2 v2 (need v3)
