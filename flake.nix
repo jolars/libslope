@@ -29,7 +29,7 @@
             "-DCMAKE_BUILD_TYPE=Release"
             "-DUSE_OPENMP=OFF"
           ];
-          
+
           # Ensure Eigen headers are findable via <Eigen/...>
           postInstall = ''
             mkdir -p $out/include
