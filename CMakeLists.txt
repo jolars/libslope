@@ -23,6 +23,14 @@ if(DAP_DEBUG)
 endif()
 
 if(USE_OPENMP)
+  if(MSVC)
+    set(
+      OpenMP_RUNTIME_MSVC
+      "llvm"
+      CACHE STRING
+      "Use LLVM OpenMP runtime on MSVC"
+    )
+  endif()
   find_package(OpenMP)
 endif()
 
@@ -160,8 +168,7 @@ if(BUILD_DOCS)
   find_package(Doxygen REQUIRED)
 
   string(
-    CONCAT
-    AWESOME_CSS_URL
+    CONCAT AWESOME_CSS_URL
     "https://github.com/jothepro/"
     "doxygen-awesome-css/archive/refs/heads/main.zip"
   )
