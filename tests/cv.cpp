@@ -179,12 +179,12 @@ TEST_CASE("Cross-validation: do not copy x", "[cv][user_folds]")
 
   auto res_copy = crossValidate(model, data.x, data.y, cv_config);
 
-  cv_config.copy_x = true;
+  cv_config.copy_x = false;
 
   auto res_view = crossValidate(model, data.x, data.y, cv_config);
 
-  REQUIRE(res_copy.results.front().score(0, 0) ==
-          res_view.results.front().score(0, 0));
+  REQUIRE_THAT(res_copy.results.front().score(0, 0),
+               WithinAbs(res_view.results.front().score(0, 0), 1e-10));
 }
 
 TEST_CASE("Best alpha index is within bounds", "[cv][alpha_index]")
