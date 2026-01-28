@@ -1,5 +1,6 @@
 #include <slope/constants.h>
 #include <slope/math.h>
+#include <cassert>
 
 namespace slope {
 

@@ -11,6 +11,7 @@
 #include "utils.h"
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
+#include <cassert>
 #include <numeric>
 #include <vector>
 

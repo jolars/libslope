@@ -2,6 +2,7 @@
 #include <slope/losses/multinomial.h>
 #include <slope/math.h>
 #include <slope/utils.h>
+#include <cassert>
 #include <unordered_set>
 
 namespace slope {

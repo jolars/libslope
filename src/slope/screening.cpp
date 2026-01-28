@@ -5,6 +5,7 @@
 
 #include "kkt_check.h"
 #include <Eigen/Core>
+#include <cassert>
 #include <slope/math.h>
 #include <slope/screening.h>
 #include <slope/utils.h>

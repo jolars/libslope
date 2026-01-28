@@ -1,5 +1,6 @@
 #include <slope/constants.h>
 #include <slope/losses/poisson.h>
+#include <cassert>
 
 namespace slope {
 
