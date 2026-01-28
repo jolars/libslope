@@ -24,11 +24,6 @@ endif()
 
 if(USE_OPENMP)
   find_package(OpenMP)
-
-  if(OpenMP_FOUND)
-    message(STATUS "OpenMP found: ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  endif()
 endif()
 
 find_package(Eigen3 REQUIRED NO_MODULE)
@@ -48,14 +43,56 @@ target_include_directories(
 
 target_link_libraries(slope PUBLIC Eigen3::Eigen)
 
-install(TARGETS slope DESTINATION lib)
+if(OpenMP_FOUND)
+  target_link_libraries(slope PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+add_library(slope::slope ALIAS slope)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(
+  TARGETS slope
+  EXPORT slopeTargets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 install(
   DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-  DESTINATION include
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   FILES_MATCHING
   PATTERN "*.h"
   PATTERN "*.hpp"
+)
+
+install(
+  EXPORT slopeTargets
+  FILE slopeTargets.cmake
+  NAMESPACE slope::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/slope
+)
+
+configure_package_config_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/slopeConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/slopeConfig.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/slope
+)
+
+write_basic_package_version_file(
+  ${CMAKE_CURRENT_BINARY_DIR}/slopeConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/slopeConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/slopeConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/slope
 )
 
 if(BUILD_TESTING)
@@ -165,4 +202,7 @@ if(BUILD_DOCS)
   )
 endif()
 
-install(FILES LICENSE DESTINATION share/licenses/${PROJECT_NAME})
+install(
+  FILES LICENSE
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/licenses/${PROJECT_NAME}
+)
