@@ -1,5 +1,6 @@
 #include <slope/math.h>
 #include <slope/solvers/slope_threshold.h>
+#include <cassert>
 
 namespace slope {
 

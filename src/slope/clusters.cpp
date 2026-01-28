@@ -1,6 +1,7 @@
 #include <slope/clusters.h>
 #include <slope/math.h>
 #include <slope/utils.h>
+#include <cassert>
 
 namespace slope {
 

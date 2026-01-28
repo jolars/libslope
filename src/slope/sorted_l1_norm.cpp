@@ -2,6 +2,7 @@
 #include <slope/math.h>
 #include <slope/sorted_l1_norm.h>
 #include <slope/utils.h>
+#include <cassert>
 
 namespace slope {
 

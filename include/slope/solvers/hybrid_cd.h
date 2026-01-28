@@ -11,6 +11,7 @@
 #include "../math.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
+#include <cassert>
 #include <random>
 #include <vector>
 
