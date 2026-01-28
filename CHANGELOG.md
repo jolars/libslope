@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.4.0](https://github.com/jolars/libslope/compare/v6.3.0...v6.4.0) (2026-01-28)
+
+### Features
+
+* provide cmake package and alias ([e1cad53](https://github.com/jolars/libslope/commit/e1cad5314fa72a63c423fd45e950a2f7db1478a6))
+
 ## [6.3.0](https://github.com/jolars/libslope/compare/v6.2.1...v6.3.0) (2026-01-06)
 
 ### Features
