@@ -22,16 +22,9 @@ if(DAP_DEBUG)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wno-cpp")
 endif()
 
+set(OpenMP_RUNTIME_MSVC "llvm")
+
 if(USE_OPENMP)
-  if(MSVC)
-    set(
-      OpenMP_RUNTIME_MSVC
-      "llvm"
-      CACHE STRING
-      "Use LLVM OpenMP runtime on MSVC"
-      FORCE
-    )
-  endif()
   find_package(OpenMP)
 endif()
 
