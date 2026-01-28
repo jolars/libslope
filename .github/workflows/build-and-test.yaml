@@ -75,7 +75,7 @@ jobs:
         run: cmake --build build
 
       - name: Install
-        run: ${{ runner.os == 'Windows' && 'cmake --install build' || 'sudo cmake --install build' }}
+        run: ${{ runner.os == 'Windows' && 'cmake --install build --config Release' || 'sudo cmake --install build' }}
 
       - name: Test
         run: ctest --test-dir build --output-on-failure
