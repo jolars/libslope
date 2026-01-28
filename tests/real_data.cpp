@@ -5,7 +5,6 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/slope.h>
-#include <unistd.h>
 
 TEST_CASE("Abalone dataset", "[realdata][poisson][quadratic]")
 {
