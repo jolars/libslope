@@ -72,10 +72,10 @@ jobs:
         run: cmake -B build -S . -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build build ${{ runner.os == 'Windows' && '--config RelWithDebInfo' || '' }}
+        run: cmake --build build ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '--config RelWithDebInfo' || '' }}
 
       - name: Install
-        run: ${{ runner.os == 'Windows' && 'cmake --install build --config RelWithDebInfo' || 'sudo cmake --install build' }}
+        run: ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && 'cmake --install build --config RelWithDebInfo' || runner.os == 'Windows' && 'cmake --install build' || 'sudo cmake --install build' }}
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure ${{ runner.os == 'Windows' && '--config RelWithDebInfo' || '' }}
+        run: ctest --test-dir build --output-on-failure ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '--config RelWithDebInfo' || '' }}
