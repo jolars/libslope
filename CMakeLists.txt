@@ -29,6 +29,7 @@ if(USE_OPENMP)
       "llvm"
       CACHE STRING
       "Use LLVM OpenMP runtime on MSVC"
+      FORCE
     )
   endif()
   find_package(OpenMP)
