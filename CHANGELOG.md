@@ -1,5 +1,18 @@
 # Changelog
 
+## [6.5.0](https://github.com/jolars/libslope/compare/v6.4.0...v6.5.0) (2026-01-28)
+
+### Features
+
+* use llvm openmp runtime on msvc ([aeb6464](https://github.com/jolars/libslope/commit/aeb64643c370c02bd1abfa3b3a07aa87c5a779a4))
+
+### Bug Fixes
+
+* add includes for cassert ([4359ade](https://github.com/jolars/libslope/commit/4359ade64de91118ac00f7faf04f55b7f4f16929))
+* add more missing cassert includes ([7a9d8b6](https://github.com/jolars/libslope/commit/7a9d8b64bda39a25a89d8e86e9f90c3a54914711))
+* add one more missing cassert include ([def85b4](https://github.com/jolars/libslope/commit/def85b49c949e35638ef804ba42c3ea15166ffa6))
+* don't include `unistd.h` ([d759e82](https://github.com/jolars/libslope/commit/d759e82c3920eae30b35078e77d6373aafa1f2a1))
+
 ## [6.4.0](https://github.com/jolars/libslope/compare/v6.3.0...v6.4.0) (2026-01-28)
 
 ### Features
