@@ -27,3 +27,22 @@ add_library(
   slope/timer.cpp
   slope/utils.cpp
 )
+
+target_compile_features(slope PUBLIC cxx_std_17)
+
+target_include_directories(
+  slope
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(slope PUBLIC Eigen3::Eigen)
+
+if(OpenMP_FOUND)
+  target_link_libraries(slope PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
+if(DAP_DEBUG)
+  target_compile_options(slope PRIVATE -O0 -Wno-cpp)
+endif()

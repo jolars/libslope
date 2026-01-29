@@ -13,19 +13,13 @@ option(USE_OPENMP "Enable OpenMP support" ON)
 include(CTest)
 include(FetchContent)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-if(DAP_DEBUG)
-  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wno-cpp")
-endif()
 
 set(OpenMP_RUNTIME_MSVC "llvm")
 
 if(USE_OPENMP)
-  find_package(OpenMP)
+  find_package(OpenMP QUIET)
 endif()
 
 find_package(Eigen3 REQUIRED NO_MODULE)
@@ -35,19 +29,6 @@ if(Eigen3_VERSION VERSION_LESS 3.4)
 endif()
 
 add_subdirectory(src)
-
-target_include_directories(
-  slope
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(slope PUBLIC Eigen3::Eigen)
-
-if(OpenMP_FOUND)
-  target_link_libraries(slope PUBLIC OpenMP::OpenMP_CXX)
-endif()
 
 add_library(slope::slope ALIAS slope)
 
