@@ -57,7 +57,7 @@ jobs:
           vcpkg install eigen3 catch2 --triplet x64-windows
 
       - name: Setup cmake
-        uses: jwlawson/actions-setup-cmake@v2.1
+        uses: jwlawson/actions-setup-cmake@v2.2
 
       - name: Configure CMake (Windows MinGW)
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
