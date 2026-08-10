@@ -20,7 +20,7 @@
     graphviz
     lcov
     lldb
-    llvmPackage.openmp
+    llvmPackages.openmp
     nodejs
   ];
 
