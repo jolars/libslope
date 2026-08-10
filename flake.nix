@@ -43,27 +43,6 @@
             platforms = platforms.unix;
           };
         };
-
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            bashInteractive
-            go-task
-            catch2_3
-            clang
-            clang-tools
-            cmake
-            doxygen
-            eigen
-            gcc
-            ghostscript
-            gdb
-            graphviz
-            lcov
-            lldb
-            llvmPackages.openmp
-            nodejs
-          ];
-        };
       }
     );
 }
