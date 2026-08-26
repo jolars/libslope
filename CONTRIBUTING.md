@@ -49,7 +49,9 @@ Thank you for your interest in contributing to libslope!
 
 ## Commit Messages
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages. This allows automated version management and changelog generation via semantic-release.
+We use [Conventional Commits](https://www.conventionalcommits.org/) for commit
+messages. This allows Versionary to manage versions and generate the changelog
+automatically.
 
 ### Format
 
