@@ -2,7 +2,21 @@
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <cmath>
 #include <slope/sorted_l1_norm.h>
+
+TEST_CASE("The SLOPE dual norm handles a zero penalty", "[prox][dual]")
+{
+  slope::SortedL1Norm norm;
+  Eigen::VectorXd gradient(2);
+  Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(2);
+
+  gradient << 1.0, 0.0;
+  REQUIRE(std::isinf(norm.dualNorm(gradient, lambda)));
+
+  gradient.setZero();
+  REQUIRE(norm.dualNorm(gradient, lambda) == 0.0);
+}
 
 TEST_CASE("Check that proximal operator works", "[prox]")
 {

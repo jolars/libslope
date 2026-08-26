@@ -112,6 +112,7 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     expected_intercept << 0.1775123, 0.1730744;
 
     model.setIntercept(true);
+    model.setDiagnostics(true);
 
     double alpha = 0.002;
     lambda << 4, 3, 2, 1;
@@ -121,8 +122,12 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     // Get coefficients
     Eigen::MatrixXd coef = fit.getCoefs();
     Eigen::MatrixXd intercept = fit.getIntercepts();
+    auto gaps = fit.getGaps();
 
     REQUIRE(!slope::WarningLogger::hasWarnings());
+    REQUIRE(gaps.front() >= -1e-12);
+    REQUIRE(gaps.back() >= -1e-12);
+    REQUIRE(gaps.back() <= 1e-6);
 
     // Compare coefficients with expected values
     REQUIRE_THAT(intercept.reshaped(),
@@ -204,6 +209,42 @@ TEST_CASE("Multinomial predictions", "[multinomial][predict]")
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
   REQUIRE(!slope::WarningLogger::hasWarnings());
+}
+
+TEST_CASE("Multinomial dual points remain feasible with an intercept",
+          "[multinomial][dual]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd eta(3, 1);
+  Eigen::MatrixXd y(3, 1);
+  eta << 31.485260345944724, -0.94707176117017333, 0.70905200876054053;
+  y << 1.0, 0.0, 1.0;
+
+  slope::Multinomial loss;
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+  Eigen::ArrayXXd means = theta.array() + y.array();
+
+  REQUIRE_THAT(theta.sum(), WithinAbs(0.0, 1e-12));
+  REQUIRE((means >= 0.0).all());
+  REQUIRE((means.rowwise().sum() <= 1.0).all());
+  REQUIRE(std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.rows()))));
+}
+
+TEST_CASE("Multinomial dual rejects points outside the simplex",
+          "[multinomial][dual]")
+{
+  slope::Multinomial loss;
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(1, 2);
+  Eigen::MatrixXd negative(1, 2);
+  Eigen::MatrixXd overfull(1, 2);
+  negative << -0.1, 0.0;
+  overfull << 0.8, 0.4;
+
+  REQUIRE_THROWS_AS(loss.dual(negative, y, Eigen::VectorXd::Ones(1)),
+                    std::domain_error);
+  REQUIRE_THROWS_AS(loss.dual(overfull, y, Eigen::VectorXd::Ones(1)),
+                    std::domain_error);
 }
 
 TEST_CASE("Multinomial alternative response types", "[multinomial][predict]")

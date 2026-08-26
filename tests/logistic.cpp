@@ -100,6 +100,11 @@ TEST_CASE("Logistic, simple fixed design", "[logistic]")
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coef_pgd = fit.getCoefs();
     double intercept_pgd = fit.getIntercepts()[0];
+    auto gaps_pgd = fit.getGaps();
+
+    REQUIRE(gaps_pgd.front() >= -1e-12);
+    REQUIRE(gaps_pgd.back() >= -1e-12);
+    REQUIRE(gaps_pgd.back() <= 1e-4);
 
     REQUIRE_THAT(coef_pgd, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_pgd, WithinAbs(intercept_target, 1e-4));
@@ -108,6 +113,11 @@ TEST_CASE("Logistic, simple fixed design", "[logistic]")
     fit = model.fit(x, y, alpha, lambda);
     Eigen::VectorXd coefs_hybrid = fit.getCoefs();
     double intercept_hybrid = fit.getIntercepts()[0];
+    auto gaps_hybrid = fit.getGaps();
+
+    REQUIRE(gaps_hybrid.front() >= -1e-12);
+    REQUIRE(gaps_hybrid.back() >= -1e-12);
+    REQUIRE(gaps_hybrid.back() <= 1e-4);
 
     REQUIRE_THAT(coefs_hybrid, VectorApproxEqual(coef_target, 1e-4));
     REQUIRE_THAT(intercept_hybrid, WithinAbs(intercept_target, 1e-4));
@@ -164,6 +174,65 @@ TEST_CASE("Logistic predictions", "[logistic][predict]")
   std::array<double, 3> expected = { 1, 1, 1 };
 
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
+}
+
+TEST_CASE("Logistic dual points remain feasible with an intercept",
+          "[logistic][dual]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::VectorXd x(3);
+  Eigen::VectorXd y(3);
+  x << 1.1980087367997552, -1.2072386600596416, -1.0844171690442312;
+  y << 1.0, 0.0, 1.0;
+
+  const double beta = 13.483990108236998;
+  const double intercept = 15.331322389355323;
+  const double lambda = 0.0011472220937630297;
+  Eigen::MatrixXd eta = x * beta;
+  eta.array() += intercept;
+
+  slope::Logistic loss;
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+  Eigen::ArrayXd means = theta.array() + y.array();
+
+  REQUIRE_THAT(theta.sum(), WithinAbs(0.0, 1e-12));
+  REQUIRE((means >= 0.0).all());
+  REQUIRE((means <= 1.0).all());
+
+  const double gradient = x.dot(theta.col(0)) / y.size();
+  theta /= std::max(1.0, std::abs(gradient) / lambda);
+
+  const double primal = loss.loss(eta, y) + lambda * std::abs(beta);
+  const double dual = loss.dual(theta, y, Eigen::VectorXd::Ones(y.size()));
+  REQUIRE(primal - dual >= -1e-12);
+}
+
+TEST_CASE("Logistic dual rejects points outside its conjugate domain",
+          "[logistic][dual]")
+{
+  slope::Logistic loss;
+  Eigen::VectorXd theta(1);
+  Eigen::VectorXd y(1);
+  theta << 0.2;
+  y << 1.0;
+
+  REQUIRE_THROWS_AS(loss.dual(theta, y, Eigen::VectorXd::Ones(1)),
+                    std::domain_error);
+}
+
+TEST_CASE("Logistic dual points handle a degenerate response",
+          "[logistic][dual]")
+{
+  slope::Logistic loss;
+  Eigen::VectorXd eta(3);
+  Eigen::VectorXd y = Eigen::VectorXd::Ones(3);
+  eta << -100.0, 0.0, 100.0;
+
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+
+  REQUIRE(theta.isZero());
+  REQUIRE(loss.dual(theta, y, Eigen::VectorXd::Ones(3)) == 0.0);
 }
 
 TEST_CASE("Failing example (at one point)", "[logistic]")

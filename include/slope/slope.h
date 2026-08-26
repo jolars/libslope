@@ -25,6 +25,8 @@
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
 #include <cassert>
+#include <cmath>
+#include <limits>
 #include <memory>
 #include <optional>
 
@@ -460,8 +462,7 @@ public:
       // Check that lambda is in decreasing order
       for (int i = 1; i < lambda.size(); ++i) {
         if (lambda(i) > lambda(i - 1)) {
-          throw std::invalid_argument(
-            "lambda must be in decreasing order");
+          throw std::invalid_argument("lambda must be in decreasing order");
         }
       }
     }
@@ -488,7 +489,8 @@ public:
                    jit_normalization);
 
     int alpha_max_ind = whichMax(gradient.cwiseAbs());
-    double alpha_max = sl1_norm.dualNorm(gradient, lambda);
+    double alpha_max =
+      lambda.maxCoeff() == 0.0 ? 0.0 : sl1_norm.dualNorm(gradient, lambda);
 
     if (alpha_type == "path" ||
         (alpha_type == "estimate" && alpha_estimate != 1)) {
@@ -579,52 +581,43 @@ public:
                         sl1_norm.eval(beta(working_set),
                                       lambda_curr.head(working_set.size()));
 
-        MatrixXd theta = residual;
-
-        // First compute gradient with potential offset for intercept case
-        VectorXd dual_gradient = gradient;
-
-        // TODO: Can we avoid this copy? Maybe revert offset afterwards or,
-        // alternatively, solve intercept until convergence and then no longer
-        // need the offset at all.
-        if (this->intercept) {
-          VectorXd theta_mean = theta.colwise().mean();
-          theta.rowwise() -= theta_mean.transpose();
-
-          offsetGradient(dual_gradient,
-                         x.derived(),
-                         theta_mean,
-                         working_set,
-                         this->x_centers,
-                         this->x_scales,
-                         jit_normalization);
-        }
-
-        // Common scaling operation
-        double dual_norm = sl1_norm.dualNorm(
-          dual_gradient(working_set), lambda_curr.head(working_set.size()));
+        MatrixXd dual_point = loss->dualPoint(eta, y, this->intercept);
+        MatrixXd theta = dual_point;
+        VectorXd dual_gradient = VectorXd::Zero(beta.size());
+        updateGradient(dual_gradient,
+                       x.derived(),
+                       theta,
+                       working_set,
+                       this->x_centers,
+                       this->x_scales,
+                       Eigen::VectorXd::Ones(n),
+                       jit_normalization);
+        double dual_norm =
+          sl1_norm.dualNorm(dual_gradient(working_set),
+                            lambda_curr.head(working_set.size()),
+                            constants::MAX_DIV);
         theta.array() /= std::max(1.0, dual_norm);
-
         double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));
+
+        double full_dual = std::numeric_limits<double>::quiet_NaN();
 
         if (collect_diagnostics) {
           timer.pause();
-          double true_dual = computeDual(beta,
-                                         residual,
-                                         loss,
-                                         sl1_norm,
-                                         lambda_curr,
-                                         x.derived(),
-                                         y,
-                                         this->x_centers,
-                                         this->x_scales,
-                                         jit_normalization,
-                                         this->intercept);
+          full_dual = computeDualFromPoint(beta,
+                                           dual_point,
+                                           loss,
+                                           sl1_norm,
+                                           lambda_curr,
+                                           x.derived(),
+                                           y,
+                                           this->x_centers,
+                                           this->x_scales,
+                                           jit_normalization);
           timer.resume();
 
           time.emplace_back(timer.elapsed());
           primals.emplace_back(primal);
-          duals.emplace_back(true_dual);
+          duals.emplace_back(full_dual);
         }
 
         double dual_gap = primal - dual;
@@ -645,7 +638,21 @@ public:
                                                this->x_scales,
                                                jit_normalization);
           if (no_violations) {
-            break;
+            if (!std::isfinite(full_dual)) {
+              full_dual = computeDualFromPoint(beta,
+                                               dual_point,
+                                               loss,
+                                               sl1_norm,
+                                               lambda_curr,
+                                               x.derived(),
+                                               y,
+                                               this->x_centers,
+                                               this->x_scales,
+                                               jit_normalization);
+            }
+            if (primal - full_dual <= tol_scaled) {
+              break;
+            }
           } else {
             it = 0; // Restart if there are KKT violations
           }
@@ -753,12 +760,11 @@ public:
    * returning coefficients and optimization details in a SlopeFit object.
    */
   template<typename T>
-  SlopeFit fit(
-    Eigen::EigenBase<T>& x,
-    const Eigen::MatrixXd& y_in,
-    const double alpha = 1.0,
-    Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
-    std::function<bool()> check_interrupt = defaultInterruptChecker)
+  SlopeFit fit(Eigen::EigenBase<T>& x,
+               const Eigen::MatrixXd& y_in,
+               const double alpha = 1.0,
+               Eigen::ArrayXd lambda = Eigen::ArrayXd::Zero(0),
+               std::function<bool()> check_interrupt = defaultInterruptChecker)
   {
     Eigen::ArrayXd alpha_arr(1);
     alpha_arr(0) = alpha;

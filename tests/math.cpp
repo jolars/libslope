@@ -9,6 +9,19 @@
 #include <slope/score.h>
 #include <slope/threads.h>
 
+TEST_CASE("Softmax preserves the probability simplex", "[math][softmax]")
+{
+  Eigen::MatrixXd eta(2, 3);
+  eta << 1000.0, -1000.0, -1000.0, -1000.0, -1000.0, -1000.0;
+
+  Eigen::MatrixXd probabilities = slope::softmax(eta);
+
+  REQUIRE((probabilities.array() >= 0.0).all());
+  REQUIRE((probabilities.rowwise().sum().array() <= 1.0).all());
+  REQUIRE(probabilities(0, 0) == 1.0);
+  REQUIRE(probabilities.row(1).sum() < 1.0);
+}
+
 TEST_CASE("Linear predictor computations", "[math][linearPredictor]")
 {
   using namespace Catch::Matchers;

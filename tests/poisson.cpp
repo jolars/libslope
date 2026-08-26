@@ -239,6 +239,51 @@ TEST_CASE("Poisson predictions", "[poisson][predict]")
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected, 1e-3));
 }
 
+TEST_CASE("Poisson dual points remain feasible with an intercept",
+          "[poisson][dual]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::VectorXd eta(3);
+  Eigen::VectorXd y(3);
+  eta << std::log(0.01), std::log(20.0), std::log(20.0);
+  y << 0.0, 10.0, 10.0;
+
+  slope::Poisson loss;
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+  Eigen::ArrayXd means = theta.array() + y.array();
+
+  REQUIRE_THAT(theta.sum(), WithinAbs(0.0, 1e-12));
+  REQUIRE((means >= 0.0).all());
+  REQUIRE(std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.size()))));
+}
+
+TEST_CASE("Poisson dual rejects points outside its conjugate domain",
+          "[poisson][dual]")
+{
+  slope::Poisson loss;
+  Eigen::VectorXd theta(1);
+  Eigen::VectorXd y(1);
+  theta << -0.1;
+  y << 0.0;
+
+  REQUIRE_THROWS_AS(loss.dual(theta, y, Eigen::VectorXd::Ones(1)),
+                    std::domain_error);
+}
+
+TEST_CASE("Poisson dual points handle an all-zero response", "[poisson][dual]")
+{
+  slope::Poisson loss;
+  Eigen::VectorXd eta(3);
+  Eigen::VectorXd y = Eigen::VectorXd::Zero(3);
+  eta << -100.0, 0.0, 100.0;
+
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+
+  REQUIRE(theta.isZero());
+  REQUIRE(loss.dual(theta, y, Eigen::VectorXd::Ones(3)) == 0.0);
+}
+
 TEST_CASE("Poisson low regularization", "[poisson]")
 {
   auto data = generateData(100, 5, "poisson", 1, 1, 1);
