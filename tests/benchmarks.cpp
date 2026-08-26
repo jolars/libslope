@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
+#include <iostream>
 #include <slope/clusters.h>
 #include <slope/cv.h>
 #include <slope/math.h>
@@ -58,6 +59,65 @@ TEST_CASE("Parallelized gradient computations", "[!benchmark]")
                           x_scales,
                           w,
                           jit_normalization);
+  };
+}
+
+TEST_CASE("Full-set gradient materialization", "[!benchmark][full_set]")
+{
+  constexpr int n = 4;
+  constexpr int p = 1'000'000;
+
+  Eigen::MatrixXd x = Eigen::MatrixXd::Random(n, p);
+  Eigen::MatrixXd residual = Eigen::MatrixXd::Random(n, 1);
+  Eigen::VectorXd gradient(p);
+  Eigen::VectorXd x_centers = Eigen::VectorXd::Zero(p);
+  Eigen::VectorXd x_scales = Eigen::VectorXd::Ones(p);
+  Eigen::VectorXd w = Eigen::VectorXd::Ones(n);
+  std::vector<int> full_set(p);
+  std::iota(full_set.begin(), full_set.end(), 0);
+
+  std::cout << "Materialized full-set index storage: " << p * sizeof(int)
+            << " bytes\n";
+  std::cout << "Allocation-free full-set index storage: 0 bytes\n";
+
+  BENCHMARK("Materialized full set")
+  {
+    std::vector<int> materialized_indices(p);
+    std::iota(materialized_indices.begin(), materialized_indices.end(), 0);
+    slope::updateGradient(gradient,
+                          x,
+                          residual,
+                          materialized_indices,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+    return gradient.sum();
+  };
+
+  BENCHMARK("Pre-materialized full set")
+  {
+    slope::updateGradient(gradient,
+                          x,
+                          residual,
+                          full_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+    return gradient.sum();
+  };
+
+  BENCHMARK("Allocation-free full set")
+  {
+    slope::updateGradient(gradient,
+                          x,
+                          residual,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::None);
+    return gradient.sum();
   };
 }
 
@@ -161,6 +221,24 @@ TEST_CASE("One lambda screening benchmarks", "[!benchmark]")
   {
     model.setScreening("none");
     model.fit(data.x, data.y, alpha);
+  };
+}
+
+TEST_CASE("Wide strong-screening path", "[!benchmark][full_set]")
+{
+  constexpr int n = 10;
+  constexpr int p = 100'000;
+
+  auto data = generateData(n, p, "quadratic", 1, 1, 0.001);
+
+  slope::Slope model;
+  model.setPathLength(10);
+  model.setScreening("strong");
+  model.setSolver("fista");
+
+  BENCHMARK("Strong screening with many coefficients")
+  {
+    return model.path(data.x, data.y);
   };
 }
 

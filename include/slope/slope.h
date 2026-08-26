@@ -26,7 +26,6 @@
 #include <Eigen/SparseCore>
 #include <cassert>
 #include <memory>
-#include <numeric>
 #include <optional>
 
 /** @namespace slope
@@ -427,9 +426,6 @@ public:
 
     const int m = y.cols();
 
-    std::vector<int> full_set(p * m);
-    std::iota(full_set.begin(), full_set.end(), 0);
-
     VectorXd beta0 = VectorXd::Zero(m);
     VectorXd beta = VectorXd::Zero(p * m);
 
@@ -486,7 +482,6 @@ public:
     updateGradient(gradient,
                    x.derived(),
                    residual,
-                   full_set,
                    this->x_centers,
                    this->x_scales,
                    Eigen::VectorXd::Ones(n),
@@ -515,7 +510,7 @@ public:
     std::unique_ptr<ScreeningRule> screening_rule =
       createScreeningRule(this->screening_type);
     std::vector<int> working_set =
-      screening_rule->initialize(full_set, alpha_max_ind);
+      screening_rule->initialize(static_cast<int>(beta.size()), alpha_max_ind);
 
     // Path variables
     double null_deviance = loss->deviance(eta, y);
@@ -558,14 +553,13 @@ public:
       updateGradient(gradient,
                      x.derived(),
                      residual,
-                     full_set,
                      x_centers,
                      x_scales,
                      Eigen::VectorXd::Ones(x.rows()),
                      jit_normalization);
 
-      working_set = screening_rule->screen(
-        gradient, lambda_curr, lambda_prev, beta, full_set);
+      screening_rule->screen(
+        working_set, gradient, lambda_curr, lambda_prev, beta);
 
       int it = 0;
       int total_it = 0;
@@ -649,8 +643,7 @@ public:
                                                residual,
                                                this->x_centers,
                                                this->x_scales,
-                                               jit_normalization,
-                                               full_set);
+                                               jit_normalization);
           if (no_violations) {
             break;
           } else {

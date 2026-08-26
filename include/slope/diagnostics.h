@@ -10,7 +10,6 @@
 #include "sorted_l1_norm.h"
 #include <Eigen/Dense>
 #include <memory>
-#include <numeric>
 
 namespace slope {
 
@@ -55,13 +54,9 @@ computeDual(const Eigen::VectorXd& beta,
 
   Eigen::VectorXd gradient(pm);
 
-  std::vector<int> full_set(pm);
-  std::iota(full_set.begin(), full_set.end(), 0);
-
   updateGradient(gradient,
                  x,
                  residual,
-                 full_set,
                  x_centers,
                  x_scales,
                  Eigen::VectorXd::Ones(n),
@@ -79,13 +74,8 @@ computeDual(const Eigen::VectorXd& beta,
     Eigen::VectorXd theta_mean = theta.colwise().mean();
     theta.rowwise() -= theta_mean.transpose();
 
-    offsetGradient(dual_gradient,
-                   x,
-                   theta_mean,
-                   full_set,
-                   x_centers,
-                   x_scales,
-                   jit_normalization);
+    offsetGradient(
+      dual_gradient, x, theta_mean, x_centers, x_scales, jit_normalization);
   }
 
   // Common scaling operation

@@ -403,6 +403,30 @@ TEST_CASE("Gradient computations", "[math][updateGradient]")
     REQUIRE_THAT(gradient_dense, VectorApproxEqual(gradient_sparse));
   }
 
+  SECTION("Without a materialized full set")
+  {
+    Eigen::VectorXd gradient_indexed = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_indexed,
+                          x,
+                          residual,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    Eigen::VectorXd gradient_full = Eigen::VectorXd::Zero(p * m);
+    slope::updateGradient(gradient_full,
+                          x,
+                          residual,
+                          x_centers,
+                          x_scales,
+                          w,
+                          slope::JitNormalization::Both);
+
+    REQUIRE_THAT(gradient_full, VectorApproxEqual(gradient_indexed));
+  }
+
   SECTION("With non-uniform weights")
   {
     // Set up non-uniform weights
@@ -618,6 +642,28 @@ TEST_CASE("Gradient offset calculations", "[math][offsetGradient]")
       -offset(0) * (col_sums(0) / n - x_centers(0)) / x_scales(0);
     REQUIRE_THAT(gradient_dense(0) - gradient_dense_copy(0),
                  WithinAbs(expected_offset_0_0, 1e-10));
+  }
+
+  SECTION("Without a materialized full set")
+  {
+    Eigen::VectorXd gradient_indexed = Eigen::VectorXd::Ones(p * m);
+    slope::offsetGradient(gradient_indexed,
+                          x,
+                          offset,
+                          active_set,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Both);
+
+    Eigen::VectorXd gradient_full = Eigen::VectorXd::Ones(p * m);
+    slope::offsetGradient(gradient_full,
+                          x,
+                          offset,
+                          x_centers,
+                          x_scales,
+                          slope::JitNormalization::Both);
+
+    REQUIRE_THAT(gradient_full, VectorApproxEqual(gradient_indexed));
   }
 }
 

@@ -49,8 +49,10 @@ TEST_CASE("Strong screening rule", "[screening]")
     gradient = x.transpose() * residual;
 
     auto violations = kktCheck(gradient, beta_hat, lambda, { 0, 1, 2 });
+    auto full_violations = kktCheck(gradient, beta_hat, lambda);
 
     REQUIRE(!violations.empty());
+    REQUIRE(full_violations == violations);
   }
 
   SECTION("Strong screening")
@@ -111,5 +113,36 @@ TEST_CASE("Gaps on screened path", "[screening][gaps]")
       REQUIRE_FALSE(slope::WarningLogger::hasWarnings());
       REQUIRE(gaps.back() / primals.back() <= tol);
     }
+  }
+}
+
+TEST_CASE("Screening rules manage their working sets", "[screening]")
+{
+  constexpr int feature_count = 4;
+  Eigen::VectorXd gradient = Eigen::VectorXd::Zero(feature_count);
+  Eigen::VectorXd beta = Eigen::VectorXd::Zero(feature_count);
+  Eigen::ArrayXd lambda_curr = Eigen::ArrayXd::Ones(feature_count);
+  Eigen::ArrayXd lambda_prev = Eigen::ArrayXd::Ones(feature_count);
+  const std::vector<int> expected = { 0, 1, 2, 3 };
+
+  SECTION("No screening retains all coefficients")
+  {
+    auto rule = slope::createScreeningRule("none");
+    auto working_set = rule->initialize(feature_count, 0);
+
+    rule->screen(working_set, gradient, lambda_curr, lambda_prev, beta);
+
+    REQUIRE(working_set == expected);
+  }
+
+  SECTION("Zero regularization disables strong screening")
+  {
+    auto rule = slope::createScreeningRule("strong");
+    auto working_set = rule->initialize(feature_count, 0);
+    lambda_curr.setZero();
+
+    rule->screen(working_set, gradient, lambda_curr, lambda_prev, beta);
+
+    REQUIRE(working_set == expected);
   }
 }
