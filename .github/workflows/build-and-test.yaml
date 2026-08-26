@@ -79,3 +79,24 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '-C RelWithDebInfo' || '' }}
+
+  versionary:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+      - id: versionary
+        uses: jolars/versionary@v1
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
