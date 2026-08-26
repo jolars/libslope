@@ -29,4 +29,12 @@
       enable = true;
     };
   };
+
+  git-hooks = {
+    hooks = {
+      clang-format = {
+        enable = true;
+      };
+    };
+  };
 }
