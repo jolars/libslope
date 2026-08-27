@@ -1,0 +1,4 @@
+interface:
+  display_name: "libslope Performance Investigation"
+  short_description: "Profile and benchmark libslope bottlenecks"
+  default_prompt: "Use $performance-investigation to profile this libslope workload and validate a performance improvement."

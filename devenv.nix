@@ -20,10 +20,13 @@
     ghostscript
     gdb
     graphviz
+    hyperfine
     lcov
     lldb
     llvmPackages.openmp
     nodejs
+    perf
+    valgrind
   ];
 
   languages = {
