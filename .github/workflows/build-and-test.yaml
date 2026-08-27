@@ -80,9 +80,54 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '-C RelWithDebInfo' || '' }}
 
+  julia-bindings:
+    name: Julia bindings
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y \
+            build-essential \
+            libeigen3-dev
+
+      - name: Setup cmake
+        uses: jwlawson/actions-setup-cmake@v2.2
+
+      - name: Setup Julia
+        uses: julia-actions/setup-julia@v3
+        with:
+          version: "1"
+
+      - name: Instantiate Julia dependencies
+        run: julia --project=bindings/julia --startup-file=no -e 'using Pkg; Pkg.instantiate()'
+
+      - name: Configure Julia bindings
+        run: |
+          jlcxx_prefix="$(
+            julia \
+              --project=bindings/julia \
+              --startup-file=no \
+              -e 'using CxxWrap; print(CxxWrap.prefix_path())'
+          )"
+          cmake \
+            -B build/julia \
+            -S . \
+            -DBUILD_JULIA_BINDINGS=ON \
+            -DBUILD_TESTING=OFF \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_PREFIX_PATH="$jlcxx_prefix"
+
+      - name: Build Julia bindings
+        run: cmake --build build/julia --target slopejll --parallel 8
+
+      - name: Smoke-test Julia module
+        run: julia --project=bindings/julia --startup-file=no bindings/julia/smoke_test.jl build/julia/lib/libslopejll
+
   versionary:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-and-test
+    needs: [build-and-test, julia-bindings]
     runs-on: ubuntu-latest
     permissions:
       contents: write
