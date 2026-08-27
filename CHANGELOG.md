@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.5.2](https://github.com/jolars/libslope/compare/v6.5.1...v6.5.2) (2026-08-27)
+
+### Bug Fixes
+- **loss:** floor logistic IRLS weights ([`b9c0ecd`](https://github.com/jolars/libslope/commit/b9c0ecd84c5c683a675cbe697b8c8642e41107e5)), fixes [#180](https://github.com/jolars/libslope/issues/180)
+
+### Performance Improvements
+- **solvers:** add dual extrapolation ([`5c3a0ca`](https://github.com/jolars/libslope/commit/5c3a0ca2172117493db1c37ec76218ceb9a10260))
+
 ## [6.5.1](https://github.com/jolars/libslope/compare/v6.5.0...v6.5.1) (2026-08-27)
 
 ### Bug Fixes
