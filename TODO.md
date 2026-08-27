@@ -6,7 +6,7 @@
   the generalized residual. Compare dual-gap tightness and runtime with the
   current domain-preserving anchor construction, and retain the anchor as a
   fallback when a finite intercept solution is unavailable.
-- [ ] Strengthen direct multinomial dual-point tests with multiple non-reference
+- [x] Strengthen direct multinomial dual-point tests with multiple non-reference
   classes, classwise zero-sum checks, simplex-boundary cases, absent
   classes, SLOPE dual-norm scaling, and nonnegative end-to-end gaps.
 - [ ] Explore dual extrapolation or another tighter candidate construction that

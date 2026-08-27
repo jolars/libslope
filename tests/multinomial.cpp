@@ -3,10 +3,14 @@
 #include "load_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
+#include <algorithm>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <cmath>
+#include <slope/math.h>
 #include <slope/slope.h>
+#include <slope/sorted_l1_norm.h>
 
 TEST_CASE("Multinomial, unpenalized", "[multinomial]")
 {
@@ -125,8 +129,9 @@ TEST_CASE("Multinomial, unpenalized", "[multinomial]")
     auto gaps = fit.getGaps();
 
     REQUIRE(!slope::WarningLogger::hasWarnings());
-    REQUIRE(gaps.front() >= -1e-12);
-    REQUIRE(gaps.back() >= -1e-12);
+    REQUIRE(std::all_of(gaps.begin(), gaps.end(), [](const double gap) {
+      return std::isfinite(gap) && gap >= -1e-12;
+    }));
     REQUIRE(gaps.back() <= 1e-6);
 
     // Compare coefficients with expected values
@@ -216,16 +221,124 @@ TEST_CASE("Multinomial dual points remain feasible with an intercept",
 {
   using namespace Catch::Matchers;
 
-  Eigen::MatrixXd eta(3, 1);
-  Eigen::MatrixXd y(3, 1);
-  eta << 31.485260345944724, -0.94707176117017333, 0.70905200876054053;
-  y << 1.0, 0.0, 1.0;
+  Eigen::MatrixXd eta(6, 3);
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(6, 3);
+  eta << 31.485260345944724, -0.94707176117017333, 0.70905200876054053, -2.0,
+    4.0, 0.5, 1.5, -3.0, 2.5, 0.0, 0.0, 0.0, -8.0, 1.0, 6.0, 2.0, -5.0, -1.0;
+  y(0, 0) = 1.0;
+  y(1, 1) = 1.0;
+  y(2, 2) = 1.0;
+  y(4, 0) = 1.0;
 
   slope::Multinomial loss;
   Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
   Eigen::ArrayXXd means = theta.array() + y.array();
 
-  REQUIRE_THAT(theta.sum(), WithinAbs(0.0, 1e-12));
+  for (Eigen::Index k = 0; k < theta.cols(); ++k) {
+    REQUIRE_THAT(theta.col(k).sum(), WithinAbs(0.0, 1e-12));
+  }
+  REQUIRE((means >= 0.0).all());
+  REQUIRE((means.rowwise().sum() <= 1.0).all());
+  REQUIRE(std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.rows()))));
+}
+
+TEST_CASE(
+  "Multinomial dual points handle absent classes and simplex boundaries",
+  "[multinomial][dual]")
+{
+  using namespace Catch::Matchers;
+
+  slope::Multinomial loss;
+  Eigen::MatrixXd eta(4, 3);
+  eta << 20.0, -20.0, 3.0, -4.0, 12.0, -8.0, 2.0, 1.0, -6.0, -10.0, -3.0, 15.0;
+
+  SECTION("A non-reference class is absent")
+  {
+    Eigen::MatrixXd y = Eigen::MatrixXd::Zero(4, 3);
+    y(0, 0) = 1.0;
+    y(1, 1) = 1.0;
+    y(2, 0) = 1.0;
+
+    Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+    Eigen::ArrayXXd means = theta.array() + y.array();
+
+    REQUIRE_THAT(theta.col(2).sum(), WithinAbs(0.0, 1e-12));
+    REQUIRE((means.col(2) == 0.0).all());
+    REQUIRE((means >= 0.0).all());
+    REQUIRE((means.rowwise().sum() <= 1.0).all());
+    REQUIRE(
+      std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.rows()))));
+  }
+
+  SECTION("The reference class is absent")
+  {
+    Eigen::MatrixXd y = Eigen::MatrixXd::Zero(4, 3);
+    y(0, 0) = 1.0;
+    y(1, 1) = 1.0;
+    y(2, 2) = 1.0;
+    y(3, 0) = 1.0;
+
+    Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+    Eigen::ArrayXXd means = theta.array() + y.array();
+
+    for (Eigen::Index k = 0; k < theta.cols(); ++k) {
+      REQUIRE_THAT(theta.col(k).sum(), WithinAbs(0.0, 1e-12));
+    }
+    REQUIRE((means >= 0.0).all());
+    for (Eigen::Index i = 0; i < means.rows(); ++i) {
+      REQUIRE_THAT(means.row(i).sum(), WithinAbs(1.0, 1e-12));
+    }
+    REQUIRE(
+      std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.rows()))));
+  }
+}
+
+TEST_CASE("Multinomial dual points satisfy the SLOPE dual constraint",
+          "[multinomial][dual]")
+{
+  using namespace Catch::Matchers;
+
+  Eigen::MatrixXd x(6, 2);
+  Eigen::MatrixXd eta(6, 3);
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(6, 3);
+  x << 2.0, -1.0, -3.0, 0.5, 1.0, 4.0, -2.0, -3.0, 0.5, 2.0, 3.0, -2.0;
+  eta << 8.0, -3.0, 1.0, -4.0, 7.0, -2.0, 2.0, -6.0, 5.0, -1.0, 1.0, 0.0, 6.0,
+    2.0, -5.0, -7.0, -2.0, 9.0;
+  y(0, 0) = 1.0;
+  y(1, 1) = 1.0;
+  y(2, 2) = 1.0;
+  y(4, 0) = 1.0;
+
+  slope::Multinomial loss;
+  slope::SortedL1Norm norm;
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true);
+  Eigen::VectorXd gradient = Eigen::VectorXd::Zero(x.cols() * y.cols());
+  Eigen::ArrayXd lambda(gradient.size());
+  lambda << 0.06, 0.05, 0.04, 0.03, 0.02, 0.01;
+  slope::updateGradient(gradient,
+                        x,
+                        theta,
+                        Eigen::VectorXd::Zero(x.cols()),
+                        Eigen::VectorXd::Ones(x.cols()),
+                        Eigen::VectorXd::Ones(x.rows()),
+                        slope::JitNormalization::None);
+
+  const double scale = std::max(1.0, norm.dualNorm(gradient, lambda));
+  REQUIRE(scale > 1.0);
+  theta.array() /= scale;
+  slope::updateGradient(gradient,
+                        x,
+                        theta,
+                        Eigen::VectorXd::Zero(x.cols()),
+                        Eigen::VectorXd::Ones(x.cols()),
+                        Eigen::VectorXd::Ones(x.rows()),
+                        slope::JitNormalization::None);
+
+  Eigen::ArrayXXd means = theta.array() + y.array();
+  REQUIRE_THAT(norm.dualNorm(gradient, lambda), WithinAbs(1.0, 1e-12));
+  for (Eigen::Index k = 0; k < theta.cols(); ++k) {
+    REQUIRE_THAT(theta.col(k).sum(), WithinAbs(0.0, 1e-12));
+  }
   REQUIRE((means >= 0.0).all());
   REQUIRE((means.rowwise().sum() <= 1.0).all());
   REQUIRE(std::isfinite(loss.dual(theta, y, Eigen::VectorXd::Ones(y.rows()))));
