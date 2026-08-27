@@ -1,4 +1,5 @@
 #include <Eigen/Core>
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/math.h>
@@ -93,5 +94,31 @@ TEST_CASE("SlopeThreshold function", "[slope][solvers]")
     CHECK(y <= 0); // Output should maintain sign of input
     CHECK(idx >= 0);
     CHECK(idx < clusters.size());
+  }
+
+  SECTION("Unscaled lambda interface")
+  {
+    constexpr double hess = 1.7;
+    const Eigen::ArrayXd scaled_lambda_cumsum = lambda_cumsum / hess;
+    const std::array<std::pair<double, int>, 8> cases = { {
+      { 10.0, 1 },
+      { 3.5, 1 },
+      { 2.9, 1 },
+      { 1.0, 1 },
+      { 2.9, 2 },
+      { -9.0, 2 },
+      { -5.0, 2 },
+      { 0.0, 1 },
+    } };
+
+    for (const auto& [x, j] : cases) {
+      const auto [expected_value, expected_index] =
+        slopeThreshold(x, j, scaled_lambda_cumsum, clusters);
+      const auto [value, index] =
+        slopeThreshold(hess * x, hess, j, lambda_cumsum, clusters);
+
+      REQUIRE_THAT(value, WithinAbs(expected_value, 1e-12));
+      REQUIRE(index == expected_index);
+    }
   }
 }

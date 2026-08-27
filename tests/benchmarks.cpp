@@ -344,32 +344,35 @@ TEST_CASE("Cluster comparison", "[!benchmark]")
 
 TEST_CASE("Thresholding", "[!benchmark]")
 {
+  constexpr int p = 100000;
+  constexpr int cluster_size = 100;
+  constexpr int n_clusters = p / cluster_size;
+  constexpr int j = n_clusters / 2;
+  constexpr double hess = 1.7;
 
-  double a = 0.1;
-  int p = 100000;
-  int j = 0;
-
-  Eigen::VectorXd beta = Eigen::VectorXd::Random(p);
-
-  for (int i = 0; i < p; i += 3) {
-    double value = beta(i);
-    int cluster_size = std::min(3, p - i);
-    for (int j = 0; j < cluster_size; j++) {
-      beta(i + j) = value;
-    }
+  Eigen::VectorXd beta(p);
+  for (int cluster = 0; cluster < n_clusters; ++cluster) {
+    beta.segment(cluster * cluster_size, cluster_size)
+      .setConstant(n_clusters - cluster);
   }
 
-  for (int i = 0; i < 1000; ++i) {
-    beta(i) = 1.1;
-  }
-
-  Eigen::ArrayXd lambdas = slope::lambdaSequence(p, 0.2, "bh");
-
+  const Eigen::ArrayXd lambdas = slope::lambdaSequence(p, 0.2, "bh");
+  const Eigen::ArrayXd lambda_cumsum = slope::cumSum(lambdas, true);
   slope::Clusters clusters(beta);
+  const int start = clusters.pointer(j);
+  const double lambda_sum =
+    lambda_cumsum(start + cluster_size) - lambda_cumsum(start);
+  const double x = clusters.coeff(j) + lambda_sum / hess;
+  const double gamma = hess * x;
 
-  BENCHMARK("Thresholding")
+  BENCHMARK("Thresholding with materialized scaled cumsum")
   {
-    slope::slopeThreshold(a, j, lambdas, clusters);
+    return slope::slopeThreshold(x, j, lambda_cumsum / hess, clusters);
+  };
+
+  BENCHMARK("Thresholding with unscaled cumsum")
+  {
+    return slope::slopeThreshold(gamma, hess, j, lambda_cumsum, clusters);
   };
 }
 

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../eigen_compat.h"
 #include "../clusters.h"
+#include "../eigen_compat.h"
 #include "../math.h"
 #include "slope_threshold.h"
 #include <Eigen/Core>
@@ -418,8 +418,9 @@ coordinateDescent(Eigen::VectorXd& beta0,
     double c_tilde;
     int new_index;
 
-    std::tie(c_tilde, new_index) = slopeThreshold(
-      c_old - grad / hess, c_ind, lambda_cumsum / hess, clusters);
+    const double gamma = hess * c_old - grad;
+    std::tie(c_tilde, new_index) =
+      slopeThreshold(gamma, hess, c_ind, lambda_cumsum, clusters);
 
     assert(c_tilde == 0 || new_index < clusters.size());
     assert(new_index >= 0 && new_index <= clusters.size());
