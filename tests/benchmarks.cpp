@@ -10,6 +10,7 @@
 #include <slope/math.h>
 #include <slope/regularization_sequence.h>
 #include <slope/slope.h>
+#include <slope/solvers/hybrid_cd.h>
 #include <slope/solvers/slope_threshold.h>
 #include <slope/threads.h>
 
@@ -373,6 +374,60 @@ TEST_CASE("Thresholding", "[!benchmark]")
   BENCHMARK("Thresholding with unscaled cumsum")
   {
     return slope::slopeThreshold(gamma, hess, j, lambda_cumsum, clusters);
+  };
+}
+
+TEST_CASE("Sparse cluster gradient and Hessian benchmark",
+          "[!benchmark][sparse_cluster]")
+{
+  constexpr int n = 20'000;
+  constexpr int p = 5'000;
+  constexpr int cluster_size = 256;
+  constexpr int nonzeros_per_column = 20;
+
+  std::vector<Eigen::Triplet<double>> triplets;
+  triplets.reserve(p * nonzeros_per_column);
+
+  for (int j = 0; j < p; ++j) {
+    for (int k = 0; k < nonzeros_per_column; ++k) {
+      const int i = (37 * j + 997 * k) % n;
+      const double value = 0.25 + (j + k) % 11;
+      triplets.emplace_back(i, j, value);
+    }
+  }
+
+  Eigen::SparseMatrix<double> x(n, p);
+  x.setFromTriplets(triplets.begin(), triplets.end());
+
+  Eigen::VectorXd beta = Eigen::VectorXd::Zero(p);
+  for (int j = 0; j < cluster_size; ++j) {
+    beta(j) = j % 2 == 0 ? 1.0 : -1.0;
+  }
+
+  slope::Clusters clusters(beta);
+  std::vector<int> signs;
+  signs.reserve(cluster_size);
+  for (auto it = clusters.cbegin(0); it != clusters.cend(0); ++it) {
+    signs.emplace_back(slope::sign(beta(*it)));
+  }
+
+  const Eigen::MatrixXd weights = Eigen::MatrixXd::Ones(n, 1);
+  const Eigen::MatrixXd residual = Eigen::VectorXd::Random(n);
+  const Eigen::VectorXd x_centers = Eigen::VectorXd::LinSpaced(p, -0.01, 0.01);
+  const Eigen::VectorXd x_scales = Eigen::VectorXd::LinSpaced(p, 0.5, 1.5);
+
+  BENCHMARK("Sparse multi-feature cluster")
+  {
+    return slope::computeClusterGradientAndHessian(
+      x,
+      0,
+      signs,
+      clusters,
+      weights,
+      residual,
+      x_centers,
+      x_scales,
+      slope::JitNormalization::Both);
   };
 }
 

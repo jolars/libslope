@@ -1,6 +1,7 @@
 #include "generate_data.hpp"
 #include "test_helpers.hpp"
 #include <Eigen/Core>
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -141,6 +142,83 @@ TEST_CASE("Cluster gradient and Hessian computation", "[hybrid]")
 
     REQUIRE_THAT(hessian, WithinAbs(hessian2, 1e-9));
     REQUIRE_THAT(gradient, WithinAbs(gradient2, 1e-9));
+  }
+}
+
+TEST_CASE("Sparse cluster derivatives agree for multiple responses", "[hybrid]")
+{
+  using namespace Catch::Matchers;
+  using namespace slope;
+
+  constexpr int n = 5;
+  constexpr int p = 4;
+  constexpr int m = 3;
+
+  Eigen::MatrixXd x(n, p);
+  // clang-format off
+  x << 1.0,  1.0, 0.0,  2.0,
+       0.0,  0.0, 3.0,  0.0,
+       2.0,  2.0, 0.0, -1.0,
+       0.0,  0.0, 4.0,  0.0,
+      -1.0, -1.0, 0.0,  3.0;
+  // clang-format on
+
+  Eigen::MatrixXd weights(n, m);
+  weights << 1.0, 0.5, 1.5, 0.8, 1.2, 0.7, 1.1, 0.9, 1.3, 0.6, 1.4, 0.4, 1.7,
+    0.3, 1.0;
+
+  Eigen::MatrixXd residual(n, m);
+  residual << 0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -1.0, 1.1, -1.2,
+    1.3, -1.4, 1.5;
+
+  Eigen::VectorXd x_centers(p);
+  x_centers << 0.4, -0.2, 0.7, -0.5;
+
+  Eigen::VectorXd x_scales(p);
+  x_scales << 0.8, 1.2, 0.5, 1.7;
+
+  Eigen::VectorXd beta = Eigen::VectorXd::Zero(p * m);
+  beta(0) = 2.0;
+  beta(1) = -2.0;
+  beta(p + 2) = 2.0;
+  beta(2 * p + 3) = -2.0;
+
+  Clusters clusters(beta);
+  std::vector<int> signs;
+  for (auto it = clusters.cbegin(0); it != clusters.cend(0); ++it) {
+    signs.emplace_back(sign(beta(*it)));
+  }
+
+  const Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+  const std::array normalizations{ JitNormalization::None,
+                                   JitNormalization::Center,
+                                   JitNormalization::Scale,
+                                   JitNormalization::Both };
+
+  for (const JitNormalization normalization : normalizations) {
+    const auto [dense_hessian, dense_gradient] =
+      computeClusterGradientAndHessian(x,
+                                       0,
+                                       signs,
+                                       clusters,
+                                       weights,
+                                       residual,
+                                       x_centers,
+                                       x_scales,
+                                       normalization);
+    const auto [sparse_hessian, sparse_gradient] =
+      computeClusterGradientAndHessian(x_sparse,
+                                       0,
+                                       signs,
+                                       clusters,
+                                       weights,
+                                       residual,
+                                       x_centers,
+                                       x_scales,
+                                       normalization);
+
+    REQUIRE_THAT(sparse_hessian, WithinAbs(dense_hessian, 1e-12));
+    REQUIRE_THAT(sparse_gradient, WithinAbs(dense_gradient, 1e-12));
   }
 }
 
