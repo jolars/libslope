@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
 {
@@ -91,5 +92,39 @@ TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
     Eigen::VectorXd coef_manual_sparse = fit_manual_dense.getCoefs();
 
     REQUIRE_THAT(coef_manual_dense, VectorApproxEqual(coef_manual_sparse));
+  }
+
+  SECTION("Near-zero dual certificates agree")
+  {
+    beta << 1, 2, -0.9;
+    y = x_dense * beta;
+
+    Eigen::MatrixXd y_multi(y.rows(), 2);
+    y_multi.col(0) = y;
+    y_multi.col(1) = y.reverse();
+
+    slope::computeCenters(x_centers, x_dense, "mean");
+    slope::computeScales(x_scales, x_dense, "sd");
+
+    for (const bool intercept : { false, true }) {
+      CAPTURE(intercept);
+
+      const Eigen::MatrixXd dense_point =
+        slope::detail::quadraticOlsDualPoint(x_dense,
+                                             y_multi,
+                                             x_centers,
+                                             x_scales,
+                                             slope::JitNormalization::Both,
+                                             intercept);
+      const Eigen::MatrixXd sparse_point =
+        slope::detail::quadraticOlsDualPoint(x_sparse,
+                                             y_multi,
+                                             x_centers,
+                                             x_scales,
+                                             slope::JitNormalization::Both,
+                                             intercept);
+
+      REQUIRE((sparse_point - dense_point).norm() <= 1e-10);
+    }
   }
 }

@@ -8,12 +8,107 @@
 #include "jit_normalization.h"
 #include "losses/loss.h"
 #include "math.h"
+#include "ols.h"
 #include "sorted_l1_norm.h"
 #include <Eigen/Dense>
+#include <Eigen/SparseCore>
 #include <algorithm>
 #include <memory>
 
 namespace slope {
+
+namespace detail {
+
+template<typename T>
+Eigen::MatrixXd
+quadraticOlsDualPointFromDesign(const T& x,
+                                const Eigen::MatrixXd& y,
+                                const bool intercept)
+{
+  Eigen::MatrixXd theta(y.rows(), y.cols());
+
+  for (Eigen::Index k = 0; k < y.cols(); ++k) {
+    auto [beta0, beta] = fitOls(x, Eigen::VectorXd(y.col(k)), intercept);
+    theta.col(k) = x * beta - y.col(k);
+    if (intercept) {
+      theta.col(k).array() += beta0;
+      theta.col(k).array() -= theta.col(k).mean();
+    }
+  }
+
+  return theta;
+}
+
+template<typename T>
+Eigen::MatrixXd
+quadraticOlsDualPoint(const Eigen::MatrixBase<T>& x,
+                      const Eigen::MatrixXd& y,
+                      const Eigen::VectorXd& x_centers,
+                      const Eigen::VectorXd& x_scales,
+                      const JitNormalization jit_normalization,
+                      const bool intercept)
+{
+  Eigen::MatrixXd x_effective = x;
+  const bool center = jit_normalization == JitNormalization::Center ||
+                      jit_normalization == JitNormalization::Both;
+  const bool scale = jit_normalization == JitNormalization::Scale ||
+                     jit_normalization == JitNormalization::Both;
+
+  if (center && !intercept) {
+    x_effective.rowwise() -= x_centers.transpose();
+  }
+  if (scale) {
+    x_effective.array().rowwise() /= x_scales.transpose().array();
+  }
+
+  return quadraticOlsDualPointFromDesign(x_effective, y, intercept);
+}
+
+template<typename T>
+Eigen::MatrixXd
+quadraticOlsDualPoint(const Eigen::SparseMatrixBase<T>& x,
+                      const Eigen::MatrixXd& y,
+                      const Eigen::VectorXd& x_centers,
+                      const Eigen::VectorXd& x_scales,
+                      const JitNormalization jit_normalization,
+                      const bool intercept)
+{
+  const bool center = jit_normalization == JitNormalization::Center ||
+                      jit_normalization == JitNormalization::Both;
+  const bool scale = jit_normalization == JitNormalization::Scale ||
+                     jit_normalization == JitNormalization::Both;
+
+  Eigen::SparseMatrix<double> x_effective = x;
+  if (scale) {
+    for (int k = 0; k < x_effective.outerSize(); ++k) {
+      for (Eigen::SparseMatrix<double>::InnerIterator it(x_effective, k); it;
+           ++it) {
+        it.valueRef() /= x_scales(it.col());
+      }
+    }
+  }
+
+  if (!center || intercept) {
+    return quadraticOlsDualPointFromDesign(x_effective, y, intercept);
+  }
+
+  Eigen::VectorXd effective_centers = x_centers;
+  if (scale) {
+    effective_centers.array() /= x_scales.array();
+  }
+
+  Eigen::MatrixXd theta(y.rows(), y.cols());
+  for (Eigen::Index k = 0; k < y.cols(); ++k) {
+    auto fit = fitOls(x_effective, Eigen::VectorXd(y.col(k)), true);
+    const Eigen::VectorXd& beta = fit.second;
+    theta.col(k) = x_effective * beta - y.col(k);
+    theta.col(k).array() -= effective_centers.dot(beta);
+  }
+
+  return theta;
+}
+
+} // namespace detail
 
 /**
  * @brief Scales a candidate into the SLOPE dual constraint and evaluates it.

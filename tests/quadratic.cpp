@@ -5,7 +5,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <slope/constants.h>
+#include <slope/logger.h>
 #include <slope/losses/quadratic.h>
+#include <slope/ols.h>
 #include <slope/slope.h>
 #include <slope/threads.h>
 
@@ -371,6 +374,135 @@ TEST_CASE("Low regularization", "[quadratic]")
   double gap = fit.getGaps().back();
 
   REQUIRE(gap <= 1e-10);
+}
+
+TEST_CASE("Near-zero regularization on noisy data", "[quadratic][realdata]")
+{
+  auto [x, y] = loadData("tests/data/abalone.csv");
+  auto [ols_intercept, ols_coefs] = slope::detail::fitOls(x, y);
+
+  constexpr double tol = 1e-4;
+
+  for (const std::string solver : { "hybrid", "pgd", "fista" }) {
+    for (const double alpha : { 0.0, 1e-14, 1e-12 }) {
+      for (const bool diagnostics : { false, true }) {
+        CAPTURE(solver, alpha, diagnostics);
+
+        slope::WarningLogger::clearWarnings();
+
+        slope::Slope model;
+        model.setSolver(solver);
+        model.setDiagnostics(diagnostics);
+        model.setMaxIterations(30000);
+        model.setTol(tol);
+
+        auto fit = model.fit(x, y, alpha);
+        Eigen::VectorXd coefs = fit.getCoefs();
+        const double intercept = fit.getIntercepts()(0);
+
+        REQUIRE_FALSE(slope::WarningLogger::hasWarnings());
+        REQUIRE_THAT(coefs, VectorApproxEqual(ols_coefs, 1e-3));
+        REQUIRE_THAT(intercept,
+                     Catch::Matchers::WithinAbs(ols_intercept, 1e-3));
+
+        if (diagnostics) {
+          const auto primals = fit.getPrimals();
+          const auto gaps = fit.getGaps();
+          REQUIRE(gaps.back() >= -1e-8);
+          if (alpha > 0.0) {
+            REQUIRE(gaps.back() <=
+                    (std::abs(primals.back()) + slope::constants::EPSILON) *
+                      tol);
+          }
+        }
+      }
+    }
+  }
+}
+
+TEST_CASE("Quadratic OLS dual certificate", "[quadratic][dual]")
+{
+  Eigen::MatrixXd x(5, 3);
+  Eigen::MatrixXd y(5, 2);
+
+  // clang-format off
+  x << 1, 2, 2,
+       2, 1, 4,
+       3, 0, 6,
+       4, 1, 8,
+       5, 2, 10;
+  y << 1,  2,
+       0,  1,
+       2, -1,
+       4,  3,
+       3,  5;
+  // clang-format on
+
+  Eigen::VectorXd centers = x.colwise().mean();
+  Eigen::MatrixXd x_effective = x.rowwise() - centers.transpose();
+  Eigen::VectorXd scales =
+    ((x_effective.array().square().colwise().sum()) / (x.rows() - 1)).sqrt();
+  x_effective.array().rowwise() /= scales.transpose().array();
+
+  Eigen::MatrixXd expected_theta(y.rows(), y.cols());
+  for (Eigen::Index k = 0; k < y.cols(); ++k) {
+    auto [intercept, coefs] =
+      slope::detail::fitOls(x_effective, Eigen::VectorXd(y.col(k)), false);
+    expected_theta.col(k) = x_effective * coefs - y.col(k);
+  }
+
+  const Eigen::MatrixXd theta = slope::detail::quadraticOlsDualPoint(
+    x, y, centers, scales, slope::JitNormalization::Both, false);
+
+  REQUIRE((theta - expected_theta).norm() <= 1e-12);
+
+  Eigen::VectorXd gradient = Eigen::VectorXd::Zero(x.cols() * y.cols());
+  slope::updateGradient(gradient,
+                        x,
+                        theta,
+                        centers,
+                        scales,
+                        Eigen::VectorXd::Ones(x.rows()),
+                        slope::JitNormalization::Both);
+
+  const Eigen::ArrayXd lambda =
+    Eigen::ArrayXd::Constant(gradient.size(), 1e-20);
+  slope::SortedL1Norm norm;
+  const double dual_norm = norm.dualNorm(gradient, lambda);
+  REQUIRE(dual_norm > 1.0);
+
+  std::unique_ptr<slope::Loss> loss = std::make_unique<slope::Quadratic>();
+  const double safe_dual =
+    slope::computeDualFromPoint(Eigen::VectorXd::Zero(gradient.size()),
+                                theta,
+                                loss,
+                                norm,
+                                lambda,
+                                x,
+                                y,
+                                centers,
+                                scales,
+                                slope::JitNormalization::Both);
+  const double expected_dual =
+    loss->dual(theta / dual_norm, y, Eigen::VectorXd::Ones(y.rows()));
+
+  REQUIRE_THAT(safe_dual, Catch::Matchers::WithinAbs(expected_dual, 1e-12));
+
+  Eigen::MatrixXd infeasible_theta = theta;
+  infeasible_theta(0, 0) += 1e-6;
+  const double zero_penalty_dual =
+    slope::computeDualFromPoint(Eigen::VectorXd::Zero(gradient.size()),
+                                infeasible_theta,
+                                loss,
+                                norm,
+                                Eigen::ArrayXd::Zero(gradient.size()),
+                                x,
+                                y,
+                                centers,
+                                scales,
+                                slope::JitNormalization::Both);
+
+  REQUIRE(zero_penalty_dual == 0.0);
 }
 
 TEST_CASE("Lasso", "[quadratic][lasso]")

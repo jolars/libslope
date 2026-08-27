@@ -491,6 +491,9 @@ public:
     int alpha_max_ind = whichMax(gradient.cwiseAbs());
     double alpha_max =
       lambda.maxCoeff() == 0.0 ? 0.0 : sl1_norm.dualNorm(gradient, lambda);
+    const double numerical_stationarity_tol =
+      std::sqrt(std::numeric_limits<double>::epsilon()) *
+      std::max(1.0, gradient.cwiseAbs().maxCoeff());
 
     if (alpha_type == "path" ||
         (alpha_type == "estimate" && alpha_estimate != 1)) {
@@ -523,6 +526,7 @@ public:
     double alpha_prev = std::max(alpha_max, alpha(0));
 
     std::vector<SlopeFit> fits;
+    std::optional<MatrixXd> quadratic_ols_dual_point;
 
     // Regularization path loop
     for (int path_step = 0; path_step < this->path_length; ++path_step) {
@@ -545,6 +549,41 @@ public:
 
       Eigen::ArrayXd lambda_curr = alpha_curr * lambda;
       Eigen::ArrayXd lambda_prev = alpha_prev * lambda;
+
+      const bool near_unregularized =
+        lambda_curr.maxCoeff() == 0.0 ||
+        (alpha_max > 0.0 &&
+         alpha_curr <=
+           std::sqrt(std::numeric_limits<double>::epsilon()) * alpha_max);
+      // The QR residual avoids amplifying roundoff in the loss gradient when
+      // the penalty is below numerical resolution. It remains only a candidate
+      // until computeDualFromPoint checks and, if necessary, scales it below.
+      if (loss_type == "quadratic" && near_unregularized &&
+          !quadratic_ols_dual_point.has_value()) {
+        quadratic_ols_dual_point =
+          detail::quadraticOlsDualPoint(x.derived(),
+                                        y,
+                                        this->x_centers,
+                                        this->x_scales,
+                                        jit_normalization,
+                                        this->intercept);
+      }
+
+      std::optional<double> quadratic_ols_dual;
+      if (quadratic_ols_dual_point.has_value()) {
+        quadratic_ols_dual = lambda_curr.maxCoeff() == 0.0
+                               ? 0.0
+                               : computeDualFromPoint(beta,
+                                                      *quadratic_ols_dual_point,
+                                                      loss,
+                                                      sl1_norm,
+                                                      lambda_curr,
+                                                      x.derived(),
+                                                      y,
+                                                      this->x_centers,
+                                                      this->x_scales,
+                                                      jit_normalization);
+      }
 
       std::vector<double> duals, primals, time;
       timer.start();
@@ -581,6 +620,15 @@ public:
                         sl1_norm.eval(beta(working_set),
                                       lambda_curr.head(working_set.size()));
 
+        // The OLS bound can be loose on correlated designs, so it may certify
+        // convergence only after the loss itself is numerically stationary.
+        const bool numerically_stationary =
+          gradient(working_set).cwiseAbs().maxCoeff() <=
+            numerical_stationarity_tol &&
+          (!this->intercept ||
+           residual.colwise().mean().cwiseAbs().maxCoeff() <=
+             numerical_stationarity_tol);
+
         MatrixXd dual_point = loss->dualPoint(eta, y, this->intercept);
         MatrixXd theta = dual_point;
         VectorXd dual_gradient = VectorXd::Zero(beta.size());
@@ -598,6 +646,9 @@ public:
                             constants::MAX_DIV);
         theta.array() /= std::max(1.0, dual_norm);
         double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));
+        if (quadratic_ols_dual.has_value() && numerically_stationary) {
+          dual = std::max(dual, *quadratic_ols_dual);
+        }
 
         double full_dual = std::numeric_limits<double>::quiet_NaN();
 
@@ -613,6 +664,9 @@ public:
                                            this->x_centers,
                                            this->x_scales,
                                            jit_normalization);
+          if (quadratic_ols_dual.has_value() && numerically_stationary) {
+            full_dual = std::max(full_dual, *quadratic_ols_dual);
+          }
           timer.resume();
 
           time.emplace_back(timer.elapsed());
@@ -625,8 +679,12 @@ public:
         assert(dual_gap > -1e-6 && "Dual gap should be positive");
 
         double tol_scaled = (std::abs(primal) + constants::EPSILON) * this->tol;
+        const bool unregularized_stationary = loss_type == "quadratic" &&
+                                              lambda_curr.maxCoeff() == 0.0 &&
+                                              numerically_stationary;
 
-        if (dual_gap <= tol_scaled || it == this->max_it) {
+        if (dual_gap <= tol_scaled || unregularized_stationary ||
+            it == this->max_it) {
           bool no_violations =
             screening_rule->checkKktViolations(gradient,
                                                beta,
@@ -649,8 +707,11 @@ public:
                                                this->x_centers,
                                                this->x_scales,
                                                jit_normalization);
+              if (quadratic_ols_dual.has_value() && numerically_stationary) {
+                full_dual = std::max(full_dual, *quadratic_ols_dual);
+              }
             }
-            if (primal - full_dual <= tol_scaled) {
+            if (primal - full_dual <= tol_scaled || unregularized_stationary) {
               break;
             }
           } else {
