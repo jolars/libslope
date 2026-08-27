@@ -1,5 +1,28 @@
 # TODO
 
+## Hybrid coordinate-descent performance
+
+- [ ] Add a focused benchmark for singleton sparse coordinate derivatives,
+  which account for about 44% of the optimized RCV1 profile inclusively.
+  Replace full residual and weight copies with a single traversal of the
+  feature column that accumulates the weighted first- and second-order terms.
+- [ ] Cache response-wise weight sums while the IRLS weights remain fixed, and
+  benchmark caching singleton Hessians during a coordinate-descent phase.
+  Adopt the latter only if its runtime benefit justifies the extra state.
+- [ ] Aggregate centered residual offsets by response during cluster updates
+  instead of applying one dense adjustment per cluster member. Investigate
+  reusing the sparse cluster workspace to avoid traversing the feature columns
+  again when updating the residual.
+- [ ] Benchmark maintaining response-wise weighted residual sums incrementally
+  to eliminate repeated dense reductions in singleton and multi-feature
+  cluster derivatives. Consider lazy centered residual offsets only if this
+  simpler approach leaves a material bottleneck.
+- [ ] Reprofile the RCV1 path after optimizing coordinate derivatives and
+  residual updates. Optimize the linear predictor, currently about 4% of the
+  profile, only if it remains material.
+- [ ] Remove the unused coordinate-descent work vector and reuse temporary sign
+  storage where practical.
+
 ## Dual points and screening
 
 - [ ] Evaluate conditionally optimizing the multinomial intercept before scaling
