@@ -452,9 +452,22 @@ TEST_CASE("Sparse singleton gradient and Hessian benchmark",
   x.setFromTriplets(triplets.begin(), triplets.end());
 
   const Eigen::MatrixXd weights = Eigen::VectorXd::LinSpaced(n, 0.25, 0.75);
+  const Eigen::VectorXd weight_sums = weights.colwise().sum().transpose();
   const Eigen::MatrixXd residual = Eigen::VectorXd::Random(n);
   const Eigen::VectorXd x_centers = Eigen::VectorXd::Constant(p, 0.01);
   const Eigen::VectorXd x_scales = Eigen::VectorXd::Constant(p, 1.25);
+  const double cached_hessian =
+    slope::computeGradientAndHessian(x,
+                                     j,
+                                     weights,
+                                     residual,
+                                     x_centers,
+                                     x_scales,
+                                     1.0,
+                                     slope::JitNormalization::Both,
+                                     n,
+                                     weight_sums)
+      .second;
 
   BENCHMARK("Sparse singleton coordinate")
   {
@@ -467,6 +480,36 @@ TEST_CASE("Sparse singleton gradient and Hessian benchmark",
                                             1.0,
                                             slope::JitNormalization::Both,
                                             n);
+  };
+
+  BENCHMARK("Sparse singleton with cached weight sums")
+  {
+    return slope::computeGradientAndHessian(x,
+                                            j,
+                                            weights,
+                                            residual,
+                                            x_centers,
+                                            x_scales,
+                                            1.0,
+                                            slope::JitNormalization::Both,
+                                            n,
+                                            weight_sums);
+  };
+
+  BENCHMARK("Sparse singleton with cached Hessian")
+  {
+    double weighted_x_residual_sum = 0.0;
+
+    for (Eigen::SparseMatrix<double>::InnerIterator it(x, j); it; ++it) {
+      const int i = it.row();
+      weighted_x_residual_sum += it.value() * weights(i, 0) * residual(i, 0);
+    }
+
+    weighted_x_residual_sum -=
+      x_centers(j) * weights.cwiseProduct(residual).sum();
+
+    const double gradient = weighted_x_residual_sum / (n * x_scales(j));
+    return std::pair{ gradient, cached_hessian };
   };
 }
 

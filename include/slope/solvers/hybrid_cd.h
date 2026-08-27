@@ -78,6 +78,7 @@ public:
  * @param jit_normalization Normalization strategy (Both, Center, Scale, or
  * None)
  * @param n Number of samples
+ * @param weight_sums Sum of the working weights for each response
  *
  * @return std::pair<double, double> containing:
  *         - first: gradient of the loss function
@@ -93,7 +94,8 @@ computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
                           const Eigen::VectorXd& x_scales,
                           const double s,
                           const JitNormalization jit_normalization,
-                          const int n)
+                          const int n,
+                          const Eigen::VectorXd& weight_sums)
 {
   double gradient = 0.0;
   double hessian = 0.0;
@@ -114,7 +116,7 @@ computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
                  (n * x_scales(j));
       hessian =
         (x.col(j).cwiseAbs2().dot(w_v) - 2 * x_centers(j) * x.col(j).dot(w_v) +
-         std::pow(x_centers(j), 2) * w_v.sum()) /
+         std::pow(x_centers(j), 2) * weight_sums(k)) /
         (std::pow(x_scales(j), 2) * n);
       break;
 
@@ -125,7 +127,7 @@ computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
                  n;
       hessian =
         (x.col(j).cwiseAbs2().dot(w_v) - 2 * x_centers(j) * x.col(j).dot(w_v) +
-         std::pow(x_centers(j), 2) * w_v.sum()) /
+         std::pow(x_centers(j), 2) * weight_sums(k)) /
         n;
       break;
 
@@ -146,7 +148,7 @@ computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
 
 template<typename T>
 std::pair<double, double>
-computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
+computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
                           const int ind,
                           const Eigen::MatrixXd& w,
                           const Eigen::MatrixXd& residual,
@@ -155,6 +157,32 @@ computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
                           const double s,
                           const JitNormalization jit_normalization,
                           const int n)
+{
+  const Eigen::VectorXd weight_sums = w.colwise().sum().transpose();
+  return computeGradientAndHessian(x,
+                                   ind,
+                                   w,
+                                   residual,
+                                   x_centers,
+                                   x_scales,
+                                   s,
+                                   jit_normalization,
+                                   n,
+                                   weight_sums);
+}
+
+template<typename T>
+std::pair<double, double>
+computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
+                          const int ind,
+                          const Eigen::MatrixXd& w,
+                          const Eigen::MatrixXd& residual,
+                          const Eigen::VectorXd& x_centers,
+                          const Eigen::VectorXd& x_scales,
+                          const double s,
+                          const JitNormalization jit_normalization,
+                          const int n,
+                          const Eigen::VectorXd& weight_sums)
 {
   const int p = x.cols();
   auto [k, j] = std::div(ind, p);
@@ -184,7 +212,7 @@ computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
     weighted_x_residual_sum -=
       offset * w.col(k).cwiseProduct(residual.col(k)).sum();
     weighted_x_squared_sum +=
-      offset * offset * w.col(k).sum() - 2.0 * offset * weighted_x_sum;
+      offset * offset * weight_sums(k) - 2.0 * offset * weighted_x_sum;
   }
 
   const double gradient = s * weighted_x_residual_sum / (n * feature_scale);
@@ -192,6 +220,31 @@ computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
     weighted_x_squared_sum / (n * feature_scale * feature_scale);
 
   return { gradient, hessian };
+}
+
+template<typename T>
+std::pair<double, double>
+computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
+                          const int ind,
+                          const Eigen::MatrixXd& w,
+                          const Eigen::MatrixXd& residual,
+                          const Eigen::VectorXd& x_centers,
+                          const Eigen::VectorXd& x_scales,
+                          const double s,
+                          const JitNormalization jit_normalization,
+                          const int n)
+{
+  const Eigen::VectorXd weight_sums = w.colwise().sum().transpose();
+  return computeGradientAndHessian(x,
+                                   ind,
+                                   w,
+                                   residual,
+                                   x_centers,
+                                   x_scales,
+                                   s,
+                                   jit_normalization,
+                                   n,
+                                   weight_sums);
 }
 
 /**
@@ -307,6 +360,7 @@ computeSparseClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
                                        const Clusters& clusters,
                                        const Eigen::MatrixXd& w,
                                        const Eigen::MatrixXd& residual,
+                                       const Eigen::VectorXd& weight_sums,
                                        const Eigen::VectorXd& x_centers,
                                        const Eigen::VectorXd& x_scales,
                                        const JitNormalization jit_normalization,
@@ -371,7 +425,7 @@ computeSparseClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
       jit_normalization == JitNormalization::Both) {
     for (int k = 0; k < m; ++k) {
       hess += -2 * offset(k) * weighted_sum(k) +
-              std::pow(offset(k), 2) * w.col(k).sum();
+              std::pow(offset(k), 2) * weight_sums(k);
       grad -= offset(k) * w.col(k).cwiseProduct(residual.col(k)).sum();
     }
   }
@@ -390,6 +444,7 @@ computeClusterGradientAndHessianWithWorkspace(
   const Clusters& clusters,
   const Eigen::MatrixXd& w,
   const Eigen::MatrixXd& residual,
+  const Eigen::VectorXd&,
   const Eigen::VectorXd& x_centers,
   const Eigen::VectorXd& x_scales,
   const JitNormalization jit_normalization,
@@ -408,6 +463,7 @@ computeClusterGradientAndHessianWithWorkspace(
   const Clusters& clusters,
   const Eigen::MatrixXd& w,
   const Eigen::MatrixXd& residual,
+  const Eigen::VectorXd& weight_sums,
   const Eigen::VectorXd& x_centers,
   const Eigen::VectorXd& x_scales,
   const JitNormalization jit_normalization,
@@ -419,6 +475,7 @@ computeClusterGradientAndHessianWithWorkspace(
                                                 clusters,
                                                 w,
                                                 residual,
+                                                weight_sums,
                                                 x_centers,
                                                 x_scales,
                                                 jit_normalization,
@@ -440,12 +497,14 @@ computeClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
                                  const JitNormalization jit_normalization)
 {
   detail::SparseClusterWorkspace workspace(x.rows(), residual.cols());
+  const Eigen::VectorXd weight_sums = w.colwise().sum().transpose();
   return detail::computeSparseClusterGradientAndHessian(x,
                                                         c_ind,
                                                         s,
                                                         clusters,
                                                         w,
                                                         residual,
+                                                        weight_sums,
                                                         x_centers,
                                                         x_scales,
                                                         jit_normalization,
@@ -467,6 +526,7 @@ computeClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
  * @param lambda_cumsum Cumulative sum of the lambda sequence.
  * @param x The design matrix
  * @param w Working weights
+ * @param weight_sums Sum of the working weights for each response
  * @param x_centers The center values of the data matrix columns
  * @param x_scales The scale values of the data matrix columns
  * @param intercept Shuold an intervept be fit?
@@ -490,6 +550,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
                   const Eigen::ArrayXd& lambda_cumsum,
                   const T& x,
                   const Eigen::MatrixXd& w,
+                  const Eigen::VectorXd& weight_sums,
                   const Eigen::VectorXd& x_centers,
                   const Eigen::VectorXd& x_scales,
                   const bool intercept,
@@ -552,8 +613,16 @@ coordinateDescent(Eigen::VectorXd& beta0,
 
     if (cluster_size == 1) {
       int ind = *clusters.cbegin(c_ind);
-      std::tie(grad, hess) = computeGradientAndHessian(
-        x, ind, w, residual, x_centers, x_scales, s[0], jit_normalization, n);
+      std::tie(grad, hess) = computeGradientAndHessian(x,
+                                                       ind,
+                                                       w,
+                                                       residual,
+                                                       x_centers,
+                                                       x_scales,
+                                                       s[0],
+                                                       jit_normalization,
+                                                       n,
+                                                       weight_sums);
     } else {
       std::tie(hess, grad) =
         detail::computeClusterGradientAndHessianWithWorkspace(x,
@@ -562,6 +631,7 @@ coordinateDescent(Eigen::VectorXd& beta0,
                                                               clusters,
                                                               w,
                                                               residual,
+                                                              weight_sums,
                                                               x_centers,
                                                               x_scales,
                                                               jit_normalization,

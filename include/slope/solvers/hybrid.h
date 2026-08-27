@@ -178,6 +178,7 @@ private:
     loss->updateWeightsAndWorkingResponse(w, z, eta, y);
 
     MatrixXd residual = eta - z;
+    const VectorXd weight_sums = w.colwise().sum().transpose();
 
     Eigen::ArrayXd lambda_cumsum(lambda.size() + 1);
     lambda_cumsum(0) = 0.0;
@@ -200,6 +201,7 @@ private:
                         lambda_cumsum,
                         x,
                         w,
+                        weight_sums,
                         x_centers,
                         x_scales,
                         this->intercept,

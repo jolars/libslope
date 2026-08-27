@@ -256,6 +256,7 @@ TEST_CASE("Sparse singleton derivatives agree with dense derivatives",
   x_scales << 0.8, 1.2, 0.5, 1.7;
 
   const Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+  const Eigen::VectorXd weight_sums = weights.colwise().sum().transpose();
   const std::array normalizations{ JitNormalization::None,
                                    JitNormalization::Center,
                                    JitNormalization::Scale,
@@ -284,9 +285,35 @@ TEST_CASE("Sparse singleton derivatives agree with dense derivatives",
                                   coefficient_sign,
                                   normalization,
                                   n);
+      const auto [cached_dense_gradient, cached_dense_hessian] =
+        computeGradientAndHessian(x,
+                                  ind,
+                                  weights,
+                                  residual,
+                                  x_centers,
+                                  x_scales,
+                                  coefficient_sign,
+                                  normalization,
+                                  n,
+                                  weight_sums);
+      const auto [cached_gradient, cached_hessian] =
+        computeGradientAndHessian(x_sparse,
+                                  ind,
+                                  weights,
+                                  residual,
+                                  x_centers,
+                                  x_scales,
+                                  coefficient_sign,
+                                  normalization,
+                                  n,
+                                  weight_sums);
 
       REQUIRE_THAT(sparse_gradient, WithinAbs(dense_gradient, 1e-12));
       REQUIRE_THAT(sparse_hessian, WithinAbs(dense_hessian, 1e-12));
+      REQUIRE_THAT(cached_dense_gradient, WithinAbs(dense_gradient, 1e-12));
+      REQUIRE_THAT(cached_dense_hessian, WithinAbs(dense_hessian, 1e-12));
+      REQUIRE_THAT(cached_gradient, WithinAbs(dense_gradient, 1e-12));
+      REQUIRE_THAT(cached_hessian, WithinAbs(dense_hessian, 1e-12));
     }
   }
 }

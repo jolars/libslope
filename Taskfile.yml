@@ -76,7 +76,7 @@ tasks:
     cmds:
       - cmake -B {{.BENCHMARK_BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DENABLE_COVERAGE=OFF -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
       - cmake --build {{.BENCHMARK_BUILD_DIR}} --target tests --parallel {{.JOBS}}
-      - ./{{.BENCHMARK_BUILD_DIR}}/tests "[sparse_cluster]" --benchmark-samples 30
+      - ./{{.BENCHMARK_BUILD_DIR}}/tests "[sparse_cluster],[sparse_singleton]" --benchmark-samples 30
 
   full-set-benchmark:
     cmds:

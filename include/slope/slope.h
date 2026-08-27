@@ -1035,6 +1035,7 @@ public:
 
       loss->updateWeightsAndWorkingResponse(w, z, eta, y);
       working_residual = eta - z;
+      const VectorXd weight_sums = w.colwise().sum().transpose();
 
       for (int inner_it = 0; inner_it < max_it_inner_relax; ++inner_it) {
         passes++;
@@ -1046,6 +1047,7 @@ public:
                                                     lambda_cumsum_relax,
                                                     x,
                                                     w,
+                                                    weight_sums,
                                                     x_centers,
                                                     x_scales,
                                                     intercept,

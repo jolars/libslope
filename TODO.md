@@ -6,9 +6,10 @@
   which account for about 44% of the optimized RCV1 profile inclusively.
   Replace full residual and weight copies with a single traversal of the
   feature column that accumulates the weighted first- and second-order terms.
-- [ ] Cache response-wise weight sums while the IRLS weights remain fixed, and
+- [x] Cache response-wise weight sums while the IRLS weights remain fixed, and
   benchmark caching singleton Hessians during a coordinate-descent phase.
-  Adopt the latter only if its runtime benefit justifies the extra state.
+  The focused benchmark found no runtime benefit from Hessian caching, so the
+  solver does not retain the extra state.
 - [ ] Aggregate centered residual offsets by response during cluster updates
   instead of applying one dense adjustment per cluster member. Investigate
   reusing the sparse cluster workspace to avoid traversing the feature columns
