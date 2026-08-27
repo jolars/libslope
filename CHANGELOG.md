@@ -1,5 +1,19 @@
 # Changelog
 
+## [6.5.1](https://github.com/jolars/libslope/compare/v6.5.0...v6.5.1) (2026-08-27)
+
+### Bug Fixes
+- **solvers:** stabilize near-zero quadratic fits ([`8bd668c`](https://github.com/jolars/libslope/commit/8bd668c7ba0269565f325e5e38ca68abb71a2648)), fixes [#146](https://github.com/jolars/libslope/issues/146)
+- correct dual point calculation for non-gaussian losses ([`f7d737d`](https://github.com/jolars/libslope/commit/f7d737d2d45ab4d496be056e6649eb6d30cafe0e))
+- add explicit includes to fix clang23 errors ([`037ea88`](https://github.com/jolars/libslope/commit/037ea88dc7862ef797997bac360ee74160935d22))
+
+### Performance Improvements
+- **solvers:** cache IRLS weight sums ([`de0cc0f`](https://github.com/jolars/libslope/commit/de0cc0f7eeece93ed249d5b0f24c9f142e9ab612))
+- **solvers:** optimize sparse derivatives ([`774cb59`](https://github.com/jolars/libslope/commit/774cb595849440cf8d6a940f5f3acb8b8983acac))
+- **solvers:** avoid sparse cluster materialization ([`d96a511`](https://github.com/jolars/libslope/commit/d96a511c0599b9813b8abc220f0689119ec6ce64))
+- **solvers:** avoid scaling lambda cumsum ([`30b8ff7`](https://github.com/jolars/libslope/commit/30b8ff7b9a2cf0e0da39fe83720c1decebbf87f4))
+- avoid materializing full index set ([`df4cdd2`](https://github.com/jolars/libslope/commit/df4cdd2e8f07398e972402074683c586497c9bff)), closes [#152](https://github.com/jolars/libslope/issues/152)
+
 ## [6.5.0](https://github.com/jolars/libslope/compare/v6.4.0...v6.5.0) (2026-01-28)
 
 ### Features
