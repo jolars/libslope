@@ -176,6 +176,24 @@ TEST_CASE("Logistic predictions", "[logistic][predict]")
   REQUIRE_THAT(pred.reshaped(), VectorApproxEqual(expected));
 }
 
+TEST_CASE("Logistic IRLS remains finite for saturated predictors",
+          "[logistic][hybrid]")
+{
+  Eigen::Vector2d eta;
+  Eigen::Vector2d y;
+  eta << -1000.0, 1000.0;
+  y << 0.0, 1.0;
+
+  slope::Logistic loss;
+  Eigen::MatrixXd weights;
+  Eigen::MatrixXd working_response;
+  loss.updateWeightsAndWorkingResponse(weights, working_response, eta, y);
+
+  REQUIRE(weights.allFinite());
+  REQUIRE((weights.array() > 0.0).all());
+  REQUIRE(working_response.allFinite());
+}
+
 TEST_CASE("Logistic dual points remain feasible with an intercept",
           "[logistic][dual]")
 {

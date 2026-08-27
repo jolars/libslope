@@ -118,7 +118,8 @@ Eigen::MatrixXd
 Logistic::hessianDiagonal(const Eigen::MatrixXd& eta)
 {
   const auto pr = inverseLink(eta);
-  return pr.array() * (1.0 - pr.array());
+  constexpr double min_hessian = constants::P_MIN * (1.0 - constants::P_MIN);
+  return (pr.array() * (1.0 - pr.array())).max(min_hessian);
 }
 
 Eigen::MatrixXd
