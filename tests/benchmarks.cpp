@@ -431,6 +431,45 @@ TEST_CASE("Sparse cluster gradient and Hessian benchmark",
   };
 }
 
+TEST_CASE("Sparse singleton gradient and Hessian benchmark",
+          "[!benchmark][sparse_singleton]")
+{
+  constexpr int n = 20'242;
+  constexpr int p = 47'236;
+  constexpr int nonzeros = 32;
+  constexpr int j = p / 2;
+
+  std::vector<Eigen::Triplet<double>> triplets;
+  triplets.reserve(nonzeros);
+
+  for (int k = 0; k < nonzeros; ++k) {
+    const int i = (997 * k) % n;
+    const double value = 0.25 + k % 11;
+    triplets.emplace_back(i, j, value);
+  }
+
+  Eigen::SparseMatrix<double> x(n, p);
+  x.setFromTriplets(triplets.begin(), triplets.end());
+
+  const Eigen::MatrixXd weights = Eigen::VectorXd::LinSpaced(n, 0.25, 0.75);
+  const Eigen::MatrixXd residual = Eigen::VectorXd::Random(n);
+  const Eigen::VectorXd x_centers = Eigen::VectorXd::Constant(p, 0.01);
+  const Eigen::VectorXd x_scales = Eigen::VectorXd::Constant(p, 1.25);
+
+  BENCHMARK("Sparse singleton coordinate")
+  {
+    return slope::computeGradientAndHessian(x,
+                                            j,
+                                            weights,
+                                            residual,
+                                            x_centers,
+                                            x_scales,
+                                            1.0,
+                                            slope::JitNormalization::Both,
+                                            n);
+  };
+}
+
 TEST_CASE("Normalization", "[!benchmark]")
 {
   auto data = generateData(100, 500, "quadratic", 1, 0.01, 0.01);

@@ -85,7 +85,7 @@ public:
  */
 template<typename T>
 std::pair<double, double>
-computeGradientAndHessian(const T& x,
+computeGradientAndHessian(const Eigen::MatrixBase<T>& x,
                           const int ind,
                           const Eigen::MatrixXd& w,
                           const Eigen::MatrixXd& residual,
@@ -102,7 +102,7 @@ computeGradientAndHessian(const T& x,
 
   auto [k, j] = std::div(ind, p);
 
-  // TODO: Avoid these copies
+  // TODO: Benchmark avoiding these copies in the dense path.
   Eigen::VectorXd residual_v = residual.col(k);
   Eigen::VectorXd w_v = w.col(k);
 
@@ -140,6 +140,56 @@ computeGradientAndHessian(const T& x,
       hessian = x.col(j).cwiseAbs2().dot(w_v) / n;
       break;
   }
+
+  return { gradient, hessian };
+}
+
+template<typename T>
+std::pair<double, double>
+computeGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
+                          const int ind,
+                          const Eigen::MatrixXd& w,
+                          const Eigen::MatrixXd& residual,
+                          const Eigen::VectorXd& x_centers,
+                          const Eigen::VectorXd& x_scales,
+                          const double s,
+                          const JitNormalization jit_normalization,
+                          const int n)
+{
+  const int p = x.cols();
+  auto [k, j] = std::div(ind, p);
+
+  double weighted_x_residual_sum = 0.0;
+  double weighted_x_sum = 0.0;
+  double weighted_x_squared_sum = 0.0;
+
+  for (typename T::InnerIterator it(x.derived(), j); it; ++it) {
+    const int i = it.row();
+    const double value = it.value();
+    const double weight = w(i, k);
+
+    weighted_x_residual_sum += value * weight * residual(i, k);
+    weighted_x_sum += value * weight;
+    weighted_x_squared_sum += value * value * weight;
+  }
+
+  const bool center = jit_normalization == JitNormalization::Center ||
+                      jit_normalization == JitNormalization::Both;
+  const bool scale = jit_normalization == JitNormalization::Scale ||
+                     jit_normalization == JitNormalization::Both;
+  const double offset = center ? x_centers(j) : 0.0;
+  const double feature_scale = scale ? x_scales(j) : 1.0;
+
+  if (center) {
+    weighted_x_residual_sum -=
+      offset * w.col(k).cwiseProduct(residual.col(k)).sum();
+    weighted_x_squared_sum +=
+      offset * offset * w.col(k).sum() - 2.0 * offset * weighted_x_sum;
+  }
+
+  const double gradient = s * weighted_x_residual_sum / (n * feature_scale);
+  const double hessian =
+    weighted_x_squared_sum / (n * feature_scale * feature_scale);
 
   return { gradient, hessian };
 }

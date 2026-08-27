@@ -222,6 +222,75 @@ TEST_CASE("Sparse cluster derivatives agree for multiple responses", "[hybrid]")
   }
 }
 
+TEST_CASE("Sparse singleton derivatives agree with dense derivatives",
+          "[hybrid]")
+{
+  using namespace Catch::Matchers;
+  using namespace slope;
+
+  constexpr int n = 5;
+  constexpr int p = 4;
+  constexpr int m = 3;
+
+  Eigen::MatrixXd x(n, p);
+  // clang-format off
+  x << 1.0,  0.0, 2.0,  0.0,
+       0.0, -1.0, 0.0,  3.0,
+       4.0,  0.0, 0.0, -2.0,
+       0.0,  5.0, 1.0,  0.0,
+      -3.0,  0.0, 0.0,  6.0;
+  // clang-format on
+
+  Eigen::MatrixXd weights(n, m);
+  weights << 1.0, 0.5, 1.5, 0.8, 1.2, 0.7, 1.1, 0.9, 1.3, 0.6, 1.4, 0.4, 1.7,
+    0.3, 1.0;
+
+  Eigen::MatrixXd residual(n, m);
+  residual << 0.1, -0.2, 0.3, -0.4, 0.5, -0.6, 0.7, -0.8, 0.9, -1.0, 1.1, -1.2,
+    1.3, -1.4, 1.5;
+
+  Eigen::VectorXd x_centers(p);
+  x_centers << 0.4, -0.2, 0.7, -0.5;
+
+  Eigen::VectorXd x_scales(p);
+  x_scales << 0.8, 1.2, 0.5, 1.7;
+
+  const Eigen::SparseMatrix<double> x_sparse = x.sparseView();
+  const std::array normalizations{ JitNormalization::None,
+                                   JitNormalization::Center,
+                                   JitNormalization::Scale,
+                                   JitNormalization::Both };
+
+  for (const JitNormalization normalization : normalizations) {
+    for (int ind = 0; ind < p * m; ++ind) {
+      const double coefficient_sign = ind % 2 == 0 ? 1.0 : -1.0;
+      const auto [dense_gradient, dense_hessian] =
+        computeGradientAndHessian(x,
+                                  ind,
+                                  weights,
+                                  residual,
+                                  x_centers,
+                                  x_scales,
+                                  coefficient_sign,
+                                  normalization,
+                                  n);
+      const auto [sparse_gradient, sparse_hessian] =
+        computeGradientAndHessian(x_sparse,
+                                  ind,
+                                  weights,
+                                  residual,
+                                  x_centers,
+                                  x_scales,
+                                  coefficient_sign,
+                                  normalization,
+                                  n);
+
+      REQUIRE_THAT(sparse_gradient, WithinAbs(dense_gradient, 1e-12));
+      REQUIRE_THAT(sparse_hessian, WithinAbs(dense_hessian, 1e-12));
+    }
+  }
+}
+
 TEST_CASE("Randomized CD", "[quadratic][hybrid]")
 {
   using namespace Catch::Matchers;

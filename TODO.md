@@ -2,7 +2,7 @@
 
 ## Hybrid coordinate-descent performance
 
-- [ ] Add a focused benchmark for singleton sparse coordinate derivatives,
+- [x] Add a focused benchmark for singleton sparse coordinate derivatives,
   which account for about 44% of the optimized RCV1 profile inclusively.
   Replace full residual and weight copies with a single traversal of the
   feature column that accumulates the weighted first- and second-order terms.
