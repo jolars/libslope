@@ -33,12 +33,10 @@
 - [x] Strengthen direct multinomial dual-point tests with multiple non-reference
   classes, classwise zero-sum checks, simplex-boundary cases, absent
   classes, SLOPE dual-norm scaling, and nonnegative end-to-end gaps.
-- [x] Add Celer-style predictor extrapolation for logistic and quadratic hybrid
-  and PGD paths, mapping candidates through the loss-specific dual-point logic
-  before SLOPE dual-norm scaling. On RCV1, extrapolation improved 14 of 116
-  positive-gap checks by up to 35.9x and reduced the hybrid path from 12.93 to
-  10.07 seconds (128 to 107 passes); E2006 remained neutral-to-positive at
-  11.48 versus 11.27 seconds.
+- [ ] Explore dual extrapolation or another tighter candidate construction that
+  preserves the intercept equality, each loss's conjugate domain, and the
+  sorted \(\ell\_1\) dual-norm constraint. Benchmark certificate quality
+  before adopting the added complexity.
 - [ ] Define and document solver behavior when an unpenalized intercept has no
   finite minimizer, including single-class binomial responses, all-zero
   Poisson responses, and absent multinomial classes. Keep dual-certificate

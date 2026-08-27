@@ -12,13 +12,6 @@
 
 namespace slope {
 
-namespace detail {
-
-std::string
-resolveSolverType(const std::string& solver_type);
-
-} // namespace detail
-
 /**
  * @brief Factory function to create and configure a SLOPE solver
  *
