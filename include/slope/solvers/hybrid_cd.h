@@ -320,8 +320,9 @@ computeClusterGradientAndHessian(const Eigen::SparseMatrixBase<T>& x,
  * @param intercept Shuold an intervept be fit?
  * @param jit_normalization Type o fJIT normalization.
  * @param rng Random number generator for shuffling indices in permuted CD.
- * @param update_clusters Flag indicating whether to update the clusters
- *   after each uupdate.
+ * @param update_clusters Whether to maintain cluster ordering and membership
+ *   after each update. If false, later cluster-coordinate updates may no longer
+ *   satisfy their required invariants.
  * @param cd_type Type of coordinate descent to use ("cyclical" or "permuted")
  *
  * @see Clusters

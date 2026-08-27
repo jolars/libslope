@@ -92,8 +92,12 @@ public:
   /**
    * @brief Sets the update clusters flag.
    *
-   * @param update_clusters Selects whether the coordinate descent keeps the
-   * clusters updated.
+   * Disabling cluster updates is intended for benchmarking and experimental
+   * use. A coordinate update can then invalidate the ordering and uniqueness
+   * assumptions required by later cluster-coordinate updates.
+   *
+   * @param update_clusters Whether coordinate descent maintains cluster
+   * ordering and membership after each update.
    */
   void setUpdateClusters(bool update_clusters);
 

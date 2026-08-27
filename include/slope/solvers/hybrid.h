@@ -40,7 +40,9 @@ public:
    * @brief Constructs Hybrid solver for SLOPE optimization
    * @param jit_normalization Feature normalization strategy
    * @param intercept If true, fits intercept term
-   * @param update_clusters If true, updates clusters during optimization
+   * @param update_clusters If true, maintains cluster ordering and membership
+   * after each coordinate update. False is intended for benchmarking because
+   * later cluster-coordinate updates may no longer satisfy their invariants.
    * @param cd_iterations Frequency of proximal gradient descent updates
    * @param cd_type Type of coordinate descent to use ("cyclical" or "permuted")
    * @param random_seed Optional random seed for reproducibility
