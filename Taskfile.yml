@@ -77,3 +77,22 @@ tasks:
       - cmake -B {{.BENCHMARK_BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DENABLE_COVERAGE=OFF -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
       - cmake --build {{.BENCHMARK_BUILD_DIR}} --parallel {{.JOBS}}
       - ./{{.BENCHMARK_BUILD_DIR}}/tests "[full_set]" --benchmark-samples 20
+
+  high-dimensional-benchmark-build:
+    cmds:
+      - cmake -B {{.BENCHMARK_BUILD_DIR}} -S . -DBUILD_DOCS=OFF -DENABLE_COVERAGE=OFF -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+      - cmake --build {{.BENCHMARK_BUILD_DIR}} --target tests --parallel {{.JOBS}}
+
+  high-dimensional-benchmark-data:
+    cmds:
+      - mkdir -p .cache/benchmarks
+      - test -f .cache/benchmarks/rcv1_train.binary.bz2 || curl --fail --location https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/rcv1_train.binary.bz2 --output .cache/benchmarks/rcv1_train.binary.bz2
+      - test -f .cache/benchmarks/rcv1_train.binary || bzip2 --decompress --keep .cache/benchmarks/rcv1_train.binary.bz2
+      - test -f .cache/benchmarks/E2006.train.bz2 || curl --fail --location https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/regression/E2006.train.bz2 --output .cache/benchmarks/E2006.train.bz2
+      - test -f .cache/benchmarks/E2006.train || bzip2 --decompress --keep .cache/benchmarks/E2006.train.bz2
+
+  high-dimensional-benchmark:
+    deps: [high-dimensional-benchmark-build, high-dimensional-benchmark-data]
+    cmds:
+      - SLOPE_BENCHMARK_DATASET=rcv1 SLOPE_BENCHMARK_DATA_PATH=.cache/benchmarks/rcv1_train.binary ./{{.BENCHMARK_BUILD_DIR}}/tests "High-dimensional solver paths" --benchmark-samples 3
+      - SLOPE_BENCHMARK_DATASET=e2006 SLOPE_BENCHMARK_DATA_PATH=.cache/benchmarks/E2006.train ./{{.BENCHMARK_BUILD_DIR}}/tests "High-dimensional solver paths" --benchmark-samples 3

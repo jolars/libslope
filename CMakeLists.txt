@@ -94,6 +94,7 @@ if(BUILD_TESTING)
     tests/interrupt.cpp
     tests/lambda_sequence.cpp
     tests/load_data.cpp
+    tests/load_libsvm.cpp
     tests/logger.cpp
     tests/logistic.cpp
     tests/map.cpp
@@ -107,6 +108,7 @@ if(BUILD_TESTING)
     tests/qnorm.cpp
     tests/quadratic.cpp
     tests/real_data.cpp
+    tests/real_data_benchmarks.cpp
     tests/relax.cpp
     tests/score.cpp
     tests/screening.cpp

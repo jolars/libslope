@@ -7,6 +7,8 @@
   packages = with pkgs; [
     git
     bashInteractive
+    bzip2
+    curl
     go-task
     catch2_3
     clang
