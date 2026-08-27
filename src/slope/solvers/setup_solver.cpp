@@ -6,6 +6,16 @@
 
 namespace slope {
 
+namespace detail {
+
+std::string
+resolveSolverType(const std::string& solver_type)
+{
+  return solver_type == "auto" ? "hybrid" : solver_type;
+}
+
+} // namespace detail
+
 std::unique_ptr<SolverBase>
 setupSolver(const std::string& solver_type,
             const std::string& loss,
@@ -16,14 +26,7 @@ setupSolver(const std::string& solver_type,
             const std::string& cd_type,
             std::optional<int> random_seed)
 {
-  std::string solver_choice = solver_type;
-
-  if (solver_type == "auto") {
-    // TODO: Make this more sophisticated, e.g. define in solver class
-    // and check if compatible with the loss function.
-    // solver_choice = loss == "multinomial" ? "fista" : "hybrid";
-    solver_choice = "hybrid";
-  }
+  const std::string solver_choice = detail::resolveSolverType(solver_type);
 
   if (solver_choice == "pgd") {
     return std::make_unique<PGD>(jit_normalization, intercept, "pgd");

@@ -8,6 +8,7 @@
 #include "clusters.h"
 #include "constants.h"
 #include "diagnostics.h"
+#include "dual_extrapolation.h"
 #include "estimate_alpha.h"
 #include "logger.h"
 #include "losses/loss.h"
@@ -29,6 +30,7 @@
 #include <limits>
 #include <memory>
 #include <optional>
+#include <utility>
 
 /** @namespace slope
  *  @brief Namespace containing SLOPE regression implementation
@@ -475,6 +477,8 @@ public:
     SortedL1Norm sl1_norm;
 
     // TODO: Make this part of the slope class
+    const std::string resolved_solver_type =
+      detail::resolveSolverType(this->solver_type);
     auto solver = setupSolver(this->solver_type,
                               this->loss_type,
                               jit_normalization,
@@ -483,6 +487,12 @@ public:
                               this->cd_iterations,
                               this->cd_type,
                               this->random_seed);
+    const bool use_dual_extrapolation =
+      detail::dualExtrapolationEnabled(this->loss_type, resolved_solver_type);
+    // A PGD update is cheap relative to another dual-gradient pass. Sampling
+    // its certificate amortizes that cost while retaining consecutive history.
+    const int dual_extrapolation_frequency =
+      resolved_solver_type == "pgd" ? 20 : 1;
 
     updateGradient(gradient,
                    x.derived(),
@@ -606,6 +616,30 @@ public:
       screening_rule->screen(
         working_set, gradient, lambda_curr, lambda_prev, beta);
 
+      detail::DualExtrapolator dual_extrapolator;
+      std::optional<MatrixXd> best_dual_point;
+      double best_candidate_dual = -std::numeric_limits<double>::infinity();
+      VectorXd dual_gradient = VectorXd::Zero(beta.size());
+      const VectorXd observation_weights = VectorXd::Ones(n);
+
+      auto evaluate_dual_point = [&](MatrixXd candidate) {
+        updateGradient(dual_gradient,
+                       x.derived(),
+                       candidate,
+                       working_set,
+                       this->x_centers,
+                       this->x_scales,
+                       observation_weights,
+                       jit_normalization);
+        const double dual_norm =
+          sl1_norm.dualNorm(dual_gradient(working_set),
+                            lambda_curr.head(working_set.size()),
+                            constants::MAX_DIV);
+        candidate.array() /= std::max(1.0, dual_norm);
+        const double value = loss->dual(candidate, y, observation_weights);
+        return std::make_pair(std::move(candidate), value);
+      };
+
       int it = 0;
       int total_it = 0;
       for (; it < this->max_it; ++it, ++total_it) {
@@ -634,22 +668,39 @@ public:
              numerical_stationarity_tol);
 
         MatrixXd dual_point = loss->dualPoint(eta, y, this->intercept);
-        MatrixXd theta = dual_point;
-        VectorXd dual_gradient = VectorXd::Zero(beta.size());
-        updateGradient(dual_gradient,
-                       x.derived(),
-                       theta,
-                       working_set,
-                       this->x_centers,
-                       this->x_scales,
-                       Eigen::VectorXd::Ones(n),
-                       jit_normalization);
-        double dual_norm =
-          sl1_norm.dualNorm(dual_gradient(working_set),
-                            lambda_curr.head(working_set.size()),
-                            constants::MAX_DIV);
-        theta.array() /= std::max(1.0, dual_norm);
-        double dual = loss->dual(theta, y, Eigen::VectorXd::Ones(n));
+        auto [theta, candidate_dual] =
+          use_dual_extrapolation ? evaluate_dual_point(std::move(dual_point))
+                                 : evaluate_dual_point(dual_point);
+
+        if (use_dual_extrapolation) {
+          const bool extrapolate_now =
+            total_it % dual_extrapolation_frequency == 0;
+          const auto extrapolated_eta =
+            dual_extrapolator.push(eta, extrapolate_now);
+          if (extrapolated_eta.has_value()) {
+            auto [extrapolated_theta, extrapolated_dual] = evaluate_dual_point(
+              loss->dualPoint(*extrapolated_eta, y, this->intercept));
+            if (std::isfinite(extrapolated_dual) &&
+                extrapolated_dual > candidate_dual) {
+              theta = std::move(extrapolated_theta);
+              candidate_dual = extrapolated_dual;
+            }
+          }
+        }
+
+        if (use_dual_extrapolation) {
+          if (candidate_dual > best_candidate_dual) {
+            best_dual_point = theta;
+            best_candidate_dual = candidate_dual;
+          } else if (best_dual_point.has_value()) {
+            theta = *best_dual_point;
+            candidate_dual = best_candidate_dual;
+          }
+        }
+
+        const MatrixXd& full_dual_point =
+          use_dual_extrapolation ? theta : dual_point;
+        double dual = candidate_dual;
         if (quadratic_ols_dual.has_value() && numerically_stationary) {
           dual = std::max(dual, *quadratic_ols_dual);
         }
@@ -659,7 +710,7 @@ public:
         if (collect_diagnostics) {
           timer.pause();
           full_dual = computeDualFromPoint(beta,
-                                           dual_point,
+                                           full_dual_point,
                                            loss,
                                            sl1_norm,
                                            lambda_curr,
@@ -702,7 +753,7 @@ public:
           if (no_violations) {
             if (!std::isfinite(full_dual)) {
               full_dual = computeDualFromPoint(beta,
-                                               dual_point,
+                                               full_dual_point,
                                                loss,
                                                sl1_norm,
                                                lambda_curr,
@@ -720,6 +771,9 @@ public:
             }
           } else {
             it = 0; // Restart if there are KKT violations
+            dual_extrapolator.reset();
+            best_dual_point.reset();
+            best_candidate_dual = -std::numeric_limits<double>::infinity();
           }
         }
 

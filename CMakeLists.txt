@@ -88,6 +88,7 @@ if(BUILD_TESTING)
     tests/benchmarks.cpp
     tests/clusters.cpp
     tests/cv.cpp
+    tests/dual_extrapolation.cpp
     tests/generate_data.cpp
     tests/hybrid.cpp
     tests/input_validation.cpp
