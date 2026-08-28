@@ -16,7 +16,13 @@ include(FetchContent)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(OpenMP_RUNTIME_MSVC "llvm")
+# The LLVM runtime makes MSVC link libomp140.<arch>.dll instead of
+# vcomp140.dll. Not every MSVC installation ships that DLL for every
+# architecture, so consumers that redistribute the binary may need "vcomp".
+set(OpenMP_RUNTIME_MSVC
+    "llvm"
+    CACHE STRING "OpenMP runtime to link against with MSVC (llvm or vcomp)"
+)
 
 if(USE_OPENMP)
   find_package(OpenMP QUIET)

@@ -21,12 +21,18 @@ jobs:
           - os: windows-latest
             name: Windows (MinGW)
             toolchain: mingw
+            triplet: x64-mingw-dynamic
           - os: windows-latest
             name: Windows (MSVC)
             toolchain: msvc
+            triplet: x64-windows
+          # MSVC is the only toolchain here that builds native arm64: the
+          # MinGW distributed by chocolatey is x86_64, so it would target x64
+          # under emulation and duplicate the job above.
           - os: windows-11-arm
-            name: Windows ARM
-            toolchain: mingw
+            name: Windows ARM (MSVC)
+            toolchain: msvc
+            triplet: arm64-windows
       fail-fast: false
     name: ${{ matrix.name }}
     steps:
@@ -49,23 +55,23 @@ jobs:
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
         run: |
           choco install mingw
-          vcpkg install eigen3 catch2 --triplet x64-mingw-dynamic
+          vcpkg install eigen3 catch2 --triplet ${{ matrix.triplet }}
 
       - name: Install dependencies (Windows MSVC)
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
         run: |
-          vcpkg install eigen3 catch2 --triplet x64-windows
+          vcpkg install eigen3 catch2 --triplet ${{ matrix.triplet }}
 
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v2.2
 
       - name: Configure CMake (Windows MinGW)
         if: runner.os == 'Windows' && matrix.toolchain == 'mingw'
-        run: cmake -B build -S . -DBUILD_TESTING=ON -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic
+        run: cmake -B build -S . -DBUILD_TESTING=ON -G "MinGW Makefiles" -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
-        run: cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+        run: cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
 
       - name: Configure CMake (Linux/macOS)
         if: runner.os != 'Windows'
