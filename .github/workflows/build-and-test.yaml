@@ -26,13 +26,23 @@ jobs:
             name: Windows (MSVC)
             toolchain: msvc
             triplet: x64-windows
+          # Consumers that redistribute binaries have to build against vcomp,
+          # because the libomp DLLs the LLVM runtime needs are not
+          # redistributable. Keep that configuration covered.
+          - os: windows-latest
+            name: Windows (MSVC, vcomp)
+            toolchain: msvc
+            triplet: x64-windows
+            openmp_runtime: vcomp
           # MSVC is the only toolchain here that builds native arm64: the
           # MinGW distributed by chocolatey is x86_64, so it would target x64
-          # under emulation and duplicate the job above.
+          # under emulation and duplicate the job above. It has to use vcomp,
+          # since the runner image ships no libomp140.aarch64.dll.
           - os: windows-11-arm
             name: Windows ARM (MSVC)
             toolchain: msvc
             triplet: arm64-windows
+            openmp_runtime: vcomp
       fail-fast: false
     name: ${{ matrix.name }}
     steps:
@@ -71,7 +81,7 @@ jobs:
 
       - name: Configure CMake (Windows MSVC)
         if: runner.os == 'Windows' && matrix.toolchain == 'msvc'
-        run: cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+        run: cmake -B build -S . -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} -DOpenMP_RUNTIME_MSVC=${{ matrix.openmp_runtime || 'llvm' }}
 
       - name: Configure CMake (Linux/macOS)
         if: runner.os != 'Windows'
