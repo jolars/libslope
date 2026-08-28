@@ -73,8 +73,8 @@ TEST_CASE("Logistic, simple fixed design", "[logistic]")
 
     auto dual_gaps = fit.getGaps();
 
-    REQUIRE(dual_gaps.front() >= 0);
-    REQUIRE(dual_gaps.back() >= 0);
+    REQUIRE(dual_gaps.front() >= -GAP_TOLERANCE);
+    REQUIRE(dual_gaps.back() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps.back() <= 1e-4);
 
     model.setSolver("hybrid");

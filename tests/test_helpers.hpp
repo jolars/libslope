@@ -4,6 +4,11 @@
 #include <catch2/matchers/catch_matchers_templated.hpp>
 #include <cmath>
 
+/// @brief Slack allowed when checking that a duality gap is non-negative.
+/// Gaps cannot be negative in exact arithmetic, but a converged one can round
+/// just below zero, and by how much depends on the platform.
+constexpr double GAP_TOLERANCE = 1e-10;
+
 template<typename T>
 std::vector<double>
 asStdVec(const T& x)

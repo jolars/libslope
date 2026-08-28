@@ -58,7 +58,7 @@ TEST_CASE("Poisson models", "[poisson]")
 
     auto dual_gaps = fit.getGaps();
 
-    REQUIRE(dual_gaps.front() >= 0);
+    REQUIRE(dual_gaps.front() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps.back() <= 1e-6);
 
     Eigen::VectorXd coefs_hybrid = fit.getCoefs();
@@ -69,7 +69,7 @@ TEST_CASE("Poisson models", "[poisson]")
 
     auto dual_gaps_pgd = fit.getGaps();
 
-    REQUIRE(dual_gaps_pgd.front() >= 0);
+    REQUIRE(dual_gaps_pgd.front() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps_pgd.back() <= 1e-6);
 
     coefs_ref << 0.1957634, -0.1612890, 0.1612890;
@@ -93,7 +93,7 @@ TEST_CASE("Poisson models", "[poisson]")
 
     auto dual_gaps_hybrid = fit.getGaps();
 
-    REQUIRE(dual_gaps_hybrid.front() >= 0);
+    REQUIRE(dual_gaps_hybrid.front() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
     model.setMaxIterations(1e4);
@@ -152,7 +152,7 @@ TEST_CASE("Poisson models", "[poisson]")
 
     auto dual_gaps_hybrid = fit.getGaps();
 
-    REQUIRE(dual_gaps_hybrid.front() >= 0);
+    REQUIRE(dual_gaps_hybrid.front() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
     model.setSolver("pgd");
@@ -184,7 +184,7 @@ TEST_CASE("Poisson models", "[poisson]")
 
     auto dual_gaps_hybrid = fit.getGaps();
 
-    REQUIRE(dual_gaps_hybrid.front() >= 0);
+    REQUIRE(dual_gaps_hybrid.front() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps_hybrid.back() <= 1e-6);
 
     model.setSolver("pgd");

@@ -169,7 +169,7 @@ TEST_CASE("Quadratic, various models", "[quadratic]")
 
     auto dual_gaps = fit.getGaps();
 
-    REQUIRE(dual_gaps.back() >= 0);
+    REQUIRE(dual_gaps.back() >= -GAP_TOLERANCE);
     REQUIRE(dual_gaps.back() <= 1e-4);
   }
 
