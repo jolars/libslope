@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.5.4](https://github.com/jolars/libslope/compare/v6.5.3...v6.5.4) (2026-08-28)
+
+### Bug Fixes
+- add another `override` ([`9a13a52`](https://github.com/jolars/libslope/commit/9a13a52a76f06aa41ecfa43f552ca8dc4a372f72))
+- explicitly override ([`0695af1`](https://github.com/jolars/libslope/commit/0695af1eaf97fe0df728e1c7ac70eb427497c132))
+
 ## [6.5.3](https://github.com/jolars/libslope/compare/v6.5.2...v6.5.3) (2026-08-28)
 
 ### Bug Fixes
