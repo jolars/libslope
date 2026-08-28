@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.5.3](https://github.com/jolars/libslope/compare/v6.5.2...v6.5.3) (2026-08-28)
+
+### Bug Fixes
+- **julia:** add `POSITION_INDEPENDENT_CODE ON` ([`dae185e`](https://github.com/jolars/libslope/commit/dae185ea087adb7046d56b2655c12641189c32ea))
+- **windows:** condition openmp pragmas on openmp version ([`82cdcdd`](https://github.com/jolars/libslope/commit/82cdcddeb69aa885e14b25263ce5d193d9e66ce8))
+- note vcomp dependency and test in CI ([`e7d601a`](https://github.com/jolars/libslope/commit/e7d601a783d0f4bbc4458809dd30e45a55c94b24))
+
 ## [6.5.2](https://github.com/jolars/libslope/compare/v6.5.1...v6.5.2) (2026-08-27)
 
 ### Bug Fixes
