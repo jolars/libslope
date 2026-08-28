@@ -88,13 +88,13 @@ jobs:
         run: cmake -B build -S . -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build build ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '--config RelWithDebInfo' || '' }}
+        run: cmake --build build --parallel 4 ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '--config RelWithDebInfo' || '' }}
 
       - name: Install
         run: ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && 'cmake --install build --config RelWithDebInfo' || runner.os == 'Windows' && 'cmake --install build' || 'sudo cmake --install build' }}
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '-C RelWithDebInfo' || '' }}
+        run: ctest --test-dir build --parallel 4 --output-on-failure ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '-C RelWithDebInfo' || '' }}
 
   julia-bindings:
     name: Julia bindings
@@ -115,6 +115,11 @@ jobs:
         uses: julia-actions/setup-julia@v3
         with:
           version: "1"
+
+      - name: Cache Julia depot
+        uses: julia-actions/cache@v3
+        with:
+          delete-old-caches: "false"
 
       - name: Instantiate Julia dependencies
         run: julia --project=bindings/julia --startup-file=no -e 'using Pkg; Pkg.instantiate()'
