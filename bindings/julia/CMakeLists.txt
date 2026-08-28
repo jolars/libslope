@@ -5,6 +5,8 @@ get_target_property(JlCxx_location JlCxx::cxxwrap_julia LOCATION)
 get_filename_component(JlCxx_location ${JlCxx_location} DIRECTORY)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${JlCxx_location}")
 
+set_target_properties(slope PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 add_library(
   slopejll
   SHARED
