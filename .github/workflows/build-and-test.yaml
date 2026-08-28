@@ -85,7 +85,9 @@ jobs:
 
       - name: Configure CMake (Linux/macOS)
         if: runner.os != 'Windows'
-        run: cmake -B build -S . -DBUILD_TESTING=ON
+        run: >-
+          cmake -B build -S . -DBUILD_TESTING=ON
+          -DCMAKE_CXX_FLAGS="-Wsuggest-override -Werror=suggest-override"
 
       - name: Build
         run: cmake --build build --parallel 4 ${{ runner.os == 'Windows' && matrix.toolchain == 'msvc' && '--config RelWithDebInfo' || '' }}
