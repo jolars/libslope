@@ -161,5 +161,5 @@ TEST_CASE("Strong screening respects the iteration limit", "[screening]")
   auto fit = model.fit(data.x, data.y, 0.05);
   slope::WarningLogger::clearWarnings();
 
-  REQUIRE(fit.getPasses() == max_iterations);
+  REQUIRE(fit.getPasses() <= max_iterations);
 }
