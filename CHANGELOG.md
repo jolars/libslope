@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.5.5](https://github.com/jolars/libslope/compare/v6.5.4...v6.5.5) (2026-08-31)
+
+### Bug Fixes
+- cap screened fits at max iterations ([`d492582`](https://github.com/jolars/libslope/commit/d4925820dda136c5d84e093dc98420aa9988483f)), fixes [#183](https://github.com/jolars/libslope/issues/183)
+
 ## [6.5.4](https://github.com/jolars/libslope/compare/v6.5.3...v6.5.4) (2026-08-28)
 
 ### Bug Fixes
