@@ -146,3 +146,20 @@ TEST_CASE("Screening rules manage their working sets", "[screening]")
     REQUIRE(working_set == expected);
   }
 }
+
+TEST_CASE("Strong screening respects the iteration limit", "[screening]")
+{
+  constexpr int max_iterations = 5;
+  auto data = generateData(40, 30, "quadratic", 1, 1.0, 0.2, 5);
+
+  slope::Slope model;
+  model.setMaxIterations(max_iterations);
+  model.setTol(1e-3);
+  model.setScreening("strong");
+
+  slope::WarningLogger::clearWarnings();
+  auto fit = model.fit(data.x, data.y, 0.05);
+  slope::WarningLogger::clearWarnings();
+
+  REQUIRE(fit.getPasses() == max_iterations);
+}

@@ -606,9 +606,9 @@ public:
       screening_rule->screen(
         working_set, gradient, lambda_curr, lambda_prev, beta);
 
-      int it = 0;
+      int working_set_it = 0;
       int total_it = 0;
-      for (; it < this->max_it; ++it, ++total_it) {
+      for (; total_it < this->max_it; ++working_set_it, ++total_it) {
         // Compute primal, dual, and gap
         residual = loss->residual(eta, y);
         updateGradient(gradient,
@@ -688,7 +688,7 @@ public:
                                               numerically_stationary;
 
         if (dual_gap <= tol_scaled || unregularized_stationary ||
-            it == this->max_it) {
+            working_set_it + 1 == this->max_it) {
           bool no_violations =
             screening_rule->checkKktViolations(gradient,
                                                beta,
@@ -719,11 +719,11 @@ public:
               break;
             }
           } else {
-            it = 0; // Restart if there are KKT violations
+            working_set_it = 0; // Restart if there are KKT violations
           }
         }
 
-        if (it % INTERRUPT_FREQ == 0) {
+        if (working_set_it % INTERRUPT_FREQ == 0) {
           bool local_interrupt = false;
 #ifdef _OPENMP
 #pragma omp critical(check_interrupt)
@@ -751,7 +751,7 @@ public:
                     y);
       }
 
-      if (it == this->max_it) {
+      if (total_it == this->max_it) {
         WarningLogger::addWarning(
           WarningCode::MAXIT_REACHED,
           "Maximum number of iterations reached at step = " +
