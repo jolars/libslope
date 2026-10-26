@@ -4,6 +4,7 @@
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <algorithm>
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -358,6 +359,104 @@ TEST_CASE("Multinomial dual rejects points outside the simplex",
                     std::domain_error);
   REQUIRE_THROWS_AS(loss.dual(overfull, y, Eigen::VectorXd::Ones(1)),
                     std::domain_error);
+}
+
+TEST_CASE("Weighted multinomial dual points preserve weighted stationarity",
+          "[multinomial][weights][dual]")
+{
+  using namespace Catch::Matchers;
+  slope::Multinomial loss;
+  Eigen::MatrixXd eta(4, 2), y = Eigen::MatrixXd::Zero(4, 2);
+  eta << 15.0, -20.0, -7.0, 12.0, 3.0, -4.0, 1e300, 1e300;
+  y(0, 0) = 1.0;
+  y(1, 1) = 1.0;
+  Eigen::Vector4d weights;
+  weights << 1.0, 3.0, 2.0, 0.0;
+  const Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  REQUIRE((weights.transpose() * theta).norm() < 1e-12);
+  REQUIRE(theta.row(3).isZero());
+  const Eigen::ArrayXXd mean = theta.array() + y.array();
+  REQUIRE((mean >= 0.0).all());
+  REQUIRE((mean.rowwise().sum() <= 1.0).all());
+  REQUIRE(std::isfinite(loss.loss(eta, y, weights)));
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+  Eigen::MatrixXd infeasible = theta;
+  infeasible.row(3).setConstant(-10.0);
+  REQUIRE_THAT(loss.dual(infeasible, y, weights),
+               WithinAbs(loss.dual(theta, y, weights), 1e-12));
+}
+
+TEST_CASE("Weighted multinomial duals tolerate simplex-face roundoff",
+          "[multinomial][weights][dual]")
+{
+  slope::Multinomial loss;
+  const Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(8, 3);
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(8, 3);
+  const std::array<int, 8> labels = { 1, 0, 0, 2, 1, 1, 0, 0 };
+  for (Eigen::Index i = 0; i < y.rows(); ++i) {
+    y(i, labels[i]) = 1.0;
+  }
+  Eigen::VectorXd weights(8);
+  weights << 0.0004657621246759779, 0.0023932852428832706, 29.5455720758297,
+    0.0019537876775492795, 3923.486690362917, 568.360876017161,
+    86.8825033645889, 0.5291334153074657;
+  const Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  REQUIRE((weights.transpose() * theta).norm() < 1e-10);
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+}
+
+TEST_CASE("Multinomial IRLS remains finite for saturated predictors",
+          "[multinomial][weights][hybrid]")
+{
+  slope::Multinomial loss;
+  Eigen::MatrixXd eta(3, 2), y = Eigen::MatrixXd::Zero(3, 2);
+  eta << 1000.0, -1000.0, -1000.0, 1000.0, 0.0, 0.0;
+  y(0, 0) = 1.0;
+  y(1, 1) = 1.0;
+  Eigen::Vector3d weights(1.0, 2.0, 0.0);
+  Eigen::MatrixXd curvature, response;
+  loss.updateWeightsAndWorkingResponse(curvature, response, eta, y, weights);
+  REQUIRE(curvature.allFinite());
+  REQUIRE(response.allFinite());
+  REQUIRE((curvature.topRows(2).array() > 0.0).all());
+  REQUIRE(curvature.row(2).isZero());
+}
+
+TEST_CASE("Weighted multinomial duals retain information with absent classes",
+          "[multinomial][weights][dual]")
+{
+  slope::Multinomial loss;
+  Eigen::MatrixXd eta(4, 3), y = Eigen::MatrixXd::Zero(4, 3);
+  eta << 1.4, -0.8, 20.0, -0.2, 1.0, 8.0, 0.8, -0.4, -15.0, -0.9, 0.3, -10.0;
+  Eigen::Vector4d weights(1.0, 2.0, 3.0, 4.0);
+
+  SECTION("The reference class is absent")
+  {
+    y(0, 0) = 1.0;
+    y(1, 1) = 1.0;
+    y(2, 0) = 1.0;
+    y(3, 1) = 1.0;
+  }
+  SECTION("The reference class is present")
+  {
+    y(0, 0) = 1.0;
+    y(2, 1) = 1.0;
+  }
+
+  const Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  const Eigen::MatrixXd mean = theta + y;
+  REQUIRE((weights.transpose() * theta).norm() < 1e-12);
+  REQUIRE(mean.col(2).isZero());
+  REQUIRE((mean.array() >= 0.0).all());
+  REQUIRE((mean.rowwise().sum().array() <= 1.0 + 1e-14).all());
+  const Eigen::RowVectorXd proportions =
+    (weights.transpose() * y) / weights.sum();
+  REQUIRE((mean.rowwise() - proportions).norm() > 0.05);
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+
+  const Eigen::MatrixXd without_intercept =
+    loss.dualPoint(eta, y, false, weights) + y;
+  REQUIRE(without_intercept.col(2).maxCoeff() > 0.5);
 }
 
 TEST_CASE("Multinomial alternative response types", "[multinomial][predict]")

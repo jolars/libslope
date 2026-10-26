@@ -14,8 +14,8 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
   {
     // Create a matrix with one zero-variance column (all 1s)
     Eigen::MatrixXd x(10, 3);
-    x << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1, 8, 9,
-      1, 9, 10, 1, 10, 11, 1;
+    x << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1, 8, 9, 1,
+      9, 10, 1, 10, 11, 1;
 
     Eigen::VectorXd y(10);
     y << 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5;
@@ -39,8 +39,8 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
   {
     // Create a matrix with two zero-variance columns
     Eigen::MatrixXd x(10, 4);
-    x << 1, 2, 1, 5, 2, 3, 1, 5, 3, 4, 1, 5, 4, 5, 1, 5, 5, 6, 1, 5, 6, 7, 1,
-      5, 7, 8, 1, 5, 8, 9, 1, 5, 9, 10, 1, 5, 10, 11, 1, 5;
+    x << 1, 2, 1, 5, 2, 3, 1, 5, 3, 4, 1, 5, 4, 5, 1, 5, 5, 6, 1, 5, 6, 7, 1, 5,
+      7, 8, 1, 5, 8, 9, 1, 5, 9, 10, 1, 5, 10, 11, 1, 5;
 
     Eigen::VectorXd y(10);
     y << 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5;
@@ -60,15 +60,16 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
   SECTION("Zero-variance column with different centering and scaling")
   {
     Eigen::MatrixXd x(10, 3);
-    x << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1, 8, 9,
-      1, 9, 10, 1, 10, 11, 1;
+    x << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1, 8, 9, 1,
+      9, 10, 1, 10, 11, 1;
 
     Eigen::VectorXd y(10);
     y << 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5;
 
     std::vector<std::string> centering_types = { "mean", "none", "min" };
-    std::vector<std::string> scaling_types = { "sd", "l1", "l2", "max_abs",
-                                               "range" };
+    std::vector<std::string> scaling_types = {
+      "sd", "l1", "l2", "max_abs", "range"
+    };
 
     for (const auto& centering_type : centering_types) {
       for (const auto& scaling_type : scaling_types) {
@@ -111,8 +112,8 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
   SECTION("Sparse matrix with zero-variance column")
   {
     Eigen::MatrixXd x_dense(10, 3);
-    x_dense << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1,
-      8, 9, 1, 9, 10, 1, 10, 11, 1;
+    x_dense << 1, 2, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 6, 1, 6, 7, 1, 7, 8, 1, 8,
+      9, 1, 9, 10, 1, 10, 11, 1;
 
     Eigen::SparseMatrix<double> x = x_dense.sparseView();
 
@@ -134,8 +135,8 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
   {
     // Create a matrix with a near-zero variance column
     Eigen::MatrixXd x(10, 3);
-    x << 1, 2, 1.0, 2, 3, 1.0, 3, 4, 1.0, 4, 5, 1.0, 5, 6, 1.0, 6, 7, 1.0, 7,
-      8, 1.0, 8, 9, 1.0, 9, 10, 1.0, 10, 11, 1.0;
+    x << 1, 2, 1.0, 2, 3, 1.0, 3, 4, 1.0, 4, 5, 1.0, 5, 6, 1.0, 6, 7, 1.0, 7, 8,
+      1.0, 8, 9, 1.0, 9, 10, 1.0, 10, 11, 1.0;
 
     // Add tiny variation to last column
     x(3, 2) = 1.0000001;
@@ -149,4 +150,28 @@ TEST_CASE("Zero-variance columns", "[zero_variance]")
     // Should not throw even with near-zero variance
     REQUIRE_NOTHROW(model.fit(x, y));
   }
+}
+
+TEST_CASE("Weighted constant predictors agree with repeated observations",
+          "[zero_variance][weights]")
+{
+  Eigen::MatrixXd x = Eigen::MatrixXd::Constant(5, 1, 0.1);
+  Eigen::VectorXd y = Eigen::VectorXd::Ones(5);
+  Eigen::VectorXd weights(5);
+  weights << 1, 2, 3, 4, 5;
+  Eigen::MatrixXd repeated_x = Eigen::MatrixXd::Constant(15, 1, 0.1);
+  Eigen::VectorXd repeated_y = Eigen::VectorXd::Ones(15);
+  Eigen::SparseMatrix<double> sparse = x.sparseView();
+
+  slope::Slope model;
+  model.setIntercept(false);
+  const auto repeated = model.fit(repeated_x, repeated_y, 0.1);
+  const auto weighted =
+    model.fit(x, y, 0.1, {}, slope::defaultInterruptChecker, weights);
+  const auto sparse_fit =
+    model.fit(sparse, y, 0.1, {}, slope::defaultInterruptChecker, weights);
+
+  REQUIRE(repeated.getCoefs().norm() == 0.0);
+  REQUIRE(weighted.getCoefs().norm() == 0.0);
+  REQUIRE(sparse_fit.getCoefs().norm() == 0.0);
 }

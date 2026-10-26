@@ -107,6 +107,7 @@ if(BUILD_TESTING)
     tests/math.cpp
     tests/multinomial.cpp
     tests/normalization.cpp
+    tests/observation_weights.cpp
     tests/path.cpp
     tests/poisson.cpp
     tests/predictions.cpp

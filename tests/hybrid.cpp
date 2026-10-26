@@ -5,10 +5,109 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 #include <slope/clusters.h>
 #include <slope/regularization_sequence.h>
 #include <slope/slope.h>
 #include <slope/solvers/hybrid_cd.h>
+
+TEST_CASE("Hybrid derivatives ignore overflow on zero-weight rows",
+          "[hybrid][weights]")
+{
+  using namespace Catch::Matchers;
+  Eigen::MatrixXd x(3, 2), residual(3, 1), weights(3, 1);
+  x << 1.0, -2.0, 3.0, 1.0, 1e200, -1e200;
+  residual << 0.5, -0.1, std::numeric_limits<double>::infinity();
+  weights << 1.0, 2.0, 0.0;
+  Eigen::MatrixXd safe_x = x, safe_residual = residual;
+  safe_x.row(2).setZero();
+  safe_residual.row(2).setZero();
+  Eigen::SparseMatrix<double> sparse_x = x.sparseView();
+  const Eigen::Vector2d centers(0.5, -0.5), scales(2.0, 0.5);
+  const Eigen::Vector2d beta(1.0, -1.0);
+  slope::Clusters clusters(beta);
+
+  for (const auto normalization : { slope::JitNormalization::None,
+                                    slope::JitNormalization::Center,
+                                    slope::JitNormalization::Scale,
+                                    slope::JitNormalization::Both }) {
+    const auto expected = slope::computeGradientAndHessian(safe_x,
+                                                           0,
+                                                           weights,
+                                                           safe_residual,
+                                                           centers,
+                                                           scales,
+                                                           1.0,
+                                                           normalization,
+                                                           3);
+    const auto dense = slope::computeGradientAndHessian(
+      x, 0, weights, residual, centers, scales, 1.0, normalization, 3);
+    const auto sparse = slope::computeGradientAndHessian(
+      sparse_x, 0, weights, residual, centers, scales, 1.0, normalization, 3);
+    REQUIRE_THAT(dense.first, WithinAbs(expected.first, 1e-12));
+    REQUIRE_THAT(dense.second, WithinAbs(expected.second, 1e-12));
+    REQUIRE_THAT(sparse.first, WithinAbs(expected.first, 1e-12));
+    REQUIRE_THAT(sparse.second, WithinAbs(expected.second, 1e-12));
+
+    const auto expected_cluster =
+      slope::computeClusterGradientAndHessian(safe_x,
+                                              0,
+                                              { 1, -1 },
+                                              clusters,
+                                              weights,
+                                              safe_residual,
+                                              centers,
+                                              scales,
+                                              normalization);
+    const auto dense_cluster =
+      slope::computeClusterGradientAndHessian(x,
+                                              0,
+                                              { 1, -1 },
+                                              clusters,
+                                              weights,
+                                              residual,
+                                              centers,
+                                              scales,
+                                              normalization);
+    const auto sparse_cluster =
+      slope::computeClusterGradientAndHessian(sparse_x,
+                                              0,
+                                              { 1, -1 },
+                                              clusters,
+                                              weights,
+                                              residual,
+                                              centers,
+                                              scales,
+                                              normalization);
+    REQUIRE_THAT(dense_cluster.first, WithinAbs(expected_cluster.first, 1e-12));
+    REQUIRE_THAT(dense_cluster.second,
+                 WithinAbs(expected_cluster.second, 1e-12));
+    REQUIRE_THAT(sparse_cluster.first,
+                 WithinAbs(expected_cluster.first, 1e-12));
+    REQUIRE_THAT(sparse_cluster.second,
+                 WithinAbs(expected_cluster.second, 1e-12));
+  }
+
+  Eigen::VectorXd beta0 = Eigen::VectorXd::Zero(1);
+  Eigen::VectorXd zero_beta = Eigen::VectorXd::Zero(2);
+  slope::Clusters zero_clusters(zero_beta);
+  std::mt19937 rng(42);
+  slope::coordinateDescent(beta0,
+                           zero_beta,
+                           residual,
+                           zero_clusters,
+                           Eigen::ArrayXd::Zero(3),
+                           x,
+                           weights,
+                           weights.colwise().sum().transpose(),
+                           centers,
+                           scales,
+                           true,
+                           slope::JitNormalization::None,
+                           false,
+                           rng);
+  REQUIRE_THAT(beta0(0), WithinAbs(-0.1, 1e-12));
+}
 
 TEST_CASE("Cluster gradient and Hessian computation", "[hybrid]")
 {

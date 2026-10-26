@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 #include <slope/losses/logistic.h>
 #include <slope/score.h>
 
@@ -239,4 +240,133 @@ TEST_CASE("Deviance score", "[score][deviance]")
 
   score = deviance->eval(perfect_eta, truth, loss);
   REQUIRE_THAT(score, WithinAbs(0.0, 1e-10));
+}
+
+TEST_CASE("Observation-weighted scores", "[score][weights]")
+{
+  using Catch::Matchers::WithinAbs;
+  using namespace slope;
+
+  Eigen::MatrixXd eta(4, 2);
+  eta << 1, 4, 2, 5, 3, 6, 4, 7;
+  Eigen::MatrixXd y = Eigen::MatrixXd::Constant(4, 2, 2.0);
+  Eigen::VectorXd weights(4);
+  weights << 1, 2, 0, 3;
+
+  SECTION("Regression metrics preserve their response-column conventions")
+  {
+    auto mse = Score::create("mse");
+    auto mae = Score::create("mae");
+    REQUIRE_THAT(mse->eval(eta, y, nullptr, weights),
+                 WithinAbs(110.0 / 6.0, 1e-12));
+    REQUIRE_THAT(mae->eval(eta, y, nullptr, weights),
+                 WithinAbs(30.0 / 12.0, 1e-12));
+    REQUIRE_THAT(mse->eval(eta, y, nullptr, 9 * weights),
+                 WithinAbs(mse->eval(eta, y, nullptr, weights), 1e-12));
+    REQUIRE_THAT(mae->eval(eta, y, nullptr, Eigen::VectorXd::Ones(4)),
+                 WithinAbs(mae->eval(eta, y, nullptr), 1e-12));
+  }
+
+  SECTION("Classification metrics weight observations")
+  {
+    auto loss = setupLoss("logistic");
+    Eigen::VectorXd predictions(4), labels(4);
+    predictions << 2, -2, 2, -2;
+    labels << 1, 1, 0, 0;
+    auto accuracy = Score::create("accuracy");
+    auto misclass = Score::create("misclass");
+    REQUIRE_THAT(accuracy->eval(predictions, labels, loss, weights),
+                 WithinAbs(4.0 / 6.0, 1e-12));
+    REQUIRE_THAT(misclass->eval(predictions, labels, loss, weights),
+                 WithinAbs(2.0 / 6.0, 1e-12));
+  }
+
+  SECTION("Deviance equals integer row replication")
+  {
+    auto loss = setupLoss("poisson");
+    auto score = Score::create("deviance");
+    Eigen::VectorXd predictions(4), counts(4);
+    predictions << 0.2, 0.5, 1.0, 1.5;
+    counts << 1, 3, 0, 5;
+    Eigen::VectorXd repeated_eta(6), repeated_y(6);
+    repeated_eta << 0.2, 0.5, 0.5, 1.5, 1.5, 1.5;
+    repeated_y << 1, 3, 3, 5, 5, 5;
+    REQUIRE_THAT(score->eval(predictions, counts, loss, weights),
+                 WithinAbs(score->eval(repeated_eta, repeated_y, loss), 1e-12));
+  }
+
+  SECTION("Invalid weights are rejected by every built-in score")
+  {
+    auto loss = setupLoss("logistic");
+    Eigen::VectorXd predictions = Eigen::VectorXd::Zero(4);
+    Eigen::VectorXd labels(4);
+    labels << 1, 0, 1, 0;
+    for (const auto& metric :
+         { "mse", "mae", "accuracy", "misclass", "deviance", "auc" }) {
+      auto scorer = Score::create(metric);
+      REQUIRE_THROWS_AS(
+        scorer->eval(predictions, labels, loss, Eigen::VectorXd::Ones(3)),
+        std::invalid_argument);
+      REQUIRE_THROWS_AS(
+        scorer->eval(predictions, labels, loss, Eigen::VectorXd::Zero(4)),
+        std::invalid_argument);
+      Eigen::VectorXd invalid = weights;
+      invalid(0) = -1;
+      REQUIRE_THROWS_AS(scorer->eval(predictions, labels, loss, invalid),
+                        std::invalid_argument);
+      invalid(0) = std::numeric_limits<double>::infinity();
+      REQUIRE_THROWS_AS(scorer->eval(predictions, labels, loss, invalid),
+                        std::invalid_argument);
+    }
+  }
+}
+
+TEST_CASE("Observation-weighted ROC AUC", "[score][weights][auc]")
+{
+  using Catch::Matchers::WithinAbs;
+  using namespace slope;
+
+  Eigen::VectorXd scores(4), labels(4), weights(4);
+  scores << 0.9, 0.5, 0.5, 0.1;
+  labels << 1, 1, 0, 0;
+  weights << 2, 1, 3, 4;
+
+  REQUIRE_THAT(binaryRocAuc(scores, labels, weights),
+               WithinAbs(13.0 / 14.0, 1e-12));
+  REQUIRE_THAT(binaryRocAuc(scores, labels, 8 * weights),
+               WithinAbs(13.0 / 14.0, 1e-12));
+  REQUIRE_THAT(binaryRocAuc(scores, labels, Eigen::VectorXd::Ones(4)),
+               WithinAbs(binaryRocAuc(scores, labels), 1e-12));
+
+  weights << 0, 0, 3, 4;
+  REQUIRE_THAT(binaryRocAuc(scores, labels, weights), WithinAbs(0.5, 1e-12));
+
+  Eigen::MatrixXd multiclass_scores(4, 2), multiclass_labels(4, 2);
+  multiclass_scores << 0.9, 0.1, 0.1, 0.9, 0.8, 0.2, 0.2, 0.8;
+  multiclass_labels << 1, 0, 0, 1, 1, 0, 0, 1;
+  weights << 0, 0, 2, 3;
+  REQUIRE_THAT(rocAuc(multiclass_scores, multiclass_labels, weights),
+               WithinAbs(1.0, 1e-12));
+}
+
+TEST_CASE("Legacy scores retain their unweighted extension point",
+          "[score][weights]")
+{
+  class LegacyScore : public slope::MinimizeScore
+  {
+  public:
+    double eval(const Eigen::MatrixXd&,
+                const Eigen::MatrixXd&,
+                const std::unique_ptr<slope::Loss>&) const override
+    {
+      return 42;
+    }
+  } legacy;
+
+  const slope::Score& score = legacy;
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(2, 1);
+  REQUIRE(score.eval(y, y, nullptr, Eigen::VectorXd::Constant(2, 3)) == 42);
+  Eigen::VectorXd weights(2);
+  weights << 1, 2;
+  REQUIRE_THROWS_AS(score.eval(y, y, nullptr, weights), std::invalid_argument);
 }

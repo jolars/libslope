@@ -118,7 +118,9 @@ TEST_CASE("Quadratic with Eigen::Map", "[quadratic][map]")
   SECTION("Cross-validation")
   {
     slope::Slope model;
+    slope::CvConfig config;
+    config.n_folds = x_data.rows();
 
-    REQUIRE_NOTHROW(crossValidate(model, x_map, y_data));
+    REQUIRE_NOTHROW(crossValidate(model, x_map, y_data, config));
   }
 }

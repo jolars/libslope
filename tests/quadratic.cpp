@@ -12,6 +12,131 @@
 #include <slope/slope.h>
 #include <slope/threads.h>
 
+TEST_CASE("Weighted quadratic loss and dual certificates",
+          "[quadratic][weights]")
+{
+  using namespace Catch::Matchers;
+  slope::Quadratic loss;
+  Eigen::Vector4d eta, y, weights;
+  eta << 2.0, -1.0, 4.0, 1e200;
+  y << 1.0, 2.0, 0.0, -1e200;
+  weights << 1.0, 2.0, 3.0, 0.0;
+
+  REQUIRE_THAT(loss.loss(eta, y, weights), WithinAbs(67.0 / 12.0, 1e-12));
+  Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  REQUIRE(theta.allFinite());
+  REQUIRE_THAT(weights.dot(theta.col(0)), WithinAbs(0.0, 1e-12));
+  REQUIRE(theta(3, 0) == 0.0);
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+
+  Eigen::MatrixXd working_weights, working_response;
+  loss.updateWeightsAndWorkingResponse(
+    working_weights, working_response, eta, y, weights);
+  REQUIRE_THAT(working_weights(0, 0), WithinAbs(2.0 / 3.0, 1e-12));
+  REQUIRE(working_weights(3, 0) == 0.0);
+  REQUIRE(working_response.allFinite());
+  const Eigen::MatrixXd first_weights = working_weights;
+  loss.updateWeightsAndWorkingResponse(
+    working_weights, working_response, eta, y, weights);
+  REQUIRE((working_weights - first_weights).isZero());
+}
+
+TEST_CASE("Weighted quadratic OLS certificates use weighted least squares",
+          "[quadratic][weights][dual]")
+{
+  using namespace Catch::Matchers;
+  Eigen::MatrixXd x(5, 2), y(5, 2);
+  x << 0.0, 1.0, 1.0, 0.0, 2.0, 1.0, -1.0, 2.0, 3.0, -1.0;
+  y << 1.0, 2.0, 2.0, -1.0, 0.0, 4.0, 3.0, 1.0, -2.0, 0.0;
+  Eigen::VectorXd weights(5);
+  weights << 1.0, 3.0, 2.0, 0.0, 4.0;
+  const Eigen::VectorXd centers = Eigen::VectorXd::Constant(2, 0.5);
+  const Eigen::VectorXd scales = Eigen::VectorXd::Constant(2, 2.0);
+  Eigen::SparseMatrix<double> sparse_x = x.sparseView();
+
+  for (const bool intercept : { false, true }) {
+    const Eigen::MatrixXd theta = slope::detail::quadraticOlsDualPoint(
+      x, y, centers, scales, slope::JitNormalization::Both, intercept, weights);
+    const Eigen::MatrixXd sparse_theta =
+      slope::detail::quadraticOlsDualPoint(sparse_x,
+                                           y,
+                                           centers,
+                                           scales,
+                                           slope::JitNormalization::Both,
+                                           intercept,
+                                           weights);
+    REQUIRE((theta - sparse_theta).norm() < 1e-10);
+    Eigen::MatrixXd effective = x.rowwise() - centers.transpose();
+    effective.array().rowwise() /= scales.transpose().array();
+    Eigen::MatrixXd weighted_theta = theta.array().colwise() * weights.array();
+    REQUIRE((effective.transpose() * weighted_theta).norm() < 1e-10);
+    if (intercept) {
+      REQUIRE(weighted_theta.colwise().sum().norm() < 1e-10);
+    }
+    REQUIRE(theta.row(3).isZero());
+  }
+}
+
+TEST_CASE("Weighted dual dispatch preserves legacy loss overrides",
+          "[quadratic][weights][dual]")
+{
+  class LegacyQuadratic : public slope::Quadratic
+  {
+  public:
+    Eigen::MatrixXd dualPoint(const Eigen::MatrixXd& eta,
+                              const Eigen::MatrixXd&,
+                              bool) override
+    {
+      return Eigen::MatrixXd::Constant(eta.rows(), eta.cols(), 42.0);
+    }
+
+    double deviance(const Eigen::MatrixXd&, const Eigen::MatrixXd&) override
+    {
+      return 17.0;
+    }
+  };
+
+  LegacyQuadratic legacy;
+  slope::Loss& loss = legacy;
+  const Eigen::Vector2d values = Eigen::Vector2d::Zero();
+  const Eigen::MatrixXd theta =
+    loss.dualPoint(values, values, true, Eigen::Vector2d::Constant(3.0));
+  REQUIRE((theta.array() == 42.0).all());
+  REQUIRE(loss.deviance(values, values, Eigen::Vector2d::Ones()) == 17.0);
+}
+
+TEST_CASE("Weighted OLS certificates mask ignored rows before scaling",
+          "[quadratic][weights][dual]")
+{
+  Eigen::MatrixXd x(4, 1), y(4, 1);
+  x << 1e-150, 2e-150, 4e-150, 1e200;
+  y << 1.0, -2.0, 3.0, 1e200;
+  const Eigen::Vector4d weights(1.0, 2.0, 3.0, 0.0);
+  const Eigen::VectorXd centers = Eigen::VectorXd::Constant(1, 2e-150);
+  const Eigen::VectorXd scales = Eigen::VectorXd::Constant(1, 1e-150);
+  Eigen::SparseMatrix<double> sparse_x = x.sparseView();
+  Eigen::MatrixXd safe_x = x;
+  safe_x.row(3).setZero();
+
+  for (const bool intercept : { false, true }) {
+    for (const auto normalization :
+         { slope::JitNormalization::Both, slope::JitNormalization::Scale }) {
+      const Eigen::MatrixXd expected = slope::detail::quadraticOlsDualPoint(
+        safe_x, y, centers, scales, normalization, intercept, weights);
+      const Eigen::MatrixXd dense = slope::detail::quadraticOlsDualPoint(
+        x, y, centers, scales, normalization, intercept, weights);
+      const Eigen::MatrixXd sparse = slope::detail::quadraticOlsDualPoint(
+        sparse_x, y, centers, scales, normalization, intercept, weights);
+      REQUIRE(dense.allFinite());
+      REQUIRE(sparse.allFinite());
+      REQUIRE(dense.row(3).isZero());
+      REQUIRE(sparse.row(3).isZero());
+      REQUIRE((dense - expected).norm() < 1e-12);
+      REQUIRE((sparse - expected).norm() < 1e-12);
+    }
+  }
+}
+
 TEST_CASE("Guassian, simple design", "[quadratic]")
 {
   using namespace Catch::Matchers;

@@ -2,12 +2,14 @@
 #include <Eigen/SparseCore>
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <cmath>
 #include <iostream>
 #include <slope/clusters.h>
 #include <slope/cv.h>
 #include <slope/math.h>
+#include <slope/normalize.h>
 #include <slope/regularization_sequence.h>
 #include <slope/slope.h>
 #include <slope/solvers/hybrid_cd.h>
@@ -545,5 +547,32 @@ TEST_CASE("Normalization", "[!benchmark]")
   {
     model.setModifyX(true);
     model.path(x_sparse, data.y);
+  };
+}
+
+TEST_CASE("Weighted sparse standard deviations",
+          "[!benchmark][weighted_sparse_normalization]")
+{
+  const int n = 100'000;
+  const int p = GENERATE(1'000, 10'000);
+  const int entries_per_column = 100'000 / p;
+  CAPTURE(n, p);
+  Eigen::SparseMatrix<double> x(n, p);
+  std::vector<Eigen::Triplet<double>> entries;
+  entries.reserve(entries_per_column * p);
+  for (int j = 0; j < p; ++j) {
+    for (int k = 0; k < entries_per_column; ++k) {
+      entries.emplace_back((37 * j + 7919 * k) % n, j, 1.0 + (j + k) % 5);
+    }
+  }
+  x.setFromTriplets(entries.begin(), entries.end());
+  const Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(n, 1.0, 2.0);
+  slope::Threads::set(1);
+
+  BENCHMARK("Nonuniform weights, p=" + std::to_string(p))
+  {
+    Eigen::VectorXd scales;
+    slope::computeScales(scales, x, "sd", weights);
+    return scales;
   };
 }

@@ -239,6 +239,31 @@ TEST_CASE("Logistic dual rejects points outside its conjugate domain",
                     std::domain_error);
 }
 
+TEST_CASE("Weighted logistic dual points preserve the conjugate domain",
+          "[logistic][weights][dual]")
+{
+  using namespace Catch::Matchers;
+  slope::Logistic loss;
+  Eigen::Vector4d eta, y, weights;
+  eta << -20.0, 30.0, 2.0, 1e300;
+  y << 1.0, 0.0, 1.0, 0.0;
+  weights << 1.0, 3.0, 2.0, 0.0;
+  const Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  REQUIRE_THAT(weights.dot(theta.col(0)), WithinAbs(0.0, 1e-12));
+  REQUIRE(theta.row(3).isZero());
+  const Eigen::ArrayXd means = theta.col(0).array() + y.array();
+  REQUIRE((means >= 0.0).all());
+  REQUIRE((means <= 1.0).all());
+  REQUIRE(std::isfinite(loss.loss(eta, y, weights)));
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+  REQUIRE_THAT(loss.loss(eta, y, weights),
+               WithinAbs(loss.loss(eta, y, 7.0 * weights), 1e-12));
+  Eigen::MatrixXd infeasible = theta;
+  infeasible(3, 0) = 100.0;
+  REQUIRE_THAT(loss.dual(infeasible, y, weights),
+               WithinAbs(loss.dual(theta, y, weights), 1e-12));
+}
+
 TEST_CASE("Logistic dual points handle a degenerate response",
           "[logistic][dual]")
 {

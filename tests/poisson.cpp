@@ -284,6 +284,103 @@ TEST_CASE("Poisson dual points handle an all-zero response", "[poisson][dual]")
   REQUIRE(loss.dual(theta, y, Eigen::VectorXd::Ones(3)) == 0.0);
 }
 
+TEST_CASE("Weighted Poisson loss and dual ignore zero-weight overflow",
+          "[poisson][weights][dual]")
+{
+  using namespace Catch::Matchers;
+  slope::Poisson loss;
+  Eigen::Vector4d eta, y, weights;
+  eta << -3.0, 2.0, 0.5, 1000.0;
+  y << 0.0, 4.0, 1.0, 100.0;
+  weights << 1.0, 2.0, 3.0, 0.0;
+  const Eigen::MatrixXd theta = loss.dualPoint(eta, y, true, weights);
+  REQUIRE(theta.allFinite());
+  REQUIRE(theta.row(3).isZero());
+  REQUIRE_THAT(weights.dot(theta.col(0)), WithinAbs(0.0, 1e-12));
+  REQUIRE(((theta.col(0) + y).array() >= 0.0).all());
+  REQUIRE(std::isfinite(loss.loss(eta, y, weights)));
+  REQUIRE(std::isfinite(loss.dual(theta, y, weights)));
+  Eigen::MatrixXd working_weights, working_response;
+  loss.updateWeightsAndWorkingResponse(
+    working_weights, working_response, eta, y, weights);
+  REQUIRE(working_weights.allFinite());
+  REQUIRE(working_response.allFinite());
+  REQUIRE(working_weights(3, 0) == 0.0);
+  REQUIRE(working_response(3, 0) == eta(3));
+}
+
+TEST_CASE("Weighted Poisson reductions average response columns",
+          "[poisson][weights][dual]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  slope::Poisson loss;
+  Eigen::MatrixXd eta = Eigen::MatrixXd::Zero(3, 2);
+  Eigen::MatrixXd y = Eigen::MatrixXd::Zero(3, 2);
+  Eigen::VectorXd weights = Eigen::VectorXd::Ones(3);
+  const double expected_deviance = loss.deviance(eta, y);
+
+  SECTION("Uniform weights") {}
+
+  SECTION("Nearly uniform weights")
+  {
+    weights(0) += 1e-10;
+  }
+
+  SECTION("Nonuniform weights")
+  {
+    weights << 1, 2, 3;
+  }
+
+  SECTION("Zero-weight rows")
+  {
+    weights << 1, 2, 0;
+    eta.row(2).setConstant(1000.0);
+  }
+
+  const Eigen::MatrixXd theta = Eigen::MatrixXd::Ones(3, 2);
+  REQUIRE_THAT(loss.loss(eta, y, weights), WithinAbs(1.0, 1e-14));
+  REQUIRE_THAT(loss.dual(theta, y, weights), WithinAbs(1.0, 1e-14));
+  REQUIRE_THAT(loss.deviance(eta, y, weights),
+               WithinAbs(expected_deviance, 1e-14));
+}
+
+TEST_CASE("Weighted Poisson matrix losses reproduce repeated observations",
+          "[poisson][weights]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  slope::Poisson loss;
+  Eigen::MatrixXd eta(3, 2), y(3, 2);
+  eta << -0.4, 0.1, 0.5, -0.2, 0.3, 0.8;
+  y << 0, 1, 2, 0, 3, 2;
+  Eigen::VectorXd weights(3);
+  weights << 1, 2, 3;
+  Eigen::MatrixXd repeated_eta(6, 2), repeated_y(6, 2);
+  int row = 0;
+  for (int i = 0; i < eta.rows(); ++i) {
+    for (int j = 0; j < weights(i); ++j, ++row) {
+      repeated_eta.row(row) = eta.row(i);
+      repeated_y.row(row) = y.row(i);
+    }
+  }
+
+  REQUIRE_THAT(loss.loss(eta, y, Eigen::VectorXd::Ones(3)),
+               WithinAbs(loss.loss(eta, y), 1e-14));
+  REQUIRE_THAT(loss.loss(eta, y, weights),
+               WithinAbs(loss.loss(repeated_eta, repeated_y), 1e-14));
+  REQUIRE_THAT(loss.deviance(eta, y, weights),
+               WithinAbs(loss.deviance(repeated_eta, repeated_y), 1e-14));
+  const Eigen::MatrixXd theta = loss.residual(eta, y);
+  const double expected_dual = ((eta.array().exp() * (1.0 - eta.array()))
+                                  .rowwise()
+                                  .sum()
+                                  .matrix()
+                                  .dot(weights)) /
+                               (weights.sum() * y.cols());
+  REQUIRE_THAT(loss.dual(theta, y, weights), WithinAbs(expected_dual, 1e-14));
+}
+
 TEST_CASE("Poisson low regularization", "[poisson]")
 {
   auto data = generateData(100, 5, "poisson", 1, 1, 1);

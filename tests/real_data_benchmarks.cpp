@@ -7,6 +7,7 @@
 #include <slope/threads.h>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 TEST_CASE("High-dimensional solver paths", "[!benchmark][high_dimensional]")
 {
@@ -43,5 +44,37 @@ TEST_CASE("High-dimensional solver paths", "[!benchmark][high_dimensional]")
     model.setTol(1e-4);
 
     return model.path(data.x, data.y);
+  };
+}
+
+TEST_CASE("Weighted sparse quadratic fitting",
+          "[!benchmark][weighted_sparse_normalization]")
+{
+  const int n = 100'000;
+  const int p = 10'000;
+  Eigen::SparseMatrix<double> x(n, p);
+  std::vector<Eigen::Triplet<double>> entries;
+  entries.reserve(10 * p);
+  for (int j = 0; j < p; ++j) {
+    for (int k = 0; k < 10; ++k) {
+      entries.emplace_back((37 * j + 7919 * k) % n, j, 1.0 + (j + k) % 5);
+    }
+  }
+  x.setFromTriplets(entries.begin(), entries.end());
+  const Eigen::MatrixXd y = Eigen::VectorXd::LinSpaced(n, -1.0, 1.0);
+  const Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(n, 1.0, 2.0);
+  const Eigen::VectorXd uniform = Eigen::VectorXd::Ones(n);
+  slope::Threads::set(1);
+  slope::Slope model;
+  model.setLoss("quadratic");
+
+  BENCHMARK("Nonuniform weights")
+  {
+    return model.fit(x, y, 1e3, {}, slope::defaultInterruptChecker, weights);
+  };
+
+  BENCHMARK("Uniform weights")
+  {
+    return model.fit(x, y, 1e3, {}, slope::defaultInterruptChecker, uniform);
   };
 }

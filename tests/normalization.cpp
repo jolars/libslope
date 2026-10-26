@@ -32,6 +32,269 @@ computeMeanAndStdDev(const Eigen::SparseMatrix<double>& x)
   return computeMeanAndStdDev(x_dense);
 }
 
+TEST_CASE("Weighted feature normalization", "[normalization][weights]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  Eigen::MatrixXd x(4, 3);
+  x << 2, 0, 4, 4, 3, 4, -100, 100, -100, 0, 6, 4;
+  Eigen::SparseMatrix<double> sparse = x.sparseView();
+  Eigen::VectorXd weights(4);
+  weights << 1, 2, 0, 1;
+  Eigen::MatrixXd retained(3, 3);
+  retained << 2, 0, 4, 4, 3, 4, 0, 6, 4;
+  Eigen::VectorXd retained_weights(3);
+  retained_weights << 1, 2, 1;
+
+  SECTION("Weighted moments and historical norm scales")
+  {
+    Eigen::VectorXd centers, scales;
+    slope::computeCenters(centers, x, "mean", weights);
+    Eigen::VectorXd expected_centers(3);
+    expected_centers << 2.5, 3, 4;
+    REQUIRE_THAT(centers, VectorApproxEqual(expected_centers));
+
+    slope::computeScales(scales, x, "sd", weights);
+    Eigen::VectorXd expected_scales(3);
+    expected_scales << std::sqrt(2.75), std::sqrt(4.5), 0;
+    REQUIRE_THAT(scales, VectorApproxEqual(expected_scales));
+
+    slope::computeScales(scales, x, "l1", weights);
+    expected_scales << 7.5, 9, 12;
+    REQUIRE_THAT(scales, VectorApproxEqual(expected_scales));
+
+    slope::computeScales(scales, x, "l2", weights);
+    expected_scales << std::sqrt(27), std::sqrt(40.5), std::sqrt(48);
+    REQUIRE_THAT(scales, VectorApproxEqual(expected_scales));
+  }
+
+  SECTION("Sparse parity, weight rescaling, and zero-row deletion")
+  {
+    for (const std::string type : { "mean", "min" }) {
+      Eigen::VectorXd dense_result, sparse_result, rescaled, deleted;
+      slope::computeCenters(dense_result, x, type, weights);
+      slope::computeCenters(sparse_result, sparse, type, weights);
+      slope::computeCenters(rescaled, x, type, 7 * weights);
+      slope::computeCenters(deleted, retained, type, retained_weights);
+      REQUIRE_THAT(dense_result, VectorApproxEqual(sparse_result));
+      REQUIRE_THAT(dense_result, VectorApproxEqual(rescaled));
+      REQUIRE_THAT(dense_result, VectorApproxEqual(deleted));
+    }
+
+    for (const std::string type : { "sd", "l1", "l2", "max_abs", "range" }) {
+      Eigen::VectorXd dense_result, sparse_result, rescaled, deleted;
+      slope::computeScales(dense_result, x, type, weights);
+      slope::computeScales(sparse_result, sparse, type, weights);
+      slope::computeScales(rescaled, x, type, 7 * weights);
+      slope::computeScales(deleted, retained, type, retained_weights);
+      REQUIRE_THAT(dense_result, VectorApproxEqual(sparse_result));
+      REQUIRE_THAT(dense_result, VectorApproxEqual(rescaled));
+      REQUIRE_THAT(dense_result, VectorApproxEqual(deleted));
+    }
+  }
+
+  SECTION("Uniform weights preserve existing normalization")
+  {
+    for (const std::string type : { "sd", "l1", "l2", "max_abs", "range" }) {
+      Eigen::VectorXd unweighted, weighted;
+      slope::computeScales(unweighted, x, type);
+      slope::computeScales(weighted, x, type, Eigen::VectorXd::Constant(4, 5));
+      REQUIRE_THAT(weighted, VectorApproxEqual(unweighted));
+    }
+  }
+
+  SECTION("Manual values and constant columns")
+  {
+    Eigen::VectorXd centers = Eigen::VectorXd::Constant(3, 2);
+    Eigen::VectorXd scales = Eigen::VectorXd::Constant(3, 3);
+    slope::computeCenters(centers, x, "manual", weights);
+    slope::computeScales(scales, x, "manual", weights);
+    REQUIRE_THAT(centers(0), WithinAbs(2, 0));
+    REQUIRE_THAT(scales(0), WithinAbs(3, 0));
+
+    auto normalized = x;
+    slope::normalize(normalized, centers, scales, "mean", "sd", true, weights);
+    REQUIRE_THAT(scales(2), WithinAbs(1, 0));
+    REQUIRE_THAT(normalized(0, 2), WithinAbs(0, 0));
+  }
+
+  SECTION("In-place normalization masks ignored rows before scaling")
+  {
+    Eigen::MatrixXd tiny(4, 1);
+    tiny << -1e-150, 0, 1e-150, 1e200;
+    Eigen::VectorXd support(4);
+    support << 1, 1, 1, 0;
+    Eigen::VectorXd centers, scales;
+
+    slope::normalize(tiny, centers, scales, "mean", "sd", true, support);
+
+    REQUIRE(tiny.allFinite());
+    REQUIRE_THAT(centers(0), WithinAbs(0, 0));
+    REQUIRE_THAT(scales(0) / 1e-150, WithinAbs(std::sqrt(2.0 / 3.0), 1e-14));
+    REQUIRE_THAT(tiny(0, 0), WithinAbs(-std::sqrt(1.5), 1e-14));
+    REQUIRE_THAT(tiny(1, 0), WithinAbs(0, 0));
+    REQUIRE_THAT(tiny(2, 0), WithinAbs(std::sqrt(1.5), 1e-14));
+    REQUIRE_THAT(tiny(3, 0), WithinAbs(0, 0));
+  }
+
+  SECTION("Sparse extrema ignore implicit zeros outside positive support")
+  {
+    Eigen::MatrixXd positive(3, 1);
+    positive << 2, 4, 0;
+    Eigen::SparseMatrix<double> positive_sparse = positive.sparseView();
+    Eigen::VectorXd support(3);
+    support << 1, 1, 0;
+    Eigen::VectorXd centers, scales;
+    slope::computeCenters(centers, positive_sparse, "min", support);
+    slope::computeScales(scales, positive_sparse, "range", support);
+    REQUIRE_THAT(centers(0), WithinAbs(2, 0));
+    REQUIRE_THAT(scales(0), WithinAbs(2, 0));
+  }
+
+  SECTION("Invalid observation weights")
+  {
+    Eigen::VectorXd result;
+    REQUIRE_THROWS_AS(
+      slope::computeCenters(result, x, "mean", Eigen::VectorXd::Ones(3)),
+      std::invalid_argument);
+    REQUIRE_THROWS_AS(
+      slope::computeScales(result, x, "sd", Eigen::VectorXd::Zero(4)),
+      std::invalid_argument);
+  }
+}
+
+TEST_CASE("Weighted constant columns have exactly zero variance",
+          "[normalization][weights]")
+{
+  Eigen::MatrixXd x = Eigen::MatrixXd::Constant(5, 1, 0.1);
+  Eigen::VectorXd weights(5);
+  weights << 1, 2, 3, 4, 5;
+
+  SECTION("Constant on every row") {}
+
+  SECTION("Constant only on positive-weight rows")
+  {
+    x.conservativeResize(7, 1);
+    weights.conservativeResize(7);
+    x(5, 0) = 0.0;
+    x(6, 0) = 1e100;
+    weights(5) = 0.0;
+    weights(6) = 0.0;
+  }
+
+  Eigen::SparseMatrix<double> sparse = x.sparseView();
+  Eigen::VectorXd centers, dense_scales, sparse_scales;
+  slope::computeScales(dense_scales, x, "sd", weights);
+  slope::computeScales(sparse_scales, sparse, "sd", weights);
+  REQUIRE(dense_scales(0) == 0.0);
+  REQUIRE(sparse_scales(0) == 0.0);
+
+  slope::normalize(x, centers, dense_scales, "mean", "sd", true, weights);
+  slope::normalize(
+    sparse, centers, sparse_scales, "mean", "sd", false, weights);
+  REQUIRE(dense_scales(0) == 1.0);
+  REQUIRE(sparse_scales(0) == 1.0);
+  REQUIRE(x.isZero(1e-16));
+}
+
+TEST_CASE("Weighted sparse variance retains small implicit-zero weights",
+          "[normalization][weights][sparse]")
+{
+  using Catch::Matchers::WithinRel;
+
+  Eigen::MatrixXd x(2, 1);
+  x << 1, 0;
+  Eigen::VectorXd weights(2);
+  weights << 1, 1e-16;
+
+  SECTION("Trailing implicit zero") {}
+
+  SECTION("Leading implicit zero")
+  {
+    x.col(0).reverseInPlace();
+    weights.reverseInPlace();
+  }
+
+  SECTION("Implicit zeros between stored entries")
+  {
+    x.resize(5, 1);
+    x << 0, 1, 0, 1, 0;
+    weights.resize(5);
+    weights << 1e-16, 0.25, 2e-16, 0.75, 1e-16;
+  }
+
+  SECTION("Explicit zero and implicit zero")
+  {
+    x.resize(3, 1);
+    x << 1, 0, 0;
+    weights.resize(3);
+    weights << 1, 1e-16, 1e-16;
+  }
+
+  SECTION("Long gaps with tiny weights between dominant stored rows")
+  {
+    x = Eigen::MatrixXd::Zero(257, 1);
+    weights = Eigen::VectorXd::Constant(257, 1e-200);
+    for (const int row : { 0, 64, 127, 256 }) {
+      x(row, 0) = 1.0;
+      weights(row) = 0.25;
+    }
+  }
+
+  Eigen::SparseMatrix<double> sparse = x.sparseView();
+  if (x.rows() == 3) {
+    sparse.coeffRef(1, 0) = 0.0;
+  }
+
+  const double zero_weight =
+    (weights.array() * (x.col(0).array() == 0.0).cast<double>()).sum();
+  const double expected = std::sqrt(zero_weight) / (1.0 + zero_weight);
+  Eigen::VectorXd centers, dense_scales, sparse_scales;
+  slope::computeScales(dense_scales, x, "sd", weights);
+  slope::computeScales(sparse_scales, sparse, "sd", weights);
+  REQUIRE_THAT(dense_scales(0), WithinRel(expected, 1e-12));
+  REQUIRE_THAT(sparse_scales(0), WithinRel(expected, 1e-12));
+
+  slope::normalize(x, centers, dense_scales, "none", "sd", false, weights);
+  slope::normalize(
+    sparse, centers, sparse_scales, "none", "sd", false, weights);
+  REQUIRE_THAT(sparse_scales(0), WithinRel(dense_scales(0), 1e-12));
+}
+
+TEST_CASE("Weighted sparse variance across different column supports",
+          "[normalization][weights][sparse]")
+{
+  using Catch::Matchers::WithinAbs;
+  using Catch::Matchers::WithinRel;
+
+  const int n = 257;
+  Eigen::MatrixXd x = Eigen::MatrixXd::Ones(n, 5);
+  Eigen::VectorXd weights = Eigen::VectorXd::Constant(n, 1e-200);
+  weights(n / 2) = 1.0;
+  x(127, 0) = 0.0;
+  x.col(1).setZero();
+  x(n / 2, 1) = 1.0;
+  for (int i = 1; i < n; i += 2) {
+    x(i, 2) = 0.0;
+  }
+  x.col(4).setZero();
+
+  Eigen::SparseMatrix<double> sparse = x.sparseView();
+  sparse.coeffRef(64, 1) = 0.0;
+  Eigen::VectorXd dense_scales, sparse_scales;
+  slope::computeScales(dense_scales, x, "sd", weights);
+  slope::computeScales(sparse_scales, sparse, "sd", weights);
+
+  for (int j = 0; j < 3; ++j) {
+    const double zero_weight =
+      (weights.array() * (x.col(j).array() == 0.0).cast<double>()).sum();
+    REQUIRE_THAT(sparse_scales(j), WithinRel(std::sqrt(zero_weight), 1e-12));
+    REQUIRE_THAT(sparse_scales(j), WithinRel(dense_scales(j), 1e-12));
+  }
+  REQUIRE_THAT(sparse_scales(3), WithinAbs(0.0, 0.0));
+  REQUIRE_THAT(sparse_scales(4), WithinAbs(0.0, 0.0));
+}
+
 TEST_CASE("Normalization, check solutions", "[normalization]")
 {
   using Catch::Matchers::WithinAbs;

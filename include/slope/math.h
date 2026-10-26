@@ -261,6 +261,11 @@ updateGradientImpl(Eigen::VectorXd& gradient,
 #endif
   for (int k = 0; k < m; ++k) {
     weighted_residual.col(k) = residual.col(k).cwiseProduct(w);
+    for (int i = 0; i < n; ++i) {
+      if (w(i) == 0.0) {
+        weighted_residual(i, k) = 0.0;
+      }
+    }
     wr_sums(k) = weighted_residual.col(k).sum();
   }
 

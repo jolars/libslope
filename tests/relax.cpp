@@ -237,3 +237,62 @@ TEST_CASE("Relaxed path", "[relax]")
 
   REQUIRE(relaxed_path.size() == path.size());
 }
+
+TEST_CASE("Weighted GLM relaxation decreases the unpenalized loss",
+          "[relax][weights]")
+{
+  using namespace slope;
+  for (const std::string loss_type : { "logistic", "poisson", "multinomial" }) {
+    for (bool intercept_only : { false, true }) {
+      DYNAMIC_SECTION(loss_type << (intercept_only ? ": intercept only" : ""))
+      {
+        auto data = generateData(48, 3, loss_type, 3, 1, 1, 91);
+        if (loss_type == "poisson") {
+          data.y = (0.5 + 0.5 * data.x.col(0).array()).exp().round();
+        }
+        if (intercept_only) {
+          data.x.setZero();
+        }
+        const Eigen::MatrixXd original_x = data.x;
+        Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(48, 1, 3);
+        weights(0) = weights(9) = 0;
+
+        Slope model;
+        model.setLoss(loss_type);
+        model.setTol(1e-8);
+        model.setRelaxTol(1e-8);
+        model.setDiagnostics(true);
+        auto loss = setupLoss(loss_type);
+        const Eigen::MatrixXd prepared = loss->preprocessResponse(data.y);
+        const Eigen::ArrayXd lambda =
+          Eigen::ArrayXd::Ones(data.x.cols() * prepared.cols());
+        const auto fit = model.fit(
+          data.x, data.y, 0.08, lambda, defaultInterruptChecker, weights);
+        const Eigen::MatrixXd initial_eta = fit.predict(data.x, "linear");
+        const double initial_loss = loss->loss(initial_eta, prepared, weights);
+
+        const auto relaxed =
+          model.relax(fit, data.x, data.y, 0, {}, {}, weights);
+        const Eigen::MatrixXd relaxed_eta = relaxed.predict(data.x, "linear");
+        const double relaxed_loss = loss->loss(relaxed_eta, prepared, weights);
+        CAPTURE(initial_loss, relaxed_loss);
+        REQUIRE(data.x.isApprox(original_x));
+        REQUIRE(relaxed_eta.allFinite());
+        REQUIRE(loss->inverseLink(relaxed_eta).allFinite());
+        REQUIRE(std::isfinite(relaxed_loss));
+        REQUIRE(relaxed_loss <= initial_loss + 1e-9);
+
+        const auto& primals = relaxed.getPrimals();
+        REQUIRE_FALSE(primals.empty());
+        for (size_t i = 0; i < primals.size(); ++i) {
+          REQUIRE(std::isfinite(primals[i]));
+          if (i > 0) {
+            CAPTURE(i, primals[i - 1], primals[i]);
+            REQUIRE(primals[i] <=
+                    primals[i - 1] + 1e-9 * (1 + std::abs(primals[i - 1])));
+          }
+        }
+      }
+    }
+  }
+}
