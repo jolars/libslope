@@ -165,6 +165,8 @@ TEST_CASE("Cross-validation: do not copy x", "[cv][user_folds]")
   using Catch::Matchers::WithinAbs;
 
   slope::Slope model;
+  // Compare normalization paths only after both fits have converged tightly.
+  model.setTol(1e-12);
   int n = 9;
 
   auto cv_config = slope::CvConfig();

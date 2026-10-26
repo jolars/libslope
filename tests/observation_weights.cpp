@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <limits>
+#include <slope/eigen_compat.h>
 #include <slope/slope.h>
 
 TEST_CASE("Weighted loss gradients match finite differences", "[weights]")
@@ -166,7 +167,7 @@ TEST_CASE("Weighted fits preserve uniform weights and ignore zero rows",
       .norm() < 1e-8);
   for (const std::string screening : { "none", "strong" }) {
     model.setScreening(screening);
-    auto view = x(Eigen::seq(0, 7), Eigen::all);
+    auto view = x(Eigen::seq(0, 7), slope::all);
     const auto viewed =
       model.fit(view, y, 0.1, {}, slope::defaultInterruptChecker, weights);
     REQUIRE((Eigen::MatrixXd(weighted.getCoefs()) -
