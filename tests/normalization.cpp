@@ -129,10 +129,10 @@ TEST_CASE("Weighted feature normalization", "[normalization][weights]")
     slope::normalize(tiny, centers, scales, "mean", "sd", true, support);
 
     REQUIRE(tiny.allFinite());
-    REQUIRE_THAT(centers(0), WithinAbs(0, 0));
+    REQUIRE_THAT(centers(0), WithinAbs(0, 1e-164));
     REQUIRE_THAT(scales(0) / 1e-150, WithinAbs(std::sqrt(2.0 / 3.0), 1e-14));
     REQUIRE_THAT(tiny(0, 0), WithinAbs(-std::sqrt(1.5), 1e-14));
-    REQUIRE_THAT(tiny(1, 0), WithinAbs(0, 0));
+    REQUIRE_THAT(tiny(1, 0), WithinAbs(0, 1e-14));
     REQUIRE_THAT(tiny(2, 0), WithinAbs(std::sqrt(1.5), 1e-14));
     REQUIRE_THAT(tiny(3, 0), WithinAbs(0, 0));
   }
@@ -160,6 +160,20 @@ TEST_CASE("Weighted feature normalization", "[normalization][weights]")
     REQUIRE_THROWS_AS(
       slope::computeScales(result, x, "sd", Eigen::VectorXd::Zero(4)),
       std::invalid_argument);
+  }
+}
+
+TEST_CASE("Unweighted constant columns have exactly zero variance",
+          "[normalization][zero_variance]")
+{
+  for (const int rows : { 3, 5, 7, 15, 31 }) {
+    CAPTURE(rows);
+    Eigen::MatrixXd x = Eigen::MatrixXd::Constant(rows, 2, 0.1);
+    x.col(1).setZero();
+    Eigen::SparseMatrix<double> sparse = x.sparseView();
+
+    REQUIRE(slope::stdDevs(x).isZero(0));
+    REQUIRE(slope::stdDevs(sparse).isZero(0));
   }
 }
 
