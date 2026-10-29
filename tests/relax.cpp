@@ -2,12 +2,154 @@
 #include "test_helpers.hpp"
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <slope/clusters.h>
 #include <slope/losses/quadratic.h>
 #include <slope/ols.h>
 #include <slope/slope.h>
+
+TEST_CASE("Relaxation reuses consecutive signed patterns", "[relax][reuse]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  const bool sparse = GENERATE(false, true);
+  const bool prepared_response = GENERATE(false, true);
+  const double gamma = GENERATE(0.0, 0.4, 1.0);
+  CAPTURE(sparse, prepared_response, gamma);
+
+  Eigen::MatrixXd x = Eigen::MatrixXd::Identity(4, 4);
+  Eigen::SparseMatrix<double> sparse_x = x.sparseView();
+  Eigen::VectorXd y(4);
+  y << 4, -2, 1, 3;
+  Eigen::VectorXd weights(4);
+  weights << 1, 2, 0, 3;
+
+  slope::Slope model;
+  model.setNormalization("none");
+  model.setIntercept(false);
+  model.setDiagnostics(true);
+  model.setRelaxTol(1e-10);
+
+  auto make_fit = [](const Eigen::VectorXd& beta, double alpha) {
+    return slope::SlopeFit{ Eigen::VectorXd::Zero(1),
+                            beta.sparseView(),
+                            {},
+                            alpha,
+                            Eigen::ArrayXd::Constant(4, alpha),
+                            0,
+                            0,
+                            {},
+                            {},
+                            {},
+                            0,
+                            "none",
+                            "none",
+                            false,
+                            Eigen::VectorXd::Zero(4),
+                            Eigen::VectorXd::Ones(4) };
+  };
+
+  std::vector<Eigen::VectorXd> betas;
+  betas.emplace_back(Eigen::VectorXd::Zero(4));
+  betas.emplace_back(Eigen::VectorXd::Zero(4));
+  betas.emplace_back((Eigen::Vector4d() << 1, -1, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 2, -2, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 2, 2, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 1, 1, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 2, 1, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 3, 1, 0, 0).finished());
+  betas.emplace_back((Eigen::Vector4d() << 3, 1, 0, 1).finished());
+  betas.emplace_back((Eigen::Vector4d() << 2, 0.5, 0, 0.5).finished());
+  betas.emplace_back((Eigen::Vector4d() << 2, 2, 0, 0.5).finished());
+  betas.emplace_back((Eigen::Vector4d() << 1, 1, 0, 0.2).finished());
+  betas.emplace_back(Eigen::VectorXd::Zero(4));
+
+  std::vector<slope::SlopeFit> fits;
+  for (size_t i = 0; i < betas.size(); ++i) {
+    fits.emplace_back(make_fit(betas[i], 1.0 / (i + 1)));
+  }
+  const slope::SlopePath path(fits);
+
+  auto check = [&](auto& features) {
+    const auto relaxed = prepared_response
+                           ? slope::detail::SlopeAccess::relax(
+                               model, path, features, y, gamma, weights)
+                           : model.relax(path, features, y, gamma, weights);
+    REQUIRE(relaxed.size() == path.size());
+    for (size_t i = 0; i < path.size(); ++i) {
+      CAPTURE(i);
+      const auto expected =
+        model.relax(path(i), features, y, gamma, {}, {}, weights);
+      REQUIRE((Eigen::MatrixXd(relaxed(i).getCoefs(false)) -
+               Eigen::MatrixXd(expected.getCoefs(false)))
+                .norm() < 1e-8);
+      REQUIRE((relaxed(i).getIntercepts(false) - expected.getIntercepts(false))
+                .norm() < 1e-8);
+      REQUIRE_THAT(relaxed(i).getDeviance(),
+                   WithinAbs(expected.getDeviance(), 1e-8));
+      REQUIRE(relaxed(i).getAlpha() == path(i).getAlpha());
+      REQUIRE((relaxed(i).getLambda() == path(i).getLambda()).all());
+    }
+    if (gamma < 1) {
+      for (size_t i : { 1, 3, 5, 7, 9, 11 }) {
+        CAPTURE(i);
+        REQUIRE(relaxed(i).getPasses() == 0);
+        REQUIRE(relaxed(i).getPrimals().empty());
+        REQUIRE(relaxed(i).getDuals().empty());
+        REQUIRE(relaxed(i).getTime().empty());
+      }
+      REQUIRE(relaxed(2).getPasses() > 0);
+      REQUIRE(relaxed(4).getPasses() > 0);
+      REQUIRE(relaxed(6).getPasses() > 0);
+      REQUIRE(relaxed(8).getPasses() > 0);
+      REQUIRE(relaxed(10).getPasses() > 0);
+    }
+  };
+  if (sparse) {
+    check(sparse_x);
+  } else {
+    check(x);
+  }
+}
+
+TEST_CASE("Relaxed GLM paths reuse unpenalized fits", "[relax][reuse][weights]")
+{
+  const std::string loss_type =
+    GENERATE("quadratic", "logistic", "poisson", "multinomial");
+  const double gamma = GENERATE(0.0, 0.4);
+  CAPTURE(loss_type, gamma);
+
+  auto data = generateData(48, 3, loss_type, 3, 1, 1, 91);
+  Eigen::SparseMatrix<double> x = data.x.sparseView();
+  const Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(48, 1, 3);
+  slope::Slope model;
+  model.setLoss(loss_type);
+  model.setReturnClusters(false);
+  model.setRelaxTol(1e-9);
+  const auto fit =
+    model.fit(x, data.y, 0.08, {}, slope::defaultInterruptChecker, weights);
+  const slope::SlopePath path(std::vector<slope::SlopeFit>{ fit, fit });
+
+  const Eigen::MatrixXd y =
+    slope::setupLoss(loss_type)->preprocessResponse(data.y);
+  const auto relaxed =
+    slope::detail::SlopeAccess::relax(model, path, x, y, gamma, weights);
+  const auto expected = model.relax(fit, x, data.y, gamma, {}, {}, weights);
+
+  for (size_t i = 0; i < path.size(); ++i) {
+    REQUIRE((Eigen::MatrixXd(relaxed(i).getCoefs()) -
+             Eigen::MatrixXd(expected.getCoefs()))
+              .norm() < 1e-7);
+    REQUIRE((relaxed(i).getIntercepts() - expected.getIntercepts()).norm() <
+            1e-7);
+    REQUIRE_THAT(relaxed(i).getDeviance(),
+                 Catch::Matchers::WithinAbs(expected.getDeviance(), 1e-8));
+  }
+  REQUIRE(relaxed(1).getPasses() == 0);
+  REQUIRE(Eigen::MatrixXd(x).isApprox(data.x));
+}
 
 TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
 {

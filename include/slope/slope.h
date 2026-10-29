@@ -1030,6 +1030,14 @@ public:
   }
 
 private:
+  struct RelaxationState
+  {
+    Eigen::SparseMatrix<int> pattern;
+    Eigen::VectorXd beta0;
+    Eigen::VectorXd beta;
+    bool initialized = false;
+  };
+
   template<typename T>
   SlopeFit relaxImpl(const SlopeFit& fit,
                      T& x,
@@ -1038,7 +1046,8 @@ private:
                      Eigen::VectorXd beta0,
                      Eigen::VectorXd beta,
                      const Eigen::VectorXd& observation_weights,
-                     bool response_prepared)
+                     bool response_prepared,
+                     RelaxationState* state = nullptr)
   {
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
@@ -1066,6 +1075,22 @@ private:
       beta = MatrixXd(fit.getCoefs(false)).reshaped();
     }
 
+    auto working_set = activeSet(beta);
+    bool reuse_solution = false;
+    if (state != nullptr) {
+      auto pattern = patternMatrix(beta);
+      reuse_solution =
+        state->initialized && pattern.rows() == state->pattern.rows() &&
+        pattern.cols() == state->pattern.cols() &&
+        (pattern.cols() == 0 || pattern.isApprox(state->pattern));
+      if (reuse_solution) {
+        beta0 = state->beta0;
+        beta = state->beta;
+      } else {
+        state->pattern = std::move(pattern);
+      }
+    }
+
     double alpha = fit.getAlpha();
 
     Timer timer;
@@ -1084,103 +1109,112 @@ private:
 
     int m = y.cols();
 
-    Eigen::ArrayXd lambda_cumsum_relax = Eigen::ArrayXd::Zero(p * m + 1);
-
-    auto working_set = activeSet(beta);
-
-    Eigen::MatrixXd eta = linearPredictor(x,
-                                          working_set,
-                                          beta0,
-                                          beta,
-                                          x_centers,
-                                          x_scales,
-                                          jit_normalization,
-                                          intercept);
-    VectorXd gradient = VectorXd::Zero(p * m);
-    MatrixXd residual(n, m);
-    MatrixXd working_residual(n, m);
-
-    MatrixXd w = MatrixXd::Ones(n, m);
-    MatrixXd w_ones = weights.replicate(1, m);
-    MatrixXd z = y;
-
-    slope::Clusters clusters(beta);
-
-    std::mt19937 rng;
-
-    if (random_seed.has_value()) {
-      rng.seed(*random_seed);
-    } else {
-      rng.seed(std::random_device{}());
-    }
-
+    MatrixXd eta;
     int passes = 0;
 
-    for (int irls_it = 0; irls_it < max_it_outer_relax; irls_it++) {
-      residual = loss->residual(eta, y);
-      detail::maskZeroWeightRows(residual, weights);
+    if (!reuse_solution) {
+      Eigen::ArrayXd lambda_cumsum_relax = Eigen::ArrayXd::Zero(p * m + 1);
 
-      if (collect_diagnostics) {
-        primals.push_back(loss->loss(eta, y, weights));
-        duals.push_back(0.0);
-        time.push_back(timer.elapsed());
+      eta = linearPredictor(x,
+                            working_set,
+                            beta0,
+                            beta,
+                            x_centers,
+                            x_scales,
+                            jit_normalization,
+                            intercept);
+      VectorXd gradient = VectorXd::Zero(p * m);
+      MatrixXd residual(n, m);
+      MatrixXd working_residual(n, m);
+
+      MatrixXd w = MatrixXd::Ones(n, m);
+      MatrixXd w_ones = weights.replicate(1, m);
+      MatrixXd z = y;
+
+      slope::Clusters clusters(beta);
+
+      std::mt19937 rng;
+
+      if (random_seed.has_value()) {
+        rng.seed(*random_seed);
+      } else {
+        rng.seed(std::random_device{}());
       }
 
-      Eigen::VectorXd cluster_gradient = clusterGradient(beta,
-                                                         residual,
-                                                         clusters,
-                                                         x,
-                                                         w_ones,
-                                                         x_centers,
-                                                         x_scales,
-                                                         jit_normalization);
+      for (int irls_it = 0; irls_it < max_it_outer_relax; irls_it++) {
+        residual = loss->residual(eta, y);
+        detail::maskZeroWeightRows(residual, weights);
 
-      double norm_grad = cluster_gradient.lpNorm<Eigen::Infinity>();
-      if (intercept) {
-        norm_grad = std::max(
-          norm_grad,
-          detail::weightedMean(residual, weights).cwiseAbs().maxCoeff());
-      }
+        if (collect_diagnostics) {
+          primals.push_back(loss->loss(eta, y, weights));
+          duals.push_back(0.0);
+          time.push_back(timer.elapsed());
+        }
 
-      if (norm_grad < tol_relax) {
-        break;
-      }
+        Eigen::VectorXd cluster_gradient = clusterGradient(beta,
+                                                           residual,
+                                                           clusters,
+                                                           x,
+                                                           w_ones,
+                                                           x_centers,
+                                                           x_scales,
+                                                           jit_normalization);
 
-      loss->updateWeightsAndWorkingResponse(w, z, eta, y, weights);
-      working_residual = eta - z;
-      detail::maskZeroWeightRows(working_residual, weights);
-      const VectorXd weight_sums = w.colwise().sum().transpose();
+        double norm_grad = cluster_gradient.lpNorm<Eigen::Infinity>();
+        if (intercept) {
+          norm_grad = std::max(
+            norm_grad,
+            detail::weightedMean(residual, weights).cwiseAbs().maxCoeff());
+        }
 
-      for (int inner_it = 0; inner_it < max_it_inner_relax; ++inner_it) {
-        passes++;
-
-        double max_abs_gradient = coordinateDescent(beta0,
-                                                    beta,
-                                                    working_residual,
-                                                    clusters,
-                                                    lambda_cumsum_relax,
-                                                    x,
-                                                    w,
-                                                    weight_sums,
-                                                    x_centers,
-                                                    x_scales,
-                                                    intercept,
-                                                    jit_normalization,
-                                                    update_clusters,
-                                                    rng,
-                                                    cd_type);
-
-        if (max_abs_gradient < tol_relax) {
+        if (norm_grad < tol_relax) {
           break;
         }
-      }
 
-      eta = working_residual + z;
+        loss->updateWeightsAndWorkingResponse(w, z, eta, y, weights);
+        working_residual = eta - z;
+        detail::maskZeroWeightRows(working_residual, weights);
+        const VectorXd weight_sums = w.colwise().sum().transpose();
 
-      if (irls_it == max_it_outer_relax) {
-        WarningLogger::addWarning(WarningCode::MAXIT_REACHED,
-                                  "Maximum number of IRLS iterations reached.");
+        for (int inner_it = 0; inner_it < max_it_inner_relax; ++inner_it) {
+          passes++;
+
+          double max_abs_gradient = coordinateDescent(beta0,
+                                                      beta,
+                                                      working_residual,
+                                                      clusters,
+                                                      lambda_cumsum_relax,
+                                                      x,
+                                                      w,
+                                                      weight_sums,
+                                                      x_centers,
+                                                      x_scales,
+                                                      intercept,
+                                                      jit_normalization,
+                                                      update_clusters,
+                                                      rng,
+                                                      cd_type);
+
+          if (max_abs_gradient < tol_relax) {
+            break;
+          }
+        }
+
+        eta = working_residual + z;
+
+        if (irls_it == max_it_outer_relax) {
+          WarningLogger::addWarning(
+            WarningCode::MAXIT_REACHED,
+            "Maximum number of IRLS iterations reached.");
+        }
       }
+    }
+
+    if (state != nullptr && !reuse_solution) {
+      // Cache before blending so later steps use their own penalized fit.
+      state->beta0 = beta0;
+      state->beta = beta;
+      state->initialized = true;
     }
 
     if (gamma > 0) {
@@ -1204,7 +1238,7 @@ private:
       null_eta.rowwise() = loss->link(detail::weightedMean(y, weights)).row(0);
     }
     const double null_dev = loss->deviance(null_eta, y, weights);
-    clusters.update(beta);
+    Clusters clusters(beta);
 
     SlopeFit fit_out{ beta0,           beta.reshaped(p, m).sparseView(),
                       clusters,        alpha,
@@ -1218,9 +1252,38 @@ private:
     return fit_out;
   }
 
+  template<typename T>
+  SlopePath relaxPathImpl(const SlopePath& path,
+                          T& x,
+                          const Eigen::MatrixXd& y,
+                          double gamma,
+                          const Eigen::VectorXd& observation_weights,
+                          bool response_prepared)
+  {
+    std::vector<SlopeFit> fits;
+    fits.reserve(path.size());
+    RelaxationState state;
+    for (size_t i = 0; i < path.size(); ++i) {
+      fits.emplace_back(relaxImpl(path(i),
+                                  x,
+                                  y,
+                                  gamma,
+                                  {},
+                                  {},
+                                  observation_weights,
+                                  response_prepared,
+                                  &state));
+    }
+    return fits;
+  }
+
 public:
   /**
    * @brief Relaxes a fitted SLOPE path
+   *
+   * Reuses the unpenalized fit at consecutive steps with the same signed
+   * cluster pattern. Reused steps have zero optimization passes and empty
+   * diagnostic histories.
    *
    * @tparam T Matrix type for feature input (supports dense or sparse matrices)
    * @param path Previously fitted SLOPE path
@@ -1240,21 +1303,7 @@ public:
     const double gamma = 0.0,
     const Eigen::VectorXd& observation_weights = Eigen::VectorXd())
   {
-    std::vector<SlopeFit> fits;
-
-    for (size_t i = 0; i < path.size(); i++) {
-      // TODO: Reinstate warm starts. Need to be careful about
-      // the warm started values though since they have to
-      // agree with the cluster or we will run into trouble.
-      // We can probably fix this by using the signs
-      // of the cluster object rather than the betas though.
-      auto relaxed_fit =
-        relax(path(i), x, y, gamma, {}, {}, observation_weights);
-
-      fits.emplace_back(relaxed_fit);
-    }
-
-    return fits;
+    return relaxPathImpl(path, x, y, gamma, observation_weights, false);
   }
 
 private:
@@ -1320,12 +1369,7 @@ struct SlopeAccess
                          double gamma,
                          const Eigen::VectorXd& weights)
   {
-    std::vector<SlopeFit> fits;
-    for (size_t i = 0; i < path.size(); ++i) {
-      fits.emplace_back(
-        model.relaxImpl(path(i), x, y, gamma, {}, {}, weights, true));
-    }
-    return fits;
+    return model.relaxPathImpl(path, x, y, gamma, weights, true);
   }
 };
 

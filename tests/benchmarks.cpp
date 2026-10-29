@@ -16,6 +16,43 @@
 #include <slope/solvers/slope_threshold.h>
 #include <slope/threads.h>
 
+TEST_CASE("Repeated-pattern relaxation", "[!benchmark][relax_path]")
+{
+  auto data = generateData(500, 40, "quadratic", 1, 1, 1, 151);
+  slope::Threads::set(1);
+  slope::Slope model;
+  model.setTol(1e-8);
+  model.setRelaxTol(1e-8);
+  const Eigen::ArrayXd alphas =
+    Eigen::ArrayXd::LinSpaced(100, std::log(0.01), std::log(0.0001)).exp();
+  const auto path = model.path(data.x, data.y, alphas);
+  REQUIRE(path.size() == 100);
+
+  size_t patterns = 1;
+  for (size_t i = 1; i < path.size(); ++i) {
+    const auto previous = slope::patternMatrix(
+      Eigen::MatrixXd(path(i - 1).getCoefs(false)).reshaped());
+    const auto current =
+      slope::patternMatrix(Eigen::MatrixXd(path(i).getCoefs(false)).reshaped());
+    if (current.cols() != previous.cols() ||
+        (current.cols() > 0 && !current.isApprox(previous))) {
+      ++patterns;
+    }
+  }
+  std::cout << path.size() << " fits, " << patterns
+            << " consecutive patterns\n";
+
+  BENCHMARK("Fully relaxed path")
+  {
+    return model.relax(path, data.x, data.y);
+  };
+
+  BENCHMARK("Partially relaxed path")
+  {
+    return model.relax(path, data.x, data.y, 0.4);
+  };
+}
+
 TEST_CASE("Parallelized gradient computations", "[!benchmark]")
 {
   int n = 10;
