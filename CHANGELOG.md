@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.6.0](https://github.com/jolars/libslope/compare/v6.5.4...v6.6.0) (2026-10-29)
+
+### Features
+
+- add observation weights ([`57d418e`](https://github.com/jolars/libslope/commit/57d418e0eea0276907ab7a0e36334aefc49547d2))
+
+### Bug Fixes
+
+- **normalization:** preserve zero variance for constants ([`9aec05a`](https://github.com/jolars/libslope/commit/9aec05a79f900271581b7812dffe682d524492b6))
+- **tests:** stabilize CI across Eigen versions ([`731964a`](https://github.com/jolars/libslope/commit/731964a85822afd4f8cbdb226195e5b977ac7564))
+- cap screened fits at max iterations ([`d492582`](https://github.com/jolars/libslope/commit/d4925820dda136c5d84e093dc98420aa9988483f)), fixes [#183](https://github.com/jolars/libslope/issues/183)
+
+### Performance Improvements
+
+- reuse relaxed fits for matching patterns ([`02f477d`](https://github.com/jolars/libslope/commit/02f477d1d23f96b3a13e2c06ba227af7d13b8135)), fixes [#151](https://github.com/jolars/libslope/issues/151)
+
 ## [6.5.4](https://github.com/jolars/libslope/compare/v6.5.3...v6.5.4) (2026-08-28)
 
 ### Bug Fixes
