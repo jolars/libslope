@@ -2,8 +2,7 @@
 
 [![Build-and-Test](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml)
 [![codecov](https://codecov.io/gh/jolars/libslope/graph/badge.svg?token=y0mJN9eqYr)](https://codecov.io/gh/jolars/libslope)
-[![Software
-DOI](https://img.shields.io/badge/Software_DOI-10.5281%2Fzenodo.17459739-blue)](https://doi.org/10.5281/zenodo.17459739)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17459739-blue)](https://doi.org/10.5281/zenodo.17459739)
 
 SLOPE is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
 purpose is to serve as a backend for R and Python packages, but it can also be
