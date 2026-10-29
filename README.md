@@ -2,6 +2,8 @@
 
 [![Build-and-Test](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml/badge.svg)](https://github.com/jolars/libslope/actions/workflows/build-and-test.yaml)
 [![codecov](https://codecov.io/gh/jolars/libslope/graph/badge.svg?token=y0mJN9eqYr)](https://codecov.io/gh/jolars/libslope)
+[![Software
+DOI](https://img.shields.io/badge/Software_DOI-10.5281%2Fzenodo.17459739-blue)](https://doi.org/10.5281/zenodo.17459739)
 
 SLOPE is a C++ library for Sorted L-One Penalized Estimation (SLOPE). Its main
 purpose is to serve as a backend for R and Python packages, but it can also be
@@ -69,6 +71,19 @@ Now we can retrieve the coefficients by calling `res.getCoefs()`.
 ### Testing
 
 - Catch2
+
+## Citation
+
+If you use libslope in your research, please cite [Efficient Solvers for SLOPE
+in R, Python, Julia, and C++](https://doi.org/10.48550/arXiv.2511.02430).
+
+For reproducibility, also cite the software release you used. Select that
+release in the [Zenodo archive](https://doi.org/10.5281/zenodo.17459739) and
+export its citation. The concept DOI `10.5281/zenodo.17459739` identifies
+libslope across all releases.
+
+Machine-readable software metadata and the preferred paper citation are
+available in [CITATION.cff](CITATION.cff).
 
 ## Contributing
 

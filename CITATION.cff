@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: If you use this software, please cite the paper in preferred-citation.
+  For reproducibility, also cite the archived software release you used.
+type: software
+title: 'libslope: Sorted L1 Penalized Estimation in C++'
+authors:
+  - family-names: Larsson
+    given-names: Johan
+    affiliation: University of Copenhagen
+    orcid: https://orcid.org/0000-0002-4029-5945
+doi: 10.5281/zenodo.17459739
+url: https://jolars.github.io/libslope/
+repository-code: https://github.com/jolars/libslope
+license: GPL-3.0-only
+preferred-citation:
+  type: article
+  title: Efficient Solvers for SLOPE in R, Python, Julia, and C++
+  authors:
+    - family-names: Larsson
+      given-names: Johan
+      orcid: https://orcid.org/0000-0002-4029-5945
+    - family-names: Bogdan
+      given-names: Małgorzata
+    - family-names: Grzesiak
+      given-names: Krystyna
+    - family-names: Massias
+      given-names: Mathurin
+    - family-names: Wallin
+      given-names: Jonas
+  year: 2025
+  month: 11
+  date-published: '2025-11-04'
+  journal: arXiv
+  doi: 10.48550/arXiv.2511.02430
+  url: https://arxiv.org/abs/2511.02430
