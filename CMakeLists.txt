@@ -94,6 +94,7 @@ if(BUILD_TESTING)
     tests/benchmarks.cpp
     tests/clusters.cpp
     tests/cv.cpp
+    tests/folds.cpp
     tests/generate_data.cpp
     tests/hybrid.cpp
     tests/input_validation.cpp

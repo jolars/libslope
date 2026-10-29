@@ -118,6 +118,11 @@ config.n_folds = 3;
 auto cv = slope::crossValidate(model, x, y, config, weights);
 ```
 
+Automatically generated folds are identical across platforms for the same
+sample count, fold count, number of repetitions, and `config.random_seed`.
+Fold assignments differ from releases that used `std::shuffle`. Set
+`config.predefined_folds` to reuse saved fold assignments.
+
 Each training and validation subset normalizes its own weights. Validation
 metrics use observation weights, and the reported mean and standard error
 continue to give each fold equal weight. Every training and validation subset

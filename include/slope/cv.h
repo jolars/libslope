@@ -99,7 +99,7 @@ struct CvConfig
   /// Evaluation metric used for model assessment (default: "mse")
   std::string metric = "mse";
 
-  /// Seed for random number generator to ensure reproducibility (default: 42)
+  /// Seed for reproducible fold assignments across platforms (default: 42).
   uint64_t random_seed = 42;
 
   /// Whether to copy the design matrix for each fold (default: true)
