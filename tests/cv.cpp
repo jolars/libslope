@@ -8,6 +8,38 @@
 #include <slope/cv.h>
 #include <slope/slope.h>
 
+TEST_CASE("Cross-validation keeps internally generated alphas absolute",
+          "[cv][alpha_scale]")
+{
+  auto data = generateData(24, 3, "quadratic", 1, 0.8, 0.5, 129);
+  Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(24, 1, 3);
+  slope::Slope model;
+  model.setPathLength(5);
+  model.setTol(1e-8);
+  slope::CvConfig config;
+  config.n_folds = 3;
+  config.hyperparams["gamma"] = { 0, 0.5 };
+  for (const bool copy_x : { true, false }) {
+    DYNAMIC_SECTION("copy_x = " << copy_x)
+    {
+      config.copy_x = copy_x;
+      const auto absolute =
+        crossValidate(model, data.x, data.y, config, weights);
+      model.setAlphaScale("relative");
+      const auto relative =
+        crossValidate(model, data.x, data.y, config, weights);
+      REQUIRE(relative.best_params == absolute.best_params);
+      REQUIRE(relative.results.size() == absolute.results.size());
+      for (int j = 0; j < absolute.results.size(); ++j) {
+        REQUIRE_THAT(relative.results[j].alphas,
+                     VectorApproxEqual(absolute.results[j].alphas, 1e-12));
+        REQUIRE((relative.results[j].score - absolute.results[j].score).norm() <
+                1e-8);
+      }
+    }
+  }
+}
+
 TEST_CASE("Cross-validation", "[cv]")
 {
   using Catch::Matchers::WithinAbs;

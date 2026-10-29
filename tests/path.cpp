@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <limits>
 #include <slope/slope.h>
 
 TEST_CASE("Path fitting", "[path][quadratic][alpha]")
@@ -155,4 +156,162 @@ TEST_CASE("Path fitting", "[path][quadratic][alpha]")
 
     REQUIRE(path.getClusters().size() > 0);
   }
+}
+
+TEST_CASE("Relative alphas match absolute penalties", "[path][alpha_scale]")
+{
+  using Catch::Matchers::WithinAbs;
+
+  for (const std::string family :
+       { "quadratic", "logistic", "poisson", "multinomial" }) {
+    DYNAMIC_SECTION(family)
+    {
+      auto data = generateData(40, 4, family, 3, 0.8, 0.5, 129);
+      Eigen::SparseMatrix<double> sparse_x = data.x.sparseView();
+      Eigen::VectorXd weights = Eigen::VectorXd::LinSpaced(40, 0, 3);
+      const int n_coefs = family == "multinomial" ? 8 : 4;
+      const Eigen::ArrayXd lambda = Eigen::ArrayXd::LinSpaced(n_coefs, 3, 1);
+      slope::Slope model;
+      model.setLoss(family);
+      model.setTol(1e-9);
+      model.setPathLength(1);
+      const auto null_path = model.path(
+        data.x, data.y, {}, lambda, slope::defaultInterruptChecker, weights);
+      const double alpha_max = null_path(0).getAlpha();
+      REQUIRE(alpha_max > 0);
+
+      Eigen::ArrayXd fractions(4);
+      fractions << 1.5, 1, 0.3, 0.1;
+      const Eigen::ArrayXd alphas = fractions * alpha_max;
+      const auto absolute = model.path(data.x,
+                                       data.y,
+                                       alphas,
+                                       lambda,
+                                       slope::defaultInterruptChecker,
+                                       weights);
+      model.setAlphaScale("relative");
+      const auto relative = model.path(data.x,
+                                       data.y,
+                                       fractions,
+                                       lambda,
+                                       slope::defaultInterruptChecker,
+                                       weights);
+      const auto sparse = model.path(sparse_x,
+                                     data.y,
+                                     fractions,
+                                     lambda,
+                                     slope::defaultInterruptChecker,
+                                     weights);
+      REQUIRE(relative.size() == fractions.size());
+      REQUIRE_THAT(relative.getAlpha(), VectorApproxEqual(alphas, 1e-12));
+      REQUIRE_THAT(sparse.getAlpha(), VectorApproxEqual(alphas, 1e-12));
+      REQUIRE(relative(0).getCoefs().norm() < 1e-8);
+      REQUIRE(relative(1).getCoefs().norm() < 1e-8);
+      REQUIRE(relative(2).getCoefs().norm() > 1e-6);
+      for (int j = 0; j < fractions.size(); ++j) {
+        REQUIRE((Eigen::MatrixXd(relative(j).getCoefs()) -
+                 Eigen::MatrixXd(absolute(j).getCoefs()))
+                  .norm() < 1e-7);
+        REQUIRE(
+          (relative(j).getIntercepts() - absolute(j).getIntercepts()).norm() <
+          1e-7);
+        REQUIRE((Eigen::MatrixXd(sparse(j).getCoefs()) -
+                 Eigen::MatrixXd(relative(j).getCoefs()))
+                  .norm() < 1e-5);
+      }
+
+      const auto fit = model.fit(
+        data.x, data.y, 0.3, lambda, slope::defaultInterruptChecker, weights);
+      REQUIRE_THAT(fit.getAlpha(), WithinAbs(0.3 * alpha_max, 1e-12));
+      REQUIRE((Eigen::MatrixXd(fit.getCoefs()) -
+               Eigen::MatrixXd(absolute(2).getCoefs()))
+                .norm() < 1e-5);
+    }
+  }
+}
+
+TEST_CASE("Relative alpha scale preserves automatic paths",
+          "[path][alpha_scale]")
+{
+  auto data = generateData(40, 4, "quadratic", 1, 0.8, 0.5, 129);
+  slope::Slope model;
+  model.setPathLength(6);
+  const auto absolute = model.path(data.x, data.y);
+  model.setAlphaScale("relative");
+  const auto relative = model.path(data.x, data.y);
+  REQUIRE_THAT(relative.getAlpha(),
+               VectorApproxEqual(absolute.getAlpha(), 1e-12));
+  for (int j = 0; j < absolute.size(); ++j) {
+    REQUIRE((Eigen::MatrixXd(relative(j).getCoefs()) -
+             Eigen::MatrixXd(absolute(j).getCoefs()))
+              .norm() < 1e-10);
+  }
+  const auto null_fit = model.fit(data.x, data.y);
+  REQUIRE_THAT(null_fit.getAlpha(),
+               Catch::Matchers::WithinAbs(absolute(0).getAlpha(), 1e-12));
+  REQUIRE(null_fit.getCoefs().norm() < 1e-8);
+
+  model.setAlphaScale("absolute");
+  const auto replay = model.path(data.x, data.y, relative.getAlpha());
+  REQUIRE_THAT(replay.getAlpha(),
+               VectorApproxEqual(absolute.getAlpha(), 1e-12));
+}
+
+TEST_CASE("Relative alpha handles zero penalties", "[path][alpha_scale]")
+{
+  using Catch::Matchers::WithinAbs;
+  Eigen::MatrixXd x(4, 1);
+  x << -3, -1, 1, 3;
+  Eigen::VectorXd y = 2 * x.col(0).array() + 4;
+  slope::Slope model;
+  model.setAlphaScale("relative");
+  model.setTol(1e-10);
+  SECTION("Zero fraction fits the unpenalized model")
+  {
+    const auto fit = model.fit(x, y, 0);
+    REQUIRE(fit.getAlpha() == 0);
+    REQUIRE_THAT(fit.getCoefs().coeff(0, 0), WithinAbs(2, 1e-8));
+    REQUIRE_THAT(fit.getIntercepts()(0), WithinAbs(4, 1e-8));
+  }
+  SECTION("Zero alpha max produces finite zero penalties")
+  {
+    y.setConstant(4);
+    Eigen::ArrayXd fractions(3);
+    fractions << 1, 0.5, 0;
+    const auto path = model.path(x, y, fractions);
+    REQUIRE(path.size() == fractions.size());
+    REQUIRE(path.getAlpha().isZero());
+    for (int j = 0; j < path.size(); ++j) {
+      REQUIRE(path(j).getCoefs().norm() == 0);
+      REQUIRE_THAT(path(j).getIntercepts()(0), WithinAbs(4, 1e-8));
+    }
+  }
+  SECTION("Zero lambda leaves the model unpenalized")
+  {
+    const auto fit = model.fit(x, y, 1, Eigen::ArrayXd::Zero(1));
+    REQUIRE(fit.getAlpha() == 0);
+    REQUIRE_THAT(fit.getCoefs().coeff(0, 0), WithinAbs(2, 1e-8));
+  }
+}
+
+TEST_CASE("Relative alpha validates inputs before scaling",
+          "[path][alpha_scale][input_validation]")
+{
+  Eigen::MatrixXd x(4, 1);
+  x << -3, -1, 1, 3;
+  Eigen::VectorXd y = Eigen::VectorXd::Constant(4, 2);
+  slope::Slope model;
+  REQUIRE_THROWS_AS(model.setAlphaScale("fraction"), std::invalid_argument);
+  model.setAlphaScale("relative");
+  for (const double invalid : { -0.1,
+                                std::numeric_limits<double>::quiet_NaN(),
+                                std::numeric_limits<double>::infinity() }) {
+    REQUIRE_THROWS_AS(model.fit(x, y, invalid), std::invalid_argument);
+    Eigen::ArrayXd fractions(2);
+    fractions << 1, invalid;
+    REQUIRE_THROWS_AS(model.path(x, y, fractions), std::invalid_argument);
+  }
+  y = 10 * x.col(0);
+  REQUIRE_THROWS_AS(model.fit(x, y, std::numeric_limits<double>::max()),
+                    std::invalid_argument);
 }

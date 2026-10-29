@@ -30,6 +30,35 @@ auto res = model.path(x, y);
 
 Now we can retrieve the coefficients by calling `res.getCoefs()`.
 
+## Relative alpha values
+
+By default, `fit()` and `path()` interpret supplied alpha values as absolute
+penalty scales. To choose them relative to the null-model threshold, set the
+alpha scale to `"relative"`:
+
+```cpp
+model.setAlphaScale("relative");
+auto fit = model.fit(x, y, 0.1);
+
+Eigen::ArrayXd fractions(4);
+fractions << 1.0, 0.5, 0.1, 0.01;
+auto path = model.path(x, y, fractions);
+```
+
+Each supplied value multiplies `alpha_max`, the smallest alpha that gives zero
+coefficients. The model computes this threshold using the current loss,
+intercept, normalization, observation weights, and lambda sequence. A value of
+`1.0` gives the null model, `0.1` uses 10% of that penalty scale, and `0.0`
+removes the penalty. Values above `1.0` are also allowed. Values must be finite
+and nonnegative, and path values must be in nonincreasing order. An all-zero
+lambda sequence leaves the model unpenalized regardless of alpha.
+
+Calling `path(x, y)` still generates the usual automatic path. Noise-based
+alpha estimation and cross-validation retain their absolute penalty scales.
+`SlopeFit::getAlpha()` and `SlopePath::getAlpha()` always return the absolute
+values used by the solver. Set `model.setAlphaScale("absolute")` before
+passing those values back to `fit()` or `path()`.
+
 ## Observation weights
 
 Pass one observation weight per row to fit a weighted model. Weights must be

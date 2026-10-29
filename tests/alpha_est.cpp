@@ -10,6 +10,27 @@
 #include <slope/slope.h>
 #include <slope/utils.h>
 
+TEST_CASE("Noise-based alpha estimates use absolute penalties",
+          "[estimate_alpha][alpha_scale]")
+{
+  for (const int n : { 20, 40 }) {
+    DYNAMIC_SECTION("n = " << n)
+    {
+      auto data = generateData(n, 4, "quadratic", 1, 0.8, 0.5, 129);
+      Eigen::MatrixXd y = data.y;
+      slope::Slope model;
+      const auto absolute = model.estimateAlpha(data.x, y);
+      model.setAlphaScale("relative");
+      const auto relative = model.estimateAlpha(data.x, y);
+      REQUIRE_THAT(relative.getAlpha(),
+                   VectorApproxEqual(absolute.getAlpha(), 1e-12));
+      REQUIRE((Eigen::MatrixXd(relative(0).getCoefs()) -
+               Eigen::MatrixXd(absolute(0).getCoefs()))
+                .norm() < 1e-10);
+    }
+  }
+}
+
 TEST_CASE("OLS on small dense matrix without intercept", "[ols]")
 {
   using namespace slope::detail;
@@ -196,7 +217,8 @@ TEST_CASE("Alpha estimation for n >= p + 30", "[estimate_alpha]")
   REQUIRE(dense_path.getCoefs().size() > 0);
 
   // Some basic sanity checks
-  REQUIRE(slope::nonZeros(dense_coefs) > 0); // Should select at least some variables
+  REQUIRE(slope::nonZeros(dense_coefs) >
+          0); // Should select at least some variables
   REQUIRE(slope::nonZeros(dense_coefs) <=
           p); // Should not select more than p variables
 }
@@ -255,7 +277,8 @@ TEST_CASE("Alpha estimation for n < p + 30", "[estimate_alpha]")
 
   // Sanity checks
   REQUIRE(slope::nonZeros(dense_coefs) > 0); // Should select some variables
-  REQUIRE(slope::nonZeros(dense_coefs) < n); // Should select fewer than n variables
+  REQUIRE(slope::nonZeros(dense_coefs) <
+          n); // Should select fewer than n variables
 }
 
 TEST_CASE("estimateAlpha error handling", "[estimate_alpha]")

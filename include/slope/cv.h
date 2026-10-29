@@ -369,6 +369,9 @@ crossValidate(Slope model,
         auto [rep, fold] = std::div(i, folds.numFolds());
 
         Slope thread_model = model;
+        // The full-data path has already converted its alphas to absolute
+        // values.
+        thread_model.setAlphaScale("absolute");
 
         scores.row(i) = detail::fitToFold(x.derived(),
                                           y,

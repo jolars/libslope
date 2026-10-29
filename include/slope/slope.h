@@ -140,6 +140,19 @@ public:
   void setAlphaType(const std::string& alpha_type);
 
   /**
+   * @brief Sets the scale of user-supplied alpha values.
+   *
+   * @param alpha_scale One of "absolute" (the default) or "relative".
+   * Relative values passed to fit() and path() are multiplied by alpha_max,
+   * the smallest alpha giving zero coefficients for the current data,
+   * normalization, observation weights, and lambda sequence. Values must be
+   * finite and nonnegative; values above one are allowed. Automatic paths and
+   * noise-based alpha estimates are unaffected. Returned fits always store
+   * absolute alpha values.
+   */
+  void setAlphaScale(const std::string& alpha_scale);
+
+  /**
    * @brief Sets the learning rate decrement.
    *
    * @param learning_rate_decr The value to set for the learning rate decrement
@@ -383,7 +396,9 @@ public:
    * @tparam T Matrix type for feature input (supports dense or sparse matrices)
    * @param x Feature matrix of size n x p
    * @param y_in Response matrix of size n x m
-   * @param alpha Sequence of mixing parameters for elastic net regularization
+   * @param alpha Nonincreasing sequence of penalty scales. Empty input
+   * generates a path automatically. Values use the scale set by
+   * setAlphaScale().
    * @param lambda Sequence of regularization parameters (if empty, computed
    * automatically)
    * @param check_interrupt Optional lambda to check for user interrupt. It runs
@@ -551,6 +566,13 @@ private:
                                  ? (n_positive > gradient.size() ? 1e-4 : 1e-2)
                                  : alpha_min_ratio;
       alpha = regularizationPath(alpha, path_length, min_ratio, alpha_max);
+      if (user_alpha && alpha_scale == "relative") {
+        alpha *= alpha_max;
+        if (!alpha.isFinite().all()) {
+          throw std::invalid_argument(
+            "Relative alpha values must produce finite absolute penalties");
+        }
+      }
       path_length = alpha.size();
     } else if (alpha_type == "estimate" && alpha_estimate == -1) {
       if (loss_type != "quadratic") {
@@ -873,7 +895,9 @@ public:
    * @tparam T Matrix type for feature input (supports dense or sparse matrices)
    * @param x Feature matrix of size n x p
    * @param y_in Response matrix of size n x m
-   * @param alpha Mixing parameter for elastic net regularization
+   * @param alpha Nonnegative penalty scale, interpreted according to
+   * setAlphaScale(). Defaults to 1.0, giving zero coefficients when the scale
+   * is relative and the lambda sequence has a positive entry.
    * @param lambda Vector of regularization parameters (if empty, computed
    * automatically)
    * @param check_interrupt Optional lambda to check for user interrupt. It runs
@@ -944,6 +968,7 @@ public:
     // Create a copy with alpha type set to path to avoid recursion
     Slope model_copy = *this;
     model_copy.setAlphaType("path");
+    model_copy.setAlphaScale("absolute");
 
     std::vector<int> selected;
     Eigen::ArrayXd alpha(1);
@@ -1331,6 +1356,7 @@ private:
   int path_length = 100;
   std::optional<int> max_clusters = std::nullopt;
   std::optional<int> random_seed = 0;
+  std::string alpha_scale = "absolute";
   std::string alpha_type = "path";
   std::string cd_type = "permuted";
   std::string centering_type = "mean";
