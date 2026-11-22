@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/matchers/catch_matchers_string.hpp>
 #include <limits>
 #include <slope/cv.h>
 #include <slope/slope.h>
@@ -397,6 +398,11 @@ TEST_CASE("Cross-validation validates observation weights", "[cv][weights]")
   REQUIRE_THAT((weighted.results[0].score - unweighted.results[0].score).norm(),
                Catch::Matchers::WithinAbs(0, 1e-12));
 
+  weights.setConstant(1e-200);
+  weights(0) = 1e200;
+  auto extreme = crossValidate(model, data.x, data.y, config, weights);
+  REQUIRE(extreme.results[0].score.allFinite());
+
   CvConfig empty_fold_config;
   empty_fold_config.n_folds = data.x.rows() + 1;
   REQUIRE_THROWS_AS(crossValidate(model, data.x, data.y, empty_fold_config),
@@ -416,6 +422,26 @@ TEST_CASE("Cross-validation validates observation weights", "[cv][weights]")
   REQUIRE_THROWS_AS(
     crossValidate(model, invalid_predictors, data.y, config, weights),
     std::invalid_argument);
+}
+
+TEST_CASE("Logistic CV requires both classes in its weighted training folds",
+          "[cv][weights][logistic]")
+{
+  Eigen::MatrixXd x = Eigen::VectorXd::LinSpaced(6, 1.0, 6.0);
+  Eigen::VectorXd y(6), weights(6);
+  y << 0, 0, 0, 1, 1, 1;
+  weights << 1, 1, 1, 1, 0, 0;
+  slope::Slope model;
+  model.setLoss("logistic");
+  model.setPathLength(2);
+  slope::CvConfig config;
+  config.predefined_folds = std::vector<std::vector<std::vector<int>>>{
+    { { 0, 3 }, { 1, 4 }, { 2, 5 } }
+  };
+
+  REQUIRE_THROWS_WITH(crossValidate(model, x, y, config, weights),
+                      Catch::Matchers::ContainsSubstring(
+                        "positive total weight in both classes"));
 }
 
 TEST_CASE("Weighted multinomial cross-validation preserves response encoding",

@@ -116,7 +116,7 @@ TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
                                              x_scales,
                                              slope::JitNormalization::Both,
                                              intercept);
-      const Eigen::MatrixXd sparse_point =
+      const auto sparse_point =
         slope::detail::quadraticOlsDualPoint(x_sparse,
                                              y_multi,
                                              x_centers,
@@ -124,7 +124,8 @@ TEST_CASE("Sparse and dense methods agree", "[quadratic][sparse]")
                                              slope::JitNormalization::Both,
                                              intercept);
 
-      REQUIRE((sparse_point - dense_point).norm() <= 1e-10);
+      REQUIRE(sparse_point.has_value());
+      REQUIRE((*sparse_point - dense_point).norm() <= 1e-10);
     }
   }
 }

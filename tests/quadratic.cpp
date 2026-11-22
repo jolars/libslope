@@ -57,7 +57,7 @@ TEST_CASE("Weighted quadratic OLS certificates use weighted least squares",
   for (const bool intercept : { false, true }) {
     const Eigen::MatrixXd theta = slope::detail::quadraticOlsDualPoint(
       x, y, centers, scales, slope::JitNormalization::Both, intercept, weights);
-    const Eigen::MatrixXd sparse_theta =
+    const auto sparse_theta =
       slope::detail::quadraticOlsDualPoint(sparse_x,
                                            y,
                                            centers,
@@ -65,12 +65,13 @@ TEST_CASE("Weighted quadratic OLS certificates use weighted least squares",
                                            slope::JitNormalization::Both,
                                            intercept,
                                            weights);
-    REQUIRE((theta - sparse_theta).norm() < 1e-10);
+    REQUIRE(sparse_theta.has_value() == intercept);
     Eigen::MatrixXd effective = x.rowwise() - centers.transpose();
     effective.array().rowwise() /= scales.transpose().array();
     Eigen::MatrixXd weighted_theta = theta.array().colwise() * weights.array();
     REQUIRE((effective.transpose() * weighted_theta).norm() < 1e-10);
     if (intercept) {
+      REQUIRE((theta - *sparse_theta).norm() < 1e-10);
       REQUIRE(weighted_theta.colwise().sum().norm() < 1e-10);
     }
     REQUIRE(theta.row(3).isZero());
@@ -125,14 +126,19 @@ TEST_CASE("Weighted OLS certificates mask ignored rows before scaling",
         safe_x, y, centers, scales, normalization, intercept, weights);
       const Eigen::MatrixXd dense = slope::detail::quadraticOlsDualPoint(
         x, y, centers, scales, normalization, intercept, weights);
-      const Eigen::MatrixXd sparse = slope::detail::quadraticOlsDualPoint(
+      const auto sparse = slope::detail::quadraticOlsDualPoint(
         sparse_x, y, centers, scales, normalization, intercept, weights);
       REQUIRE(dense.allFinite());
-      REQUIRE(sparse.allFinite());
       REQUIRE(dense.row(3).isZero());
-      REQUIRE(sparse.row(3).isZero());
       REQUIRE((dense - expected).norm() < 1e-12);
-      REQUIRE((sparse - expected).norm() < 1e-12);
+      const bool use_sparse_certificate =
+        intercept || normalization == slope::JitNormalization::Scale;
+      REQUIRE(sparse.has_value() == use_sparse_certificate);
+      if (sparse.has_value()) {
+        REQUIRE(sparse->allFinite());
+        REQUIRE(sparse->row(3).isZero());
+        REQUIRE((*sparse - expected).norm() < 1e-12);
+      }
     }
   }
 }

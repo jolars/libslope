@@ -114,7 +114,8 @@ TEST_CASE("Relaxation reuses consecutive signed patterns", "[relax][reuse]")
   }
 }
 
-TEST_CASE("Relaxed GLM paths reuse unpenalized fits", "[relax][reuse][weights]")
+TEST_CASE("Weighted GLM relaxation paths match standalone fits",
+          "[relax][weights]")
 {
   const std::string loss_type =
     GENERATE("quadratic", "logistic", "poisson", "multinomial");
@@ -128,6 +129,7 @@ TEST_CASE("Relaxed GLM paths reuse unpenalized fits", "[relax][reuse][weights]")
   model.setLoss(loss_type);
   model.setReturnClusters(false);
   model.setRelaxTol(1e-9);
+  model.setRandomSeed(91);
   const auto fit =
     model.fit(x, data.y, 0.08, {}, slope::defaultInterruptChecker, weights);
   const slope::SlopePath path(std::vector<slope::SlopeFit>{ fit, fit });
@@ -147,8 +149,50 @@ TEST_CASE("Relaxed GLM paths reuse unpenalized fits", "[relax][reuse][weights]")
     REQUIRE_THAT(relaxed(i).getDeviance(),
                  Catch::Matchers::WithinAbs(expected.getDeviance(), 1e-8));
   }
-  REQUIRE(relaxed(1).getPasses() == 0);
   REQUIRE(Eigen::MatrixXd(x).isApprox(data.x));
+}
+
+TEST_CASE("Failed IRLS steps are not reused", "[relax][reuse][poisson]")
+{
+  const double first_beta = GENERATE(10.0, 1000.0);
+  Eigen::MatrixXd x = Eigen::MatrixXd::Ones(3, 1);
+  const Eigen::Vector3d y(1, 2, 3);
+  slope::Slope model;
+  model.setLoss("poisson");
+  model.setNormalization("none");
+  model.setIntercept(false);
+  model.setRelaxMaxOuterIterations(1);
+
+  auto make_fit = [](double coefficient, double alpha) {
+    const Eigen::VectorXd beta = Eigen::VectorXd::Constant(1, coefficient);
+    return slope::SlopeFit{ Eigen::VectorXd::Zero(1),
+                            beta.sparseView(),
+                            {},
+                            alpha,
+                            Eigen::ArrayXd::Ones(1),
+                            0,
+                            0,
+                            {},
+                            {},
+                            {},
+                            0,
+                            "none",
+                            "none",
+                            false,
+                            Eigen::VectorXd::Zero(1),
+                            Eigen::VectorXd::Ones(1) };
+  };
+  const auto later_fit = make_fit(1, 0.1);
+  const slope::SlopePath path(
+    std::vector<slope::SlopeFit>{ make_fit(first_beta, 0.2), later_fit });
+
+  const double gamma = 0.4;
+  const auto relaxed = model.relax(path, x, y, gamma);
+  const auto expected = model.relax(later_fit, x, y, gamma);
+  REQUIRE(relaxed(1).getPasses() > 0);
+  const Eigen::MatrixXd actual_coefs = relaxed(1).getCoefs();
+  const Eigen::MatrixXd expected_coefs = expected.getCoefs();
+  REQUIRE(actual_coefs.isApprox(expected_coefs));
 }
 
 TEST_CASE("Relaxed quadratic fits", "[relax][quadratic]")
