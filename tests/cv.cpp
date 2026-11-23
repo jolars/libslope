@@ -506,13 +506,13 @@ TEST_CASE("Weighted multinomial cross-validation retains missing classes",
           "[cv][weights][multinomial]")
 {
   using namespace slope;
-  auto data = generateData(12, 2, "quadratic", 1, 1, 1, 91);
+  Eigen::MatrixXd x(12, 1);
+  x.col(0) << -1, 1, 1, -1, -1, 1, 1, -1, -1, 1, 1, -1;
   Slope model;
   model.setLoss("multinomial");
+  // An absent class can drive its intercept toward infinity.
+  model.setIntercept(false);
   model.setPathLength(3);
-  model.setTol(1e-6);
-  // Folds with missing classes can converge slowly.
-  model.setMaxIterations(2000);
   CvConfig config;
   config.metric = "accuracy";
   config.hyperparams["gamma"] = { 0, 0.5 };
@@ -545,16 +545,16 @@ TEST_CASE("Weighted multinomial cross-validation retains missing classes",
     }
   }
 
-  const auto full_path = model.path(data.x,
+  const auto full_path = model.path(x,
                                     labels,
                                     Eigen::ArrayXd(0),
                                     Eigen::ArrayXd(0),
                                     defaultInterruptChecker,
                                     weights);
   REQUIRE(full_path(0).getCoefs().cols() == 2);
-  const auto copied = crossValidate(model, data.x, labels, config, weights);
+  const auto copied = crossValidate(model, x, labels, config, weights);
   config.copy_x = false;
-  const auto views = crossValidate(model, data.x, labels, config, weights);
+  const auto views = crossValidate(model, x, labels, config, weights);
   REQUIRE(copied.results.size() == 2);
   for (int i = 0; i < copied.results.size(); ++i) {
     REQUIRE(copied.results[i].score.allFinite());
