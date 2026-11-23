@@ -32,6 +32,14 @@ tasks:
       - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=ON -DBUILD_TESTING=OFF -DENABLE_COVERAGE=OFF
       - cmake --build {{.BUILD_DIR}}
 
+  logo:
+    desc: Regenerate the SLOPE logo when its renderer changes
+    watch: true
+    sources:
+      - assets/render_logo.py
+    cmds:
+      - python3 assets/render_logo.py
+
   coverage:
     cmds:
       - cmake -B {{.BUILD_DIR}} -S . -DBUILD_DOCS=ON -DBUILD_TESTING=ON -DENABLE_COVERAGE=ON
