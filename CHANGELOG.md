@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.7.0](https://github.com/jolars/libslope/compare/v6.6.0...v6.7.0) (2026-11-23)
+
+### Features
+
+- support relative alpha values ([`75f0ab6`](https://github.com/jolars/libslope/commit/75f0ab6c1ec57c6f6e02a2a23434920b16a02973)), closes [#129](https://github.com/jolars/libslope/issues/129)
+
+### Bug Fixes
+
+- correct weighted fits and cross-validation paths ([`4521a2f`](https://github.com/jolars/libslope/commit/4521a2f52457282470be3df88329d7c4a87a5d03))
+- **cv:** make fold assignments platform-independent ([`4349edf`](https://github.com/jolars/libslope/commit/4349edfb1f926b3789adbad5556c7df98e61e4af)), fixes [#136](https://github.com/jolars/libslope/issues/136)
+
 ## [6.6.0](https://github.com/jolars/libslope/compare/v6.5.4...v6.6.0) (2026-10-29)
 
 ### Features
