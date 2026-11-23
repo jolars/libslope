@@ -511,6 +511,8 @@ TEST_CASE("Weighted multinomial cross-validation retains missing classes",
   model.setLoss("multinomial");
   model.setPathLength(3);
   model.setTol(1e-6);
+  // Folds with missing classes can converge slowly.
+  model.setMaxIterations(2000);
   CvConfig config;
   config.metric = "accuracy";
   config.hyperparams["gamma"] = { 0, 0.5 };
