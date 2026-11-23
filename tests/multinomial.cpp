@@ -11,6 +11,7 @@
 #include <cmath>
 #include <slope/math.h>
 #include <slope/slope.h>
+#include <slope/solvers/hybrid.h>
 #include <slope/sorted_l1_norm.h>
 
 TEST_CASE("Multinomial, unpenalized", "[multinomial]")
@@ -166,14 +167,13 @@ TEST_CASE("Multinomial wine data", "[multinomial]")
   slope::Slope model;
 
   model.setLoss("multinomial");
-
-  // TODO: Hybrid solver has convergence issues with this data
-  model.setSolver("pgd");
+  model.setMaxIterations(2000);
 
   auto path = model.path(x, y);
 
   REQUIRE(path.getDeviance().back() > 0);
   REQUIRE(path.getDeviance().size() > 5);
+  REQUIRE_FALSE(slope::WarningLogger::hasWarnings());
 }
 
 TEST_CASE("Multinomial predictions", "[multinomial][predict]")
@@ -420,6 +420,113 @@ TEST_CASE("Multinomial IRLS remains finite for saturated predictors",
   REQUIRE(response.allFinite());
   REQUIRE((curvature.topRows(2).array() > 0.0).all());
   REQUIRE(curvature.row(2).isZero());
+}
+
+TEST_CASE("Multinomial working steps decrease the true objective",
+          "[multinomial][weights][hybrid][relax]")
+{
+  using namespace slope;
+
+  Eigen::MatrixXd x(6, 1);
+  x << -1, -1, -1, 1, 1, 1;
+  Eigen::VectorXd labels(6), weights(6);
+  labels << 0, 1, 2, 0, 1, 2;
+  weights << 3, 1, 1, 1, 3, 1;
+  Eigen::VectorXd beta0 = Eigen::Vector2d::Constant(0.5);
+  Eigen::VectorXd beta = Eigen::Vector2d(8, -8);
+  Eigen::ArrayXd lambda = Eigen::Array2d::Constant(0.01);
+  auto loss = setupLoss("multinomial");
+  const Eigen::MatrixXd y = loss->preprocessResponse(labels);
+
+  SECTION("The hybrid step starts from saturated probabilities")
+  {
+    const SortedL1Norm penalty;
+    const std::vector<int> working_set{ 0, 1 };
+    const Eigen::VectorXd centers = Eigen::VectorXd::Zero(1);
+    const Eigen::VectorXd scales = Eigen::VectorXd::Ones(1);
+    Eigen::MatrixXd eta = x * beta.transpose();
+    eta.rowwise() += beta0.transpose();
+    Eigen::VectorXd gradient(beta.size());
+    const Eigen::MatrixXd residual = loss->residual(eta, y);
+    const Eigen::VectorXd normalized =
+      detail::normalizeObservationWeights(weights, x.rows());
+    updateGradient(gradient,
+                   x,
+                   residual,
+                   centers,
+                   scales,
+                   normalized,
+                   JitNormalization::None);
+    const double before =
+      loss->loss(eta, y, weights) + penalty.eval(beta, lambda);
+    auto solver = setupSolver("hybrid",
+                              "multinomial",
+                              JitNormalization::None,
+                              true,
+                              true,
+                              10,
+                              "cyclical",
+                              0);
+    solver->run(beta0,
+                beta,
+                eta,
+                lambda,
+                loss,
+                penalty,
+                gradient,
+                working_set,
+                x,
+                centers,
+                scales,
+                y,
+                weights);
+    REQUIRE(loss->loss(eta, y, weights) + penalty.eval(beta, lambda) < before);
+    REQUIRE(eta.isApprox((x * beta.transpose()).rowwise() + beta0.transpose()));
+  }
+
+  SECTION("Relaxation recovers from a saturated warm start")
+  {
+    Slope model;
+    model.setLoss("multinomial");
+    model.setNormalization("none");
+    model.setRelaxTol(1e-9);
+    model.setDiagnostics(true);
+    const auto fit =
+      model.fit(x, labels, 0.01, {}, defaultInterruptChecker, weights);
+    const auto relaxed = model.relax(fit, x, labels, 0.0, beta0, beta, weights);
+    const double target = std::log(3.0) / 2.0;
+    REQUIRE_THAT(
+      relaxed.getIntercepts(),
+      VectorApproxEqual(Eigen::Vector2d::Constant(target).eval(), 1e-7));
+    REQUIRE_THAT(Eigen::MatrixXd(relaxed.getCoefs()).reshaped(),
+                 VectorApproxEqual(Eigen::Vector2d(-target, target), 1e-7));
+    const auto& primals = relaxed.getPrimals();
+    REQUIRE(primals.size() > 1);
+    for (size_t i = 1; i < primals.size(); ++i) {
+      REQUIRE(primals[i] <= primals[i - 1] + 1e-12);
+    }
+
+    weights(2) = weights(5) = 0;
+    REQUIRE_THROWS_AS(model.relax(fit, x, labels, 0.0, {}, {}, weights),
+                      std::invalid_argument);
+  }
+
+  SECTION("The intercepts adjust together when the reference class is rare")
+  {
+    weights(2) = weights(5) = 1e-4;
+    Slope model;
+    model.setLoss("multinomial");
+    model.setRelaxTol(1e-11);
+    model.setRelaxMaxOuterIterations(20);
+    const auto fit =
+      model.fit(x, labels, 1, {}, defaultInterruptChecker, weights);
+    REQUIRE(fit.getCoefs().nonZeros() == 0);
+    beta0.setConstant(5.0);
+    const auto relaxed = model.relax(fit, x, labels, 0.0, beta0, {}, weights);
+    REQUIRE_THAT(
+      relaxed.getIntercepts(),
+      VectorApproxEqual(Eigen::Vector2d::Constant(std::log(2e4)).eval(), 1e-6));
+  }
 }
 
 TEST_CASE("Weighted multinomial duals retain information with absent classes",

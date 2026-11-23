@@ -18,7 +18,7 @@ TEST_CASE("Hybrid derivatives ignore overflow on zero-weight rows",
   Eigen::MatrixXd x(3, 2), residual(3, 1), weights(3, 1);
   x << 1.0, -2.0, 3.0, 1.0, 1e200, -1e200;
   residual << 0.5, -0.1, std::numeric_limits<double>::infinity();
-  weights << 1.0, 2.0, 0.0;
+  weights << 1.0, 0.5, 0.0;
   Eigen::MatrixXd safe_x = x, safe_residual = residual;
   safe_x.row(2).setZero();
   safe_residual.row(2).setZero();
@@ -106,7 +106,10 @@ TEST_CASE("Hybrid derivatives ignore overflow on zero-weight rows",
                            slope::JitNormalization::None,
                            false,
                            rng);
-  REQUIRE_THAT(beta0(0), WithinAbs(-0.1, 1e-12));
+  REQUIRE_THAT(beta0(0), WithinAbs(-0.3, 1e-12));
+  REQUIRE_THAT(
+    slope::detail::weightedResidualSum(weights.col(0), residual.col(0)),
+    WithinAbs(0.0, 1e-12));
 }
 
 TEST_CASE("Cluster gradient and Hessian computation", "[hybrid]")

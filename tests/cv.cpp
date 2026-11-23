@@ -563,4 +563,18 @@ TEST_CASE("Weighted multinomial cross-validation retains missing classes",
     REQUIRE_THAT((copied.results[i].score - views.results[i].score).norm(),
                  Catch::Matchers::WithinAbs(0, 1e-8));
   }
+
+  model.setIntercept(true);
+  model.setMaxIterations(25);
+  const auto missing_class =
+    Catch::Matchers::ContainsSubstring("positive total weight in every class");
+  if (weights(11) == 0) {
+    REQUIRE_THROWS_WITH(
+      model.path(x, labels, {}, {}, defaultInterruptChecker, weights),
+      missing_class);
+  } else {
+    REQUIRE_THROWS_WITH(crossValidate(model, x, labels, config, weights),
+                        Catch::Matchers::ContainsSubstring("Fold 2") &&
+                          missing_class);
+  }
 }
