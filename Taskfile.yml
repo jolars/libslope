@@ -33,12 +33,13 @@ tasks:
       - cmake --build {{.BUILD_DIR}}
 
   logo:
-    desc: Regenerate the SLOPE logo when its renderer changes
+    desc: Regenerate the SLOPE logos when their renderer changes
     watch: true
     sources:
       - assets/render_logo.py
     cmds:
       - python3 assets/render_logo.py
+      - python3 assets/render_logo.py --theme dark assets/slope-logo-dark.png
 
   coverage:
     cmds:

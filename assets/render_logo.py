@@ -11,7 +11,10 @@ WIDTH, HEIGHT = 400, 425
 HEIGHT_3D = 1.6
 CAMERA_DIRECTION = (0.42, -0.94, 0.5)
 CAMERA_DISTANCE = 9
-FACE_COLOR = "222436"
+FACE_COLORS = {
+    "light": "1E1E2E",
+    "dark": "ea76cb",
+}
 OUTLINE_COLOR = "fefefe"
 OUTLINE_WIDTH = 6
 
@@ -150,6 +153,12 @@ def main():
     )
     parser.add_argument("--bands", type=int, default=4, help="number of vertical bands")
     parser.add_argument(
+        "--theme",
+        choices=FACE_COLORS,
+        default="light",
+        help="background theme the logo is designed for (default: light)",
+    )
+    parser.add_argument(
         "--camera",
         type=float,
         nargs=3,
@@ -166,14 +175,13 @@ def main():
     parser.add_argument(
         "--color",
         type=hex_color,
-        default=FACE_COLOR,
-        help="face color as an RGB hex value (default: 9eb7b1)",
+        help="override the theme's face color with an RGB hex value",
     )
     parser.add_argument(
         "--outline",
         type=hex_color,
         default=OUTLINE_COLOR,
-        help="outline color as an RGB hex value (default: 172522)",
+        help=f"outline color as an RGB hex value (default: {OUTLINE_COLOR})",
     )
     parser.add_argument(
         "--outline-width",
@@ -201,7 +209,12 @@ def main():
         return
 
     svg = render_svg(
-        faces, args.camera, args.distance, args.color, args.outline, args.outline_width
+        faces,
+        args.camera,
+        args.distance,
+        args.color or FACE_COLORS[args.theme],
+        args.outline,
+        args.outline_width,
     )
     if suffix == ".svg":
         args.output.write_text(svg, encoding="utf-8")
