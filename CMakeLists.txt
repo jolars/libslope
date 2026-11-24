@@ -132,6 +132,11 @@ if(BUILD_TESTING)
   )
   target_include_directories(tests PUBLIC tests/ "${PROJECT_BINARY_DIR}")
 
+  if(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # Template-heavy tests can exceed the standard COFF section limit.
+    target_compile_options(tests PRIVATE -Wa,-mbig-obj)
+  endif()
+
   list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
   include(Catch)
   catch_discover_tests(tests)
