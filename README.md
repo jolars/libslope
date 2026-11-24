@@ -9,14 +9,25 @@ purpose is to serve as a backend for R and Python packages, but it can also be
 used as a standalone library in the off-chance that you want to fit your models
 entirely through C++.
 
+## SLOPE ecosystem
+
+The C++ library is the backbone of several other packages in the SLOPE
+ecosystem:
+
+- R package ([SLOPE](https://github.com/jolars/SLOPE))
+- Python package ([sortedl1](https://github.com/jolars/sortedl1))
+- Julia package ([SLOPE.jl](https://github.com/jolars/SLOPE.jl))
+
 ## Public API
 
-SLOPE provides a clean public API through the `include/` directory with minimal dependencies.
-The public API exposes three main components:
+SLOPE provides a clean public API through the `include/` directory with minimal
+dependencies. The public API exposes three main components:
 
-- **Core SLOPE functionality** - Main classes for fitting SLOPE models (`Slope`, `SlopeFit`, `SlopePath`)
+- **Core SLOPE functionality** - Main classes for fitting SLOPE models (`Slope`,
+  `SlopeFit`, `SlopePath`)
 - **Cross-validation** - Hyperparameter tuning with k-fold cross-validation
-- **Proximal operators** - Direct access to the sorted L1 penalty (`SortedL1Norm`)
+- **Proximal operators** - Direct access to the sorted L1 penalty
+  (`SortedL1Norm`)
 
 To use the public API, simply include:
 
@@ -26,8 +37,8 @@ To use the public API, simply include:
 
 ## Getting Started
 
-First, we define our model. Let's use logistic regression, by setting the
-loss to `"logistic"`.
+First, we define our model. Let's use logistic regression, by setting the loss
+to `"logistic"`.
 
 ```cpp
 #include <slope.h>
@@ -86,4 +97,5 @@ available in [CITATION.cff](CITATION.cff).
 
 ## Contributing
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to
+this project.
