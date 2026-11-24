@@ -1,5 +1,19 @@
 # Changelog
 
+## [7.0.0](https://github.com/jolars/libslope/compare/v6.7.0...v7.0.0) (2026-11-24)
+
+### Breaking changes
+
+- **solvers:** correct multinomial intercept updates ([`299b24a`](https://github.com/jolars/libslope/commit/299b24a0e78d11fc8bd011aa94aedd7323c20580))
+
+### Bug Fixes
+
+- **solvers:** correct multinomial intercept updates ([`299b24a`](https://github.com/jolars/libslope/commit/299b24a0e78d11fc8bd011aa94aedd7323c20580))
+
+### Performance Improvements
+
+- **solvers:** cache zero-weight checks during coordinate descent ([`f1ea257`](https://github.com/jolars/libslope/commit/f1ea25754775b80c9b2f093fe36d1aa9b3aee917))
+
 ## [6.7.0](https://github.com/jolars/libslope/compare/v6.6.0...v6.7.0) (2026-11-23)
 
 ### Features
