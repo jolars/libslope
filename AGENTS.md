@@ -25,6 +25,25 @@ The Nix/devenv shell supplies CMake, Eigen, Catch2, Clang tooling, and
 Equivalent direct commands are `cmake -B build -S . -DBUILD_TESTING=ON`,
 `cmake --build build`, and `ctest --test-dir build --output-on-failure`.
 
+## Performance investigations
+
+Use `tests/real_data_benchmarks.cpp` for end-to-end comparisons. RCV1 covers
+sparse logistic regression and E2006 covers sparse quadratic regression. Use
+`tests/benchmarks.cpp` for isolated operations. The
+`sparse-cluster-benchmark`, `full-set-benchmark`, and
+`high-dimensional-benchmark` tasks build in Release mode. `task build` and
+`task benchmark` use Debug builds.
+
+For a symbolized profiling build, configure a separate CMake build directory
+with `-DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON` and match release
+features and thread settings. Add `-fno-omit-frame-pointer` when recording
+frame-pointer call chains. The devenv shell provides Hyperfine, perf, and
+Valgrind. Keep captures in an ignored build directory or temporary directory.
+
+Preserve solver tolerances, convergence, normalization, and the affected
+sparse, dense, or multi-response behavior. `setUpdateClusters(false)` is for
+isolating update cost and produces an invalid correctness baseline.
+
 ## Coding Style & Naming Conventions
 
 Use C++17 and format C++ with `clang-format`; `.clang-format` selects Mozilla
