@@ -12,10 +12,10 @@ HEIGHT_3D = 1.6
 CAMERA_DIRECTION = (0.42, -0.94, 0.5)
 CAMERA_DISTANCE = 9
 FACE_COLORS = {
-    "light": "1E1E2E",
-    "dark": "ea76cb",
+    "light": "2d2d43",
+    "dark": "5e5e92",
 }
-OUTLINE_COLOR = "fefefe"
+OUTLINE_COLOR = "ffffff"
 OUTLINE_WIDTH = 6
 
 
